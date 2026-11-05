@@ -17,3 +17,17 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
+
+# Firebase config (public repo)
+**/google-services.json
+**/GoogleService-Info.plist
+# Firebase Admin SDK service account keys (server)
+**/*service-account*.json
+**/*serviceAccount*.json
+# Firebase CLI / SQL Connect emulator output
+dataconnect/.dataconnect/
+*-debug.log
+.firebase/
+# Firebase project config (contains project ID and support email)
+firebase.json
+.firebaserc

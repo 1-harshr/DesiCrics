@@ -28,6 +28,8 @@ gitlive-firebase = "2.8.0"
 firebase-admin = "9.11.0"
 google-services = "4.5.0"
 turbine = "1.2.1"
+androidx-credentials = "1.6.0"
+googleid = "1.2.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -95,10 +97,12 @@ multiplatformSettings = { module = "com.russhwolf:multiplatform-settings-no-arg"
 multiplatformSettings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatform-settings" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
-# Firebase (KMP wrapper for the app, Admin SDK for the server)
+# Firebase (KMP wrapper for auth/storage in the app, Admin SDK for the server)
 gitlive-firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "gitlive-firebase" }
-gitlive-firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "gitlive-firebase" }
 gitlive-firebase-storage = { module = "dev.gitlive:firebase-storage", version.ref = "gitlive-firebase" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "androidx-credentials" }
+androidx-credentials-playServicesAuth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx-credentials" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebase-admin" }
 
 [plugins]

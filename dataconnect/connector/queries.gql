@@ -1,0 +1,70 @@
+query GetMyProfile @auth(level: USER) {
+  user(key: { id_expr: "auth.uid" }) {
+    id
+    name
+    phone
+    email
+    photoUrl
+    city
+    role
+    battingStyle
+    bowlingStyle
+    createdAt
+  }
+}
+
+# Any signed-in user can follow matches; matches still being set up are hidden.
+query ListRecentMatches($limit: Int!) @auth(level: USER) {
+  matches(
+    where: { status: { ne: SETUP } }
+    orderBy: [{ createdAt: DESC }]
+    limit: $limit
+  ) {
+    id
+    createdById
+    createdAt
+    teamAName
+    teamBName
+    oversPerInnings
+    tossWinner
+    tossDecision
+    status
+    scoreSummary
+    result
+  }
+}
+
+# Everything the scorecard needs in one round trip; the app polls this for live scores.
+query GetMatch($id: UUID!) @auth(level: USER) {
+  match(id: $id) {
+    id
+    createdById
+    createdAt
+    teamAName
+    teamBName
+    oversPerInnings
+    tossWinner
+    tossDecision
+    status
+    scoreSummary
+    result
+    players: matchPlayers_on_match(orderBy: [{ position: ASC }]) {
+      id
+      side
+      position
+      name
+    }
+    deliveries: deliveries_on_match(orderBy: [{ seq: ASC }]) {
+      seq
+      innings
+      strikerId
+      nonStrikerId
+      bowlerId
+      runsOffBat
+      extra
+      extraRuns
+      wicketKind
+      playerOutId
+    }
+  }
+}

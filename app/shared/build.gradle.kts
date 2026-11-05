@@ -23,7 +23,7 @@ kotlin {
        compileSdk = libs.versions.android.compileSdk.get().toInt()
        minSdk = libs.versions.android.minSdk.get().toInt()
        compilerOptions {
-           jvmTarget = JvmTarget.JVM_11
+           jvmTarget = JvmTarget.JVM_17
        }
        androidResources {
            enable = true
@@ -44,6 +44,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.ktor.clientOkhttp)
             implementation(libs.koin.android)
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.playServicesAuth)
+            implementation(libs.googleid)
         }
         iosMain.dependencies {
             implementation(libs.ktor.clientDarwin)
@@ -73,7 +76,6 @@ kotlin {
             implementation(libs.ktor.serializationKotlinxJson)
 
             implementation(libs.gitlive.firebase.auth)
-            implementation(libs.gitlive.firebase.firestore)
             implementation(libs.gitlive.firebase.storage)
 
             implementation(libs.coil.compose)
