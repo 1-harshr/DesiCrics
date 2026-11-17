@@ -34,3 +34,10 @@ firebase.json
 
 # Local in-process database used by the Ktor server
 server/data/
+
+# Signing keys
+*.jks
+*.keystore
+# Locally built APKs
+app/androidApp/debug/
+app/androidApp/release/
