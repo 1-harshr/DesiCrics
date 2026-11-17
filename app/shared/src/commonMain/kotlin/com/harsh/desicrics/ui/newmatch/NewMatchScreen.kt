@@ -23,9 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
-import com.harsh.desicrics.ui.components.AppScaffold
-import com.harsh.desicrics.ui.components.ChoiceChips
-import com.harsh.desicrics.ui.components.SectionLabel
+import com.harsh.desicrics.designsystem.component.DesiScaffold
+import com.harsh.desicrics.designsystem.component.ChoiceChips
+import com.harsh.desicrics.designsystem.component.SectionLabel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -36,7 +36,7 @@ fun NewMatchScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    AppScaffold(title = "New match", onBack = onBack) { padding ->
+    DesiScaffold(title = "New match", onBack = onBack) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

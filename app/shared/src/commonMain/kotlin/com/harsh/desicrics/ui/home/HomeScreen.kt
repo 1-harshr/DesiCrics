@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchStatus
-import com.harsh.desicrics.ui.components.AppScaffold
-import com.harsh.desicrics.ui.components.FullScreenLoading
+import com.harsh.desicrics.designsystem.component.DesiScaffold
+import com.harsh.desicrics.designsystem.component.FullScreenLoading
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -40,7 +40,7 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    AppScaffold(
+    DesiScaffold(
         title = "DesiCrics",
         actions = { TextButton(onClick = onProfile) { Text("Profile") } },
         floatingActionButton = {

@@ -6,7 +6,8 @@ import com.harsh.desicrics.auth.PhoneCodeResult
 import com.harsh.desicrics.auth.PhoneVerifier
 import com.harsh.desicrics.auth.SocialProvider
 import com.harsh.desicrics.auth.SocialSignIn
-import com.harsh.desicrics.auth.toAuthMessage
+import com.harsh.desicrics.auth.SignInError
+import com.harsh.desicrics.auth.toSignInError
 import com.harsh.desicrics.data.AuthRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,12 +22,17 @@ sealed interface PhoneStep {
     data class EnterCode(val phoneNumber: String, val verificationId: String) : PhoneStep
 }
 
+/** Non-error feedback shown under the form. */
+sealed interface SignInMessage {
+    data class ResetEmailSent(val email: String) : SignInMessage
+    data class CodeSent(val phoneNumber: String) : SignInMessage
+}
+
 data class SignInUiState(
     /** The method with a request in flight; everything is disabled until it finishes. */
     val inProgress: SignInMethod? = null,
-    val error: String? = null,
-    /** Non-error feedback, e.g. "Password reset email sent". */
-    val message: String? = null,
+    val error: SignInError? = null,
+    val message: SignInMessage? = null,
     val phoneStep: PhoneStep = PhoneStep.EnterNumber,
 )
 
@@ -49,15 +55,15 @@ class SignInViewModel(private val authRepository: AuthRepository) : ViewModel() 
     }
 
     fun signInWithEmail(email: String, password: String) {
-        val error = validateEmail(email) ?: if (password.isEmpty()) "Enter your password" else null
+        val error = validateEmail(email) ?: if (password.isEmpty()) SignInError.PASSWORD_MISSING else null
         if (error != null) return showError(error)
         launchAuth(SignInMethod.EMAIL) { authRepository.signInWithEmail(email.trim(), password) }
     }
 
     fun createAccountWithEmail(email: String, password: String, confirmPassword: String) {
         val error = validateEmail(email) ?: when {
-            password.length < 6 -> "Password must be at least 6 characters"
-            password != confirmPassword -> "Passwords don't match"
+            password.length < 6 -> SignInError.PASSWORD_SHORT
+            password != confirmPassword -> SignInError.PASSWORDS_DIFFER
             else -> null
         }
         if (error != null) return showError(error)
@@ -68,16 +74,16 @@ class SignInViewModel(private val authRepository: AuthRepository) : ViewModel() 
         validateEmail(email)?.let { return showError(it) }
         launchAuth(SignInMethod.EMAIL) {
             authRepository.sendPasswordReset(email.trim())
-            _state.update { it.copy(message = "Password reset email sent to ${email.trim()}") }
+            _state.update { it.copy(message = SignInMessage.ResetEmailSent(email.trim())) }
         }
     }
 
     fun sendPhoneCode(rawNumber: String, verifier: PhoneVerifier) {
-        val phoneNumber = normalizePhoneNumber(rawNumber) ?: return showError("Enter a valid mobile number")
+        val phoneNumber = normalizePhoneNumber(rawNumber) ?: return showError(SignInError.PHONE_INVALID)
         launchAuth(SignInMethod.PHONE) {
             when (val result = verifier.sendCode(phoneNumber)) {
                 is PhoneCodeResult.CodeSent -> _state.update {
-                    it.copy(phoneStep = PhoneStep.EnterCode(phoneNumber, result.verificationId), message = "Code sent to $phoneNumber")
+                    it.copy(phoneStep = PhoneStep.EnterCode(phoneNumber, result.verificationId), message = SignInMessage.CodeSent(phoneNumber))
                 }
                 is PhoneCodeResult.AutoVerified -> authRepository.signIn(result.credential)
             }
@@ -87,7 +93,7 @@ class SignInViewModel(private val authRepository: AuthRepository) : ViewModel() 
     fun verifyPhoneCode(code: String) {
         val step = _state.value.phoneStep as? PhoneStep.EnterCode ?: return
         val digits = code.filter { it.isDigit() }
-        if (digits.length != 6) return showError("Enter the 6-digit code")
+        if (digits.length != 6) return showError(SignInError.CODE_INCOMPLETE)
         // A wrong code leaves us on this step, so the user can retype without another SMS.
         launchAuth(SignInMethod.PHONE) { authRepository.signIn(authRepository.phoneCredential(step.verificationId, digits)) }
     }
@@ -103,18 +109,18 @@ class SignInViewModel(private val authRepository: AuthRepository) : ViewModel() 
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.update { it.copy(error = e.toAuthMessage()) }
+                _state.update { it.copy(error = e.toSignInError()) }
             } finally {
                 _state.update { it.copy(inProgress = null) }
             }
         }
     }
 
-    private fun showError(message: String) = _state.update { it.copy(error = message, message = null) }
+    private fun showError(error: SignInError) = _state.update { it.copy(error = error, message = null) }
 
-    private fun validateEmail(email: String): String? = when {
-        email.isBlank() -> "Enter your email"
-        !EMAIL_PATTERN.matches(email.trim()) -> "That email address doesn't look right"
+    private fun validateEmail(email: String): SignInError? = when {
+        email.isBlank() -> SignInError.EMAIL_MISSING
+        !EMAIL_PATTERN.matches(email.trim()) -> SignInError.EMAIL_INVALID
         else -> null
     }
 

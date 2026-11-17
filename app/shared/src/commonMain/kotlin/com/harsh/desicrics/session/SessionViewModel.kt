@@ -27,7 +27,8 @@ sealed interface SessionState {
     data class NeedsProfile(val user: AuthUser) : SessionState
     data class SignedIn(val profile: UserProfile) : SessionState
     /** Signed in, but the profile couldn't be loaded (usually no network). */
-    data class Error(val message: String) : SessionState
+    /** Signed in, but the profile couldn't be loaded (usually no connection). */
+    data object Error : SessionState
 }
 
 class SessionViewModel(
@@ -46,7 +47,7 @@ class SessionViewModel(
                 userRepository.observeProfile(user.uid)
                     .map { profile -> if (profile == null) SessionState.NeedsProfile(user) else SessionState.SignedIn(profile) }
                     .onStart { emit(SessionState.Loading) }
-                    .catch { emit(SessionState.Error(it.message ?: "Couldn't load your profile")) }
+                    .catch { emit(SessionState.Error) }
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SessionState.Loading)

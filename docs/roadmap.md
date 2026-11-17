@@ -24,11 +24,11 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ Postgres + Flyway migrations (local Postgres in Docker)
 
 ### Level 2 · Complete
-- ⬜ `:app:designsystem` module: tokens, fonts, type, first 10 components ([design-system.md](design-system.md))
-- ⬜ `strings.xml` set up in `:app:shared` and `:app:designsystem`; no hardcoded UI text ([ui-conventions.md](ui-conventions.md))
-- ⬜ Phone OTP + Google sign-in screens in Crease
-- ⬜ Profile onboarding: name, photo, role, styles
-- ⬜ CI: build, unit tests, server tests
+- ✅ `:app:designsystem` module: tokens, fonts, type, first 10 components ([design-system.md](design-system.md))
+- ✅ `strings.xml` set up in `:app:shared` and `:app:designsystem`; sign-in, profile and session text moved ([ui-conventions.md](ui-conventions.md))
+- ✅ Phone OTP + Google sign-in screens in Crease
+- 🟡 Profile onboarding: name, role, styles done; photo upload to do
+- ✅ CI: build, unit tests, server tests (`.github/workflows/ci.yml`)
 
 ### Level 3 · Delight
 - ⬜ Staging server deploy (needs the hosting decision)
@@ -45,6 +45,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 
 ### Level 1 · Playable
 - 🟡 Delivery rules engine with tests
+- ⬜ Rebuild home, new match and scoring screens in Crease, moving their text to string resources
 - ⬜ Quick match: ad-hoc teams, typed player names, overs
 - ⬜ Toss sheet
 - ⬜ Run pad: 0–6, wides, no-balls, byes, leg byes

@@ -25,6 +25,8 @@ Crease is built around the scoreboard: big condensed numerals, one brand green, 
 | `brand` | `#0B7A4B` | `#3CC788` | Primary actions, selection |
 | `brandSoft` | `#DDF1E6` | `#143325` | Selected backgrounds, callouts |
 | `onBrand` | `#FFFFFF` | `#06140D` | Text and icons on `brand` |
+| `brandStrong` | `#0B7A4B` | `#0E5A3A` | Full-bleed brand areas (sign-in header); dark in both themes |
+| `onBrandStrong` | `#FFFFFF` | `#F2F7F4` | Text and art on `brandStrong` |
 | `event.four` | `#2459D6` | `#6D9BFF` | Boundary 4 |
 | `event.six` | `#6D3BD8` | `#A68BFF` | Boundary 6 |
 | `event.wicket` | `#D22F3B` | `#FF6B74` | Wicket, LIVE badge, destructive actions |
@@ -46,7 +48,7 @@ Crease is built around the scoreboard: big condensed numerals, one brand green, 
 |---|---|---|---|
 | Barlow Condensed | Display: scores, titles, run pad digits | `barlow_condensed_semibold.ttf` (600), `barlow_condensed_bold.ttf` (700) | Narrow figures fit big scores on small screens and read like a scoreboard |
 | Figtree | Body and UI text | `figtree_variable.ttf` (variable, 400–700) | Clear at small sizes, friendly, one file covers every weight |
-| JetBrains Mono | Data: overs, run rates, figures in tables | `jetbrains_mono_medium.ttf` (500) | Fixed-width digits line up in scorecards |
+| JetBrains Mono | Data: overs, run rates, figures in tables | `jetbrains_mono_variable.ttf` (variable, used at 500) | Fixed-width digits line up in scorecards |
 
 All three are from Google Fonts under the SIL Open Font License (OFL).
 
@@ -186,11 +188,20 @@ Some things have no Google icon (cricket bat, stumps, gloves, a ball with seam) 
 - Naming: `ill_<name>` for illustrations, `img_<name>` for raster images, `bg_<name>` for backgrounds.
 - Source files (Figma or SVG) kept in `design/` at the repo root.
 
+### App icon
+
+A white ball with a turf-green seam, moving across a pitch strip, on `brand` green.
+
+- Sources: `design/icons/app_icon_background.svg`, `app_icon_foreground.svg`, `app_icon_monochrome.svg` (108×108, content inside the 66dp safe zone).
+- Android: `app/androidApp/src/main/res/drawable/ic_launcher_{background,foreground,monochrome}.xml`, generated from the SVGs, wired up in `mipmap-anydpi-v26/`. No PNG mipmaps, since min SDK is 26.
+- Play Store listing: `design/icons/play_store_icon_512.png`.
+- The monochrome layer (Android 13+ themed icons) outlines the ball so the seam stays visible in one colour.
+
 ### Assets by phase
 
 | Phase | Asset | Type |
 |---|---|---|
-| 0 | App icon (adaptive, plus monochrome for themed icons) | Custom |
+| 0 | App icon (adaptive, plus monochrome for themed icons) ✅ | Custom |
 | 0 | Sign-in screen artwork | Illustration |
 | 1 | Bat, ball, stumps, gloves icons | Custom icon |
 | 1 | Empty state: no matches yet | Illustration |
@@ -214,16 +225,28 @@ Some things have no Google icon (cricket bat, stumps, gloves, a ball with seam) 
 
 ## Components (first set)
 
-1. `BallChip`: one delivery (0–6, W, Wd, Nb, B, Lb), 32dp circle, coloured by event token.
-2. `OverStrip`: a row of `BallChip`s for the current over, `space.2` apart.
-3. `ScoreHeader`: team name (`label`), score (`score.xl`), overs (`data`), CRR / RRR / target line.
-4. `MatchCard`: live, upcoming and result variants for feeds.
-5. `RunPad`: 4×3 grid of 64dp keys: 0, 1, 2, 3, 4, 6, Extra, OUT / Undo, 5/7, Swap, More.
-6. `WicketSheet`: dismissal type picker that only asks for the fields that type needs (fielder, which batter).
-7. `PlayerRow`: avatar, name, role, batting/bowling style.
-8. `PrimaryButton` / `GhostButton`: 52dp tall, pill shape.
-9. `LiveBadge`: red dot plus LIVE in `label`.
-10. `SyncIndicator`: count of deliveries waiting in the offline queue.
+All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
+
+| Component | File | What it is |
+|---|---|---|
+| `BallChip` / `OverStrip` | `Scoring.kt` | One delivery as a 32dp circle coloured by event token; a row of them for the current over |
+| `ScoreHeader` | `Scoring.kt` | Label, score (`score.xl`), overs (`data`) and an optional target / run-rate line |
+| `RunPad` | `Scoring.kt` | 4-column grid of 64dp keys; the caller defines the keys and what they do |
+| `MatchCard` | `Content.kt` | A match in a feed: status slot (e.g. `LiveBadge`), meta, team lines, footer |
+| `LiveBadge` | `Content.kt` | Red dot plus LIVE |
+| `PlayerRow` / `Avatar` | `Content.kt` | Avatar (photo slot, initial or person icon), name, secondary line |
+| `SyncIndicator` | `Content.kt` | Count of deliveries waiting to sync; hidden at zero |
+| `DesiCard` / `SectionLabel` | `Content.kt` | Flat bordered surface; uppercase section label |
+| `PrimaryButton` / `TonalButton` / `GhostButton` | `Buttons.kt` | 52dp pills. Primary: brand fill, optional trailing arrow, spinner while loading, faded brand when disabled. Tonal: soft `sunk` fill with a brand-tinted leading icon, for secondary options. Ghost: outline |
+| `DesiScaffold` / `FullScreenLoading` | `Structure.kt` | Screen frame with title and back icon; centred spinner |
+| `DesiTextField` | `Structure.kt` | Labelled field with helper / error line and optional password masking |
+| `ChoiceChips` / `ChoiceSheet` | `Structure.kt` | Single-choice chips; bottom sheet of options |
+| `PhoneNumberField` | `PhoneNumberField.kt` | Label above; country pill, divider, then digits in 26sp display type grouped "98765 43210"; tick when complete |
+| `OtpField` | `OtpField.kt` | One-time code in separate boxes; one text field underneath, so paste and SMS autofill work |
+
+Illustrations live in `DesiIllustrations` (drawn with `Image`, not tinted). `BallMark` is the app icon's ball and speed lines, used in the sign-in header.
+
+The wicket sheet (dismissal type, then only the fields that type needs) is built in the scoring feature on top of `ChoiceSheet`, since it needs cricket rules from `core`.
 
 ## The `:app:designsystem` module
 

@@ -4,30 +4,44 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.harsh.desicrics.designsystem.component.ChoiceChips
+import com.harsh.desicrics.designsystem.component.DesiScaffold
+import com.harsh.desicrics.designsystem.component.DesiTextField
+import com.harsh.desicrics.designsystem.component.FullScreenLoading
+import com.harsh.desicrics.designsystem.component.PrimaryButton
+import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.PlayerRole
-import com.harsh.desicrics.ui.components.AppScaffold
-import com.harsh.desicrics.ui.components.ChoiceChips
-import com.harsh.desicrics.ui.components.FullScreenLoading
-import com.harsh.desicrics.ui.components.SectionLabel
+import com.harsh.desicrics.resources.Res
+import com.harsh.desicrics.resources.profile_batting_section
+import com.harsh.desicrics.resources.profile_bowling_section
+import com.harsh.desicrics.resources.profile_city_label
+import com.harsh.desicrics.resources.profile_edit_title
+import com.harsh.desicrics.resources.profile_error_save_failed
+import com.harsh.desicrics.resources.profile_finish_setup
+import com.harsh.desicrics.resources.profile_name_label
+import com.harsh.desicrics.resources.profile_phone_label
+import com.harsh.desicrics.resources.profile_phone_placeholder
+import com.harsh.desicrics.resources.profile_role_section
+import com.harsh.desicrics.resources.profile_save
+import com.harsh.desicrics.resources.profile_setup_intro
+import com.harsh.desicrics.resources.profile_setup_title
+import com.harsh.desicrics.ui.text.label
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -42,11 +56,14 @@ fun EditProfileScreen(
     viewModel: EditProfileViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val colors = DesiTheme.colors
+    val space = DesiTheme.space
+    val title = if (isOnboarding) Res.string.profile_setup_title else Res.string.profile_edit_title
 
-    AppScaffold(title = if (isOnboarding) "Set up your profile" else "Edit profile", onBack = onBack) { padding ->
+    DesiScaffold(title = stringResource(title), onBack = onBack) { padding ->
         if (state.loading) {
-            FullScreenLoading()
-            return@AppScaffold
+            FullScreenLoading(Modifier.padding(padding))
+            return@DesiScaffold
         }
         Column(
             modifier = Modifier
@@ -54,60 +71,59 @@ fun EditProfileScreen(
                 .padding(padding)
                 .imePadding()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                .padding(horizontal = space.screen, vertical = space.s4),
+            verticalArrangement = Arrangement.spacedBy(space.s4),
         ) {
             if (isOnboarding) {
-                Text(
-                    "Tell us a bit about your game. Teammates will find you by your mobile number.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                Text(stringResource(Res.string.profile_setup_intro), style = DesiTheme.type.body, color = colors.muted)
             }
-            OutlinedTextField(
+            DesiTextField(
                 value = state.name,
                 onValueChange = { value -> viewModel.update { it.copy(name = value) } },
-                label = { Text("Full name") },
-                singleLine = true,
+                label = stringResource(Res.string.profile_name_label),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-                modifier = Modifier.fillMaxWidth(),
             )
-            OutlinedTextField(
+            DesiTextField(
                 value = state.phone,
                 onValueChange = { value -> viewModel.update { it.copy(phone = value) } },
-                label = { Text("Mobile number") },
-                placeholder = { Text("+91 98765 43210") },
-                singleLine = true,
+                label = stringResource(Res.string.profile_phone_label),
+                placeholder = stringResource(Res.string.profile_phone_placeholder),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                modifier = Modifier.fillMaxWidth(),
             )
-            OutlinedTextField(
+            DesiTextField(
                 value = state.city,
                 onValueChange = { value -> viewModel.update { it.copy(city = value) } },
-                label = { Text("City (optional)") },
-                singleLine = true,
+                label = stringResource(Res.string.profile_city_label),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-                modifier = Modifier.fillMaxWidth(),
             )
 
-            SectionLabel("Playing role")
-            ChoiceChips(PlayerRole.entries, state.role, { it.displayName }, { value -> viewModel.update { it.copy(role = value) } })
-
-            SectionLabel("Batting")
-            ChoiceChips(BattingStyle.entries, state.battingStyle, { it.displayName }, { value -> viewModel.update { it.copy(battingStyle = value) } })
-
-            SectionLabel("Bowling")
-            ChoiceChips(BowlingStyle.entries, state.bowlingStyle, { it.displayName }, { value -> viewModel.update { it.copy(bowlingStyle = value) } })
-
-            state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-
-            Button(
-                onClick = { viewModel.save(onDone) },
-                enabled = !state.saving,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-            ) {
-                Text(if (state.saving) "Saving…" else if (isOnboarding) "Let's play" else "Save")
+            Column(verticalArrangement = Arrangement.spacedBy(space.s2), modifier = Modifier.padding(top = space.s2)) {
+                SectionLabel(stringResource(Res.string.profile_role_section))
+                ChoiceChips(PlayerRole.entries, state.role, { stringResource(it.label) }, { value -> viewModel.update { it.copy(role = value) } })
             }
+            Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
+                SectionLabel(stringResource(Res.string.profile_batting_section))
+                ChoiceChips(BattingStyle.entries, state.battingStyle, { stringResource(it.label) }, { value -> viewModel.update { it.copy(battingStyle = value) } })
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
+                SectionLabel(stringResource(Res.string.profile_bowling_section))
+                ChoiceChips(BowlingStyle.entries, state.bowlingStyle, { stringResource(it.label) }, { value -> viewModel.update { it.copy(bowlingStyle = value) } })
+            }
+
+            state.error?.let { error ->
+                val text = when (error) {
+                    is ProfileFormError.Invalid -> stringResource(error.error.label)
+                    ProfileFormError.SaveFailed -> stringResource(Res.string.profile_error_save_failed)
+                }
+                Text(text, style = DesiTheme.type.body, color = colors.event.wicket)
+            }
+
+            PrimaryButton(
+                text = stringResource(if (isOnboarding) Res.string.profile_finish_setup else Res.string.profile_save),
+                onClick = { viewModel.save(onDone) },
+                loading = state.saving,
+                modifier = Modifier.fillMaxWidth().padding(top = space.s2),
+            )
         }
     }
 }

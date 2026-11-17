@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ball and speed lines from design/icons/app_icon_foreground.svg, cropped to the art for large hero use. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="54dp"
+    android:height="34dp"
+    android:viewportWidth="54"
+    android:viewportHeight="34">
+    <group
+        android:translateX="-26"
+        android:translateY="-37">
+        <path
+            android:strokeColor="#FFDDF1E6"
+            android:strokeWidth="3.6"
+            android:strokeLineCap="round"
+            android:pathData="M33,46H43" />
+        <path
+            android:strokeColor="#FFDDF1E6"
+            android:strokeWidth="3.6"
+            android:strokeLineCap="round"
+            android:strokeAlpha="0.85"
+            android:pathData="M28,54H43" />
+        <path
+            android:strokeColor="#FFDDF1E6"
+            android:strokeWidth="3.6"
+            android:strokeLineCap="round"
+            android:strokeAlpha="0.7"
+            android:pathData="M35,62H43" />
+        <path
+            android:fillColor="#FFF5F7F4"
+            android:pathData="M48,54a15,15 0,1 0,30 0a15,15 0,1 0,-30 0" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.6"
+            android:strokeLineCap="round"
+            android:pathData="M60.5,39.2Q56,54 60.5,68.8" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.6"
+            android:strokeLineCap="round"
+            android:pathData="M65.5,39.2Q61,54 65.5,68.8" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M56.4,45l2.6,0.5" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M55.5,49.5l2.7,0.2" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M55.3,54l2.7,0" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M55.5,58.5l2.7,-0.2" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M56.4,63l2.6,-0.5" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M65.2,45.5l2.6,-0.5" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M64.4,49.7l2.7,-0.2" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M64.2,54l2.7,0" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M64.4,58.3l2.7,0.2" />
+        <path
+            android:strokeColor="#FF0B7A4B"
+            android:strokeWidth="1.1"
+            android:strokeLineCap="round"
+            android:pathData="M65.2,62.5l2.6,0.5" />
+    </group>
+</vector>

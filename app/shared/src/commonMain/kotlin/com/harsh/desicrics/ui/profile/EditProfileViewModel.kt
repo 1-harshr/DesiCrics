@@ -2,6 +2,7 @@ package com.harsh.desicrics.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.harsh.desicrics.api.ProfileError
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.UserRepository
@@ -14,6 +15,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+sealed interface ProfileFormError {
+    data class Invalid(val error: ProfileError) : ProfileFormError
+    data object SaveFailed : ProfileFormError
+}
+
 data class ProfileFormState(
     val loading: Boolean = true,
     val name: String = "",
@@ -23,7 +29,7 @@ data class ProfileFormState(
     val battingStyle: BattingStyle = BattingStyle.RIGHT_HAND,
     val bowlingStyle: BowlingStyle = BowlingStyle.NONE,
     val saving: Boolean = false,
-    val error: String? = null,
+    val error: ProfileFormError? = null,
 )
 
 /** Backs both first-time onboarding and later profile edits. */
@@ -71,8 +77,8 @@ class EditProfileViewModel(
             photoUrl = authRepository.currentUser?.photoUrl,
         )
         // Same check the server runs, for instant feedback.
-        request.validationError()?.let { error ->
-            _state.update { it.copy(error = error) }
+        request.validate()?.let { error ->
+            _state.update { it.copy(error = ProfileFormError.Invalid(error)) }
             return
         }
         _state.update { it.copy(saving = true) }
@@ -83,7 +89,7 @@ class EditProfileViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.update { it.copy(error = e.message ?: "Couldn't save your profile") }
+                _state.update { it.copy(error = ProfileFormError.SaveFailed) }
             } finally {
                 _state.update { it.copy(saving = false) }
             }

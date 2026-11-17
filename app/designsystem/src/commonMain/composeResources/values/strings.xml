@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only text that is part of a design-system component. Feature text lives in :app:shared. -->
+<resources>
+    <string name="ds_live">LIVE</string>
+    <string name="ds_back">Back</string>
+</resources>

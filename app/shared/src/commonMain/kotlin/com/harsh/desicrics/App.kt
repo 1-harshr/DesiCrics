@@ -5,11 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -24,14 +21,22 @@ import androidx.navigation.toRoute
 import com.harsh.desicrics.model.UserProfile
 import com.harsh.desicrics.session.SessionState
 import com.harsh.desicrics.session.SessionViewModel
-import com.harsh.desicrics.ui.components.FullScreenLoading
+import com.harsh.desicrics.designsystem.component.FullScreenLoading
 import com.harsh.desicrics.ui.home.HomeScreen
 import com.harsh.desicrics.ui.match.MatchScreen
 import com.harsh.desicrics.ui.newmatch.NewMatchScreen
 import com.harsh.desicrics.ui.profile.EditProfileScreen
 import com.harsh.desicrics.ui.profile.ProfileScreen
 import com.harsh.desicrics.ui.signin.SignInScreen
-import com.harsh.desicrics.ui.theme.DesiCricsTheme
+import com.harsh.desicrics.designsystem.component.GhostButton
+import com.harsh.desicrics.designsystem.component.PrimaryButton
+import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.resources.Res
+import com.harsh.desicrics.resources.common_try_again
+import com.harsh.desicrics.resources.profile_sign_out
+import com.harsh.desicrics.resources.session_error_body
+import com.harsh.desicrics.resources.session_error_title
+import org.jetbrains.compose.resources.stringResource
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -43,8 +48,8 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun App() {
-    DesiCricsTheme {
-        Surface(Modifier.fillMaxSize()) {
+    DesiTheme {
+        Surface(Modifier.fillMaxSize(), color = DesiTheme.colors.bg) {
             val session = koinViewModel<SessionViewModel>()
             val state by session.state.collectAsStateWithLifecycle()
             // Auth gates the whole app; the nav graph only exists once there's a profile.
@@ -53,23 +58,29 @@ fun App() {
                 SessionState.SignedOut -> SignInScreen()
                 is SessionState.NeedsProfile -> EditProfileScreen(isOnboarding = true, onDone = {}, onBack = null)
                 is SessionState.SignedIn -> MainNavHost(current.profile, onSignOut = session::signOut)
-                is SessionState.Error -> SessionErrorScreen(current.message, onRetry = session::retry, onSignOut = session::signOut)
+                SessionState.Error -> SessionErrorScreen(onRetry = session::retry, onSignOut = session::signOut)
             }
         }
     }
 }
 
 @Composable
-private fun SessionErrorScreen(message: String, onRetry: () -> Unit, onSignOut: () -> Unit) {
+private fun SessionErrorScreen(onRetry: () -> Unit, onSignOut: () -> Unit) {
+    val space = DesiTheme.space
     Column(
-        modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = space.screen),
+        verticalArrangement = Arrangement.spacedBy(space.s3, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Couldn't load your profile", style = MaterialTheme.typography.titleMedium)
-        Text(message, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Button(onClick = onRetry) { Text("Try again") }
-        TextButton(onClick = onSignOut) { Text("Sign out") }
+        Text(stringResource(Res.string.session_error_title), style = DesiTheme.type.titleMd, color = DesiTheme.colors.ink)
+        Text(
+            stringResource(Res.string.session_error_body),
+            style = DesiTheme.type.body,
+            textAlign = TextAlign.Center,
+            color = DesiTheme.colors.muted,
+        )
+        PrimaryButton(stringResource(Res.string.common_try_again), onClick = onRetry, modifier = Modifier.padding(top = space.s2))
+        GhostButton(stringResource(Res.string.profile_sign_out), onClick = onSignOut)
     }
 }
 

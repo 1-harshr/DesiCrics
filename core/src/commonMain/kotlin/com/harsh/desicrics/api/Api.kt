@@ -30,13 +30,23 @@ data class UpdateProfileRequest(
     val photoUrl: String? = null,
 ) {
     /** Checked on the device for instant feedback and again on the server. */
-    fun validationError(): String? = when {
-        name.isBlank() -> "Please enter your name"
-        name.length > 100 -> "That name is too long"
-        phone.count { it.isDigit() } !in 10..13 -> "Please enter a valid mobile number"
-        city.length > 100 -> "That city name is too long"
+    fun validate(): ProfileError? = when {
+        name.isBlank() -> ProfileError.NAME_MISSING
+        name.length > 100 -> ProfileError.NAME_TOO_LONG
+        phone.count { it.isDigit() } !in 10..13 -> ProfileError.PHONE_INVALID
+        city.length > 100 -> ProfileError.CITY_TOO_LONG
         else -> null
     }
+
+    /** English message for API error responses; the app shows its own localised text for [validate]. */
+    fun validationError(): String? = validate()?.message
+}
+
+enum class ProfileError(val message: String) {
+    NAME_MISSING("Please enter your name"),
+    NAME_TOO_LONG("That name is too long"),
+    PHONE_INVALID("Please enter a valid mobile number"),
+    CITY_TOO_LONG("That city name is too long"),
 }
 
 @Serializable

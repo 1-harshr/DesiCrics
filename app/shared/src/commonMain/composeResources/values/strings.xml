@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- All user-visible app text. Naming: <feature>_<screen or element>_<meaning>. See docs/ui-conventions.md. -->
+<resources>
+    <string name="app_name">DesiCrics</string>
+
+    <!-- Common -->
+    <string name="common_empty_value">—</string>
+    <string name="common_joined">%1$s · %2$s</string>
+    <string name="common_try_again">Try again</string>
+
+    <!-- Session -->
+    <string name="session_error_title">Couldn't load your profile</string>
+    <string name="session_error_body">Check your connection and try again.</string>
+
+    <!-- Sign-in -->
+    <string name="signin_hero_title">Score every gully match.</string>
+    <string name="signin_hero_subtitle">Ball-by-ball scoring, live scores and career stats for your team.</string>
+    <string name="signin_phone_title">Sign in with your mobile</string>
+    <string name="signin_phone_hint">We'll text you a 6-digit code.</string>
+    <string name="signin_phone_label">Mobile number</string>
+    <string name="signin_phone_prefix">+91</string>
+    <string name="signin_phone_country">IN</string>
+    <string name="signin_phone_placeholder">98765 43210</string>
+    <string name="signin_send_code">Send code</string>
+    <string name="signin_other_ways">Other ways to sign in</string>
+    <string name="signin_continue_with">Continue with %1$s</string>
+    <string name="signin_use_email">Continue with email</string>
+    <string name="signin_use_phone">Use mobile number instead</string>
+    <string name="signin_code_title">Enter the code</string>
+    <string name="signin_code_hint">Sent to %1$s</string>
+    <string name="signin_verify">Verify and continue</string>
+    <string name="signin_resend_code">Resend code</string>
+    <string name="signin_change_number">Change number</string>
+    <string name="signin_email_title">Sign in with email</string>
+    <string name="signin_create_title">Create your account</string>
+    <string name="signin_email_label">Email</string>
+    <string name="signin_password_label">Password</string>
+    <string name="signin_confirm_password_label">Confirm password</string>
+    <string name="signin_create_account">Create account</string>
+    <string name="signin_sign_in">Sign in</string>
+    <string name="signin_forgot_password">Forgot password?</string>
+    <string name="signin_switch_to_sign_in">Already have an account? Sign in</string>
+    <string name="signin_switch_to_create">New here? Create an account</string>
+    <string name="signin_reset_email_sent">Password reset email sent to %1$s</string>
+    <string name="signin_code_sent">Code sent to %1$s</string>
+
+    <!-- Sign-in errors -->
+    <string name="signin_error_email_missing">Enter your email</string>
+    <string name="signin_error_email_invalid">That email address doesn't look right.</string>
+    <string name="signin_error_password_missing">Enter your password</string>
+    <string name="signin_error_password_short">Password must be at least 6 characters</string>
+    <string name="signin_error_passwords_differ">Passwords don't match</string>
+    <string name="signin_error_phone_invalid">Enter a valid mobile number, including the country code.</string>
+    <string name="signin_error_code_incomplete">Enter the 6-digit code</string>
+    <string name="signin_error_offline">No internet connection. Check your network and try again.</string>
+    <string name="signin_error_too_many_attempts">Too many attempts. Please wait a few minutes and try again.</string>
+    <string name="signin_error_weak_password">Choose a stronger password (at least 6 characters).</string>
+    <string name="signin_error_account_exists">An account already exists with this email. Sign in instead.</string>
+    <string name="signin_error_sms_region">We can't send codes to this country yet. Try another sign-in method.</string>
+    <string name="signin_error_sms_billing">SMS codes need the Firebase Blaze plan. Use a test phone number from the Firebase console for now.</string>
+    <string name="signin_error_method_disabled">This sign-in method isn't enabled yet.</string>
+    <string name="signin_error_wrong_credentials">Incorrect email or password.</string>
+    <string name="signin_error_account_disabled">This account has been disabled.</string>
+    <string name="signin_error_code_wrong">That code is incorrect. Check the SMS and try again.</string>
+    <string name="signin_error_code_expired">That code has expired. Send a new one.</string>
+    <string name="signin_error_sms_quota">We've hit today's SMS limit. Please try again later.</string>
+    <string name="signin_error_unknown">Something went wrong. Please try again.</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_mobile">Mobile</string>
+    <string name="profile_email">Email</string>
+    <string name="profile_batting">Batting</string>
+    <string name="profile_bowling">Bowling</string>
+    <string name="profile_edit">Edit profile</string>
+    <string name="profile_sign_out">Sign out</string>
+
+    <!-- Edit profile / onboarding -->
+    <string name="profile_setup_title">Set up your profile</string>
+    <string name="profile_edit_title">Edit profile</string>
+    <string name="profile_setup_intro">Tell us a bit about your game. Teammates will find you by your mobile number.</string>
+    <string name="profile_name_label">Full name</string>
+    <string name="profile_phone_label">Mobile number</string>
+    <string name="profile_phone_placeholder">+91 98765 43210</string>
+    <string name="profile_city_label">City (optional)</string>
+    <string name="profile_role_section">Playing role</string>
+    <string name="profile_batting_section">Batting</string>
+    <string name="profile_bowling_section">Bowling</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_finish_setup">Let's play</string>
+    <string name="profile_error_name_missing">Please enter your name</string>
+    <string name="profile_error_name_too_long">That name is too long</string>
+    <string name="profile_error_phone_invalid">Please enter a valid mobile number</string>
+    <string name="profile_error_city_too_long">That city name is too long</string>
+    <string name="profile_error_save_failed">Couldn't save your profile. Check your connection and try again.</string>
+
+    <!-- Player role, batting and bowling styles -->
+    <string name="player_role_batter">Batter</string>
+    <string name="player_role_bowler">Bowler</string>
+    <string name="player_role_all_rounder">All-rounder</string>
+    <string name="player_role_wicket_keeper">Wicket-keeper</string>
+    <string name="batting_style_right_hand">Right-hand bat</string>
+    <string name="batting_style_left_hand">Left-hand bat</string>
+    <string name="bowling_style_none">Doesn't bowl</string>
+    <string name="bowling_style_right_arm_fast">Right-arm fast</string>
+    <string name="bowling_style_right_arm_medium">Right-arm medium</string>
+    <string name="bowling_style_right_arm_off_spin">Right-arm off spin</string>
+    <string name="bowling_style_right_arm_leg_spin">Right-arm leg spin</string>
+    <string name="bowling_style_left_arm_fast">Left-arm fast</string>
+    <string name="bowling_style_left_arm_medium">Left-arm medium</string>
+    <string name="bowling_style_left_arm_orthodox">Left-arm orthodox</string>
+    <string name="bowling_style_left_arm_wrist_spin">Left-arm wrist spin</string>
+</resources>

@@ -28,6 +28,7 @@ dependencyResolutionManagement {
 }
 
 include(":app:androidApp")
+include(":app:designsystem")
 include(":app:shared")
 include(":core")
 include(":server")

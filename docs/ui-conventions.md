@@ -44,6 +44,7 @@ Use Compose Multiplatform resources (`stringResource`, `pluralStringResource`, `
   ```kotlin
   stringResource(Res.string.scoring_need_runs, runsNeeded, ballsLeft)
   ```
+- **Write apostrophes plainly** (`it's`, not `it\'s`). Compose Multiplatform resources show a backslash literally.
 - **Use plurals for counts:** `pluralStringResource(Res.plurals.team_member_count, count, count)`.
 - **Cricket abbreviations are strings too:** Wd, Nb, B, Lb, ov, CRR, RRR, LBW.
 - **Numbers that are pure data** (scores like `142/6`, overs like `16.4`) are formatted by a formatter in code, not stored as strings. Any words around them come from resources.

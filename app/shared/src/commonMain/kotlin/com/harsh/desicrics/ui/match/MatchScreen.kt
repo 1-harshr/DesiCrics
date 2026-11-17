@@ -42,13 +42,15 @@ import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.scoring.InningsState
 import com.harsh.desicrics.scoring.MatchState
-import com.harsh.desicrics.ui.components.AppScaffold
-import com.harsh.desicrics.ui.components.ChoiceChips
-import com.harsh.desicrics.ui.components.FullScreenLoading
+import com.harsh.desicrics.designsystem.component.DesiScaffold
+import com.harsh.desicrics.designsystem.component.ChoiceChips
+import com.harsh.desicrics.designsystem.component.FullScreenLoading
 import com.harsh.desicrics.ui.components.PlayerPickerDialog
 import com.harsh.desicrics.ui.components.RunsPickerDialog
-import com.harsh.desicrics.ui.components.SectionLabel
-import com.harsh.desicrics.ui.theme.BoundaryColor
+import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.Ball
+import com.harsh.desicrics.designsystem.component.BallKind
+import com.harsh.desicrics.designsystem.component.BallChip as DsBallChip
 import com.harsh.desicrics.util.format2
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -62,7 +64,7 @@ fun MatchScreen(
     val ui by viewModel.state.collectAsStateWithLifecycle()
     val match = ui.match
 
-    AppScaffold(
+    DesiScaffold(
         title = match?.let { "${it.teamA.name} vs ${it.teamB.name}" } ?: "Match",
         onBack = onBack,
     ) { padding ->
@@ -156,17 +158,15 @@ private fun ScoreHeader(state: MatchState) {
 
 @Composable
 private fun BallChip(delivery: Delivery) {
-    val (background, content) = when {
-        delivery.wicket != null -> MaterialTheme.colorScheme.error to MaterialTheme.colorScheme.onError
-        delivery.runsOffBat == 4 || delivery.runsOffBat == 6 -> BoundaryColor to Color.White
-        else -> MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.onSurface
+    val kind = when {
+        delivery.wicket != null -> BallKind.Wicket
+        delivery.runsOffBat == 4 -> BallKind.Four
+        delivery.runsOffBat == 6 -> BallKind.Six
+        delivery.extra != null -> BallKind.Extra
+        delivery.runsOffBat == 0 -> BallKind.Dot
+        else -> BallKind.Runs
     }
-    Box(
-        modifier = Modifier.size(36.dp).background(background, CircleShape),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(delivery.label(), color = content, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold)
-    }
+    DsBallChip(Ball(delivery.label(), kind))
 }
 
 private fun Delivery.label(): String {

@@ -41,6 +41,7 @@ kotlin {
         }
         commonMain.dependencies {
             api(project(":core"))
+            implementation(project(":app:designsystem"))
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -83,6 +84,10 @@ kotlin {
             implementation(libs.androidx.testRunner)
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "com.harsh.desicrics.resources"
 }
 
 dependencies {

@@ -1,174 +1,365 @@
 package com.harsh.desicrics.ui.signin
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.harsh.desicrics.auth.SocialProvider
+import com.harsh.desicrics.auth.SignInError
+import com.harsh.desicrics.auth.SocialSignIn
 import com.harsh.desicrics.auth.rememberPhoneVerifier
 import com.harsh.desicrics.auth.rememberSocialSignIn
-import com.harsh.desicrics.ui.components.ChoiceChips
+import com.harsh.desicrics.designsystem.component.DesiTextField
+import com.harsh.desicrics.designsystem.component.OtpField
+import com.harsh.desicrics.designsystem.component.PhoneNumberField
+import com.harsh.desicrics.designsystem.component.PrimaryButton
+import com.harsh.desicrics.designsystem.component.TonalButton
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import com.harsh.desicrics.designsystem.icon.DesiIllustrations
+import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.resources.Res
+import com.harsh.desicrics.resources.app_name
+import com.harsh.desicrics.resources.signin_change_number
+import com.harsh.desicrics.resources.signin_code_hint
+import com.harsh.desicrics.resources.signin_code_sent
+import com.harsh.desicrics.resources.signin_code_title
+import com.harsh.desicrics.resources.signin_confirm_password_label
+import com.harsh.desicrics.resources.signin_continue_with
+import com.harsh.desicrics.resources.signin_create_account
+import com.harsh.desicrics.resources.signin_create_title
+import com.harsh.desicrics.resources.signin_email_label
+import com.harsh.desicrics.resources.signin_email_title
+import com.harsh.desicrics.resources.signin_forgot_password
+import com.harsh.desicrics.resources.signin_hero_subtitle
+import com.harsh.desicrics.resources.signin_hero_title
+import com.harsh.desicrics.resources.signin_other_ways
+import com.harsh.desicrics.resources.signin_password_label
+import com.harsh.desicrics.resources.signin_phone_country
+import com.harsh.desicrics.resources.signin_phone_hint
+import com.harsh.desicrics.resources.signin_phone_label
+import com.harsh.desicrics.resources.signin_phone_placeholder
+import com.harsh.desicrics.resources.signin_phone_prefix
+import com.harsh.desicrics.resources.signin_phone_title
+import com.harsh.desicrics.resources.signin_resend_code
+import com.harsh.desicrics.resources.signin_reset_email_sent
+import com.harsh.desicrics.resources.signin_send_code
+import com.harsh.desicrics.resources.signin_sign_in
+import com.harsh.desicrics.resources.signin_switch_to_create
+import com.harsh.desicrics.resources.signin_switch_to_sign_in
+import com.harsh.desicrics.resources.signin_use_email
+import com.harsh.desicrics.resources.signin_use_phone
+import com.harsh.desicrics.resources.signin_verify
+import com.harsh.desicrics.ui.system.LightStatusBarIcons
+import com.harsh.desicrics.ui.text.label
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-private enum class OtherMethod(val label: String) {
-    PHONE("Mobile number"),
-    EMAIL("Email"),
-}
+/** Which form the sign-in card shows. Phone is the default; email is the fallback. */
+private enum class Mode { PHONE, CODE, EMAIL }
+
+/** How far the card overlaps the green header, so its rounded corners sit on the header. */
+private val CardOverlap = 28.dp
+private val CardShape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+private const val PHONE_DIGITS = 10
 
 @Composable
 fun SignInScreen(viewModel: SignInViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val socialSignIn = rememberSocialSignIn()
-    var otherMethod by rememberSaveable { mutableStateOf(OtherMethod.PHONE) }
-    val busy = state.inProgress != null
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .safeDrawingPadding()
-            .imePadding()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Spacer(Modifier.height(24.dp))
-        Text("🏏", style = MaterialTheme.typography.displayMedium)
-        Text("DesiCrics", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
-        Text(
-            "Score every gully match like it's a World Cup final",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Spacer(Modifier.height(16.dp))
-
-        socialSignIn.providers.forEach { provider ->
-            SocialButton(
-                provider = provider,
-                loading = state.inProgress?.name == provider.name,
-                enabled = !busy,
-                onClick = { viewModel.signIn(provider, socialSignIn) },
-            )
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
-            HorizontalDivider(Modifier.weight(1f))
-            Text("  or continue with  ", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            HorizontalDivider(Modifier.weight(1f))
-        }
-        ChoiceChips(
-            options = OtherMethod.entries,
-            selected = otherMethod,
-            label = { it.label },
-            onSelect = {
-                otherMethod = it
-                viewModel.clearFeedback()
-            },
-        )
-
-        when (otherMethod) {
-            OtherMethod.PHONE -> PhoneSignIn(state, viewModel)
-            OtherMethod.EMAIL -> EmailSignIn(state, viewModel)
-        }
-
-        state.error?.let { Text(it, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center) }
-        state.message?.let { Text(it, color = MaterialTheme.colorScheme.primary, textAlign = TextAlign.Center) }
+    var useEmail by rememberSaveable { mutableStateOf(false) }
+    val mode = when {
+        useEmail -> Mode.EMAIL
+        state.phoneStep is PhoneStep.EnterCode -> Mode.CODE
+        else -> Mode.PHONE
     }
-}
+    val colors = DesiTheme.colors
+    val quick = DesiTheme.motion.QUICK_MS
+    val base = DesiTheme.motion.BASE_MS
 
-@Composable
-private fun SocialButton(provider: SocialProvider, loading: Boolean, enabled: Boolean, onClick: () -> Unit) {
-    val content: @Composable () -> Unit = {
-        if (loading) ButtonProgress() else Text("Continue with ${provider.displayName}")
-    }
-    // Apple's guidelines ask for a black button; Google's for a neutral outlined one.
-    if (provider == SocialProvider.APPLE) {
-        Button(
-            onClick = onClick,
-            enabled = enabled,
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
-            modifier = Modifier.fillMaxWidth().height(52.dp),
-        ) { content() }
-    } else {
-        OutlinedButton(onClick = onClick, enabled = enabled, modifier = Modifier.fillMaxWidth().height(52.dp)) { content() }
-    }
-}
-
-@Composable
-private fun PhoneSignIn(state: SignInUiState, viewModel: SignInViewModel) {
-    val verifier = rememberPhoneVerifier()
-    val loading = state.inProgress == SignInMethod.PHONE
-    val enabled = state.inProgress == null
-
-    when (val step = state.phoneStep) {
-        PhoneStep.EnterNumber -> {
-            var phone by rememberSaveable { mutableStateOf("+91 ") }
-            OutlinedTextField(
-                value = phone,
-                onValueChange = { phone = it },
-                label = { Text("Mobile number") },
-                placeholder = { Text("+91 98765 43210") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            PrimaryButton("Send OTP", loading, enabled) { viewModel.sendPhoneCode(phone, verifier) }
-        }
-        is PhoneStep.EnterCode -> {
-            var code by rememberSaveable(step.verificationId) { mutableStateOf("") }
-            OutlinedTextField(
-                value = code,
-                onValueChange = { value -> code = value.filter { it.isDigit() }.take(6) },
-                label = { Text("6-digit code") },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            PrimaryButton("Verify", loading, enabled) { viewModel.verifyPhoneCode(code) }
-            Row {
-                TextButton(onClick = { viewModel.sendPhoneCode(step.phoneNumber, verifier) }, enabled = enabled) { Text("Resend code") }
-                TextButton(onClick = viewModel::changePhoneNumber, enabled = enabled) { Text("Change number") }
+    LightStatusBarIcons()
+    Box(Modifier.fillMaxSize().background(colors.surface)) {
+        Column(Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState())) {
+            Hero()
+            Column(
+                Modifier
+                    .offset(y = -CardOverlap)
+                    .clip(CardShape)
+                    .background(colors.surface)
+                    .fillMaxWidth()
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(horizontal = DesiTheme.space.s6, vertical = DesiTheme.space.s8),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                AnimatedContent(
+                    targetState = mode,
+                    transitionSpec = { fadeIn(tween(base)) togetherWith fadeOut(tween(quick)) },
+                    label = "sign-in form",
+                    modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth(),
+                ) { current ->
+                    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
+                        when (current) {
+                            Mode.PHONE -> PhoneForm(state, viewModel, socialSignIn) {
+                                useEmail = true
+                                viewModel.clearFeedback()
+                            }
+                            Mode.CODE -> CodeForm(state, viewModel)
+                            Mode.EMAIL -> EmailForm(state, viewModel) {
+                                useEmail = false
+                                viewModel.clearFeedback()
+                            }
+                        }
+                        Feedback(state)
+                    }
+                }
             }
         }
     }
 }
 
+/**
+ * Full-bleed green header. The app icon's ball is the hero: drawn large on the right, bleeding off the
+ * edge above the crease, and delivered in from the left on first show. Name, headline and pitch below.
+ */
 @Composable
-private fun EmailSignIn(state: SignInUiState, viewModel: SignInViewModel) {
+private fun Hero() {
+    val colors = DesiTheme.colors
+    val crease = colors.onBrandStrong.copy(alpha = 0.28f)
+    val stripe = colors.onBrandStrong.copy(alpha = 0.045f)
+
+    // The delivery: slides in from the left and settles. System "remove animations" makes this instant.
+    val travel = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        travel.animateTo(1f, tween(durationMillis = 700, easing = DesiTheme.motion.emphasizedDecelerate))
+    }
+
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .background(colors.brandStrong)
+            .drawBehind {
+                // A lighter pitch strip under the ball, as on the app icon.
+                val stripWidth = size.width * 0.42f
+                drawRect(stripe, topLeft = Offset(size.width - stripWidth, 0f), size = Size(stripWidth, size.height))
+            },
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(top = DesiTheme.space.s4, bottom = CardOverlap + DesiTheme.space.s8),
+        ) {
+            Text(
+                stringResource(Res.string.app_name).uppercase(),
+                style = DesiTheme.type.label,
+                color = colors.onBrandStrong.copy(alpha = 0.85f),
+                modifier = Modifier.padding(horizontal = DesiTheme.space.s6),
+            )
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .height(HeroArtHeight)
+                    .drawBehind {
+                        // The popping crease the ball is about to cross.
+                        drawRoundRect(
+                            crease,
+                            topLeft = Offset(size.width * 0.35f, size.height - 6.dp.toPx()),
+                            size = Size(size.width * 0.65f, 2.dp.toPx()),
+                            cornerRadius = CornerRadius(1.dp.toPx()),
+                        )
+                    },
+            ) {
+                Image(
+                    painterResource(DesiIllustrations.BallHero),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .requiredWidth(HeroArtWidth)
+                        .aspectRatio(54f / 34f)
+                        // Bleed the ball off the right edge.
+                        .offset(x = HeroArtWidth * 0.18f)
+                        .graphicsLayer {
+                            translationX = -(1f - travel.value) * size.width * 1.1f
+                            alpha = travel.value
+                        },
+                )
+            }
+            Column(
+                Modifier.padding(horizontal = DesiTheme.space.s6),
+                verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
+            ) {
+                Text(stringResource(Res.string.signin_hero_title), style = DesiTheme.type.scoreXl, color = colors.onBrandStrong)
+                Text(
+                    stringResource(Res.string.signin_hero_subtitle),
+                    style = DesiTheme.type.bodyLg,
+                    color = colors.onBrandStrong.copy(alpha = 0.78f),
+                )
+            }
+        }
+    }
+}
+
+private val HeroArtWidth = 300.dp
+private val HeroArtHeight = 190.dp
+
+@Composable
+private fun FormTitle(title: StringResource, hint: String? = null) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1),
+        modifier = Modifier.padding(bottom = DesiTheme.space.s2),
+    ) {
+        Text(stringResource(title), style = DesiTheme.type.titleLg, color = DesiTheme.colors.ink)
+        if (hint != null) Text(hint, style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+    }
+}
+
+@Composable
+private fun PhoneForm(state: SignInUiState, viewModel: SignInViewModel, socialSignIn: SocialSignIn, onUseEmail: () -> Unit) {
+    val verifier = rememberPhoneVerifier()
+    val enabled = state.inProgress == null
+    val prefix = stringResource(Res.string.signin_phone_prefix)
+    var digits by rememberSaveable { mutableStateOf("") }
+    val complete = digits.length == PHONE_DIGITS
+    val send = { if (complete) viewModel.sendPhoneCode("$prefix$digits", verifier) }
+
+    FormTitle(Res.string.signin_phone_title, stringResource(Res.string.signin_phone_hint))
+    PhoneNumberField(
+        value = digits,
+        onValueChange = { digits = it },
+        label = stringResource(Res.string.signin_phone_label),
+        countryCode = prefix,
+        countryLabel = stringResource(Res.string.signin_phone_country),
+        placeholder = stringResource(Res.string.signin_phone_placeholder),
+        length = PHONE_DIGITS,
+        enabled = enabled,
+        error = state.error?.takeIf { it == SignInError.PHONE_INVALID }?.let { stringResource(it.label) },
+        onDone = send,
+    )
+    PrimaryButton(
+        text = stringResource(Res.string.signin_send_code),
+        onClick = send,
+        loading = state.inProgress == SignInMethod.PHONE,
+        enabled = enabled && complete,
+        trailingIcon = DesiIcons.Forward,
+        modifier = Modifier.fillMaxWidth(),
+    )
+
+    OtherWays {
+        socialSignIn.providers.forEach { provider ->
+            TonalButton(
+                text = stringResource(Res.string.signin_continue_with, provider.displayName),
+                onClick = { viewModel.signIn(provider, socialSignIn) },
+                enabled = enabled,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        TonalButton(
+            text = stringResource(Res.string.signin_use_email),
+            onClick = onUseEmail,
+            leadingIcon = DesiIcons.Mail,
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/** Secondary sign-in options under a quiet label, spaced away from the main action. */
+@Composable
+private fun OtherWays(content: @Composable () -> Unit) {
+    Column(
+        Modifier.fillMaxWidth().padding(top = DesiTheme.space.s4),
+        verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            stringResource(Res.string.signin_other_ways).uppercase(),
+            style = DesiTheme.type.label,
+            color = DesiTheme.colors.muted,
+        )
+        content()
+    }
+}
+
+@Composable
+private fun CodeForm(state: SignInUiState, viewModel: SignInViewModel) {
+    val step = state.phoneStep as? PhoneStep.EnterCode ?: return
+    val verifier = rememberPhoneVerifier()
+    val enabled = state.inProgress == null
+    var code by rememberSaveable(step.verificationId) { mutableStateOf("") }
+
+    FormTitle(Res.string.signin_code_title, stringResource(Res.string.signin_code_hint, step.phoneNumber))
+    OtpField(
+        value = code,
+        onValueChange = {
+            code = it
+            // Submit as soon as the last digit is typed or pasted.
+            if (it.length == 6) viewModel.verifyPhoneCode(it)
+        },
+        enabled = enabled,
+        isError = state.error == SignInError.CODE_WRONG || state.error == SignInError.CODE_EXPIRED,
+    )
+    PrimaryButton(
+        text = stringResource(Res.string.signin_verify),
+        onClick = { viewModel.verifyPhoneCode(code) },
+        loading = state.inProgress == SignInMethod.PHONE,
+        enabled = enabled && code.length == 6,
+        trailingIcon = DesiIcons.Forward,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        LinkButton(Res.string.signin_change_number, enabled, viewModel::changePhoneNumber)
+        LinkButton(Res.string.signin_resend_code, enabled) { viewModel.sendPhoneCode(step.phoneNumber, verifier) }
+    }
+}
+
+@Composable
+private fun EmailForm(state: SignInUiState, viewModel: SignInViewModel, onUsePhone: () -> Unit) {
     var creatingAccount by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -176,55 +367,87 @@ private fun EmailSignIn(state: SignInUiState, viewModel: SignInViewModel) {
     val loading = state.inProgress == SignInMethod.EMAIL
     val enabled = state.inProgress == null
 
-    OutlinedTextField(
+    FormTitle(if (creatingAccount) Res.string.signin_create_title else Res.string.signin_email_title)
+    DesiTextField(
         value = email,
         onValueChange = { email = it },
-        label = { Text("Email") },
-        singleLine = true,
+        label = stringResource(Res.string.signin_email_label),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        modifier = Modifier.fillMaxWidth(),
+        enabled = enabled,
     )
-    OutlinedTextField(
-        value = password,
-        onValueChange = { password = it },
-        label = { Text("Password") },
-        singleLine = true,
-        visualTransformation = PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-        modifier = Modifier.fillMaxWidth(),
-    )
+    PasswordField(password, { password = it }, Res.string.signin_password_label, enabled)
+    if (!creatingAccount) {
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+            LinkButton(Res.string.signin_forgot_password, enabled) { viewModel.sendPasswordReset(email) }
+        }
+    }
     if (creatingAccount) {
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm password") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        PasswordField(confirmPassword, { confirmPassword = it }, Res.string.signin_confirm_password_label, enabled)
+        PrimaryButton(
+            text = stringResource(Res.string.signin_create_account),
+            onClick = { viewModel.createAccountWithEmail(email, password, confirmPassword) },
+            loading = loading,
+            enabled = enabled,
             modifier = Modifier.fillMaxWidth(),
         )
-        PrimaryButton("Create account", loading, enabled) { viewModel.createAccountWithEmail(email, password, confirmPassword) }
     } else {
-        PrimaryButton("Sign in", loading, enabled) { viewModel.signInWithEmail(email, password) }
-        TextButton(onClick = { viewModel.sendPasswordReset(email) }, enabled = enabled) { Text("Forgot password?") }
+        PrimaryButton(
+            text = stringResource(Res.string.signin_sign_in),
+            onClick = { viewModel.signInWithEmail(email, password) },
+            loading = loading,
+            enabled = enabled,
+            trailingIcon = DesiIcons.Forward,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
-    TextButton(
-        onClick = {
+    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        LinkButton(if (creatingAccount) Res.string.signin_switch_to_sign_in else Res.string.signin_switch_to_create, enabled) {
             creatingAccount = !creatingAccount
             viewModel.clearFeedback()
-        },
+        }
+    }
+    OtherWays {
+        TonalButton(
+            text = stringResource(Res.string.signin_use_phone),
+            onClick = onUsePhone,
+            leadingIcon = DesiIcons.Phone,
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/** Errors that belong to a field are shown on that field; everything else shows here. */
+@Composable
+private fun Feedback(state: SignInUiState) {
+    val colors = DesiTheme.colors
+    state.error?.takeIf { it != SignInError.PHONE_INVALID }?.let {
+        Text(stringResource(it.label), style = DesiTheme.type.body, color = colors.event.wicket)
+    }
+    state.message?.let { message ->
+        val text = when (message) {
+            is SignInMessage.ResetEmailSent -> stringResource(Res.string.signin_reset_email_sent, message.email)
+            is SignInMessage.CodeSent -> stringResource(Res.string.signin_code_sent, message.phoneNumber)
+        }
+        Text(text, style = DesiTheme.type.body, color = colors.brand)
+    }
+}
+
+@Composable
+private fun PasswordField(value: String, onValueChange: (String) -> Unit, label: StringResource, enabled: Boolean) {
+    DesiTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = stringResource(label),
         enabled = enabled,
-    ) {
-        Text(if (creatingAccount) "Already have an account? Sign in" else "New here? Create an account")
-    }
+        visualTransformation = PasswordVisualTransformation(),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+    )
 }
 
 @Composable
-private fun PrimaryButton(text: String, loading: Boolean, enabled: Boolean, onClick: () -> Unit) {
-    Button(onClick = onClick, enabled = enabled, modifier = Modifier.fillMaxWidth().height(52.dp)) {
-        if (loading) ButtonProgress() else Text(text)
+private fun LinkButton(text: StringResource, enabled: Boolean, onClick: () -> Unit) {
+    TextButton(onClick = onClick, enabled = enabled) {
+        Text(stringResource(text), style = DesiTheme.type.button, color = if (enabled) DesiTheme.colors.brand else DesiTheme.colors.muted)
     }
 }
-
-@Composable
-private fun ButtonProgress() = CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
