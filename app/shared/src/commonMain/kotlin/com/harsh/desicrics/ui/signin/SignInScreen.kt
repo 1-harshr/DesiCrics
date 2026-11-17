@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,15 +45,13 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.auth.SignInError
+import com.harsh.desicrics.auth.SocialProvider
 import com.harsh.desicrics.auth.SocialSignIn
 import com.harsh.desicrics.auth.rememberPhoneVerifier
 import com.harsh.desicrics.auth.rememberSocialSignIn
-import com.harsh.desicrics.designsystem.component.DesiTextField
 import com.harsh.desicrics.designsystem.component.OtpField
 import com.harsh.desicrics.designsystem.component.PhoneNumberField
 import com.harsh.desicrics.designsystem.component.PrimaryButton
@@ -68,17 +65,10 @@ import com.harsh.desicrics.resources.signin_change_number
 import com.harsh.desicrics.resources.signin_code_hint
 import com.harsh.desicrics.resources.signin_code_sent
 import com.harsh.desicrics.resources.signin_code_title
-import com.harsh.desicrics.resources.signin_confirm_password_label
 import com.harsh.desicrics.resources.signin_continue_with
-import com.harsh.desicrics.resources.signin_create_account
-import com.harsh.desicrics.resources.signin_create_title
-import com.harsh.desicrics.resources.signin_email_label
-import com.harsh.desicrics.resources.signin_email_title
-import com.harsh.desicrics.resources.signin_forgot_password
 import com.harsh.desicrics.resources.signin_hero_subtitle
 import com.harsh.desicrics.resources.signin_hero_title
 import com.harsh.desicrics.resources.signin_other_ways
-import com.harsh.desicrics.resources.signin_password_label
 import com.harsh.desicrics.resources.signin_phone_country
 import com.harsh.desicrics.resources.signin_phone_hint
 import com.harsh.desicrics.resources.signin_phone_label
@@ -86,13 +76,7 @@ import com.harsh.desicrics.resources.signin_phone_placeholder
 import com.harsh.desicrics.resources.signin_phone_prefix
 import com.harsh.desicrics.resources.signin_phone_title
 import com.harsh.desicrics.resources.signin_resend_code
-import com.harsh.desicrics.resources.signin_reset_email_sent
 import com.harsh.desicrics.resources.signin_send_code
-import com.harsh.desicrics.resources.signin_sign_in
-import com.harsh.desicrics.resources.signin_switch_to_create
-import com.harsh.desicrics.resources.signin_switch_to_sign_in
-import com.harsh.desicrics.resources.signin_use_email
-import com.harsh.desicrics.resources.signin_use_phone
 import com.harsh.desicrics.resources.signin_verify
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
 import com.harsh.desicrics.ui.text.label
@@ -101,8 +85,8 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-/** Which form the sign-in card shows. Phone is the default; email is the fallback. */
-private enum class Mode { PHONE, CODE, EMAIL }
+/** Which form the sign-in card shows: the mobile number, then the code sent to it. */
+private enum class Mode { PHONE, CODE }
 
 /** How far the card overlaps the green header, so its rounded corners sit on the header. */
 private val CardOverlap = 28.dp
@@ -113,12 +97,7 @@ private const val PHONE_DIGITS = 10
 fun SignInScreen(viewModel: SignInViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val socialSignIn = rememberSocialSignIn()
-    var useEmail by rememberSaveable { mutableStateOf(false) }
-    val mode = when {
-        useEmail -> Mode.EMAIL
-        state.phoneStep is PhoneStep.EnterCode -> Mode.CODE
-        else -> Mode.PHONE
-    }
+    val mode = if (state.phoneStep is PhoneStep.EnterCode) Mode.CODE else Mode.PHONE
     val colors = DesiTheme.colors
     val quick = DesiTheme.motion.QUICK_MS
     val base = DesiTheme.motion.BASE_MS
@@ -144,18 +123,11 @@ fun SignInScreen(viewModel: SignInViewModel = koinViewModel()) {
                     modifier = Modifier.widthIn(max = 480.dp).fillMaxWidth(),
                 ) { current ->
                     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
+                        // Each form shows Feedback(state) right under its main button, where the eye already is.
                         when (current) {
-                            Mode.PHONE -> PhoneForm(state, viewModel, socialSignIn) {
-                                useEmail = true
-                                viewModel.clearFeedback()
-                            }
+                            Mode.PHONE -> PhoneForm(state, viewModel, socialSignIn)
                             Mode.CODE -> CodeForm(state, viewModel)
-                            Mode.EMAIL -> EmailForm(state, viewModel) {
-                                useEmail = false
-                                viewModel.clearFeedback()
-                            }
                         }
-                        Feedback(state)
                     }
                 }
             }
@@ -260,7 +232,7 @@ private fun FormTitle(title: StringResource, hint: String? = null) {
 }
 
 @Composable
-private fun PhoneForm(state: SignInUiState, viewModel: SignInViewModel, socialSignIn: SocialSignIn, onUseEmail: () -> Unit) {
+private fun PhoneForm(state: SignInUiState, viewModel: SignInViewModel, socialSignIn: SocialSignIn) {
     val verifier = rememberPhoneVerifier()
     val enabled = state.inProgress == null
     val prefix = stringResource(Res.string.signin_phone_prefix)
@@ -289,23 +261,20 @@ private fun PhoneForm(state: SignInUiState, viewModel: SignInViewModel, socialSi
         trailingIcon = DesiIcons.Forward,
         modifier = Modifier.fillMaxWidth(),
     )
+    Feedback(state)
 
     OtherWays {
         socialSignIn.providers.forEach { provider ->
             TonalButton(
                 text = stringResource(Res.string.signin_continue_with, provider.displayName),
                 onClick = { viewModel.signIn(provider, socialSignIn) },
+                leadingIcon = if (provider == SocialProvider.GOOGLE) DesiIllustrations.GoogleLogo else null,
+                tintLeadingIcon = false,
                 enabled = enabled,
+                loading = state.inProgress?.name == provider.name,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        TonalButton(
-            text = stringResource(Res.string.signin_use_email),
-            onClick = onUseEmail,
-            leadingIcon = DesiIcons.Mail,
-            enabled = enabled,
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 
@@ -352,68 +321,10 @@ private fun CodeForm(state: SignInUiState, viewModel: SignInViewModel) {
         trailingIcon = DesiIcons.Forward,
         modifier = Modifier.fillMaxWidth(),
     )
+    Feedback(state)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         LinkButton(Res.string.signin_change_number, enabled, viewModel::changePhoneNumber)
         LinkButton(Res.string.signin_resend_code, enabled) { viewModel.sendPhoneCode(step.phoneNumber, verifier) }
-    }
-}
-
-@Composable
-private fun EmailForm(state: SignInUiState, viewModel: SignInViewModel, onUsePhone: () -> Unit) {
-    var creatingAccount by rememberSaveable { mutableStateOf(false) }
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var confirmPassword by rememberSaveable { mutableStateOf("") }
-    val loading = state.inProgress == SignInMethod.EMAIL
-    val enabled = state.inProgress == null
-
-    FormTitle(if (creatingAccount) Res.string.signin_create_title else Res.string.signin_email_title)
-    DesiTextField(
-        value = email,
-        onValueChange = { email = it },
-        label = stringResource(Res.string.signin_email_label),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        enabled = enabled,
-    )
-    PasswordField(password, { password = it }, Res.string.signin_password_label, enabled)
-    if (!creatingAccount) {
-        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-            LinkButton(Res.string.signin_forgot_password, enabled) { viewModel.sendPasswordReset(email) }
-        }
-    }
-    if (creatingAccount) {
-        PasswordField(confirmPassword, { confirmPassword = it }, Res.string.signin_confirm_password_label, enabled)
-        PrimaryButton(
-            text = stringResource(Res.string.signin_create_account),
-            onClick = { viewModel.createAccountWithEmail(email, password, confirmPassword) },
-            loading = loading,
-            enabled = enabled,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    } else {
-        PrimaryButton(
-            text = stringResource(Res.string.signin_sign_in),
-            onClick = { viewModel.signInWithEmail(email, password) },
-            loading = loading,
-            enabled = enabled,
-            trailingIcon = DesiIcons.Forward,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-        LinkButton(if (creatingAccount) Res.string.signin_switch_to_sign_in else Res.string.signin_switch_to_create, enabled) {
-            creatingAccount = !creatingAccount
-            viewModel.clearFeedback()
-        }
-    }
-    OtherWays {
-        TonalButton(
-            text = stringResource(Res.string.signin_use_phone),
-            onClick = onUsePhone,
-            leadingIcon = DesiIcons.Phone,
-            enabled = enabled,
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 
@@ -426,23 +337,10 @@ private fun Feedback(state: SignInUiState) {
     }
     state.message?.let { message ->
         val text = when (message) {
-            is SignInMessage.ResetEmailSent -> stringResource(Res.string.signin_reset_email_sent, message.email)
             is SignInMessage.CodeSent -> stringResource(Res.string.signin_code_sent, message.phoneNumber)
         }
         Text(text, style = DesiTheme.type.body, color = colors.brand)
     }
-}
-
-@Composable
-private fun PasswordField(value: String, onValueChange: (String) -> Unit, label: StringResource, enabled: Boolean) {
-    DesiTextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = stringResource(label),
-        enabled = enabled,
-        visualTransformation = PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-    )
 }
 
 @Composable

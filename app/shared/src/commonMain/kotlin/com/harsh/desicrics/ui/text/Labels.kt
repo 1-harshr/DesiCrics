@@ -48,21 +48,14 @@ val ProfileError.label: StringResource
 
 val SignInError.label: StringResource
     get() = when (this) {
-        SignInError.EMAIL_MISSING -> Res.string.signin_error_email_missing
-        SignInError.EMAIL_INVALID -> Res.string.signin_error_email_invalid
-        SignInError.PASSWORD_MISSING -> Res.string.signin_error_password_missing
-        SignInError.PASSWORD_SHORT -> Res.string.signin_error_password_short
-        SignInError.PASSWORDS_DIFFER -> Res.string.signin_error_passwords_differ
         SignInError.PHONE_INVALID -> Res.string.signin_error_phone_invalid
         SignInError.CODE_INCOMPLETE -> Res.string.signin_error_code_incomplete
         SignInError.OFFLINE -> Res.string.signin_error_offline
         SignInError.TOO_MANY_ATTEMPTS -> Res.string.signin_error_too_many_attempts
-        SignInError.WEAK_PASSWORD -> Res.string.signin_error_weak_password
         SignInError.ACCOUNT_EXISTS -> Res.string.signin_error_account_exists
         SignInError.SMS_REGION -> Res.string.signin_error_sms_region
         SignInError.SMS_BILLING -> Res.string.signin_error_sms_billing
         SignInError.METHOD_DISABLED -> Res.string.signin_error_method_disabled
-        SignInError.WRONG_CREDENTIALS -> Res.string.signin_error_wrong_credentials
         SignInError.ACCOUNT_DISABLED -> Res.string.signin_error_account_disabled
         SignInError.CODE_WRONG -> Res.string.signin_error_code_wrong
         SignInError.CODE_EXPIRED -> Res.string.signin_error_code_expired

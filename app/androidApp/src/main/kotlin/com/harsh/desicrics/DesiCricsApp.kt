@@ -27,7 +27,7 @@ class DesiCricsApp : Application() {
 /**
  * The google-services plugin generates `default_web_client_id` only when google-services.json has a web
  * OAuth client, which appears once Google sign-in is enabled in Firebase. Looked up by name so the app
- * still builds and runs (without the Google button) before that.
+ * still builds and runs before that; the Google button then explains it isn't set up yet.
  */
 @SuppressLint("DiscouragedApi")
 private fun Context.googleWebClientId(): String? =

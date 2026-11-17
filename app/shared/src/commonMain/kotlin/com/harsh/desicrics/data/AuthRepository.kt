@@ -34,18 +34,6 @@ class AuthRepository(private val auth: FirebaseAuth) : IdTokenProvider {
         return checkNotNull(auth.signInWithCredential(credential).user) { "Sign-in returned no user" }.toAuthUser()
     }
 
-    suspend fun signInWithEmail(email: String, password: String): AuthUser =
-        checkNotNull(auth.signInWithEmailAndPassword(email, password).user) { "Sign-in returned no user" }.toAuthUser()
-
-    /** Creates the account and signs straight in. The verification email is best-effort; nothing is gated on it yet. */
-    suspend fun createAccountWithEmail(email: String, password: String): AuthUser {
-        val user = checkNotNull(auth.createUserWithEmailAndPassword(email, password).user) { "Sign-up returned no user" }
-        runCatching { user.sendEmailVerification() }
-        return user.toAuthUser()
-    }
-
-    suspend fun sendPasswordReset(email: String) = auth.sendPasswordResetEmail(email)
-
     /** Builds the credential for an SMS code sent by [com.harsh.desicrics.auth.PhoneVerifier]. */
     fun phoneCredential(verificationId: String, code: String): AuthCredential =
         PhoneAuthProvider(auth).credential(verificationId, code)

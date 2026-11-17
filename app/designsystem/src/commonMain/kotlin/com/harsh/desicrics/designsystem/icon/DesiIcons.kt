@@ -4,9 +4,8 @@ import com.harsh.desicrics.designsystem.resources.Res
 import com.harsh.desicrics.designsystem.resources.ic_arrow_back
 import com.harsh.desicrics.designsystem.resources.ic_arrow_forward
 import com.harsh.desicrics.designsystem.resources.ic_check_circle
-import com.harsh.desicrics.designsystem.resources.ic_mail
+import com.harsh.desicrics.designsystem.resources.ic_google_logo
 import com.harsh.desicrics.designsystem.resources.ic_person
-import com.harsh.desicrics.designsystem.resources.ic_smartphone
 import com.harsh.desicrics.designsystem.resources.ic_sports_cricket
 import com.harsh.desicrics.designsystem.resources.ic_sync
 import com.harsh.desicrics.designsystem.resources.ill_ball_hero
@@ -23,8 +22,6 @@ object DesiIcons {
     val Back: DrawableResource = Res.drawable.ic_arrow_back
     val Forward: DrawableResource = Res.drawable.ic_arrow_forward
     val CheckCircle: DrawableResource = Res.drawable.ic_check_circle
-    val Mail: DrawableResource = Res.drawable.ic_mail
-    val Phone: DrawableResource = Res.drawable.ic_smartphone
     val Person: DrawableResource = Res.drawable.ic_person
     val Cricket: DrawableResource = Res.drawable.ic_sports_cricket
     val Sync: DrawableResource = Res.drawable.ic_sync
@@ -37,4 +34,7 @@ object DesiIllustrations {
 
     /** The same ball and speed lines cropped tight to the art (54:34), for drawing large as hero art. */
     val BallHero: DrawableResource = Res.drawable.ill_ball_hero
+
+    /** Google's "G" for the Google sign-in button. Must keep its colours, so pass `tintLeadingIcon = false`. */
+    val GoogleLogo: DrawableResource = Res.drawable.ic_google_logo
 }

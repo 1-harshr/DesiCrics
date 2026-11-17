@@ -14,6 +14,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
@@ -61,7 +62,7 @@ fun PrimaryButton(
 }
 
 /**
- * A soft, filled secondary action with a leading icon ("Continue with email"). Quieter than
+ * A soft, filled secondary action with a leading icon ("Continue with Google"). Quieter than
  * [PrimaryButton], friendlier than an outline.
  */
 @Composable
@@ -70,12 +71,15 @@ fun TonalButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     leadingIcon: DrawableResource? = null,
+    /** False for brand logos (e.g. Google's "G") that must keep their own colours. */
+    tintLeadingIcon: Boolean = true,
     enabled: Boolean = true,
+    loading: Boolean = false,
 ) {
     val colors = DesiTheme.colors
     Button(
         onClick = onClick,
-        enabled = enabled,
+        enabled = enabled && !loading,
         modifier = modifier.heightIn(min = DesiTheme.size.button),
         shape = DesiTheme.radius.full,
         contentPadding = ButtonPadding,
@@ -86,9 +90,18 @@ fun TonalButton(
             disabledContentColor = colors.muted,
         ),
     ) {
+        if (loading) {
+            CircularProgressIndicator(Modifier.size(20.dp), color = colors.brand, strokeWidth = 2.dp)
+            return@Button
+        }
         if (leadingIcon != null) {
-            Icon(painterResource(leadingIcon), contentDescription = null, tint = colors.brand, modifier = Modifier.size(DesiTheme.size.iconSmall))
-            Spacer(Modifier.width(DesiTheme.space.s2))
+            Icon(
+                painterResource(leadingIcon),
+                contentDescription = null,
+                tint = if (tintLeadingIcon) colors.brand else Color.Unspecified,
+                modifier = Modifier.size(DesiTheme.size.iconSmall),
+            )
+            Spacer(Modifier.width(DesiTheme.space.s3))
         }
         Text(text, style = DesiTheme.type.button)
     }

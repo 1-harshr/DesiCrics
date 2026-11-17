@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-enum class SignInMethod { GOOGLE, APPLE, EMAIL, PHONE }
+enum class SignInMethod { GOOGLE, APPLE, PHONE }
 
 sealed interface PhoneStep {
     data object EnterNumber : PhoneStep
@@ -24,7 +24,6 @@ sealed interface PhoneStep {
 
 /** Non-error feedback shown under the form. */
 sealed interface SignInMessage {
-    data class ResetEmailSent(val email: String) : SignInMessage
     data class CodeSent(val phoneNumber: String) : SignInMessage
 }
 
@@ -41,9 +40,6 @@ class SignInViewModel(private val authRepository: AuthRepository) : ViewModel() 
     private val _state = MutableStateFlow(SignInUiState())
     val state: StateFlow<SignInUiState> = _state
 
-    /** Clears feedback when the user switches between sign-in options. */
-    fun clearFeedback() = _state.update { it.copy(error = null, message = null) }
-
     fun signIn(provider: SocialProvider, socialSignIn: SocialSignIn) {
         val method = if (provider == SocialProvider.APPLE) SignInMethod.APPLE else SignInMethod.GOOGLE
         launchAuth(method) {
@@ -51,30 +47,6 @@ class SignInViewModel(private val authRepository: AuthRepository) : ViewModel() 
             val result = socialSignIn.signIn(provider) ?: return@launchAuth
             // SessionViewModel picks up the new user from the auth state flow.
             authRepository.signIn(result.credential, result.displayName)
-        }
-    }
-
-    fun signInWithEmail(email: String, password: String) {
-        val error = validateEmail(email) ?: if (password.isEmpty()) SignInError.PASSWORD_MISSING else null
-        if (error != null) return showError(error)
-        launchAuth(SignInMethod.EMAIL) { authRepository.signInWithEmail(email.trim(), password) }
-    }
-
-    fun createAccountWithEmail(email: String, password: String, confirmPassword: String) {
-        val error = validateEmail(email) ?: when {
-            password.length < 6 -> SignInError.PASSWORD_SHORT
-            password != confirmPassword -> SignInError.PASSWORDS_DIFFER
-            else -> null
-        }
-        if (error != null) return showError(error)
-        launchAuth(SignInMethod.EMAIL) { authRepository.createAccountWithEmail(email.trim(), password) }
-    }
-
-    fun sendPasswordReset(email: String) {
-        validateEmail(email)?.let { return showError(it) }
-        launchAuth(SignInMethod.EMAIL) {
-            authRepository.sendPasswordReset(email.trim())
-            _state.update { it.copy(message = SignInMessage.ResetEmailSent(email.trim())) }
         }
     }
 
@@ -118,12 +90,6 @@ class SignInViewModel(private val authRepository: AuthRepository) : ViewModel() 
 
     private fun showError(error: SignInError) = _state.update { it.copy(error = error, message = null) }
 
-    private fun validateEmail(email: String): SignInError? = when {
-        email.isBlank() -> SignInError.EMAIL_MISSING
-        !EMAIL_PATTERN.matches(email.trim()) -> SignInError.EMAIL_INVALID
-        else -> null
-    }
-
     /** Accepts "98765 43210", "+91 98765-43210", etc. Bare 10-digit numbers are treated as Indian. */
     private fun normalizePhoneNumber(raw: String): String? {
         val digits = raw.filter { it.isDigit() }
@@ -132,9 +98,5 @@ class SignInViewModel(private val authRepository: AuthRepository) : ViewModel() 
             digits.length == 10 -> "+91$digits"
             else -> null
         }
-    }
-
-    private companion object {
-        val EMAIL_PATTERN = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
     }
 }

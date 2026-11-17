@@ -4,26 +4,21 @@ import dev.gitlive.firebase.FirebaseNetworkException
 import dev.gitlive.firebase.FirebaseTooManyRequestsException
 import dev.gitlive.firebase.auth.FirebaseAuthException
 import dev.gitlive.firebase.auth.FirebaseAuthUserCollisionException
-import dev.gitlive.firebase.auth.FirebaseAuthWeakPasswordException
 import dev.gitlive.firebase.auth.code
+
+/** Thrown when a sign-in method isn't configured for this build yet (e.g. no Google web client ID). */
+class SignInNotConfiguredException(message: String) : IllegalStateException(message)
 
 /** Everything that can go wrong while signing in. The UI picks the text for each one. */
 enum class SignInError {
-    EMAIL_MISSING,
-    EMAIL_INVALID,
-    PASSWORD_MISSING,
-    PASSWORD_SHORT,
-    PASSWORDS_DIFFER,
     PHONE_INVALID,
     CODE_INCOMPLETE,
     OFFLINE,
     TOO_MANY_ATTEMPTS,
-    WEAK_PASSWORD,
     ACCOUNT_EXISTS,
     SMS_REGION,
     SMS_BILLING,
     METHOD_DISABLED,
-    WRONG_CREDENTIALS,
     ACCOUNT_DISABLED,
     CODE_WRONG,
     CODE_EXPIRED,
@@ -38,15 +33,14 @@ fun Throwable.toSignInError(): SignInError {
     return when {
         this is FirebaseNetworkException -> SignInError.OFFLINE
         this is FirebaseTooManyRequestsException -> SignInError.TOO_MANY_ATTEMPTS
-        this is FirebaseAuthWeakPasswordException -> SignInError.WEAK_PASSWORD
         this is FirebaseAuthUserCollisionException -> SignInError.ACCOUNT_EXISTS
+        this is SignInNotConfiguredException -> SignInError.METHOD_DISABLED
         // New Firebase projects allow SMS to no regions until one is added under Auth → Settings → SMS region policy.
         "region enabled" in raw -> SignInError.SMS_REGION
         "BILLING_NOT_ENABLED" in raw -> SignInError.SMS_BILLING
-        code == "ERROR_OPERATION_NOT_ALLOWED" || "OPERATION_NOT_ALLOWED" in raw -> SignInError.METHOD_DISABLED
-        code == "ERROR_INVALID_EMAIL" -> SignInError.EMAIL_INVALID
-        code == "ERROR_USER_NOT_FOUND" || code == "ERROR_WRONG_PASSWORD" || code == "ERROR_INVALID_CREDENTIAL" ||
-            "INVALID_LOGIN_CREDENTIALS" in raw -> SignInError.WRONG_CREDENTIALS
+        // CONFIGURATION_NOT_FOUND: Authentication was never set up for the Firebase project in google-services.json.
+        code == "ERROR_OPERATION_NOT_ALLOWED" || "OPERATION_NOT_ALLOWED" in raw || "CONFIGURATION_NOT_FOUND" in raw ->
+            SignInError.METHOD_DISABLED
         code == "ERROR_USER_DISABLED" -> SignInError.ACCOUNT_DISABLED
         code == "ERROR_INVALID_PHONE_NUMBER" -> SignInError.PHONE_INVALID
         code == "ERROR_INVALID_VERIFICATION_CODE" -> SignInError.CODE_WRONG

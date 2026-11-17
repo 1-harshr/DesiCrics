@@ -12,7 +12,7 @@ the iOS sources removed from `app/shared` can be restored from git history.
 
 ### Architecture
 
-- **Auth:** Firebase Authentication (Google, email/password, phone OTP).
+- **Auth:** Firebase Authentication (phone OTP and Google).
 - **Backend:** the Ktor server in [/server](./server). The app calls its REST API with the user's Firebase ID
   token, which the server verifies against Google's public keys. The routes are listed in
   [core/.../api/Api.kt](./core/src/commonMain/kotlin/com/harsh/desicrics/api/Api.kt).
@@ -48,7 +48,7 @@ To wipe local data: `docker compose down -v`.
 
 Firebase config files are gitignored (this is a public repo), so each developer adds their own.
 
-1. In the [Firebase console](https://console.firebase.google.com), enable the Google, Email/Password and Phone
+1. In the [Firebase console](https://console.firebase.google.com), enable the Phone and Google
    sign-in providers. For phone sign-in, also allow your countries under Authentication → Settings →
    SMS region policy, and add test numbers. Real SMS needs the Blaze plan.
 2. **Android:** register package `com.harsh.desicrics`, add your debug SHA-1 and SHA-256
