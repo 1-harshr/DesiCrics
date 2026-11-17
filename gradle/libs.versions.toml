@@ -28,6 +28,8 @@ gitlive-firebase = "2.8.0"
 exposed = "1.6.1"
 h2 = "2.5.252"
 postgresql = "42.7.14"
+flyway = "13.12.0"
+hikari = "7.1.0"
 google-services = "4.5.0"
 turbine = "1.2.1"
 androidx-credentials = "1.6.0"
@@ -104,11 +106,14 @@ androidx-credentials = { module = "androidx.credentials:credentials", version.re
 androidx-credentials-playServicesAuth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx-credentials" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
-# Server database: Exposed over JDBC. H2 runs in-process today; Postgres is a DATABASE_URL away.
+# Server database: Exposed over JDBC, Postgres in dev and prod, H2 for tests. Flyway owns the schema.
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
+flyway-postgresql = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
+hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

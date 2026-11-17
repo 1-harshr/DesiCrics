@@ -3,8 +3,8 @@ package com.harsh.desicrics
 /**
  * Everything environment-specific, read from env vars so the same build runs locally and in the cloud.
  *
- * To move off the in-process H2 database, point DATABASE_URL somewhere else, e.g.
- * `jdbc:postgresql://<host>:5432/desicrics` (Cloud SQL works too). No code changes are needed.
+ * The defaults match the Postgres started by `docker compose up -d` at the repo root. In the cloud, set
+ * DATABASE_URL, DATABASE_USER and DATABASE_PASSWORD.
  */
 data class ServerConfig(
     val port: Int = 8080,
@@ -16,24 +16,26 @@ data class ServerConfig(
             port = env["PORT"]?.toIntOrNull() ?: 8080,
             firebaseProjectId = env["FIREBASE_PROJECT_ID"] ?: "desicrics-d5fbe",
             database = DatabaseConfig(
-                url = env["DATABASE_URL"] ?: DatabaseConfig.LOCAL_H2_URL,
-                user = env["DATABASE_USER"] ?: "",
-                password = env["DATABASE_PASSWORD"] ?: "",
+                url = env["DATABASE_URL"] ?: DatabaseConfig.LOCAL_URL,
+                user = env["DATABASE_USER"] ?: DatabaseConfig.LOCAL_USER,
+                password = env["DATABASE_PASSWORD"] ?: DatabaseConfig.LOCAL_PASSWORD,
+                maxPoolSize = env["DATABASE_POOL_SIZE"]?.toIntOrNull() ?: DatabaseConfig.DEFAULT_POOL_SIZE,
             ),
         )
     }
 }
 
 data class DatabaseConfig(
-    val url: String = LOCAL_H2_URL,
-    val user: String = "",
-    val password: String = "",
+    val url: String = LOCAL_URL,
+    val user: String = LOCAL_USER,
+    val password: String = LOCAL_PASSWORD,
+    val maxPoolSize: Int = DEFAULT_POOL_SIZE,
 ) {
     companion object {
-        /**
-         * H2 running inside the server process, persisted to `server/data/`. PostgreSQL mode keeps its SQL
-         * behaviour close to Postgres, which is where this is likely to move.
-         */
-        const val LOCAL_H2_URL = "jdbc:h2:file:./data/desicrics;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH"
+        /** The local Postgres from `docker-compose.yml`. */
+        const val LOCAL_URL = "jdbc:postgresql://localhost:5432/desicrics"
+        const val LOCAL_USER = "desicrics"
+        const val LOCAL_PASSWORD = "desicrics"
+        const val DEFAULT_POOL_SIZE = 10
     }
 }

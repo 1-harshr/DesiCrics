@@ -16,22 +16,33 @@ the iOS sources removed from `app/shared` can be restored from git history.
 - **Backend:** the Ktor server in [/server](./server). The app calls its REST API with the user's Firebase ID
   token, which the server verifies against Google's public keys. The routes are listed in
   [core/.../api/Api.kt](./core/src/commonMain/kotlin/com/harsh/desicrics/api/Api.kt).
-- **Database:** H2 running inside the server process (PostgreSQL mode), accessed through Exposed. Data is
-  stored in `server/data/`. Routes and services only use the `UserStore` / `MatchStore` interfaces.
+- **Database:** Postgres, accessed through Exposed with a HikariCP connection pool. Routes and services only
+  use the `UserStore` / `MatchStore` interfaces. Tests run on in-memory H2 in PostgreSQL mode.
 - **Scoring:** `ScoringEngine` and the ball rules in `:core`. The server uses them to validate every ball and
   compute the score; the app uses them to draw the scorecard.
 
-#### Swapping the database
+#### Database setup
 
-Any SQL database Exposed supports needs only environment variables, no code changes:
+Start the local Postgres (needs Docker Desktop or another Docker runtime running):
 
 ```
-DATABASE_URL=jdbc:postgresql://<host>:5432/desicrics DATABASE_USER=... DATABASE_PASSWORD=... ./gradlew :server:run
+docker compose up -d
 ```
 
-Something that isn't SQL needs new implementations of `UserStore` and `MatchStore` in
-[server/.../store](./server/src/main/kotlin/com/harsh/desicrics/store). Tables are created on startup; add
-versioned migrations (e.g. Flyway) before relying on a production database.
+The server's defaults point at it, so `./gradlew :server:run` needs no extra settings. Anywhere else, set
+`DATABASE_URL` (e.g. `jdbc:postgresql://<host>:5432/desicrics`), `DATABASE_USER`, `DATABASE_PASSWORD` and
+optionally `DATABASE_POOL_SIZE` (default 10).
+
+#### Schema changes
+
+Flyway owns the schema. On startup the server applies any pending migrations from
+[server/src/main/resources/db/migration](./server/src/main/resources/db/migration). To change the schema:
+
+1. Add a new file `V<next number>__<description>.sql`. Never edit a migration that has already run.
+2. Update the matching Exposed table in [db/Database.kt](./server/src/main/kotlin/com/harsh/desicrics/db/Database.kt).
+3. Keep the SQL valid on both Postgres and H2, since the tests use H2.
+
+To wipe local data: `docker compose down -v`.
 
 ### Firebase setup
 
@@ -49,7 +60,7 @@ Firebase config files are gitignored (this is a public repo), so each developer 
 Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
 
 - Android app: `./gradlew :app:androidApp:assembleDebug`
-- Server: `./gradlew :server:run` (start this first; the app expects it on port 8080). Android emulators reach
+- Server: `docker compose up -d`, then `./gradlew :server:run` (start this first; the app expects it on port 8080). Android emulators reach
   it at `http://10.0.2.2:8080`. For a physical device, build with `-Pdesicrics.apiBaseUrl=http://<your-LAN-IP>:8080`.
 
 ### Running tests

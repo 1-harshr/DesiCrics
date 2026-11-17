@@ -14,11 +14,14 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.jdbc.Database
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
-// Plain relational tables; nothing here is H2-specific.
+// Exposed mappings for the tables. The schema itself is owned by the Flyway migrations in
+// src/main/resources/db/migration; change both together.
 
 object UsersTable : Table("users") {
     val uid = varchar("uid", 128)
@@ -76,17 +79,29 @@ object DeliveriesTable : Table("deliveries") {
     override val primaryKey = PrimaryKey(matchId, seq)
 }
 
+/** A connected database plus the pool behind it, so the server can close it on shutdown. */
+class DatabaseHandle(val database: Database, private val dataSource: HikariDataSource) : AutoCloseable {
+    override fun close() = dataSource.close()
+}
+
 object DatabaseFactory {
-    /**
-     * Connects and creates any missing tables. Fine for H2 and early Postgres; switch to versioned
-     * migrations (e.g. Flyway) once there's production data to preserve.
-     */
-    fun connect(config: DatabaseConfig): Database {
-        val database = Database.connect(config.url, user = config.user, password = config.password)
-        transaction(database) {
-            SchemaUtils.create(UsersTable, MatchesTable, MatchPlayersTable, DeliveriesTable)
+    /** Opens a connection pool, applies any pending Flyway migrations, then hands the pool to Exposed. */
+    fun connect(config: DatabaseConfig): DatabaseHandle {
+        val dataSource = HikariDataSource(
+            HikariConfig().apply {
+                jdbcUrl = config.url
+                username = config.user
+                password = config.password
+                maximumPoolSize = config.maxPoolSize
+            },
+        )
+        try {
+            Flyway.configure().dataSource(dataSource).load().migrate()
+        } catch (e: Exception) {
+            dataSource.close()
+            throw e
         }
-        return database
+        return DatabaseHandle(Database.connect(dataSource), dataSource)
     }
 }
 

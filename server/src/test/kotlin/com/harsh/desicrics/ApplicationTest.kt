@@ -41,7 +41,7 @@ class ApplicationTest {
     private val fakeTokens = TokenVerifier { token -> token.removePrefix("test-").takeIf { it != token }?.let { FirebasePrincipal(it) } }
 
     private fun apiTest(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
-        val config = ServerConfig(database = DatabaseConfig(url = "jdbc:h2:mem:${UUID.randomUUID()};MODE=PostgreSQL;DB_CLOSE_DELAY=-1"))
+        val config = ServerConfig(database = DatabaseConfig(url = "jdbc:h2:mem:${UUID.randomUUID()};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1"))
         application { module(config, fakeTokens) }
         block(createClient { install(ContentNegotiation) { json() } })
     }

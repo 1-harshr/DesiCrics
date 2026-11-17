@@ -12,6 +12,7 @@ import com.harsh.desicrics.store.ExposedUserStore
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
@@ -38,7 +39,9 @@ fun Application.module(
     config: ServerConfig = ServerConfig.fromEnv(),
     tokenVerifier: TokenVerifier = FirebaseTokenVerifier(config.firebaseProjectId),
 ) {
-    val database = DatabaseFactory.connect(config.database)
+    val db = DatabaseFactory.connect(config.database)
+    monitor.subscribe(ApplicationStopped) { db.close() }
+    val database = db.database
     val users = ExposedUserStore(database)
     val profiles = ProfileService(users)
     val matches = MatchService(ExposedMatchStore(database), users)

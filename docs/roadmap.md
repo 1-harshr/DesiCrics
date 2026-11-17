@@ -8,7 +8,7 @@ Each phase delivers something a real group can use on a Sunday morning. Inside a
 
 A phase is done when its exit criterion passes. Level 3 items don't block the next phase.
 
-Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `feature/mvp-auth-scoring` branch.
+Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 
 ---
 
@@ -18,10 +18,10 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `feature/mvp
 
 ### Level 1 · Playable
 - ✅ Ktor server with Firebase token auth
-- ✅ Exposed stores, H2 locally
+- ✅ Exposed stores
 - ✅ Shared DTOs in `core`
 - ✅ Drop the iOS target from the build
-- ⬜ Postgres + Flyway migrations (local Postgres in Docker)
+- ✅ Postgres + Flyway migrations (local Postgres in Docker)
 
 ### Level 2 · Complete
 - ⬜ `:app:designsystem` module: tokens, fonts, type, first 10 components ([design-system.md](design-system.md))
