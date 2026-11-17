@@ -45,11 +45,12 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.auth.SignInError
 import com.harsh.desicrics.auth.SocialProvider
-import com.harsh.desicrics.auth.SocialSignIn
 import com.harsh.desicrics.auth.rememberPhoneVerifier
 import com.harsh.desicrics.auth.rememberSocialSignIn
 import com.harsh.desicrics.designsystem.component.OtpField
@@ -97,12 +98,34 @@ private const val PHONE_DIGITS = 10
 fun SignInScreen(viewModel: SignInViewModel = koinViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val socialSignIn = rememberSocialSignIn()
+    val verifier = rememberPhoneVerifier()
+
+    LightStatusBarIcons()
+    SignInContent(
+        state = state,
+        providers = socialSignIn.providers,
+        onSendCode = { viewModel.sendPhoneCode(it, verifier) },
+        onVerifyCode = viewModel::verifyPhoneCode,
+        onChangeNumber = viewModel::changePhoneNumber,
+        onSocialSignIn = { viewModel.signIn(it, socialSignIn) },
+    )
+}
+
+/** The sign-in screen without its ViewModel, so previews and tests can render any state. */
+@Composable
+fun SignInContent(
+    state: SignInUiState,
+    providers: List<SocialProvider>,
+    onSendCode: (phoneNumber: String) -> Unit,
+    onVerifyCode: (code: String) -> Unit,
+    onChangeNumber: () -> Unit,
+    onSocialSignIn: (SocialProvider) -> Unit,
+) {
     val mode = if (state.phoneStep is PhoneStep.EnterCode) Mode.CODE else Mode.PHONE
     val colors = DesiTheme.colors
     val quick = DesiTheme.motion.QUICK_MS
     val base = DesiTheme.motion.BASE_MS
 
-    LightStatusBarIcons()
     Box(Modifier.fillMaxSize().background(colors.surface)) {
         Column(Modifier.fillMaxSize().imePadding().verticalScroll(rememberScrollState())) {
             Hero()
@@ -125,8 +148,8 @@ fun SignInScreen(viewModel: SignInViewModel = koinViewModel()) {
                     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
                         // Each form shows Feedback(state) right under its main button, where the eye already is.
                         when (current) {
-                            Mode.PHONE -> PhoneForm(state, viewModel, socialSignIn)
-                            Mode.CODE -> CodeForm(state, viewModel)
+                            Mode.PHONE -> PhoneForm(state, providers, onSendCode, onSocialSignIn)
+                            Mode.CODE -> CodeForm(state, onVerifyCode, onChangeNumber, onResend = onSendCode)
                         }
                     }
                 }
@@ -145,8 +168,10 @@ private fun Hero() {
     val crease = colors.onBrandStrong.copy(alpha = 0.28f)
     val stripe = colors.onBrandStrong.copy(alpha = 0.045f)
 
-    // The delivery: slides in from the left and settles. System "remove animations" makes this instant.
-    val travel = remember { Animatable(0f) }
+    // The delivery: slides in from the left and settles. System "remove animations" makes this instant,
+    // and previews show it already settled.
+    val inPreview = LocalInspectionMode.current
+    val travel = remember { Animatable(if (inPreview) 1f else 0f) }
     LaunchedEffect(Unit) {
         travel.animateTo(1f, tween(durationMillis = 700, easing = DesiTheme.motion.emphasizedDecelerate))
     }
@@ -232,13 +257,17 @@ private fun FormTitle(title: StringResource, hint: String? = null) {
 }
 
 @Composable
-private fun PhoneForm(state: SignInUiState, viewModel: SignInViewModel, socialSignIn: SocialSignIn) {
-    val verifier = rememberPhoneVerifier()
+private fun PhoneForm(
+    state: SignInUiState,
+    providers: List<SocialProvider>,
+    onSendCode: (String) -> Unit,
+    onSocialSignIn: (SocialProvider) -> Unit,
+) {
     val enabled = state.inProgress == null
     val prefix = stringResource(Res.string.signin_phone_prefix)
     var digits by rememberSaveable { mutableStateOf("") }
     val complete = digits.length == PHONE_DIGITS
-    val send = { if (complete) viewModel.sendPhoneCode("$prefix$digits", verifier) }
+    val send = { if (complete) onSendCode("$prefix$digits") }
 
     FormTitle(Res.string.signin_phone_title, stringResource(Res.string.signin_phone_hint))
     PhoneNumberField(
@@ -264,10 +293,10 @@ private fun PhoneForm(state: SignInUiState, viewModel: SignInViewModel, socialSi
     Feedback(state)
 
     OtherWays {
-        socialSignIn.providers.forEach { provider ->
+        providers.forEach { provider ->
             TonalButton(
                 text = stringResource(Res.string.signin_continue_with, provider.displayName),
-                onClick = { viewModel.signIn(provider, socialSignIn) },
+                onClick = { onSocialSignIn(provider) },
                 leadingIcon = if (provider == SocialProvider.GOOGLE) DesiIllustrations.GoogleLogo else null,
                 tintLeadingIcon = false,
                 enabled = enabled,
@@ -296,9 +325,13 @@ private fun OtherWays(content: @Composable () -> Unit) {
 }
 
 @Composable
-private fun CodeForm(state: SignInUiState, viewModel: SignInViewModel) {
+private fun CodeForm(
+    state: SignInUiState,
+    onVerifyCode: (String) -> Unit,
+    onChangeNumber: () -> Unit,
+    onResend: (String) -> Unit,
+) {
     val step = state.phoneStep as? PhoneStep.EnterCode ?: return
-    val verifier = rememberPhoneVerifier()
     val enabled = state.inProgress == null
     var code by rememberSaveable(step.verificationId) { mutableStateOf("") }
 
@@ -308,14 +341,14 @@ private fun CodeForm(state: SignInUiState, viewModel: SignInViewModel) {
         onValueChange = {
             code = it
             // Submit as soon as the last digit is typed or pasted.
-            if (it.length == 6) viewModel.verifyPhoneCode(it)
+            if (it.length == 6) onVerifyCode(it)
         },
         enabled = enabled,
         isError = state.error == SignInError.CODE_WRONG || state.error == SignInError.CODE_EXPIRED,
     )
     PrimaryButton(
         text = stringResource(Res.string.signin_verify),
-        onClick = { viewModel.verifyPhoneCode(code) },
+        onClick = { onVerifyCode(code) },
         loading = state.inProgress == SignInMethod.PHONE,
         enabled = enabled && code.length == 6,
         trailingIcon = DesiIcons.Forward,
@@ -323,8 +356,8 @@ private fun CodeForm(state: SignInUiState, viewModel: SignInViewModel) {
     )
     Feedback(state)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        LinkButton(Res.string.signin_change_number, enabled, viewModel::changePhoneNumber)
-        LinkButton(Res.string.signin_resend_code, enabled) { viewModel.sendPhoneCode(step.phoneNumber, verifier) }
+        LinkButton(Res.string.signin_change_number, enabled, onChangeNumber)
+        LinkButton(Res.string.signin_resend_code, enabled) { onResend(step.phoneNumber) }
     }
 }
 
@@ -349,3 +382,44 @@ private fun LinkButton(text: StringResource, enabled: Boolean, onClick: () -> Un
         Text(stringResource(text), style = DesiTheme.type.button, color = if (enabled) DesiTheme.colors.brand else DesiTheme.colors.muted)
     }
 }
+
+// Previews: sample phone number only; all labels come from string resources.
+
+private const val PreviewNumber = "+919876543210"
+
+@Composable
+private fun SignInPreview(state: SignInUiState, darkTheme: Boolean = false) = DesiTheme(darkTheme = darkTheme) {
+    SignInContent(state, listOf(SocialProvider.GOOGLE), {}, {}, {}, {})
+}
+
+@Preview
+@Composable
+private fun SignInPhonePreview() = SignInPreview(SignInUiState())
+
+@Preview
+@Composable
+private fun SignInPhoneDarkPreview() = SignInPreview(SignInUiState(), darkTheme = true)
+
+@Preview
+@Composable
+private fun SignInSendingPreview() = SignInPreview(SignInUiState(inProgress = SignInMethod.PHONE))
+
+@Preview
+@Composable
+private fun SignInGoogleNotSetUpPreview() = SignInPreview(SignInUiState(error = SignInError.METHOD_DISABLED))
+
+@Preview
+@Composable
+private fun SignInCodePreview() = SignInPreview(
+    SignInUiState(
+        phoneStep = PhoneStep.EnterCode(PreviewNumber, verificationId = "preview"),
+        message = SignInMessage.CodeSent(PreviewNumber),
+    ),
+)
+
+@Preview
+@Composable
+private fun SignInWrongCodePreview() = SignInPreview(
+    SignInUiState(phoneStep = PhoneStep.EnterCode(PreviewNumber, verificationId = "preview"), error = SignInError.CODE_WRONG),
+    darkTheme = true,
+)

@@ -15,7 +15,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.harsh.desicrics.api.ProfileError
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiScaffold
 import com.harsh.desicrics.designsystem.component.DesiTextField
@@ -56,6 +58,24 @@ fun EditProfileScreen(
     viewModel: EditProfileViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    EditProfileContent(
+        state = state,
+        isOnboarding = isOnboarding,
+        onUpdate = viewModel::update,
+        onSave = { viewModel.save(onDone) },
+        onBack = onBack,
+    )
+}
+
+/** The profile form without its ViewModel, so previews and tests can render any state. */
+@Composable
+fun EditProfileContent(
+    state: ProfileFormState,
+    isOnboarding: Boolean,
+    onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit,
+    onSave: () -> Unit,
+    onBack: (() -> Unit)?,
+) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
     val title = if (isOnboarding) Res.string.profile_setup_title else Res.string.profile_edit_title
@@ -79,35 +99,35 @@ fun EditProfileScreen(
             }
             DesiTextField(
                 value = state.name,
-                onValueChange = { value -> viewModel.update { it.copy(name = value) } },
+                onValueChange = { value -> onUpdate { it.copy(name = value) } },
                 label = stringResource(Res.string.profile_name_label),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
             DesiTextField(
                 value = state.phone,
-                onValueChange = { value -> viewModel.update { it.copy(phone = value) } },
+                onValueChange = { value -> onUpdate { it.copy(phone = value) } },
                 label = stringResource(Res.string.profile_phone_label),
                 placeholder = stringResource(Res.string.profile_phone_placeholder),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
             )
             DesiTextField(
                 value = state.city,
-                onValueChange = { value -> viewModel.update { it.copy(city = value) } },
+                onValueChange = { value -> onUpdate { it.copy(city = value) } },
                 label = stringResource(Res.string.profile_city_label),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
 
             Column(verticalArrangement = Arrangement.spacedBy(space.s2), modifier = Modifier.padding(top = space.s2)) {
                 SectionLabel(stringResource(Res.string.profile_role_section))
-                ChoiceChips(PlayerRole.entries, state.role, { stringResource(it.label) }, { value -> viewModel.update { it.copy(role = value) } })
+                ChoiceChips(PlayerRole.entries, state.role, { stringResource(it.label) }, { value -> onUpdate { it.copy(role = value) } })
             }
             Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
                 SectionLabel(stringResource(Res.string.profile_batting_section))
-                ChoiceChips(BattingStyle.entries, state.battingStyle, { stringResource(it.label) }, { value -> viewModel.update { it.copy(battingStyle = value) } })
+                ChoiceChips(BattingStyle.entries, state.battingStyle, { stringResource(it.label) }, { value -> onUpdate { it.copy(battingStyle = value) } })
             }
             Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
                 SectionLabel(stringResource(Res.string.profile_bowling_section))
-                ChoiceChips(BowlingStyle.entries, state.bowlingStyle, { stringResource(it.label) }, { value -> viewModel.update { it.copy(bowlingStyle = value) } })
+                ChoiceChips(BowlingStyle.entries, state.bowlingStyle, { stringResource(it.label) }, { value -> onUpdate { it.copy(bowlingStyle = value) } })
             }
 
             state.error?.let { error ->
@@ -120,10 +140,57 @@ fun EditProfileScreen(
 
             PrimaryButton(
                 text = stringResource(if (isOnboarding) Res.string.profile_finish_setup else Res.string.profile_save),
-                onClick = { viewModel.save(onDone) },
+                onClick = onSave,
                 loading = state.saving,
                 modifier = Modifier.fillMaxWidth().padding(top = space.s2),
             )
         }
     }
+}
+
+// Previews: sample player data only; all labels come from string resources.
+
+private val PreviewForm = ProfileFormState(
+    loading = false,
+    name = "Rohan Iyer",
+    phone = "+91 98765 43210",
+    city = "Mumbai",
+    role = PlayerRole.ALL_ROUNDER,
+    bowlingStyle = BowlingStyle.RIGHT_ARM_OFF_SPIN,
+)
+
+@Preview
+@Composable
+private fun OnboardingPreview() = DesiTheme(darkTheme = false) {
+    EditProfileContent(ProfileFormState(loading = false), isOnboarding = true, onUpdate = {}, onSave = {}, onBack = null)
+}
+
+@Preview
+@Composable
+private fun EditProfilePreview() = DesiTheme(darkTheme = false) {
+    EditProfileContent(PreviewForm, isOnboarding = false, onUpdate = {}, onSave = {}, onBack = {})
+}
+
+@Preview
+@Composable
+private fun EditProfileDarkPreview() = DesiTheme(darkTheme = true) {
+    EditProfileContent(PreviewForm, isOnboarding = false, onUpdate = {}, onSave = {}, onBack = {})
+}
+
+@Preview
+@Composable
+private fun EditProfileErrorPreview() = DesiTheme(darkTheme = false) {
+    EditProfileContent(
+        PreviewForm.copy(name = "", error = ProfileFormError.Invalid(ProfileError.NAME_MISSING)),
+        isOnboarding = true,
+        onUpdate = {},
+        onSave = {},
+        onBack = null,
+    )
+}
+
+@Preview
+@Composable
+private fun EditProfileSavingPreview() = DesiTheme(darkTheme = false) {
+    EditProfileContent(PreviewForm.copy(saving = true), isOnboarding = false, onUpdate = {}, onSave = {}, onBack = {})
 }

@@ -1,6 +1,8 @@
 package com.harsh.desicrics
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,32 +14,33 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.harsh.desicrics.designsystem.component.FullScreenLoading
+import com.harsh.desicrics.designsystem.component.GhostButton
+import com.harsh.desicrics.designsystem.component.PrimaryButton
+import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.UserProfile
+import com.harsh.desicrics.resources.Res
+import com.harsh.desicrics.resources.common_try_again
+import com.harsh.desicrics.resources.profile_sign_out
+import com.harsh.desicrics.resources.session_error_body
+import com.harsh.desicrics.resources.session_error_title
 import com.harsh.desicrics.session.SessionState
 import com.harsh.desicrics.session.SessionViewModel
-import com.harsh.desicrics.designsystem.component.FullScreenLoading
 import com.harsh.desicrics.ui.home.HomeScreen
 import com.harsh.desicrics.ui.match.MatchScreen
 import com.harsh.desicrics.ui.newmatch.NewMatchScreen
 import com.harsh.desicrics.ui.profile.EditProfileScreen
 import com.harsh.desicrics.ui.profile.ProfileScreen
 import com.harsh.desicrics.ui.signin.SignInScreen
-import com.harsh.desicrics.designsystem.component.GhostButton
-import com.harsh.desicrics.designsystem.component.PrimaryButton
-import com.harsh.desicrics.designsystem.theme.DesiTheme
-import com.harsh.desicrics.resources.Res
-import com.harsh.desicrics.resources.common_try_again
-import com.harsh.desicrics.resources.profile_sign_out
-import com.harsh.desicrics.resources.session_error_body
-import com.harsh.desicrics.resources.session_error_title
-import org.jetbrains.compose.resources.stringResource
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Serializable object HomeRoute
@@ -82,6 +85,18 @@ private fun SessionErrorScreen(onRetry: () -> Unit, onSignOut: () -> Unit) {
         PrimaryButton(stringResource(Res.string.common_try_again), onClick = onRetry, modifier = Modifier.padding(top = space.s2))
         GhostButton(stringResource(Res.string.profile_sign_out), onClick = onSignOut)
     }
+}
+
+@Preview
+@Composable
+private fun SessionErrorPreview() = DesiTheme(darkTheme = false) {
+    Box(Modifier.background(DesiTheme.colors.bg)) { SessionErrorScreen(onRetry = {}, onSignOut = {}) }
+}
+
+@Preview
+@Composable
+private fun SessionErrorDarkPreview() = DesiTheme(darkTheme = true) {
+    Box(Modifier.background(DesiTheme.colors.bg)) { SessionErrorScreen(onRetry = {}, onSignOut = {}) }
 }
 
 @Composable

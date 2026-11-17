@@ -13,13 +13,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import com.harsh.desicrics.designsystem.component.Avatar
 import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.component.DesiScaffold
 import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
+import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.UserProfile
 import com.harsh.desicrics.resources.Res
 import com.harsh.desicrics.resources.common_empty_value
@@ -93,4 +96,30 @@ private fun ProfileRow(label: StringResource, value: String) {
         Text(stringResource(label).uppercase(), style = DesiTheme.type.label, color = DesiTheme.colors.muted)
         Text(value, style = DesiTheme.type.bodyLg, color = DesiTheme.colors.ink)
     }
+}
+
+// Previews: sample player data only; all labels come from string resources.
+
+private val PreviewProfile = UserProfile(
+    uid = "preview",
+    name = "Rohan Iyer",
+    phone = "+91 98765 43210",
+    email = null,
+    city = "Mumbai",
+    role = PlayerRole.ALL_ROUNDER,
+    battingStyle = BattingStyle.LEFT_HAND,
+    bowlingStyle = BowlingStyle.RIGHT_ARM_OFF_SPIN,
+    createdAt = 0,
+)
+
+@Preview
+@Composable
+private fun ProfilePreview() = DesiTheme(darkTheme = false) {
+    ProfileScreen(PreviewProfile, onEdit = {}, onSignOut = {}, onBack = {})
+}
+
+@Preview
+@Composable
+private fun ProfileDarkPreview() = DesiTheme(darkTheme = true) {
+    ProfileScreen(PreviewProfile.copy(city = "", bowlingStyle = BowlingStyle.NONE), onEdit = {}, onSignOut = {}, onBack = {})
 }

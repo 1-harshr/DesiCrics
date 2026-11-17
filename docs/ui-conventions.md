@@ -67,6 +67,13 @@ Use Compose Multiplatform resources (`stringResource`, `pluralStringResource`, `
 - Colours, text styles, spacing, radii and motion come from `DesiTheme` ([design-system.md](design-system.md)). No hex values, raw `dp` numbers or `TextStyle(...)` in feature code.
 - Reusable UI goes in `:app:designsystem`, not in a feature package.
 
+## Previews
+
+- Every screen is split in two: `FooScreen(viewModel)` collects state and wires platform pieces (verifiers, sign-in launchers, status bar), and `FooContent(state, callbacks)` draws the UI. Previews and tests render `FooContent`.
+- Each screen has light and dark previews of its main states (empty, filled, loading, error). Each design system component has light and dark previews of its states in `ComponentPreviews.kt`.
+- Preview sample data (player names, numbers) may be literal; labels still come from string resources.
+- Animations that start in a `LaunchedEffect` check `LocalInspectionMode` and show their end state in previews.
+
 ## Icons and assets
 
 - Icons are downloaded one at a time from Google Fonts Icons (Material Symbols Rounded, Android XML) into `:app:designsystem`, and used through `DesiIcons`. No icon libraries. See [design-system.md › Icons](design-system.md#icons).
@@ -78,5 +85,6 @@ Use Compose Multiplatform resources (`stringResource`, `pluralStringResource`, `
 - [ ] New strings follow the naming pattern and use placeholders or plurals where needed
 - [ ] No colour, size or text style literals outside `:app:designsystem`
 - [ ] New shared UI lives in `:app:designsystem`, with light and dark previews
+- [ ] New screens have a stateless `…Content` composable with light and dark previews of their main states
 - [ ] New icons are Material Symbols Rounded XML (or custom on the same grid), named `ic_*`, untinted, and added to `DesiIcons`
 - [ ] No `material-icons-extended` or other icon library dependency
