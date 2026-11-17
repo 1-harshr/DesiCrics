@@ -20,7 +20,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `feature/mvp
 - ✅ Ktor server with Firebase token auth
 - ✅ Exposed stores, H2 locally
 - ✅ Shared DTOs in `core`
-- ⬜ Drop the iOS target from the build
+- ✅ Drop the iOS target from the build
 - ⬜ Postgres + Flyway migrations (local Postgres in Docker)
 
 ### Level 2 · Complete

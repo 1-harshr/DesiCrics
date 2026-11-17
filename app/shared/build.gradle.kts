@@ -9,15 +9,6 @@ plugins {
 }
 
 kotlin {
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "Shared"
-            isStatic = true
-        }
-    }
     android {
        namespace = "com.harsh.desicrics.app.shared"
        compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -47,9 +38,6 @@ kotlin {
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.playServicesAuth)
             implementation(libs.googleid)
-        }
-        iosMain.dependencies {
-            implementation(libs.ktor.clientDarwin)
         }
         commonMain.dependencies {
             api(project(":core"))
