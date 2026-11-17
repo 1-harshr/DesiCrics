@@ -33,6 +33,11 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        // The Ktor server. 10.0.2.2 is the host machine from an Android emulator; for a physical device,
+        // pass your computer's LAN address: ./gradlew ... -Pdesicrics.apiBaseUrl=http://192.168.1.20:8080
+        val apiBaseUrl = providers.gradleProperty("desicrics.apiBaseUrl").getOrElse("http://10.0.2.2:8080")
+        buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
     }
     packaging {
         resources {
@@ -54,5 +59,6 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }

@@ -21,11 +21,13 @@ dependencies {
     implementation(libs.ktor.serverCallLogging)
     implementation(libs.ktor.serverCors)
     implementation(libs.ktor.serverAuth)
-    implementation(platform(libs.koin.bom))
-    implementation(libs.koin.ktor)
-    implementation(libs.koin.loggerSlf4j)
-    implementation(libs.firebase.admin)
+    // Brings java-jwt and jwks-rsa, used to verify Firebase ID tokens against Google's public keys.
+    implementation(libs.ktor.serverAuthJwt)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    runtimeOnly(libs.h2)
+    runtimeOnly(libs.postgresql)
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
-    testImplementation(libs.koin.test)
+    testImplementation(libs.ktor.clientContentNegotiation)
 }

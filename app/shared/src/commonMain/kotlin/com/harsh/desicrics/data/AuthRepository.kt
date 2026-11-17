@@ -1,6 +1,6 @@
 package com.harsh.desicrics.data
 
-import com.harsh.desicrics.data.sqlconnect.IdTokenProvider
+import com.harsh.desicrics.data.api.IdTokenProvider
 import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseUser
@@ -50,7 +50,7 @@ class AuthRepository(private val auth: FirebaseAuth) : IdTokenProvider {
     fun phoneCredential(verificationId: String, code: String): AuthCredential =
         PhoneAuthProvider(auth).credential(verificationId, code)
 
-    /** Firebase ID token that SQL Connect (and later the Ktor server) uses to identify the user. */
+    /** Firebase ID token the DesiCrics server uses to identify the user. */
     override suspend fun idToken(forceRefresh: Boolean): String? = auth.currentUser?.getIdToken(forceRefresh)
 
     suspend fun signOut() = auth.signOut()

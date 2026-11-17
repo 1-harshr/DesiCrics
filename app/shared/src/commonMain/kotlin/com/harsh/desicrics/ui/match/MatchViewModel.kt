@@ -2,13 +2,13 @@ package com.harsh.desicrics.ui.match
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.MatchRepository
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Match
-import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.Wicket
 import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.scoring.ScoringEngine
@@ -141,28 +141,23 @@ class MatchViewModel(
             wicket = wicket,
             timestamp = nowMillis(),
         )
-        val deliveries = ui.deliveries + delivery
-        val updated = match.withScore(ScoringEngine.compute(match, deliveries))
-        save(updated, deliveries) { matchRepository.recordDelivery(updated, delivery) }
+        save { matchRepository.recordDelivery(match.id, delivery) }
     }
 
     fun undo() {
         val ui = _state.value
         if (!ui.canUndo) return
         val match = ui.match ?: return
-        val last = ui.deliveries.maxBy { it.seq }
-        val deliveries = ui.deliveries - last
-        val updated = match.withScore(ScoringEngine.compute(match, deliveries))
-        save(updated, deliveries) { matchRepository.undoDelivery(updated, last) }
+        save { matchRepository.undoLastDelivery(match.id) }
     }
 
-    /** Writes to the server, then shows the result locally straight away instead of waiting for the next poll. */
-    private fun save(match: Match, deliveries: List<Delivery>, write: suspend () -> Unit) {
+    /** Sends the change and shows the server's scorecard straight away instead of waiting for the next poll. */
+    private fun save(write: suspend () -> MatchDetails) {
         _state.update { it.copy(saving = true) }
         viewModelScope.launch {
             try {
-                write()
-                _state.update { it.withSnapshot(match, deliveries).copy(selection = Selection(), saving = false) }
+                val details = write()
+                _state.update { it.withSnapshot(details.match, details.deliveries).copy(selection = Selection(), saving = false) }
                 refreshes.update { it + 1 }
             } catch (e: CancellationException) {
                 throw e
@@ -179,11 +174,5 @@ class MatchViewModel(
         deliveries = deliveries,
         state = ScoringEngine.compute(match, deliveries),
         isScorer = match.createdBy == uid,
-    )
-
-    private fun Match.withScore(state: MatchState) = copy(
-        scoreSummary = state.scoreSummary,
-        status = if (state.isComplete) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
-        result = state.result,
     )
 }

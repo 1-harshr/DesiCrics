@@ -31,3 +31,6 @@ dataconnect/.dataconnect/
 # Firebase project config (contains project ID and support email)
 firebase.json
 .firebaserc
+
+# Local in-process database used by the Ktor server
+server/data/

@@ -2,13 +2,12 @@ package com.harsh.desicrics.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.UserRepository
 import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.PlayerRole
-import com.harsh.desicrics.model.UserProfile
-import com.harsh.desicrics.util.nowMillis
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,12 +35,10 @@ class EditProfileViewModel(
     private val _state = MutableStateFlow(ProfileFormState())
     val state: StateFlow<ProfileFormState> = _state
 
-    private var existing: UserProfile? = null
-
     init {
         viewModelScope.launch {
             val user = authRepository.currentUser ?: return@launch
-            existing = runCatching { userRepository.getProfile() }.getOrNull()
+            val existing = runCatching { userRepository.getProfile() }.getOrNull()
             _state.value = existing?.let {
                 ProfileFormState(
                     loading = false,
@@ -64,33 +61,24 @@ class EditProfileViewModel(
 
     fun save(onSaved: () -> Unit) {
         val form = _state.value
-        val user = authRepository.currentUser ?: return
-        val phoneDigits = form.phone.filter { it.isDigit() }
-        val error = when {
-            form.name.isBlank() -> "Please enter your name"
-            phoneDigits.length !in 10..13 -> "Please enter a valid mobile number"
-            else -> null
-        }
-        if (error != null) {
-            _state.update { it.copy(error = error) }
-            return
-        }
-        val profile = UserProfile(
-            uid = user.uid,
+        val request = UpdateProfileRequest(
             name = form.name.trim(),
             phone = form.phone.trim(),
-            email = user.email,
-            photoUrl = user.photoUrl,
             city = form.city.trim(),
             role = form.role,
             battingStyle = form.battingStyle,
             bowlingStyle = form.bowlingStyle,
-            createdAt = existing?.createdAt ?: nowMillis(),
+            photoUrl = authRepository.currentUser?.photoUrl,
         )
+        // Same check the server runs, for instant feedback.
+        request.validationError()?.let { error ->
+            _state.update { it.copy(error = error) }
+            return
+        }
         _state.update { it.copy(saving = true) }
         viewModelScope.launch {
             try {
-                userRepository.saveProfile(profile)
+                userRepository.saveProfile(request)
                 onSaved()
             } catch (e: CancellationException) {
                 throw e

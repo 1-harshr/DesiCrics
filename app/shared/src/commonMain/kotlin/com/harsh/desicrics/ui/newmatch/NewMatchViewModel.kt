@@ -2,6 +2,7 @@ package com.harsh.desicrics.ui.newmatch
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.data.MatchRepository
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
@@ -32,32 +33,24 @@ class NewMatchViewModel(private val matchRepository: MatchRepository) : ViewMode
 
     fun create(onCreated: (matchId: String) -> Unit) {
         val form = _state.value
-        val playersA = parsePlayers(form.teamAPlayers)
-        val playersB = parsePlayers(form.teamBPlayers)
-        val overs = form.overs.toIntOrNull()
-        val error = when {
-            form.teamAName.isBlank() || form.teamBName.isBlank() -> "Give both teams a name"
-            form.teamAName.trim().equals(form.teamBName.trim(), ignoreCase = true) -> "Teams need different names"
-            playersA.size < 2 || playersB.size < 2 -> "Each team needs at least 2 players"
-            overs == null || overs !in 1..50 -> "Overs must be between 1 and 50"
-            else -> null
-        }
-        if (error != null) {
+        val request = CreateMatchRequest(
+            teamAName = form.teamAName.trim(),
+            teamAPlayers = parsePlayers(form.teamAPlayers),
+            teamBName = form.teamBName.trim(),
+            teamBPlayers = parsePlayers(form.teamBPlayers),
+            oversPerInnings = form.overs.toIntOrNull() ?: 0,
+            tossWinner = form.tossWinner,
+            tossDecision = form.tossDecision,
+        )
+        // Same check the server runs, for instant feedback.
+        request.validationError()?.let { error ->
             _state.update { it.copy(error = error) }
             return
         }
         _state.update { it.copy(saving = true) }
         viewModelScope.launch {
             try {
-                val matchId = matchRepository.createMatch(
-                    teamAName = form.teamAName.trim(),
-                    teamAPlayers = playersA,
-                    teamBName = form.teamBName.trim(),
-                    teamBPlayers = playersB,
-                    oversPerInnings = overs!!,
-                    tossWinner = form.tossWinner,
-                    tossDecision = form.tossDecision,
-                )
+                val matchId = matchRepository.createMatch(request)
                 onCreated(matchId)
             } catch (e: CancellationException) {
                 throw e
