@@ -30,7 +30,7 @@ class DeliveryRulesTest {
         Delivery(seq, innings = 1, strikerId = striker, nonStrikerId = nonStriker, bowlerId = bowler, runsOffBat = runs)
 
     private fun reason(history: List<Delivery>, next: Delivery) =
-        ScoringEngine.compute(match, history).rejectionReason(next, nextSeq = history.size)
+        ScoringEngine.compute(match, history).validate(next, nextSeq = history.size)
 
     @Test
     fun acceptsAValidBall() {
@@ -39,40 +39,88 @@ class DeliveryRulesTest {
 
     @Test
     fun rejectsStaleSequenceNumbers() {
-        assertEquals("The scorecard changed. Refresh and try again", reason(listOf(ball(0)), ball(0)))
+        assertEquals(DeliveryError.STALE, reason(listOf(ball(0)), ball(0)))
     }
 
     @Test
     fun rejectsPlayersFromTheWrongTeam() {
-        assertEquals("Both batters must be from Strikers", reason(emptyList(), ball(0, striker = "b2")))
-        assertEquals("The bowler must be from Royals", reason(emptyList(), ball(0, bowler = "a3")))
+        assertEquals(DeliveryError.BATTER_NOT_IN_TEAM, reason(emptyList(), ball(0, striker = "b2")))
+        assertEquals(DeliveryError.BOWLER_NOT_IN_TEAM, reason(emptyList(), ball(0, bowler = "a3")))
     }
 
     @Test
     fun rejectsTheWrongStrikerAfterRotation() {
         // After a single the batters have crossed, so a1 can't still be on strike.
-        assertEquals("Wrong striker for this ball", reason(listOf(ball(0, runs = 1)), ball(1, striker = "a1", nonStriker = "a2")))
+        assertEquals(DeliveryError.WRONG_STRIKER, reason(listOf(ball(0, runs = 1)), ball(1, striker = "a1", nonStriker = "a2")))
     }
 
     @Test
     fun rejectsTheSameBowlerForConsecutiveOvers() {
         val over = (0 until 6).map { ball(it) }
         val next = ball(6, striker = "a2", nonStriker = "a1", bowler = "b1")
-        assertEquals("A bowler can't bowl two overs in a row", reason(over, next))
+        assertEquals(DeliveryError.CONSECUTIVE_OVERS, reason(over, next))
     }
 
     @Test
     fun rejectsDismissedBattersAndImpossibleWickets() {
         val bowled = ball(0).copy(wicket = Wicket(DismissalKind.BOWLED, "a1"))
-        assertEquals("That batter is already out", reason(listOf(bowled), ball(1, striker = "a1", nonStriker = "a2")))
+        assertEquals(DeliveryError.BATTER_ALREADY_OUT, reason(listOf(bowled), ball(1, striker = "a1", nonStriker = "a2")))
         val stumpedNonStriker = ball(0).copy(wicket = Wicket(DismissalKind.STUMPED, "a2"))
-        assertEquals("Only the striker can be out stumped", reason(emptyList(), stumpedNonStriker))
+        assertEquals(DeliveryError.ONLY_STRIKER_CAN_BE_OUT, reason(emptyList(), stumpedNonStriker))
     }
 
     @Test
     fun rejectsMalformedExtras() {
         val wideWithBatRuns = ball(0, runs = 2).copy(extra = ExtraType.WIDE, extraRuns = 1)
-        assertEquals("A wide is 1–5 runs with nothing off the bat", reason(emptyList(), wideWithBatRuns))
-        assertEquals("A legal ball can't have extra runs", reason(emptyList(), ball(0).copy(extraRuns = 3)))
+        assertEquals(DeliveryError.INVALID_WIDE, reason(emptyList(), wideWithBatRuns))
+        assertEquals(DeliveryError.EXTRA_RUNS_ON_LEGAL_BALL, reason(emptyList(), ball(0).copy(extraRuns = 3)))
+    }
+
+    @Test
+    fun allowsRunOutsOffAnyBallAndStumpingsOffAWide() {
+        val runOutOffNoBall = ball(0, runs = 1).copy(
+            extra = ExtraType.NO_BALL, extraRuns = 1, wicket = Wicket(DismissalKind.RUN_OUT, "a2", fielderId = "b2"),
+        )
+        assertNull(reason(emptyList(), runOutOffNoBall))
+        val runOutOffBye = ball(0).copy(extra = ExtraType.BYE, extraRuns = 1, wicket = Wicket(DismissalKind.RUN_OUT, "a1"))
+        assertNull(reason(emptyList(), runOutOffBye))
+        val stumpedOffWide = ball(0).copy(extra = ExtraType.WIDE, extraRuns = 1, wicket = Wicket(DismissalKind.STUMPED, "a1", "b2"))
+        assertNull(reason(emptyList(), stumpedOffWide))
+    }
+
+    @Test
+    fun rejectsDismissalsThatCantHappenOnExtras() {
+        val bowledOffNoBall = ball(0).copy(extra = ExtraType.NO_BALL, extraRuns = 1, wicket = Wicket(DismissalKind.BOWLED, "a1"))
+        assertEquals(DeliveryError.DISMISSAL_NOT_POSSIBLE_ON_EXTRA, reason(emptyList(), bowledOffNoBall))
+        val caughtOffWide = ball(0).copy(extra = ExtraType.WIDE, extraRuns = 1, wicket = Wicket(DismissalKind.CAUGHT, "a1"))
+        assertEquals(DeliveryError.DISMISSAL_NOT_POSSIBLE_ON_EXTRA, reason(emptyList(), caughtOffWide))
+        val stumpedOffBye = ball(0).copy(extra = ExtraType.BYE, extraRuns = 1, wicket = Wicket(DismissalKind.STUMPED, "a1"))
+        assertEquals(DeliveryError.DISMISSAL_NOT_POSSIBLE_ON_EXTRA, reason(emptyList(), stumpedOffBye))
+    }
+
+    @Test
+    fun onlyRunOutsKeepCompletedRuns() {
+        val caughtForTwo = ball(0, runs = 2).copy(wicket = Wicket(DismissalKind.CAUGHT, "a1", "b2"))
+        assertEquals(DeliveryError.NO_RUNS_ON_DISMISSAL, reason(emptyList(), caughtForTwo))
+        val runOutAfterOne = ball(0, runs = 1).copy(wicket = Wicket(DismissalKind.RUN_OUT, "a1"))
+        assertNull(reason(emptyList(), runOutAfterOne))
+    }
+
+    @Test
+    fun checksTheFielder() {
+        val caughtByBatter = ball(0).copy(wicket = Wicket(DismissalKind.CAUGHT, "a1", fielderId = "a3"))
+        assertEquals(DeliveryError.FIELDER_NOT_IN_TEAM, reason(emptyList(), caughtByBatter))
+        val bowledWithFielder = ball(0).copy(wicket = Wicket(DismissalKind.BOWLED, "a1", fielderId = "b2"))
+        assertEquals(DeliveryError.FIELDER_NOT_ALLOWED, reason(emptyList(), bowledWithFielder))
+        val caughtAndBowled = ball(0).copy(wicket = Wicket(DismissalKind.CAUGHT, "a1", fielderId = "b1"))
+        assertNull(reason(emptyList(), caughtAndBowled))
+    }
+
+    @Test
+    fun rejectsBallsAfterTheMatchEnds() {
+        val firstInnings = (0 until 12).map { ball(it, bowler = if (it < 6) "b1" else "b2") }
+        val chase = ball(12, striker = "b1", nonStriker = "b2", bowler = "a1", runs = 1).copy(innings = 2)
+        val done = ScoringEngine.compute(match, firstInnings + chase)
+        assertEquals(DeliveryError.MATCH_OVER, done.validate(chase.copy(seq = 13), nextSeq = 13))
     }
 }

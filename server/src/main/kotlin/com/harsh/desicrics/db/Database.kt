@@ -5,6 +5,7 @@ import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.TeamSide
@@ -48,7 +49,9 @@ object MatchesTable : Table("matches") {
     val tossDecision = enumerationByName("toss_decision", 4, TossDecision::class)
     val status = enumerationByName("status", 20, MatchStatus::class)
     val scoreSummary = varchar("score_summary", 200)
-    val result = varchar("result", 200).nullable()
+    val resultWinner = enumerationByName("result_winner", 1, TeamSide::class).nullable()
+    val resultMargin = integer("result_margin").nullable()
+    val resultMarginUnit = enumerationByName("result_margin_unit", 10, MarginUnit::class).nullable()
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -75,6 +78,7 @@ object DeliveriesTable : Table("deliveries") {
     val extraRuns = integer("extra_runs")
     val wicketKind = enumerationByName("wicket_kind", 15, DismissalKind::class).nullable()
     val playerOutId = reference("player_out_id", MatchPlayersTable.id).nullable()
+    val fielderId = reference("fielder_id", MatchPlayersTable.id).nullable()
     val createdAt = long("created_at")
     override val primaryKey = PrimaryKey(matchId, seq)
 }

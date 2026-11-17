@@ -1,8 +1,10 @@
 package com.harsh.desicrics.scoring
 
 import com.harsh.desicrics.model.Delivery
+import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
 import com.harsh.desicrics.model.TeamSide
@@ -12,7 +14,7 @@ data class MatchState(
     /** Innings started so far: one, or two once the first is complete. */
     val innings: List<InningsState>,
     val isComplete: Boolean,
-    val result: String?,
+    val result: MatchResult?,
 ) {
     val current: InningsState get() = innings.last()
 
@@ -78,12 +80,20 @@ data class BatterCard(
     val balls: Int = 0,
     val fours: Int = 0,
     val sixes: Int = 0,
-    /** e.g. "b Bumrah"; null while not out. */
-    val dismissal: String? = null,
+    /** Null while not out. */
+    val dismissal: Dismissal? = null,
 ) {
     val isOut: Boolean get() = dismissal != null
     val strikeRate: Double get() = if (balls == 0) 0.0 else runs * 100.0 / balls
 }
+
+/** How a batter got out. The app turns it into "c Rohit b Bumrah" with its own strings. */
+data class Dismissal(
+    val kind: DismissalKind,
+    /** Null for a run out, which isn't credited to the bowler. */
+    val bowler: Player?,
+    val fielder: Player?,
+)
 
 data class BowlerCard(
     val player: Player,

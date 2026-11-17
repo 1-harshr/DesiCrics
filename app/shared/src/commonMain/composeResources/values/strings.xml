@@ -90,4 +90,51 @@
     <string name="bowling_style_left_arm_medium">Left-arm medium</string>
     <string name="bowling_style_left_arm_orthodox">Left-arm orthodox</string>
     <string name="bowling_style_left_arm_wrist_spin">Left-arm wrist spin</string>
+    <!-- Scorecard: dismissals, written the way a scorebook does -->
+    <string name="scorecard_not_out">not out</string>
+    <string name="scorecard_out_bowled">b %1$s</string>
+    <string name="scorecard_out_caught">c %1$s b %2$s</string>
+    <string name="scorecard_out_caught_and_bowled">c &amp; b %1$s</string>
+    <string name="scorecard_out_caught_no_fielder">c b %1$s</string>
+    <string name="scorecard_out_lbw">lbw b %1$s</string>
+    <string name="scorecard_out_run_out">run out (%1$s)</string>
+    <string name="scorecard_out_run_out_no_fielder">run out</string>
+    <string name="scorecard_out_stumped">st %1$s b %2$s</string>
+    <string name="scorecard_out_stumped_no_fielder">st b %1$s</string>
+    <string name="scorecard_out_hit_wicket">hit wicket b %1$s</string>
+
+    <!-- Match result -->
+    <plurals name="match_result_won_by_runs">
+        <item quantity="one">%1$s won by %2$d run</item>
+        <item quantity="other">%1$s won by %2$d runs</item>
+    </plurals>
+    <plurals name="match_result_won_by_wickets">
+        <item quantity="one">%1$s won by %2$d wicket</item>
+        <item quantity="other">%1$s won by %2$d wickets</item>
+    </plurals>
+    <string name="match_result_tie">Match tied</string>
+
+    <!-- Why a ball can't be recorded -->
+    <string name="scoring_error_match_over">This match is already over.</string>
+    <string name="scoring_error_stale">The scorecard changed. Refresh and try again.</string>
+    <string name="scoring_error_wrong_innings">That ball is for the wrong innings.</string>
+    <string name="scoring_error_same_batter">Striker and non-striker must be different players.</string>
+    <string name="scoring_error_batter_not_in_team">Both batters must be from the batting side.</string>
+    <string name="scoring_error_batter_already_out">That batter is already out.</string>
+    <string name="scoring_error_wrong_striker">That isn't the batter on strike.</string>
+    <string name="scoring_error_wrong_non_striker">That isn't the non-striker.</string>
+    <string name="scoring_error_bowler_not_in_team">The bowler must be from the fielding side.</string>
+    <string name="scoring_error_over_not_finished">The over isn't finished yet.</string>
+    <string name="scoring_error_consecutive_overs">A bowler can't bowl two overs in a row.</string>
+    <string name="scoring_error_runs_out_of_range">Runs off the bat must be between 0 and 7.</string>
+    <string name="scoring_error_extra_runs_on_legal_ball">A legal ball can't have extra runs.</string>
+    <string name="scoring_error_invalid_wide">A wide is 1 to 5 runs with nothing off the bat.</string>
+    <string name="scoring_error_invalid_no_ball">A no-ball carries exactly 1 penalty run.</string>
+    <string name="scoring_error_invalid_byes">Byes and leg byes are 1 to 4 runs with nothing off the bat.</string>
+    <string name="scoring_error_out_player_not_at_crease">Only a batter at the crease can be out.</string>
+    <string name="scoring_error_only_striker_can_be_out">Only the striker can be out that way.</string>
+    <string name="scoring_error_dismissal_not_possible">That dismissal can't happen on this kind of ball.</string>
+    <string name="scoring_error_no_runs_on_dismissal">No runs count on that dismissal.</string>
+    <string name="scoring_error_fielder_not_allowed">That dismissal doesn't have a fielder.</string>
+    <string name="scoring_error_fielder_not_in_team">The fielder must be from the fielding side.</string>
 </resources>

@@ -1,21 +1,21 @@
 package com.harsh.desicrics.scoring
 
 import com.harsh.desicrics.model.Delivery
-import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
 import com.harsh.desicrics.model.TeamSide
-import com.harsh.desicrics.model.Wicket
 
 /**
  * Replays a match's deliveries into a full scorecard. Pure and deterministic so the app,
  * the server and tests all agree on the score.
  *
  * Simplifications for the MVP: no retirements, no penalty runs, no byes off a no-ball,
- * no per-bowler over limits, and a wicket only removes the dismissed batter from whichever
- * end they finished at.
+ * no per-bowler over limits, and a run out removes the dismissed batter from whichever end
+ * they finished at after the completed runs.
  */
 object ScoringEngine {
 
@@ -32,7 +32,7 @@ object ScoringEngine {
             match = match,
             innings = listOf(first, second),
             isComplete = second.isComplete,
-            result = if (second.isComplete) resultText(first, second) else null,
+            result = if (second.isComplete) result(first, second) else null,
         )
     }
 
@@ -99,7 +99,13 @@ object ScoringEngine {
             d.wicket?.let { wicket ->
                 wickets++
                 batters[wicket.playerOutId]?.let { out ->
-                    batters[wicket.playerOutId] = out.copy(dismissal = dismissalText(wicket, bowlerCard.player))
+                    batters[wicket.playerOutId] = out.copy(
+                        dismissal = Dismissal(
+                            kind = wicket.kind,
+                            bowler = bowlerCard.player.takeIf { wicket.kind.creditedToBowler },
+                            fielder = wicket.fielderId?.let { bowlingTeam.player(it) },
+                        ),
+                    )
                 }
                 if (striker == wicket.playerOutId) striker = null
                 if (nonStriker == wicket.playerOutId) nonStriker = null
@@ -143,25 +149,12 @@ object ScoringEngine {
         )
     }
 
-    private fun resultText(first: InningsState, second: InningsState): String = when {
-        second.runs > first.runs -> {
-            val wicketsLeft = second.allOutWickets - second.wickets
-            "${second.battingTeam.name} won by ${plural(wicketsLeft, "wicket")}"
-        }
-        second.runs == first.runs -> "Match tied"
-        else -> "${first.battingTeam.name} won by ${plural(first.runs - second.runs, "run")}"
+    private fun result(first: InningsState, second: InningsState): MatchResult = when {
+        second.runs > first.runs ->
+            MatchResult(second.battingSide, second.allOutWickets - second.wickets, MarginUnit.WICKETS)
+        second.runs == first.runs -> MatchResult.Tie
+        else -> MatchResult(first.battingSide, first.runs - second.runs, MarginUnit.RUNS)
     }
-
-    private fun dismissalText(wicket: Wicket, bowler: Player): String = when (wicket.kind) {
-        DismissalKind.BOWLED -> "b ${bowler.name}"
-        DismissalKind.CAUGHT -> "c b ${bowler.name}"
-        DismissalKind.LBW -> "lbw b ${bowler.name}"
-        DismissalKind.RUN_OUT -> "run out"
-        DismissalKind.STUMPED -> "st b ${bowler.name}"
-        DismissalKind.HIT_WICKET -> "hit wicket b ${bowler.name}"
-    }
-
-    private fun plural(count: Int, word: String) = "$count $word${if (count == 1) "" else "s"}"
 
     private fun Team.player(id: String): Player = players.firstOrNull { it.id == id } ?: Player(id, "Unknown")
 }

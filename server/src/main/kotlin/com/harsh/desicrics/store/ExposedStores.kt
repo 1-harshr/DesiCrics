@@ -8,6 +8,8 @@ import com.harsh.desicrics.db.UsersTable
 import com.harsh.desicrics.db.query
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchResult
+import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
 import com.harsh.desicrics.model.TeamSide
@@ -17,6 +19,7 @@ import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
@@ -100,7 +103,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[tossDecision] = match.tossDecision
                 it[status] = match.status
                 it[scoreSummary] = match.scoreSummary
-                it[result] = match.result
+                it.setResult(match)
             }
             insertRoster(match.id, TeamSide.A, match.teamA)
             insertRoster(match.id, TeamSide.B, match.teamB)
@@ -121,6 +124,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[extraRuns] = delivery.extraRuns
                 it[wicketKind] = delivery.wicket?.kind
                 it[playerOutId] = delivery.wicket?.playerOutId
+                it[fielderId] = delivery.wicket?.fielderId
                 it[createdAt] = delivery.timestamp
             }
             updateScore(match)
@@ -152,7 +156,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
         MatchesTable.update({ MatchesTable.id eq match.id }) {
             it[scoreSummary] = match.scoreSummary
             it[status] = match.status
-            it[result] = match.result
+            it.setResult(match)
         }
     }
 
@@ -173,7 +177,14 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             tossDecision = this[MatchesTable.tossDecision],
             status = this[MatchesTable.status],
             scoreSummary = this[MatchesTable.scoreSummary],
-            result = this[MatchesTable.result],
+            result = when {
+                this[MatchesTable.status] != MatchStatus.COMPLETED -> null
+                else -> MatchResult(
+                    winner = this[MatchesTable.resultWinner],
+                    margin = this[MatchesTable.resultMargin] ?: 0,
+                    marginUnit = this[MatchesTable.resultMarginUnit],
+                )
+            },
         )
     }
 
@@ -189,10 +200,16 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             runsOffBat = this[DeliveriesTable.runsOffBat],
             extra = this[DeliveriesTable.extra],
             extraRuns = this[DeliveriesTable.extraRuns],
-            wicket = if (kind != null && out != null) Wicket(kind, out) else null,
+            wicket = if (kind != null && out != null) Wicket(kind, out, this[DeliveriesTable.fielderId]) else null,
             timestamp = this[DeliveriesTable.createdAt],
         )
     }
+}
+
+private fun UpdateBuilder<*>.setResult(match: Match) {
+    this[MatchesTable.resultWinner] = match.result?.winner
+    this[MatchesTable.resultMargin] = match.result?.margin
+    this[MatchesTable.resultMarginUnit] = match.result?.marginUnit
 }
 
 /** SQLSTATE 23505 means a unique or primary-key violation in both H2 and Postgres. */

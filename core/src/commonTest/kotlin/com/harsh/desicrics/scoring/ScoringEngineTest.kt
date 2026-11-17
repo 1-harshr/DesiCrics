@@ -3,7 +3,9 @@ package com.harsh.desicrics.scoring
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
 import com.harsh.desicrics.model.TeamSide
@@ -89,7 +91,7 @@ class ScoringEngineTest {
         assertEquals(1, innings.wickets)
         assertNull(innings.strikerId)
         assertEquals("a2", innings.nonStrikerId)
-        assertEquals("b Dev", innings.batters.first().dismissal)
+        assertEquals(Dismissal(DismissalKind.BOWLED, bowler = Player("b1", "Dev"), fielder = null), innings.batters.first().dismissal)
         assertEquals(1, innings.bowlers.single().wickets)
         assertEquals(listOf("a3"), innings.yetToBat.map { it.id })
     }
@@ -108,7 +110,7 @@ class ScoringEngineTest {
         ball("b1", "b2", "a1", runs = 6, innings = 2)
         val done = state()
         assertTrue(done.isComplete)
-        assertEquals("Royals won by 2 wickets", done.result)
+        assertEquals(MatchResult(TeamSide.B, 2, MarginUnit.WICKETS), done.result)
         assertEquals("Strikers 4/2 (0.3) · Royals 6/0 (0.1)", done.scoreSummary)
     }
 
@@ -118,6 +120,49 @@ class ScoringEngineTest {
         repeat(12) { i -> ball("b1", "b2", if (i < 6) "a1" else "a2", innings = 2) }
         val done = state()
         assertTrue(done.isComplete)
-        assertEquals("Strikers won by 24 runs", done.result)
+        assertEquals(MatchResult(TeamSide.A, 24, MarginUnit.RUNS), done.result)
+    }
+
+    @Test
+    fun levelScoresTie() {
+        repeat(6) { ball("a1", "a2", "b1", runs = 1) }
+        repeat(6) { ball("a2", "a1", "b2") }
+        repeat(6) { ball("b1", "b2", "a1", runs = 1, innings = 2) }
+        repeat(6) { ball("b2", "b1", "a2", innings = 2) }
+        assertEquals(MatchResult.Tie, state().result)
+    }
+
+    @Test
+    fun runOutKeepsCompletedRunsAndNamesTheFielder() {
+        // One run completed, then the non-striker is run out at the striker's end.
+        ball("a1", "a2", "b1", runs = 1, wicket = Wicket(DismissalKind.RUN_OUT, "a2", fielderId = "b3"))
+        val innings = state().current
+        assertEquals(1, innings.runs)
+        assertEquals(1, innings.batters.first { it.player.id == "a1" }.runs)
+        assertNull(innings.strikerId)
+        assertEquals("a1", innings.nonStrikerId)
+        assertEquals(Dismissal(DismissalKind.RUN_OUT, bowler = null, fielder = Player("b3", "Farhan")), innings.batters.first { it.player.id == "a2" }.dismissal)
+        assertEquals(0, innings.bowlers.single().wickets)
+    }
+
+    @Test
+    fun stumpedOffAWideCountsTheWideButNotABall() {
+        ball("a1", "a2", "b1", extra = ExtraType.WIDE, extraRuns = 1, wicket = Wicket(DismissalKind.STUMPED, "a1", "b2"))
+        val innings = state().current
+        assertEquals(1, innings.runs)
+        assertEquals(0, innings.legalBalls)
+        assertEquals(1, innings.wickets)
+        assertEquals(0, innings.batters.first().balls)
+        assertEquals(1, innings.bowlers.single().wickets)
+    }
+
+    @Test
+    fun wicketOnTheLastBallOfAnOverLeavesTheNewBatterAtTheNonStrikersEnd() {
+        repeat(5) { ball("a1", "a2", "b1") }
+        ball("a1", "a2", "b1", wicket = Wicket(DismissalKind.BOWLED, "a1"))
+        val innings = state().current
+        assertEquals("a2", innings.strikerId)
+        assertNull(innings.nonStrikerId)
+        assertNull(innings.bowlerId)
     }
 }

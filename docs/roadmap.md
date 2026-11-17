@@ -44,7 +44,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 **Goal:** two teams play a full limited-overs match scored ball by ball, with a correct scorecard at the end.
 
 ### Level 1 · Playable
-- 🟡 Delivery rules engine with tests
+- ✅ Delivery rules engine with tests: extras, wickets off extras, fielders, innings end, typed results and errors
 - ⬜ Rebuild home, new match and scoring screens in Crease, moving their text to string resources
 - ⬜ Quick match: ad-hoc teams, typed player names, overs
 - ⬜ Toss sheet

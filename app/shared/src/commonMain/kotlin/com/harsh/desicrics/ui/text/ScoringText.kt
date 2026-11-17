@@ -1,0 +1,135 @@
+package com.harsh.desicrics.ui.text
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.model.DismissalKind
+import com.harsh.desicrics.model.MarginUnit
+import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchResult
+import com.harsh.desicrics.model.Player
+import com.harsh.desicrics.model.Team
+import com.harsh.desicrics.model.TeamSide
+import com.harsh.desicrics.model.TossDecision
+import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.scoring.DeliveryError
+import com.harsh.desicrics.scoring.Dismissal
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
+
+/** "Strikers won by 24 runs" or "Match tied". */
+@Composable
+fun resultText(match: Match, result: MatchResult): String {
+    val winner = result.winner ?: return stringResource(Res.string.match_result_tie)
+    val plural = when (result.marginUnit) {
+        MarginUnit.WICKETS -> Res.plurals.match_result_won_by_wickets
+        MarginUnit.RUNS, null -> Res.plurals.match_result_won_by_runs
+    }
+    return pluralStringResource(plural, result.margin, match.team(winner).name, result.margin)
+}
+
+/** The scorebook line under a batter: "c Rohit b Bumrah", "run out (Jadeja)", "not out". */
+@Composable
+fun dismissalText(dismissal: Dismissal?): String {
+    if (dismissal == null) return stringResource(Res.string.scorecard_not_out)
+    val bowler = dismissal.bowler?.name.orEmpty()
+    val fielder = dismissal.fielder?.name
+    return when (dismissal.kind) {
+        DismissalKind.BOWLED -> stringResource(Res.string.scorecard_out_bowled, bowler)
+        DismissalKind.CAUGHT -> when {
+            fielder == null -> stringResource(Res.string.scorecard_out_caught_no_fielder, bowler)
+            dismissal.fielder == dismissal.bowler -> stringResource(Res.string.scorecard_out_caught_and_bowled, bowler)
+            else -> stringResource(Res.string.scorecard_out_caught, fielder, bowler)
+        }
+        DismissalKind.LBW -> stringResource(Res.string.scorecard_out_lbw, bowler)
+        DismissalKind.RUN_OUT ->
+            if (fielder == null) stringResource(Res.string.scorecard_out_run_out_no_fielder)
+            else stringResource(Res.string.scorecard_out_run_out, fielder)
+        DismissalKind.STUMPED ->
+            if (fielder == null) stringResource(Res.string.scorecard_out_stumped_no_fielder, bowler)
+            else stringResource(Res.string.scorecard_out_stumped, fielder, bowler)
+        DismissalKind.HIT_WICKET -> stringResource(Res.string.scorecard_out_hit_wicket, bowler)
+    }
+}
+
+val DeliveryError.label: StringResource
+    get() = when (this) {
+        DeliveryError.MATCH_OVER -> Res.string.scoring_error_match_over
+        DeliveryError.STALE -> Res.string.scoring_error_stale
+        DeliveryError.WRONG_INNINGS -> Res.string.scoring_error_wrong_innings
+        DeliveryError.SAME_BATTER -> Res.string.scoring_error_same_batter
+        DeliveryError.BATTER_NOT_IN_TEAM -> Res.string.scoring_error_batter_not_in_team
+        DeliveryError.BATTER_ALREADY_OUT -> Res.string.scoring_error_batter_already_out
+        DeliveryError.WRONG_STRIKER -> Res.string.scoring_error_wrong_striker
+        DeliveryError.WRONG_NON_STRIKER -> Res.string.scoring_error_wrong_non_striker
+        DeliveryError.BOWLER_NOT_IN_TEAM -> Res.string.scoring_error_bowler_not_in_team
+        DeliveryError.OVER_NOT_FINISHED -> Res.string.scoring_error_over_not_finished
+        DeliveryError.CONSECUTIVE_OVERS -> Res.string.scoring_error_consecutive_overs
+        DeliveryError.RUNS_OUT_OF_RANGE -> Res.string.scoring_error_runs_out_of_range
+        DeliveryError.EXTRA_RUNS_ON_LEGAL_BALL -> Res.string.scoring_error_extra_runs_on_legal_ball
+        DeliveryError.INVALID_WIDE -> Res.string.scoring_error_invalid_wide
+        DeliveryError.INVALID_NO_BALL -> Res.string.scoring_error_invalid_no_ball
+        DeliveryError.INVALID_BYES -> Res.string.scoring_error_invalid_byes
+        DeliveryError.OUT_PLAYER_NOT_AT_CREASE -> Res.string.scoring_error_out_player_not_at_crease
+        DeliveryError.ONLY_STRIKER_CAN_BE_OUT -> Res.string.scoring_error_only_striker_can_be_out
+        DeliveryError.DISMISSAL_NOT_POSSIBLE_ON_EXTRA -> Res.string.scoring_error_dismissal_not_possible
+        DeliveryError.NO_RUNS_ON_DISMISSAL -> Res.string.scoring_error_no_runs_on_dismissal
+        DeliveryError.FIELDER_NOT_ALLOWED -> Res.string.scoring_error_fielder_not_allowed
+        DeliveryError.FIELDER_NOT_IN_TEAM -> Res.string.scoring_error_fielder_not_in_team
+    }
+
+// Previews: sample teams and players only; every line of text comes from string resources.
+
+private val Rohit = Player("p1", "Rohit")
+private val Bumrah = Player("p2", "Bumrah")
+private val Jadeja = Player("p3", "Jadeja")
+
+private val PreviewMatch = Match(
+    id = "preview",
+    createdBy = "preview",
+    createdAt = 0,
+    teamA = Team("Andheri Strikers", emptyList()),
+    teamB = Team("Powai XI", emptyList()),
+    oversPerInnings = 20,
+    tossWinner = TeamSide.A,
+    tossDecision = TossDecision.BAT,
+)
+
+private val PreviewDismissals = listOf(
+    null,
+    Dismissal(DismissalKind.BOWLED, Bumrah, null),
+    Dismissal(DismissalKind.CAUGHT, Bumrah, Rohit),
+    Dismissal(DismissalKind.CAUGHT, Bumrah, Bumrah),
+    Dismissal(DismissalKind.CAUGHT, Bumrah, null),
+    Dismissal(DismissalKind.LBW, Bumrah, null),
+    Dismissal(DismissalKind.RUN_OUT, null, Jadeja),
+    Dismissal(DismissalKind.RUN_OUT, null, null),
+    Dismissal(DismissalKind.STUMPED, Bumrah, Rohit),
+    Dismissal(DismissalKind.HIT_WICKET, Bumrah, null),
+)
+
+private val PreviewResults = listOf(
+    MatchResult(TeamSide.A, 24, MarginUnit.RUNS),
+    MatchResult(TeamSide.B, 1, MarginUnit.WICKETS),
+    MatchResult.Tie,
+)
+
+@Preview
+@Composable
+private fun ScoringTextPreview() = DesiTheme(darkTheme = false) {
+    Column(
+        Modifier.background(DesiTheme.colors.bg).padding(DesiTheme.space.s4),
+        verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
+    ) {
+        PreviewDismissals.forEach { Text(dismissalText(it), style = DesiTheme.type.body, color = DesiTheme.colors.ink) }
+        PreviewResults.forEach { Text(resultText(PreviewMatch, it), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.brand) }
+        Text(stringResource(DeliveryError.CONSECUTIVE_OVERS.label), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+    }
+}

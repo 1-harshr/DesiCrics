@@ -8,7 +8,10 @@ import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.auth.TokenVerifier
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
+import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchResult
+import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
@@ -145,6 +148,29 @@ class ApplicationTest {
         val undone = client.delete("/matches/${match.id}/deliveries/last") { bearerAuth("test-asha") }.body<MatchDetails>()
         assertEquals(listOf(four.seq), undone.deliveries.map { it.seq })
         assertEquals("Strikers 4/0 (0.1)", undone.match.scoreSummary)
+    }
+
+    @Test
+    fun completedMatchKeepsItsResultAndFielders() = apiTest { client ->
+        client.setUpProfile("asha")
+        val match = client.createMatch("asha").match
+        val (a1, a2) = match.teamA.players
+        val (b1, b2) = match.teamB.players
+
+        // Strikers make 4 off their one over.
+        repeat(6) { seq ->
+            val ball = Delivery(seq, innings = 1, strikerId = a1.id, nonStrikerId = a2.id, bowlerId = b1.id, runsOffBat = if (seq == 0) 4 else 0)
+            assertEquals(HttpStatusCode.OK, client.record("asha", match.id, ball).status)
+        }
+        // Royals have two players, so one wicket is all out.
+        val caught = Delivery(6, innings = 2, strikerId = b1.id, nonStrikerId = b2.id, bowlerId = a1.id, wicket = Wicket(DismissalKind.CAUGHT, b1.id, fielderId = a2.id))
+        assertEquals(HttpStatusCode.OK, client.record("asha", match.id, caught).status)
+
+        val listed = client.get("/matches") { bearerAuth("test-dev") }.body<List<Match>>().single { it.id == match.id }
+        assertEquals(MatchStatus.COMPLETED, listed.status)
+        assertEquals(MatchResult(TeamSide.A, 4, MarginUnit.RUNS), listed.result)
+        val details = client.get("/matches/${match.id}") { bearerAuth("test-dev") }.body<MatchDetails>()
+        assertEquals(a2.id, details.deliveries.last().wicket?.fielderId)
     }
 
     @Test

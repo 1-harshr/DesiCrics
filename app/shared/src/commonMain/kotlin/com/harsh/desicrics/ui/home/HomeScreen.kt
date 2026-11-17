@@ -1,5 +1,6 @@
 package com.harsh.desicrics.ui.home
 
+import com.harsh.desicrics.ui.text.resultText
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -97,7 +98,7 @@ private fun MatchCard(match: Match, isMine: Boolean, onClick: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
             )
             match.result?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
+                Text(resultText(match, it), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Medium)
             }
             if (isMine) {
                 Text("You're the scorer", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)

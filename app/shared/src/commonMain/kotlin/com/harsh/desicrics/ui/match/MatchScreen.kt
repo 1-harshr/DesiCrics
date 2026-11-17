@@ -1,6 +1,5 @@
 package com.harsh.desicrics.ui.match
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -31,29 +29,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.harsh.desicrics.designsystem.component.Ball
+import com.harsh.desicrics.designsystem.component.BallKind
+import com.harsh.desicrics.designsystem.component.ChoiceChips
+import com.harsh.desicrics.designsystem.component.DesiScaffold
+import com.harsh.desicrics.designsystem.component.FullScreenLoading
+import com.harsh.desicrics.designsystem.component.SectionLabel
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.scoring.InningsState
 import com.harsh.desicrics.scoring.MatchState
-import com.harsh.desicrics.designsystem.component.DesiScaffold
-import com.harsh.desicrics.designsystem.component.ChoiceChips
-import com.harsh.desicrics.designsystem.component.FullScreenLoading
 import com.harsh.desicrics.ui.components.PlayerPickerDialog
 import com.harsh.desicrics.ui.components.RunsPickerDialog
-import com.harsh.desicrics.designsystem.component.SectionLabel
-import com.harsh.desicrics.designsystem.component.Ball
-import com.harsh.desicrics.designsystem.component.BallKind
-import com.harsh.desicrics.designsystem.component.BallChip as DsBallChip
+import com.harsh.desicrics.ui.text.dismissalText
+import com.harsh.desicrics.ui.text.resultText
 import com.harsh.desicrics.util.format2
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import com.harsh.desicrics.designsystem.component.BallChip as DsBallChip
 
 @Composable
 fun MatchScreen(
@@ -144,7 +143,7 @@ private fun ScoreHeader(state: MatchState) {
             }
             Text(details.joinToString(" · "), style = MaterialTheme.typography.bodyMedium)
             state.result?.let {
-                Text(it, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
+                Text(resultText(state.match, it), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 8.dp))
             }
             if (innings.currentOver.isNotEmpty() && !state.isComplete) {
                 Text("This over", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(top = 8.dp))
@@ -370,7 +369,7 @@ private fun InningsCard(innings: InningsState) {
             innings.batters.forEach { card ->
                 StatRow(
                     listOf(card.player.name, "${card.runs}", "${card.balls}", "${card.fours}", "${card.sixes}", card.strikeRate.format2()),
-                    subtitle = card.dismissal ?: "not out",
+                    subtitle = dismissalText(card.dismissal),
                 )
             }
             val extras = innings.extras

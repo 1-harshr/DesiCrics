@@ -16,7 +16,7 @@ data class Match(
     val status: MatchStatus = MatchStatus.SETUP,
     /** Denormalised for list screens, e.g. "Strikers 145/6 (20.0) · Royals 98/3 (12.4)". */
     val scoreSummary: String = "",
-    val result: String? = null,
+    val result: MatchResult? = null,
 ) {
     val battingFirst: TeamSide
         get() = if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other
@@ -57,3 +57,20 @@ enum class MatchStatus {
     IN_PROGRESS,
     COMPLETED,
 }
+
+/** How a completed match ended. [winner] is null for a tie. */
+@Serializable
+data class MatchResult(
+    val winner: TeamSide?,
+    val margin: Int = 0,
+    val marginUnit: MarginUnit? = null,
+) {
+    val isTie: Boolean get() = winner == null
+
+    companion object {
+        val Tie = MatchResult(winner = null)
+    }
+}
+
+@Serializable
+enum class MarginUnit { RUNS, WICKETS }

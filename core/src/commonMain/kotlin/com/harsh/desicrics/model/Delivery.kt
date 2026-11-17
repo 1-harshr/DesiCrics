@@ -48,14 +48,30 @@ enum class ExtraType(val shortName: String) {
 data class Wicket(
     val kind: DismissalKind,
     val playerOutId: String,
+    /** Catcher, run-out fielder or keeper. Optional: casual scorers often skip it. */
+    val fielderId: String? = null,
 )
 
 @Serializable
-enum class DismissalKind(val displayName: String, val creditedToBowler: Boolean) {
-    BOWLED("Bowled", true),
-    CAUGHT("Caught", true),
-    LBW("LBW", true),
-    RUN_OUT("Run out", false),
-    STUMPED("Stumped", true),
-    HIT_WICKET("Hit wicket", true),
+enum class DismissalKind(
+    val displayName: String,
+    val creditedToBowler: Boolean,
+    /** Whether a fielder can be named: the catcher, the run-out fielder or the keeper. */
+    val hasFielder: Boolean,
+    /** Whether runs can be scored on the ball. Only a run out lets completed runs stand. */
+    val allowsRuns: Boolean,
+) {
+    BOWLED("Bowled", creditedToBowler = true, hasFielder = false, allowsRuns = false),
+    CAUGHT("Caught", creditedToBowler = true, hasFielder = true, allowsRuns = false),
+    LBW("LBW", creditedToBowler = true, hasFielder = false, allowsRuns = false),
+    RUN_OUT("Run out", creditedToBowler = false, hasFielder = true, allowsRuns = true),
+    STUMPED("Stumped", creditedToBowler = true, hasFielder = true, allowsRuns = false),
+    HIT_WICKET("Hit wicket", creditedToBowler = true, hasFielder = false, allowsRuns = false);
+
+    /** Whether this dismissal can happen on a ball with [extra]. */
+    fun possibleOn(extra: ExtraType?): Boolean = when (extra) {
+        null -> true
+        ExtraType.WIDE -> this == RUN_OUT || this == STUMPED || this == HIT_WICKET
+        ExtraType.NO_BALL, ExtraType.BYE, ExtraType.LEG_BYE -> this == RUN_OUT
+    }
 }
