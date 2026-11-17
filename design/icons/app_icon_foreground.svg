@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108">
+  <!-- DesiCrics launcher foreground: a white ball with a turf-green seam, moving left to right.
+       Keep everything inside the 66dp safe zone (x/y 21–87). -->
+  <!-- Speed lines -->
+  <g stroke="#DDF1E6" stroke-width="3.6" stroke-linecap="round" fill="none">
+    <path d="M33 46 H43"/>
+    <path d="M28 54 H43" stroke-opacity="0.85"/>
+    <path d="M35 62 H43" stroke-opacity="0.7"/>
+  </g>
+  <!-- Ball -->
+  <circle cx="63" cy="54" r="15" fill="#F5F7F4"/>
+  <!-- Seam: two curves through the middle with stitches on the outside -->
+  <g stroke="#0B7A4B" stroke-width="1.6" stroke-linecap="round" fill="none">
+    <path d="M60.5 39.2 Q56 54 60.5 68.8"/>
+    <path d="M65.5 39.2 Q61 54 65.5 68.8"/>
+  </g>
+  <g stroke="#0B7A4B" stroke-width="1.1" stroke-linecap="round">
+    <path d="M56.4 45 l2.6 0.5"/>
+    <path d="M55.5 49.5 l2.7 0.2"/>
+    <path d="M55.3 54 l2.7 0"/>
+    <path d="M55.5 58.5 l2.7 -0.2"/>
+    <path d="M56.4 63 l2.6 -0.5"/>
+    <path d="M65.2 45.5 l2.6 -0.5"/>
+    <path d="M64.4 49.7 l2.7 -0.2"/>
+    <path d="M64.2 54 l2.7 0"/>
+    <path d="M64.4 58.3 l2.7 0.2"/>
+    <path d="M65.2 62.5 l2.6 0.5"/>
+  </g>
+</svg>

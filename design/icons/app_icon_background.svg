@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108">
+  <!-- Turf green with a lighter pitch strip and a popping crease line -->
+  <rect width="108" height="108" fill="#0B7A4B"/>
+  <rect x="34" y="0" width="40" height="108" fill="#0F8753"/>
+  <rect x="30" y="76" width="48" height="2.4" rx="1.2" fill="#DDF1E6" fill-opacity="0.55"/>
+</svg>
