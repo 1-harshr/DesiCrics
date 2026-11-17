@@ -13,8 +13,12 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import dev.gitlive.firebase.auth.GoogleAuthProvider
 import org.koin.compose.koinInject
 
-/** Provided by the Android app, since the web client ID comes from its google-services.json. */
-class GoogleSignInConfig(val webClientId: String)
+/**
+ * Provided by the Android app, since the web client ID comes from its google-services.json. Null when
+ * that file has no web OAuth client yet (Google sign-in not enabled in Firebase); the Google button is
+ * then hidden.
+ */
+class GoogleSignInConfig(val webClientId: String?)
 
 @Composable
 actual fun rememberSocialSignIn(): SocialSignIn {
@@ -30,13 +34,14 @@ private class AndroidSocialSignIn(
 ) : SocialSignIn {
 
     // Sign in with Apple on Android needs Firebase's web OAuth flow; left out of the MVP.
-    override val providers = listOf(SocialProvider.GOOGLE)
+    override val providers = if (config.webClientId != null) listOf(SocialProvider.GOOGLE) else emptyList()
 
     override suspend fun signIn(provider: SocialProvider): SocialSignInResult? {
         require(provider == SocialProvider.GOOGLE) { "$provider sign-in isn't supported on Android" }
+        val webClientId = checkNotNull(config.webClientId) { "Google sign-in isn't configured" }
 
         val request = GetCredentialRequest.Builder()
-            .addCredentialOption(GetSignInWithGoogleOption.Builder(config.webClientId).build())
+            .addCredentialOption(GetSignInWithGoogleOption.Builder(webClientId).build())
             .build()
         val credential = try {
             CredentialManager.create(context).getCredential(context, request).credential

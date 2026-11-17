@@ -53,7 +53,7 @@ Firebase config files are gitignored (this is a public repo), so each developer 
    SMS region policy, and add test numbers. Real SMS needs the Blaze plan.
 2. **Android:** register package `com.harsh.desicrics`, add your debug SHA-1 and SHA-256
    (`./gradlew :app:androidApp:signingReport`), and put `google-services.json` in `app/androidApp/`.
-3. If your Firebase project isn't `desicrics-d5fbe`, run the server with `FIREBASE_PROJECT_ID=<your-project>`.
+3. If your Firebase project isn't `desicrics-45117`, run the server with `FIREBASE_PROJECT_ID=<your-project>`.
 
 ### Running the apps
 

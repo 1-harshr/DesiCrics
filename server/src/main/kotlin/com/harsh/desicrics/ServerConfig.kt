@@ -8,13 +8,13 @@ package com.harsh.desicrics
  */
 data class ServerConfig(
     val port: Int = 8080,
-    val firebaseProjectId: String = "desicrics-d5fbe",
+    val firebaseProjectId: String = "desicrics-45117",
     val database: DatabaseConfig = DatabaseConfig(),
 ) {
     companion object {
         fun fromEnv(env: Map<String, String> = System.getenv()) = ServerConfig(
             port = env["PORT"]?.toIntOrNull() ?: 8080,
-            firebaseProjectId = env["FIREBASE_PROJECT_ID"] ?: "desicrics-d5fbe",
+            firebaseProjectId = env["FIREBASE_PROJECT_ID"] ?: "desicrics-45117",
             database = DatabaseConfig(
                 url = env["DATABASE_URL"] ?: DatabaseConfig.LOCAL_URL,
                 user = env["DATABASE_USER"] ?: DatabaseConfig.LOCAL_USER,
