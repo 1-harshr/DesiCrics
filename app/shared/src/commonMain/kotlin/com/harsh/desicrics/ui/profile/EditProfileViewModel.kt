@@ -24,6 +24,8 @@ data class ProfileFormState(
     val loading: Boolean = true,
     val name: String = "",
     val phone: String = "",
+    /** The number came from phone sign-in, so it's already verified and can't be edited here. */
+    val phoneVerified: Boolean = false,
     val city: String = "",
     val role: PlayerRole = PlayerRole.BATTER,
     val battingStyle: BattingStyle = BattingStyle.RIGHT_HAND,
@@ -50,6 +52,7 @@ class EditProfileViewModel(
                     loading = false,
                     name = it.name,
                     phone = it.phone,
+                    phoneVerified = user.phone != null && user.phone == it.phone,
                     city = it.city,
                     role = it.role,
                     battingStyle = it.battingStyle,
@@ -59,6 +62,7 @@ class EditProfileViewModel(
                 loading = false,
                 name = user.displayName ?: authRepository.displayNameHint.orEmpty(),
                 phone = user.phone.orEmpty(),
+                phoneVerified = user.phone != null,
             )
         }
     }

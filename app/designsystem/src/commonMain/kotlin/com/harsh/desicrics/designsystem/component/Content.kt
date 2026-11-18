@@ -142,7 +142,7 @@ fun PlayerRow(
     }
 }
 
-/** A 40dp circle with a photo, the name's first letter, or a person icon. */
+/** A circle (40dp by default) with a photo, the name's initials ("RI" for Rohan Iyer), or a person icon. */
 @Composable
 fun Avatar(name: String, image: (@Composable () -> Unit)? = null, modifier: Modifier = Modifier, size: Int = 40) {
     val colors = DesiTheme.colors
@@ -150,13 +150,25 @@ fun Avatar(name: String, image: (@Composable () -> Unit)? = null, modifier: Modi
         modifier.size(size.dp).clip(DesiTheme.radius.full).background(colors.brandSoft).clearAndSetSemantics {},
         contentAlignment = Alignment.Center,
     ) {
-        val initial = name.trim().firstOrNull()?.uppercaseChar()
+        val initials = initials(name)
         when {
             image != null -> image()
-            initial != null -> Text(initial.toString(), style = DesiTheme.type.titleMd, color = colors.brand)
+            initials.isNotEmpty() -> Text(
+                initials,
+                style = if (size >= 56) DesiTheme.type.scoreMd else DesiTheme.type.titleMd,
+                color = colors.brand,
+            )
             else -> Icon(painterResource(DesiIcons.Person), contentDescription = null, tint = colors.brand)
         }
     }
+}
+
+/** First letters of the first and last words: "Rohan Iyer" → "RI", "Zoya" → "Z". */
+private fun initials(name: String): String {
+    val words = name.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
+    return listOfNotNull(words.firstOrNull(), words.drop(1).lastOrNull())
+        .mapNotNull { it.firstOrNull()?.uppercaseChar() }
+        .joinToString("")
 }
 
 /** Shows how many scored balls are still waiting to reach the server. Hidden when nothing is pending. */

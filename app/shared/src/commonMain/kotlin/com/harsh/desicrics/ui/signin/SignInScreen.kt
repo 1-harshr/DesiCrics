@@ -62,6 +62,9 @@ import com.harsh.desicrics.designsystem.icon.DesiIllustrations
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.resources.Res
 import com.harsh.desicrics.resources.app_name
+import com.harsh.desicrics.resources.common_phone_country
+import com.harsh.desicrics.resources.common_phone_placeholder
+import com.harsh.desicrics.resources.common_phone_prefix
 import com.harsh.desicrics.resources.signin_change_number
 import com.harsh.desicrics.resources.signin_code_hint
 import com.harsh.desicrics.resources.signin_code_sent
@@ -70,11 +73,8 @@ import com.harsh.desicrics.resources.signin_continue_with
 import com.harsh.desicrics.resources.signin_hero_subtitle
 import com.harsh.desicrics.resources.signin_hero_title
 import com.harsh.desicrics.resources.signin_other_ways
-import com.harsh.desicrics.resources.signin_phone_country
 import com.harsh.desicrics.resources.signin_phone_hint
 import com.harsh.desicrics.resources.signin_phone_label
-import com.harsh.desicrics.resources.signin_phone_placeholder
-import com.harsh.desicrics.resources.signin_phone_prefix
 import com.harsh.desicrics.resources.signin_phone_title
 import com.harsh.desicrics.resources.signin_resend_code
 import com.harsh.desicrics.resources.signin_send_code
@@ -264,7 +264,7 @@ private fun PhoneForm(
     onSocialSignIn: (SocialProvider) -> Unit,
 ) {
     val enabled = state.inProgress == null
-    val prefix = stringResource(Res.string.signin_phone_prefix)
+    val prefix = stringResource(Res.string.common_phone_prefix)
     var digits by rememberSaveable { mutableStateOf("") }
     val complete = digits.length == PHONE_DIGITS
     val send = { if (complete) onSendCode("$prefix$digits") }
@@ -275,8 +275,8 @@ private fun PhoneForm(
         onValueChange = { digits = it },
         label = stringResource(Res.string.signin_phone_label),
         countryCode = prefix,
-        countryLabel = stringResource(Res.string.signin_phone_country),
-        placeholder = stringResource(Res.string.signin_phone_placeholder),
+        countryLabel = stringResource(Res.string.common_phone_country),
+        placeholder = stringResource(Res.string.common_phone_placeholder),
         length = PHONE_DIGITS,
         enabled = enabled,
         error = state.error?.takeIf { it == SignInError.PHONE_INVALID }?.let { stringResource(it.label) },

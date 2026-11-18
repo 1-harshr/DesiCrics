@@ -118,6 +118,32 @@ private fun ContentLight() = PreviewSurface(darkTheme = false) { ContentStates()
 @Composable
 private fun ContentDark() = PreviewSurface(darkTheme = true) { ContentStates() }
 
+// Selection
+
+@Composable
+private fun SelectionStates() {
+    PlayerCard("Rohan Iyer", namePlaceholder = "Your name", subtitle = "All-rounder · Mumbai", tags = listOf("Left-hand bat", "Right-arm off spin"))
+    PlayerCard("", namePlaceholder = "Your name", subtitle = "Batter", tags = listOf("Right-hand bat"))
+    Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+        OptionCard("Batter", "Scores the runs", DesiIcons.Bat, selected = true, onClick = {}, modifier = Modifier.weight(1f))
+        OptionCard("Bowler", "Takes the wickets", DesiIcons.Ball, selected = false, onClick = {}, modifier = Modifier.weight(1f))
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+        OptionCard("All-rounder", "Bats and bowls", DesiIcons.Cricket, selected = false, onClick = {}, modifier = Modifier.weight(1f))
+        OptionCard("Wicket-keeper", "Keeps behind the stumps", DesiIcons.Glove, selected = false, onClick = {}, modifier = Modifier.weight(1f))
+    }
+    SegmentedControl(listOf("Right-hand bat", "Left-hand bat"), selected = "Left-hand bat", label = { it }, onSelect = {})
+    SegmentedControl(listOf("Don't bowl", "Pace", "Spin"), selected = "Don't bowl", label = { it }, onSelect = {})
+}
+
+@Preview
+@Composable
+private fun SelectionLight() = PreviewSurface(darkTheme = false) { SelectionStates() }
+
+@Preview
+@Composable
+private fun SelectionDark() = PreviewSurface(darkTheme = true) { SelectionStates() }
+
 // Scoring
 
 private val PreviewOver = listOf(

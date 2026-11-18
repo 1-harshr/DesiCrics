@@ -243,6 +243,9 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `ChoiceChips` / `ChoiceSheet` | `Structure.kt` | Single-choice chips; bottom sheet of options |
 | `PhoneNumberField` | `PhoneNumberField.kt` | Label above; country pill, divider, then digits in 26sp display type grouped "98765 43210"; tick when complete |
 | `OtpField` | `OtpField.kt` | One-time code in separate boxes; one text field underneath, so paste and SMS autofill work |
+| `SegmentedControl` | `Selection.kt` | 2–4 exclusive options in one pill with a sliding raised thumb (batting hand, pace or spin) |
+| `OptionCard` | `Selection.kt` | Large choice with icon, title and one-line description, laid out in a grid; brand outline and tick when selected (playing role) |
+| `PlayerCard` | `Selection.kt` | Avatar with initials, name, role line and style tags; the live preview on profile setup |
 
 Illustrations live in `DesiIllustrations` (drawn with `Image`, not tinted). `BallMark` is the app icon's ball and speed lines, used in the sign-in header.
 

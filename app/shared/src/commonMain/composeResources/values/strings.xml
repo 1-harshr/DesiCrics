@@ -7,6 +7,11 @@
     <string name="common_empty_value">—</string>
     <string name="common_joined">%1$s · %2$s</string>
     <string name="common_try_again">Try again</string>
+    <string name="common_back">Back</string>
+    <!-- Mobile number field: India only for now -->
+    <string name="common_phone_prefix">+91</string>
+    <string name="common_phone_country">IN</string>
+    <string name="common_phone_placeholder">98765 43210</string>
 
     <!-- Session -->
     <string name="session_error_title">Couldn't load your profile</string>
@@ -18,9 +23,6 @@
     <string name="signin_phone_title">Sign in with your mobile</string>
     <string name="signin_phone_hint">We'll text you a 6-digit code.</string>
     <string name="signin_phone_label">Mobile number</string>
-    <string name="signin_phone_prefix">+91</string>
-    <string name="signin_phone_country">IN</string>
-    <string name="signin_phone_placeholder">98765 43210</string>
     <string name="signin_send_code">Send code</string>
     <string name="signin_other_ways">Other ways to sign in</string>
     <string name="signin_continue_with">Continue with %1$s</string>
@@ -58,14 +60,33 @@
     <!-- Edit profile / onboarding -->
     <string name="profile_setup_title">Set up your profile</string>
     <string name="profile_edit_title">Edit profile</string>
-    <string name="profile_setup_intro">Tell us a bit about your game. Teammates will find you by your mobile number.</string>
+    <string name="profile_setup_intro">This is how teammates and scorers will see you.</string>
+    <string name="profile_name_placeholder">Your name</string>
+    <string name="profile_section_about">About you</string>
+    <string name="profile_section_game">Your game</string>
     <string name="profile_name_label">Full name</string>
     <string name="profile_phone_label">Mobile number</string>
-    <string name="profile_phone_placeholder">+91 98765 43210</string>
+    <string name="profile_phone_help">Teammates add you to matches with this number.</string>
+    <string name="profile_phone_verified">Verified when you signed in.</string>
     <string name="profile_city_label">City (optional)</string>
     <string name="profile_role_section">Playing role</string>
+    <string name="profile_role_batter_description">Scores the runs</string>
+    <string name="profile_role_bowler_description">Takes the wickets</string>
+    <string name="profile_role_all_rounder_description">Bats and bowls</string>
+    <string name="profile_role_wicket_keeper_description">Keeps behind the stumps</string>
     <string name="profile_batting_section">Batting</string>
     <string name="profile_bowling_section">Bowling</string>
+    <string name="profile_bowling_none">Don't bowl</string>
+    <string name="profile_bowling_pace">Pace</string>
+    <string name="profile_bowling_spin">Spin</string>
+    <string name="profile_bowling_right_arm">Right arm</string>
+    <string name="profile_bowling_left_arm">Left arm</string>
+    <string name="profile_bowling_fast">Fast</string>
+    <string name="profile_bowling_medium">Medium</string>
+    <string name="profile_bowling_off_spin">Off spin</string>
+    <string name="profile_bowling_leg_spin">Leg spin</string>
+    <string name="profile_bowling_orthodox">Orthodox</string>
+    <string name="profile_bowling_wrist_spin">Wrist spin</string>
     <string name="profile_save">Save</string>
     <string name="profile_finish_setup">Let's play</string>
     <string name="profile_error_name_missing">Please enter your name</string>

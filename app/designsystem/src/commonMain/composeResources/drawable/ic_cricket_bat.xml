@@ -1,0 +1,24 @@
+<!-- Custom: a cricket bat on the Material Symbols grid (960 units, 80-unit stroke = weight 400), for "Batter". -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <group
+      android:pivotX="480"
+      android:pivotY="480"
+      android:rotation="40">
+    <!-- Blade -->
+    <path
+        android:strokeColor="#FF000000"
+        android:strokeWidth="80"
+        android:strokeLineJoin="round"
+        android:pathData="M400,340L560,340Q610,340 610,390L610,830Q610,900 540,900L420,900Q350,900 350,830L350,390Q350,340 400,340Z"/>
+    <!-- Handle -->
+    <path
+        android:strokeColor="#FF000000"
+        android:strokeWidth="80"
+        android:strokeLineCap="round"
+        android:pathData="M480,60L480,340"/>
+  </group>
+</vector>

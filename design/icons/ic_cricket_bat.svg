@@ -1,0 +1,7 @@
+<!-- Source for app/designsystem/.../drawable/ic_cricket_bat.xml. Material Symbols grid: 960 units, 80-unit stroke. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 960" width="24" height="24">
+  <g transform="rotate(40 480 480)" fill="none" stroke="#000" stroke-width="80" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M400,340L560,340Q610,340 610,390L610,830Q610,900 540,900L420,900Q350,900 350,830L350,390Q350,340 400,340Z"/>
+    <path d="M480,60L480,340"/>
+  </g>
+</svg>

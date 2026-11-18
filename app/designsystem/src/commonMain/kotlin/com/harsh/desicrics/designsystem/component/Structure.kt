@@ -32,6 +32,7 @@ import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.resources.Res
 import com.harsh.desicrics.designsystem.resources.ds_back
 import com.harsh.desicrics.designsystem.theme.DesiTheme
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -97,6 +98,7 @@ fun DesiTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     prefix: String? = null,
+    leadingIcon: DrawableResource? = null,
 ) {
     val colors = DesiTheme.colors
     OutlinedTextField(
@@ -106,6 +108,7 @@ fun DesiTextField(
         label = { Text(label) },
         placeholder = placeholder?.let { { Text(it, color = colors.muted) } },
         prefix = prefix?.let { { Text(it, style = DesiTheme.type.body, color = colors.ink) } },
+        leadingIcon = leadingIcon?.let { { Icon(painterResource(it), contentDescription = null, tint = colors.muted) } },
         supportingText = (error ?: supportingText)?.let { { Text(it) } },
         isError = error != null,
         singleLine = singleLine,
