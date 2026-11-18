@@ -13,6 +13,7 @@ import org.koin.dsl.module
 class DesiCricsApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        PushService.createChannels(this)
         initKoin {
             androidContext(this@DesiCricsApp)
             modules(

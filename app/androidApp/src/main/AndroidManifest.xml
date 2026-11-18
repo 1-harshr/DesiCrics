@@ -55,6 +55,14 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/match_widget" />
         </receiver>
+        <!-- Pushes that arrive while the app is in the background are shown by Firebase; these make them use
+             the app's own channel and icon rather than a generic "Miscellaneous" one. -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="match_updates" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_launcher_monochrome" />
         <service
             android:name=".PushService"
             android:exported="false">

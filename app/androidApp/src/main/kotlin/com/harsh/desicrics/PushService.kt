@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.app.NotificationCompat
@@ -46,7 +47,6 @@ class PushService : FirebaseMessagingService() {
 
     private fun showUpdate(message: RemoteMessage) {
         val body = message.notification?.body ?: return
-        channel(CHANNEL, R.string.notifications_channel, NotificationManager.IMPORTANCE_DEFAULT)
         val notification = NotificationCompat.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_launcher_monochrome)
             .setContentTitle(message.notification?.title ?: getString(R.string.app_name))
@@ -60,7 +60,6 @@ class PushService : FirebaseMessagingService() {
     /** One quiet notification per followed match, updated in place each over and wicket until it ends. */
     private fun showLiveScore(data: Map<String, String>) {
         val matchId = data["matchId"] ?: return
-        channel(LIVE_CHANNEL, R.string.live_scores_channel, NotificationManager.IMPORTANCE_LOW)
         val notification = NotificationCompat.Builder(this, LIVE_CHANNEL)
             .setSmallIcon(R.drawable.ic_launcher_monochrome)
             .setContentTitle(data["title"] ?: getString(R.string.app_name))
@@ -75,9 +74,7 @@ class PushService : FirebaseMessagingService() {
         post(matchId, LIVE_ID, notification)
     }
 
-    private fun channel(id: String, name: Int, importance: Int) {
-        getSystemService(NotificationManager::class.java).createNotificationChannel(NotificationChannel(id, getString(name), importance))
-    }
+
 
     /** Opens the match through the same link handling as a shared /m/ link. */
     private fun openMatch(matchId: String?, requestCode: Int): PendingIntent {
@@ -103,11 +100,19 @@ class PushService : FirebaseMessagingService() {
         super.onDestroy()
     }
 
-    private companion object {
+    companion object {
+        /** Also the default channel in the manifest, for pushes Firebase shows while the app is in the background. */
         const val CHANNEL = "match_updates"
         const val LIVE_CHANNEL = "live_scores"
         /** Live scores are told apart by their match ID tag; the ID itself is shared. */
         const val LIVE_ID = 1
         const val LIVE_TIMEOUT_MS = 3 * 60 * 60 * 1000L
+
+        /** Both channels, created when the app starts so a background push already has its own. */
+        fun createChannels(context: Context) {
+            val manager = context.getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(NotificationChannel(CHANNEL, context.getString(R.string.notifications_channel), NotificationManager.IMPORTANCE_DEFAULT))
+            manager.createNotificationChannel(NotificationChannel(LIVE_CHANNEL, context.getString(R.string.live_scores_channel), NotificationManager.IMPORTANCE_LOW))
+        }
     }
 }

@@ -61,6 +61,7 @@ Phases 1 (Level 3) to 5 were built in one unattended stretch. These are the ques
 
 - The real APK was driven on an emulator against the new server (on a throwaway Postgres), through onboarding, a team with a placeholder, a match from a saved squad to its result, profile stats, a best-of-three tournament to its second fixture, and the home screen widget. That run found four bugs (a Google sign-up blocked by Firebase's empty phone string, a fixture card showing its placeholder toss, "1 matches", and a stretched form chart), all fixed in 8e53b2a.
 
+- Push was tested on the emulator with real FCM messages to its own token: the app registered the token with the server after sign-in, and messages showed both in the background (shown by Firebase) and in the foreground (shown by `PushService`). That test found background pushes landing in Firebase's generic channel; the app now creates its channels at start and declares the default. Crashlytics 20.1.0 and Analytics initialise on start. Not tested: the server sending through Firebase Admin (needs the service account), silent live-score data messages (the console tool only sends notifications), and a crash report reaching the console.
 - Every server test also runs on real Postgres 17 (`TEST_POSTGRES_URL`, and in CI), not just H2.
 - Screenshot tests (Robolectric + Roborazzi) render the main screens to `app/shared/screenshots/`. Looking at them caught two bugs the compiler and tests couldn't: notification text cut to one line, and the tournament table never being shown in tests.
 
