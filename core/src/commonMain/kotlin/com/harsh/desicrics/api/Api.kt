@@ -5,6 +5,7 @@ import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
@@ -61,6 +62,7 @@ data class CreateMatchRequest(
     val oversPerInnings: Int,
     val tossWinner: TeamSide,
     val tossDecision: TossDecision,
+    val rules: MatchRules = MatchRules(),
 ) {
     /** Checked on the device for instant feedback and again on the server. */
     fun validate(): MatchSetupError? = when {
@@ -71,6 +73,7 @@ data class CreateMatchRequest(
         teamAPlayers.size > MAX_PLAYERS || teamBPlayers.size > MAX_PLAYERS -> MatchSetupError.TOO_MANY_PLAYERS
         (teamAPlayers + teamBPlayers).any { it.isBlank() || it.length > MAX_NAME } -> MatchSetupError.PLAYER_NAME_INVALID
         oversPerInnings !in OVERS -> MatchSetupError.OVERS_OUT_OF_RANGE
+        !rules.isValid() -> MatchSetupError.RULES_INVALID
         else -> null
     }
 
@@ -93,6 +96,7 @@ enum class MatchSetupError(val message: String) {
     TOO_MANY_PLAYERS("Teams can have at most 20 players"),
     PLAYER_NAME_INVALID("Player names must be 1–60 characters"),
     OVERS_OUT_OF_RANGE("Overs must be between 1 and 50"),
+    RULES_INVALID("Some of the match rules are out of range"),
 }
 
 /** A match with every ball bowled and every event so far, which is everything a scorecard needs. */

@@ -81,6 +81,7 @@ class MatchService(
             tossWinner = request.tossWinner,
             tossDecision = request.tossDecision,
             status = MatchStatus.IN_PROGRESS,
+            rules = request.rules,
         )
         matches.create(match)
         return MatchDetails(match, emptyList())

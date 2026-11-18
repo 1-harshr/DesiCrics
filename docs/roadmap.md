@@ -56,6 +56,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 ### Level 2 · Complete
 - ✅ All dismissals in the laws except timed out, plus "Other" for local rules; penalty runs to either side
 - ✅ Retired hurt (can return) / retired out, swap ends, change bowler mid-over, add latecomers and substitutes mid-match
+- ✅ Per-match rules with presets, each off / warn / enforce: last man stands, retired batters' return, retire at a score, overs per bowler, back-to-back overs, wide and no-ball runs and re-bowling, free hits
 - ⬜ Revise target (rain), declare
 - ✅ Scorecard and over-by-over tabs
 - ✅ Auto-generated commentary text (per ball, on the Overs tab)

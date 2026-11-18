@@ -54,6 +54,8 @@ object MatchesTable : Table("matches") {
     val resultMarginUnit = enumerationByName("result_margin_unit", 10, MarginUnit::class).nullable()
     /** JSON list of InningsScore. */
     val inningsScores = text("innings_scores")
+    /** JSON MatchRules. */
+    val rules = text("rules")
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -73,7 +75,7 @@ object DeliveriesTable : Table("deliveries") {
     val seq = integer("seq")
     val innings = integer("innings")
     val strikerId = reference("striker_id", MatchPlayersTable.id)
-    val nonStrikerId = reference("non_striker_id", MatchPlayersTable.id)
+    val nonStrikerId = reference("non_striker_id", MatchPlayersTable.id).nullable()
     val bowlerId = reference("bowler_id", MatchPlayersTable.id)
     val runsOffBat = integer("runs_off_bat")
     val extra = enumerationByName("extra", 10, ExtraType::class).nullable()
@@ -81,6 +83,8 @@ object DeliveriesTable : Table("deliveries") {
     val wicketKind = enumerationByName("wicket_kind", 20, DismissalKind::class).nullable()
     val playerOutId = reference("player_out_id", MatchPlayersTable.id).nullable()
     val fielderId = reference("fielder_id", MatchPlayersTable.id).nullable()
+    val extraPenalty = integer("extra_penalty")
+    val countsAsBall = bool("counts_as_ball")
     val createdAt = long("created_at")
     override val primaryKey = PrimaryKey(matchId, seq)
 }

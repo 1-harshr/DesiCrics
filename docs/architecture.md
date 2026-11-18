@@ -74,3 +74,4 @@ app/designsystem/     :app:designsystem: Crease tokens, fonts, components (see d
 - Only the match's scorers can write. There is one active scorer at a time, and the role can be handed over.
 - Every write returns the new innings state, so the client never computes the score on its own.
 - `DeliveryRules` in `core` validates a delivery before it leaves the device, and again on the server.
+- Each match carries its own `MatchRules`, chosen at creation and fixed after: last man stands, when retired batters may return, retiring at a score, overs per bowler, back-to-back overs, wide and no-ball penalties and re-bowling, and free hits. Restrictions are `OFF`, `WARN` (the app asks the scorer, then records the ball anyway) or `ENFORCE` (refused on the device and the server). Penalties and re-bowling are stored on each `Delivery`, so a ball describes itself without the rules.

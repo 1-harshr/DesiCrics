@@ -56,16 +56,19 @@ import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchRules
+import com.harsh.desicrics.model.RuleMode
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.model.Wicket
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.scoring.DeliveryError
 import com.harsh.desicrics.scoring.InningsState
-import com.harsh.desicrics.scoring.Retirement
 import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.scoring.ScoringEngine
+import com.harsh.desicrics.scoring.bowlerRuleBreak
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
 import com.harsh.desicrics.ui.text.label
 import com.harsh.desicrics.ui.text.resultText
@@ -103,6 +106,8 @@ fun MatchScreen(
             onReplaceBowler = viewModel::replaceBowler,
             onAddPlayer = viewModel::addPlayer,
             onPenalty = viewModel::awardPenalty,
+            onRecordPendingBall = viewModel::recordPendingBall,
+            onDropPendingBall = viewModel::dropPendingBall,
         ),
     )
 }
@@ -123,6 +128,8 @@ class MatchActions(
     val onReplaceBowler: () -> Unit,
     val onAddPlayer: (TeamSide, name: String) -> Unit,
     val onPenalty: (toBattingSide: Boolean, runs: Int) -> Unit,
+    val onRecordPendingBall: () -> Unit,
+    val onDropPendingBall: () -> Unit,
 )
 
 private enum class MatchTab { LIVE, SCORECARD, OVERS }
@@ -211,7 +218,8 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
         ScoringPad(ui, actions, onSheet = { sheet = it })
     }
 
-    ScoringSheets(sheet, ui, innings, actions, onSheet = { sheet = it }, onClose = { sheet = null })
+    ScoringSheets(sheet, ui, state, actions, onSheet = { sheet = it }, onClose = { sheet = null })
+    ui.pendingBall?.let { RuleWarningSheet(it, actions.onRecordPendingBall, actions.onDropPendingBall) }
 }
 
 /** The green header: teams, then the batting side's score, overs and where the chase stands. */
@@ -297,13 +305,34 @@ private fun CreaseCard(ui: MatchUiState, innings: InningsState, onChoose: (Scori
     val bowler = innings.bowlingTeam.players.firstOrNull { it.id == ui.bowlerId }
     val chooseBowler = if (innings.legalBalls == 0) Res.string.match_choose_opening_bowler else Res.string.match_choose_next_bowler
 
+    val rules = ui.match?.rules
+    // Batters on the run limit who haven't retired yet; once they come back, the limit doesn't apply again.
+    val mustRetire = rules?.takeIf { it.retireAtMode != RuleMode.OFF }?.let { r ->
+        innings.batters.filter { it.runs >= r.retireAtRuns && it.retiredAtWickets == null }.map { it.player.id }.toSet()
+    }.orEmpty()
+
     DesiCard(Modifier.fillMaxWidth()) {
-        SectionLabel(stringResource(Res.string.match_section_crease))
-        BatterSlot(batter(ui.strikerId), innings, onStrike = true, empty = stringResource(Res.string.match_choose_striker), ui.canEdit, onChoose) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SectionLabel(stringResource(Res.string.match_section_crease), Modifier.weight(1f))
+            if (innings.isFreeHit) {
+                Text(
+                    stringResource(Res.string.match_free_hit).uppercase(),
+                    style = DesiTheme.type.label,
+                    color = DesiTheme.colors.onBrand,
+                    modifier = Modifier.clip(DesiTheme.radius.full).background(DesiTheme.colors.brand)
+                        .padding(horizontal = DesiTheme.space.s2, vertical = 2.dp),
+                )
+            }
+        }
+        BatterSlot(batter(ui.strikerId), innings, onStrike = true, empty = stringResource(Res.string.match_choose_striker), ui.canEdit, mustRetire, rules, onChoose) {
             onChoose(ScoringSheet.Striker)
         }
-        BatterSlot(batter(ui.nonStrikerId), innings, onStrike = false, empty = stringResource(Res.string.match_choose_non_striker), ui.canEdit, onChoose) {
-            onChoose(ScoringSheet.NonStriker)
+        if (ui.battingAlone) {
+            Text(stringResource(Res.string.match_batting_alone), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        } else {
+            BatterSlot(batter(ui.nonStrikerId), innings, onStrike = false, empty = stringResource(Res.string.match_choose_non_striker), ui.canEdit, mustRetire, rules, onChoose) {
+                onChoose(ScoringSheet.NonStriker)
+            }
         }
         HorizontalDivider(color = DesiTheme.colors.line)
         if (bowler == null) {
@@ -328,6 +357,8 @@ private fun BatterSlot(
     onStrike: Boolean,
     empty: String,
     canEdit: Boolean,
+    mustRetire: Set<String>,
+    rules: MatchRules?,
     onSheet: (ScoringSheet) -> Unit,
     onChoose: () -> Unit,
 ) {
@@ -339,7 +370,11 @@ private fun BatterSlot(
     SlotRow(
         icon = { SlotIcon(DesiIcons.Bat, highlighted = onStrike) },
         name = player.name,
-        caption = if (onStrike) stringResource(Res.string.match_on_strike) else null,
+        caption = when {
+            player.id in mustRetire && rules != null -> stringResource(Res.string.match_must_retire, rules.retireAtRuns)
+            onStrike -> stringResource(Res.string.match_on_strike)
+            else -> null
+        },
         figures = stringResource(Res.string.match_batter_score, card?.runs ?: 0, card?.balls ?: 0),
         onOptions = if (canEdit) ({ onSheet(ScoringSheet.BatterOptions(player)) }) else null,
     )
@@ -471,21 +506,26 @@ private fun ErrorBanner(error: ScoringError, onDismiss: () -> Unit) {
 private fun ScoringSheets(
     sheet: ScoringSheet?,
     ui: MatchUiState,
-    innings: InningsState,
+    state: MatchState,
     actions: MatchActions,
     onSheet: (ScoringSheet) -> Unit,
     onClose: () -> Unit,
 ) {
+    val innings = state.current
+    val rules = state.match.rules
     fun batter(id: String?) = innings.battingTeam.players.firstOrNull { it.id == id }
     when (sheet) {
         null -> Unit
         ScoringSheet.Striker, ScoringSheet.NonStriker -> {
             val other = if (sheet == ScoringSheet.Striker) ui.nonStrikerId else ui.strikerId
             val canReturn = stringResource(Res.string.scoring_can_return)
+            val notYet = stringResource(Res.string.scoring_return_not_yet)
             PlayerSheet(
                 title = stringResource(if (sheet == ScoringSheet.Striker) Res.string.scoring_pick_striker else Res.string.scoring_pick_non_striker),
                 players = innings.canComeIn.filter { it.id != other },
-                notes = innings.batters.filter { it.retired == Retirement.HURT }.associate { it.player.id to canReturn },
+                // Players the rules keep out only show up here when the rule warns rather than enforces.
+                notes = innings.batters.filter { it.retired?.canReturn == true }
+                    .associate { it.player.id to if (it.player.id in innings.returnBlocked) notYet else canReturn },
                 onPick = {
                     if (sheet == ScoringSheet.Striker) actions.onSelectStriker(it.id) else actions.onSelectNonStriker(it.id)
                     onClose()
@@ -495,12 +535,17 @@ private fun ScoringSheets(
             )
         }
         ScoringSheet.Bowler -> {
-            // Anyone can bowl, even the previous over's bowler; small sides often need to.
+            // Bowlers an enforced rule rules out are hidden; a warned rule just shows why next to their name.
+            val breaks = innings.bowlingTeam.players.associate { it.id to state.bowlerRuleBreak(it.id) }
             val bowledLast = stringResource(Res.string.scoring_bowled_last_over)
+            val allBowled = stringResource(Res.string.scoring_over_limit_reached)
             PlayerSheet(
                 title = stringResource(Res.string.scoring_pick_bowler),
-                players = innings.bowlingTeam.players,
-                notes = listOfNotNull(innings.previousOverBowlerId).associateWith { bowledLast },
+                players = innings.bowlingTeam.players.filter { breaks[it.id]?.mode != RuleMode.ENFORCE },
+                notes = buildMap {
+                    innings.previousOverBowlerId?.let { put(it, bowledLast) }
+                    breaks.forEach { (id, rule) -> if (rule?.error == DeliveryError.BOWLER_OVER_LIMIT) put(id, allBowled) }
+                },
                 onPick = {
                     actions.onSelectBowler(it.id)
                     onClose()
@@ -509,24 +554,31 @@ private fun ScoringSheets(
                 onAddPlayer = { actions.onAddPlayer(innings.battingSide.other, it) },
             )
         }
-        is ScoringSheet.BatterOptions -> OptionsSheet(
-            title = sheet.player.name,
-            options = listOf(
-                SheetOption(stringResource(Res.string.scoring_retire_hurt), stringResource(Res.string.scoring_retire_hurt_hint)) {
-                    actions.onRetire(sheet.player.id, false)
-                    onClose()
-                },
-                SheetOption(stringResource(Res.string.scoring_retire_out), stringResource(Res.string.scoring_retire_out_hint)) {
-                    actions.onRetire(sheet.player.id, true)
-                    onClose()
-                },
-                SheetOption(stringResource(Res.string.scoring_swap_ends), stringResource(Res.string.scoring_swap_ends_hint)) {
-                    actions.onSwapEnds()
-                    onClose()
-                },
-            ),
-            onDismiss = onClose,
-        )
+        is ScoringSheet.BatterOptions -> {
+            val card = innings.batters.firstOrNull { it.player.id == sheet.player.id }
+            // Not out either way; the engine tells a run-limit retirement from an injury by the score.
+            val atRunLimit = rules.retireAtMode != RuleMode.OFF && card != null && card.runs >= rules.retireAtRuns
+            val (retire, retireHint) = if (atRunLimit) Res.string.scoring_retire_not_out to Res.string.scoring_retire_not_out_hint
+            else Res.string.scoring_retire_hurt to Res.string.scoring_retire_hurt_hint
+            OptionsSheet(
+                title = sheet.player.name,
+                options = listOf(
+                    SheetOption(stringResource(retire), stringResource(retireHint)) {
+                        actions.onRetire(sheet.player.id, false)
+                        onClose()
+                    },
+                    SheetOption(stringResource(Res.string.scoring_retire_out), stringResource(Res.string.scoring_retire_out_hint)) {
+                        actions.onRetire(sheet.player.id, true)
+                        onClose()
+                    },
+                    SheetOption(stringResource(Res.string.scoring_swap_ends), stringResource(Res.string.scoring_swap_ends_hint)) {
+                        actions.onSwapEnds()
+                        onClose()
+                    },
+                ),
+                onDismiss = onClose,
+            )
+        }
         ScoringSheet.MatchOptions -> OptionsSheet(
             title = stringResource(Res.string.match_options),
             options = listOf(
@@ -555,14 +607,14 @@ private fun ScoringSheets(
             ),
             onDismiss = onClose,
         )
-        is ScoringSheet.Extra -> ExtraRunsSheet(sheet.type, onPick = { runs ->
+        is ScoringSheet.Extra -> ExtraRunsSheet(sheet.type, rules.penalty(sheet.type), onPick = { runs ->
             actions.onExtra(sheet.type, runs)
             onClose()
         }, onDismiss = onClose)
         ScoringSheet.Wicket -> {
             val striker = batter(ui.strikerId)
             val nonStriker = batter(ui.nonStrikerId)
-            if (striker == null || nonStriker == null) return onClose()
+            if (striker == null || (nonStriker == null && !ui.battingAlone)) return onClose()
             WicketSheet(
                 striker = striker,
                 nonStriker = nonStriker,
@@ -607,7 +659,7 @@ internal fun ballFor(delivery: Delivery): Ball {
     }
     val shortText = stringResource(short)
     // A plain wide or no-ball is just "wd" / "nb"; anything more shows the total, e.g. "3wd".
-    val label = if (runs <= 1 && (extra == ExtraType.WIDE || extra == ExtraType.NO_BALL)) shortText
+    val label = if (runs <= delivery.extraPenalty && delivery.isWideOrNoBall) shortText
     else stringResource(Res.string.scoring_ball_extra_with_runs, runs, shortText)
     return Ball(label, BallKind.Extra)
 }
@@ -635,7 +687,7 @@ private fun previewBalls(): List<Delivery> {
 private fun previewUi(deliveries: List<Delivery>, isScorer: Boolean = true) =
     MatchUiState(loading = false, match = PreviewMatch, deliveries = deliveries, state = ScoringEngine.compute(PreviewMatch, deliveries), isScorer = isScorer)
 
-private val PreviewActions = MatchActions({}, {}, {}, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _ -> })
+private val PreviewActions = MatchActions({}, {}, {}, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _ -> }, {}, {})
 
 @Preview
 @Composable

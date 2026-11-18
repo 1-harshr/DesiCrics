@@ -44,6 +44,7 @@ import com.harsh.desicrics.designsystem.component.BrandStatusBar
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.component.DesiTextField
+import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.NumberStepper
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.RemovableChip
@@ -131,6 +132,7 @@ fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions) {
                     )
                 }
                 TossSection(state, actions)
+                RulesSection(state, actions)
             }
         }
         StartBar(state, actions.onStart)
@@ -226,6 +228,33 @@ private fun TossSection(state: NewMatchFormState, actions: NewMatchActions) {
     }
 }
 
+/** A preset to start from, with a line on what it means; Customise opens every rule. */
+@Composable
+private fun RulesSection(state: NewMatchFormState, actions: NewMatchActions) {
+    var customising by rememberSaveable { mutableStateOf(false) }
+    val preset = RulesPreset.matching(state.rules)
+
+    Section(Res.string.new_match_section_rules) {
+        Text(stringResource(Res.string.new_match_rules_hint), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+        ChoiceChips(
+            options = RulesPreset.entries.filter { it != RulesPreset.CUSTOM || preset == RulesPreset.CUSTOM },
+            selected = preset,
+            label = { stringResource(it.label) },
+            onSelect = { picked -> picked.rules?.let { rules -> actions.onUpdate { it.copy(rules = rules) } } },
+        )
+        Text(stringResource(preset.hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        GhostButton(stringResource(Res.string.new_match_rules_customise), onClick = { customising = true }, modifier = Modifier.fillMaxWidth())
+    }
+    if (customising) {
+        RulesSheet(
+            rules = state.rules,
+            oversPerInnings = state.overs,
+            onChange = { rules -> actions.onUpdate { it.copy(rules = rules) } },
+            onDismiss = { customising = false },
+        )
+    }
+}
+
 @Composable
 private fun Section(title: StringResource, content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
@@ -276,6 +305,7 @@ private val MatchSetupError.label: StringResource
         MatchSetupError.TOO_MANY_PLAYERS -> Res.string.new_match_error_too_many_players
         MatchSetupError.PLAYER_NAME_INVALID -> Res.string.new_match_error_player_name_invalid
         MatchSetupError.OVERS_OUT_OF_RANGE -> Res.string.new_match_error_overs
+        MatchSetupError.RULES_INVALID -> Res.string.new_match_error_rules
     }
 
 // Previews: sample team and player names only; all labels come from string resources.

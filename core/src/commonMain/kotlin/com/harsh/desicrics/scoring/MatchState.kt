@@ -46,15 +46,23 @@ data class InningsState(
     val isComplete: Boolean,
     /** Every over started so far, oldest first, for the over-by-over view and commentary. */
     val overs: List<OverSummary> = emptyList(),
-    /** Batters who can walk in now: those yet to bat and anyone retired hurt, not counting the two at the crease. */
+    /**
+     * Batters who can walk in now: those yet to bat and retired batters the rules let back, not counting
+     * the two at the crease.
+     */
     val canComeIn: List<Player> = emptyList(),
+    /** Wickets that end the innings: one fewer than the side, or all of it when the last man stands. */
+    val allOutWickets: Int = battingTeam.players.size - 1,
+    /** Retired batters the rules don't let back yet. Left out of [canComeIn] only when the rule is enforced. */
+    val returnBlocked: Set<String> = emptySet(),
+    /** The next ball is a free hit. */
+    val isFreeHit: Boolean = false,
 ) {
     val scoreText: String get() = "$runs/$wickets"
     val oversText: String get() = formatOvers(legalBalls)
     val runRate: Double get() = if (legalBalls == 0) 0.0 else runs * 6.0 / legalBalls
     val runsNeeded: Int? get() = target?.let { (it - runs).coerceAtLeast(0) }
     val ballsRemaining: Int get() = (maxBalls - legalBalls).coerceAtLeast(0)
-    val allOutWickets: Int get() = battingTeam.players.size - 1
 
     /** Batting side players who haven't come out to bat yet. */
     val yetToBat: List<Player>
@@ -110,15 +118,27 @@ data class BatterCard(
     val sixes: Int = 0,
     /** Null while not out. */
     val dismissal: Dismissal? = null,
-    /** Set while retired; cleared if a retired-hurt batter comes back. */
+    /** Set while retired; cleared if a retired batter comes back. */
     val retired: Retirement? = null,
+    /**
+     * The innings' wickets when they last retired, for [com.harsh.desicrics.model.RetiredReturn.AFTER_WICKET].
+     * Kept if they come back, so a batter who already retired at the run limit isn't asked to again.
+     */
+    val retiredAtWickets: Int? = null,
 ) {
     val isOut: Boolean get() = dismissal != null || retired == Retirement.OUT
     val strikeRate: Double get() = if (balls == 0) 0.0 else runs * 100.0 / balls
 }
 
-/** Retired hurt isn't out and can bat again; retired out counts as a wicket. */
-enum class Retirement { HURT, OUT }
+/** Retired hurt or not out can bat again, if the rules allow; retired out counts as a wicket. */
+enum class Retirement {
+    HURT,
+    /** Made to retire on reaching the match's run limit. */
+    NOT_OUT,
+    OUT;
+
+    val canReturn: Boolean get() = this != OUT
+}
 
 /** How a batter got out. The app turns it into "c Rohit b Bumrah" with its own strings. */
 data class Dismissal(

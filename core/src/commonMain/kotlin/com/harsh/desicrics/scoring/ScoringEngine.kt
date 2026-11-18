@@ -7,6 +7,8 @@ import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.Player
+import com.harsh.desicrics.model.RetiredReturn
+import com.harsh.desicrics.model.RuleMode
 import com.harsh.desicrics.model.Team
 import com.harsh.desicrics.model.TeamSide
 
@@ -14,9 +16,9 @@ import com.harsh.desicrics.model.TeamSide
  * Replays a match's deliveries into a full scorecard. Pure and deterministic so the app,
  * the server and tests all agree on the score.
  *
- * Simplifications for the MVP: no retirements, no penalty runs, no byes off a no-ball,
- * no per-bowler over limits, and a run out removes the dismissed batter from whichever end
- * they finished at after the completed runs.
+ * The match's [com.harsh.desicrics.model.MatchRules] decide when an innings ends and who may come in;
+ * whether a ball was allowed is [validate]'s job. Simplifications: no byes off a no-ball, and a run out
+ * removes the dismissed batter from whichever end they finished at after the completed runs.
  */
 object ScoringEngine {
 
@@ -58,6 +60,7 @@ object ScoringEngine {
         val battingTeam = match.team(battingSide)
         val bowlingTeam = match.team(battingSide.other)
         val maxBalls = match.oversPerInnings * 6
+        val rules = match.rules
 
         val batters = LinkedHashMap<String, BatterCard>()
         val bowlers = LinkedHashMap<String, BowlerCard>()
@@ -73,12 +76,20 @@ object ScoringEngine {
         val overs = mutableListOf<OverSummary>()
         var overJustCompleted = false
         var overRuns = 0
+        var freeHit = false
 
         for (item in timeline) {
             if (item is MatchEvent) {
                 when (item) {
                     is MatchEvent.Retire -> {
-                        batters[item.playerId]?.let { batters[item.playerId] = it.copy(retired = if (item.out) Retirement.OUT else Retirement.HURT) }
+                        batters[item.playerId]?.let { card ->
+                            val retirement = when {
+                                item.out -> Retirement.OUT
+                                rules.retireAtMode != RuleMode.OFF && card.runs >= rules.retireAtRuns -> Retirement.NOT_OUT
+                                else -> Retirement.HURT
+                            }
+                            batters[item.playerId] = card.copy(retired = retirement, retiredAtWickets = wickets)
+                        }
                         if (item.out) wickets++
                         if (striker == item.playerId) striker = null
                         if (nonStriker == item.playerId) nonStriker = null
@@ -97,11 +108,13 @@ object ScoringEngine {
                 overJustCompleted = false
             }
 
-            // A retired-hurt batter back at the crease is batting again.
-            for (id in listOf(d.strikerId, d.nonStrikerId)) {
+            // A retired batter back at the crease is batting again.
+            for (id in listOfNotNull(d.strikerId, d.nonStrikerId)) {
                 val card = batters.getOrPut(id) { BatterCard(battingTeam.player(id)) }
-                if (card.retired == Retirement.HURT) batters[id] = card.copy(retired = null)
+                if (card.retired?.canReturn == true) batters[id] = card.copy(retired = null)
             }
+            // A last batter on their own keeps the strike whatever they run.
+            val alone = d.nonStrikerId == null
             val strikerCard = batters.getValue(d.strikerId)
             val bowlerCard = bowlers.getOrPut(d.bowlerId) { BowlerCard(bowlingTeam.player(d.bowlerId)) }
 
@@ -129,7 +142,10 @@ object ScoringEngine {
             striker = d.strikerId
             nonStriker = d.nonStrikerId
             bowler = d.bowlerId
-            if (d.runsRun % 2 == 1) {
+            // A free hit carries over a wide, and a no-ball always gives a new one.
+            freeHit = rules.freeHitMode != RuleMode.OFF &&
+                (d.extra == ExtraType.NO_BALL || (freeHit && d.extra == ExtraType.WIDE))
+            if (!alone && d.runsRun % 2 == 1) {
                 striker = nonStriker.also { nonStriker = striker }
             }
 
@@ -172,7 +188,7 @@ object ScoringEngine {
                 if (overRuns == 0) {
                     bowlers.getValue(d.bowlerId).let { bowlers[d.bowlerId] = it.copy(maidens = it.maidens + 1) }
                 }
-                striker = nonStriker.also { nonStriker = striker }
+                if (!alone) striker = nonStriker.also { nonStriker = striker }
                 previousOverBowler = bowler
                 bowler = null
                 overRuns = 0
@@ -181,12 +197,36 @@ object ScoringEngine {
         }
 
         val atCrease = setOfNotNull(striker, nonStriker)
-        val canComeIn = battingTeam.players.filter { player ->
+        val notOut = battingTeam.players.filter { player ->
             val card = batters[player.id]
             player.id !in atCrease && (card == null || !card.isOut)
         }
+        val othersLeft = notOut.any { batters[it.id]?.retired == null }
+        // Retired batters the rules don't let back in yet, whether the rule warns or enforces.
+        val returnBlocked = if (rules.retiredReturnMode == RuleMode.OFF) emptySet() else notOut.mapNotNull { player ->
+            val card = batters[player.id]?.takeIf { it.retired != null } ?: return@mapNotNull null
+            val since = card.retiredAtWickets ?: return@mapNotNull null
+            val allowed = when (rules.retiredReturn) {
+                RetiredReturn.ANY_TIME -> true
+                RetiredReturn.AFTER_WICKET -> wickets > since
+                RetiredReturn.AT_END -> !othersLeft
+                RetiredReturn.NEVER -> false
+            }
+            player.id.takeUnless { allowed }
+        }.toSet()
+        val canComeIn = if (rules.retiredReturnMode == RuleMode.ENFORCE) notOut.filter { it.id !in returnBlocked } else notOut
 
-        val isComplete = wickets >= battingTeam.players.size - 1 ||
+        // The last batter on their own faces every ball, whichever end they were at.
+        if (rules.lastManStands && atCrease.size == 1 && canComeIn.isEmpty()) {
+            striker = atCrease.single()
+            nonStriker = null
+        }
+
+        val allOutWickets = battingTeam.players.size - if (rules.lastManStands) 0 else 1
+        // Also over when nobody is left to fill the crease, e.g. retired batters the rules keep out.
+        val battersNeeded = if (rules.lastManStands) 1 else 2
+        val isComplete = wickets >= allOutWickets ||
+            atCrease.size + canComeIn.size < battersNeeded ||
             legalBalls >= maxBalls ||
             (target != null && runs >= target)
 
@@ -211,6 +251,9 @@ object ScoringEngine {
             isComplete = isComplete,
             overs = overs.toList(),
             canComeIn = canComeIn,
+            allOutWickets = allOutWickets,
+            returnBlocked = returnBlocked,
+            isFreeHit = freeHit,
         )
     }
 

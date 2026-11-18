@@ -112,6 +112,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[tossDecision] = match.tossDecision
                 it[status] = match.status
                 it[scoreSummary] = match.scoreSummary
+                it[rules] = Json.encodeToString(match.rules)
                 it.setResult(match)
             }
             insertRoster(match.id, TeamSide.A, match.teamA)
@@ -134,6 +135,8 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[wicketKind] = delivery.wicket?.kind
                 it[playerOutId] = delivery.wicket?.playerOutId
                 it[fielderId] = delivery.wicket?.fielderId
+                it[extraPenalty] = delivery.extraPenalty
+                it[countsAsBall] = delivery.countsAsBall
                 it[createdAt] = delivery.timestamp
             }
             updateScore(match)
@@ -247,6 +250,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             status = this[MatchesTable.status],
             scoreSummary = this[MatchesTable.scoreSummary],
             innings = Json.decodeFromString(this[MatchesTable.inningsScores]),
+            rules = Json.decodeFromString(this[MatchesTable.rules]),
             result = when {
                 this[MatchesTable.status] != MatchStatus.COMPLETED -> null
                 else -> MatchResult(
@@ -272,6 +276,8 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             extraRuns = this[DeliveriesTable.extraRuns],
             wicket = if (kind != null && out != null) Wicket(kind, out, this[DeliveriesTable.fielderId]) else null,
             timestamp = this[DeliveriesTable.createdAt],
+            extraPenalty = this[DeliveriesTable.extraPenalty],
+            countsAsBall = this[DeliveriesTable.countsAsBall],
         )
     }
 }

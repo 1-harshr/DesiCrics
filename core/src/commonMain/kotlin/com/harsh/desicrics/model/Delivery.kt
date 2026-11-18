@@ -12,28 +12,39 @@ data class Delivery(
     val seq: Int,
     val innings: Int,
     val strikerId: String,
-    val nonStrikerId: String,
+    /** Null when the last batter bats alone (see [MatchRules.lastManStands]). */
+    val nonStrikerId: String?,
     val bowlerId: String,
     val runsOffBat: Int = 0,
     val extra: ExtraType? = null,
     /**
-     * Runs credited as extras. Wide: 1 + runs taken. No-ball: the 1-run penalty.
+     * Runs credited as extras. Wide: [extraPenalty] + runs taken. No-ball: [extraPenalty].
      * Bye / leg bye: runs taken.
      */
     val extraRuns: Int = 0,
     val wicket: Wicket? = null,
     val timestamp: Long = 0,
+    /**
+     * The penalty a wide or no-ball gives on its own, from the match's rules. Kept on the ball so it
+     * describes itself without the rules.
+     */
+    val extraPenalty: Int = 1,
+    /** A wide or no-ball the match doesn't re-bowl, so it counts as one of the over's six. */
+    val countsAsBall: Boolean = false,
 ) {
-    val isLegal: Boolean get() = extra != ExtraType.WIDE && extra != ExtraType.NO_BALL
+    /** Counts as one of the over's six balls. */
+    val isLegal: Boolean get() = !isWideOrNoBall || countsAsBall
+
+    val isWideOrNoBall: Boolean get() = extra == ExtraType.WIDE || extra == ExtraType.NO_BALL
 
     val totalRuns: Int get() = runsOffBat + extraRuns
 
     /** Runs the batters actually ran, which decides whether they swap ends. */
-    val runsRun: Int get() = totalRuns - if (isLegal) 0 else 1
+    val runsRun: Int get() = totalRuns - if (isWideOrNoBall) extraPenalty else 0
 
     /** Runs charged to the bowler: byes and leg byes are not. */
     val bowlerRuns: Int
-        get() = runsOffBat + if (extra == ExtraType.WIDE || extra == ExtraType.NO_BALL) extraRuns else 0
+        get() = runsOffBat + if (isWideOrNoBall) extraRuns else 0
 }
 
 @Serializable

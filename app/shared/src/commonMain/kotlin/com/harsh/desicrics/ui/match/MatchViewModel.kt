@@ -17,6 +17,7 @@ import com.harsh.desicrics.scoring.InningsState
 import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.scoring.validate
+import com.harsh.desicrics.scoring.warnings
 import com.harsh.desicrics.util.nowMillis
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,6 +42,9 @@ sealed interface ScoringError {
     data object LoadFailed : ScoringError
 }
 
+/** A ball that breaks match rules set to warn, waiting for the scorer to record it anyway or drop it. */
+data class PendingBall(val delivery: Delivery, val warnings: List<DeliveryError>)
+
 data class MatchUiState(
     val loading: Boolean = true,
     val notFound: Boolean = false,
@@ -55,14 +59,23 @@ data class MatchUiState(
     /** The latest refresh failed; the last good scorecard stays on screen. */
     val offline: Boolean = false,
     val error: ScoringError? = null,
+    val pendingBall: PendingBall? = null,
 ) {
     val strikerId: String? get() = state?.current?.strikerId ?: selection.strikerId
     val nonStrikerId: String? get() = state?.current?.nonStrikerId ?: selection.nonStrikerId
     val bowlerId: String? get() = state?.current?.bowlerId ?: selection.bowlerId
 
+    /** The last batter is on their own, which the match's rules allow. */
+    val battingAlone: Boolean
+        get() {
+            val innings = state?.current ?: return false
+            return state.match.rules.lastManStands && strikerId != null && nonStrikerId == null &&
+                innings.canComeIn.none { it.id != strikerId }
+        }
+
     val canScore: Boolean
         get() = isScorer && state?.isComplete == false && !saving &&
-            strikerId != null && nonStrikerId != null && bowlerId != null
+            strikerId != null && (nonStrikerId != null || battingAlone) && bowlerId != null
 
     val canUndo: Boolean get() = isScorer && (deliveries.isNotEmpty() || events.isNotEmpty()) && !saving
 
@@ -121,12 +134,15 @@ class MatchViewModel(
 
     fun recordRuns(runs: Int) = record(runsOffBat = runs)
 
-    fun recordExtra(extra: ExtraType, runs: Int) = when (extra) {
-        // A wide is worth 1 plus whatever the batters ran.
-        ExtraType.WIDE -> record(extra = extra, extraRuns = 1 + runs)
-        // A no-ball is a 1-run penalty plus whatever came off the bat.
-        ExtraType.NO_BALL -> record(runsOffBat = runs, extra = extra, extraRuns = 1)
-        ExtraType.BYE, ExtraType.LEG_BYE -> record(extra = extra, extraRuns = runs)
+    fun recordExtra(extra: ExtraType, runs: Int) {
+        val penalty = _state.value.match?.rules?.penalty(extra) ?: return
+        when (extra) {
+            // A wide is worth its penalty plus whatever the batters ran.
+            ExtraType.WIDE -> record(extra = extra, extraRuns = penalty + runs)
+            // A no-ball is its penalty plus whatever came off the bat.
+            ExtraType.NO_BALL -> record(runsOffBat = runs, extra = extra, extraRuns = penalty)
+            ExtraType.BYE, ExtraType.LEG_BYE -> record(extra = extra, extraRuns = runs)
+        }
     }
 
     /** [runsCompleted] only counts for a run out; every other dismissal ends the ball with no runs. */
@@ -142,25 +158,49 @@ class MatchViewModel(
         val ui = _state.value
         if (!ui.canScore) return
         val match = ui.match ?: return
+        val wideOrNoBall = extra == ExtraType.WIDE || extra == ExtraType.NO_BALL
         val delivery = Delivery(
             seq = ui.nextSeq,
             innings = ui.state!!.current.number,
             strikerId = ui.strikerId!!,
-            nonStrikerId = ui.nonStrikerId!!,
+            nonStrikerId = ui.nonStrikerId,
             bowlerId = ui.bowlerId!!,
             runsOffBat = runsOffBat,
             extra = extra,
             extraRuns = extraRuns,
             wicket = wicket,
             timestamp = nowMillis(),
+            extraPenalty = if (extra != null && wideOrNoBall) match.rules.penalty(extra) else 1,
+            countsAsBall = wideOrNoBall && match.rules.countsAsBall(extra),
         )
         // The same check the server runs, so a mistake shows straight away and in the user's language.
         ui.state.validate(delivery, delivery.seq)?.let { error ->
             _state.update { it.copy(error = ScoringError.Rejected(error)) }
             return
         }
+        val warnings = ui.state.warnings(delivery)
+        if (warnings.isNotEmpty()) {
+            _state.update { it.copy(pendingBall = PendingBall(delivery, warnings)) }
+            return
+        }
         save { matchRepository.recordDelivery(match.id, delivery) }
     }
+
+    /** The scorer read the warning and wants the ball recorded anyway. */
+    fun recordPendingBall() {
+        val ui = _state.value
+        val pending = ui.pendingBall ?: return
+        val match = ui.match ?: return
+        _state.update { it.copy(pendingBall = null) }
+        // Still checked: the scorecard may have changed while the warning was up.
+        ui.state?.validate(pending.delivery, ui.nextSeq)?.let { error ->
+            _state.update { it.copy(error = ScoringError.Rejected(error)) }
+            return
+        }
+        save { matchRepository.recordDelivery(match.id, pending.delivery) }
+    }
+
+    fun dropPendingBall() = _state.update { it.copy(pendingBall = null) }
 
     fun undo() {
         val ui = _state.value

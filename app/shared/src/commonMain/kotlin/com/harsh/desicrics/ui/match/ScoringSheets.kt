@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.DesiTextField
+import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.NumberStepper
 import com.harsh.desicrics.designsystem.component.PadKey
 import com.harsh.desicrics.designsystem.component.PlayerRow
@@ -41,8 +42,10 @@ import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -133,16 +136,20 @@ internal fun OptionsSheet(title: String, options: List<SheetOption>, onDismiss: 
     }
 }
 
-/** Asks how many runs came off an extra, as a row of big keys. */
+/** Asks how many runs came off an extra, as a row of big keys. [penalty] is what a wide or no-ball adds itself. */
 @Composable
-internal fun ExtraRunsSheet(type: ExtraType, onPick: (runs: Int) -> Unit, onDismiss: () -> Unit) {
+internal fun ExtraRunsSheet(type: ExtraType, penalty: Int, onPick: (runs: Int) -> Unit, onDismiss: () -> Unit) {
     val (title, hint, options) = when (type) {
-        ExtraType.WIDE -> Triple(Res.string.scoring_wide_title, Res.string.scoring_wide_hint, listOf(0, 1, 2, 3, 4))
-        ExtraType.NO_BALL -> Triple(Res.string.scoring_no_ball_title, Res.string.scoring_no_ball_hint, listOf(0, 1, 2, 3, 4, 6))
-        ExtraType.BYE -> Triple(Res.string.scoring_bye_title, Res.string.scoring_byes_hint, listOf(1, 2, 3, 4))
-        ExtraType.LEG_BYE -> Triple(Res.string.scoring_leg_bye_title, Res.string.scoring_byes_hint, listOf(1, 2, 3, 4))
+        ExtraType.WIDE -> Triple(
+            Res.string.scoring_wide_title, pluralStringResource(Res.plurals.scoring_wide_hint, penalty, penalty), listOf(0, 1, 2, 3, 4),
+        )
+        ExtraType.NO_BALL -> Triple(
+            Res.string.scoring_no_ball_title, pluralStringResource(Res.plurals.scoring_no_ball_hint, penalty, penalty), listOf(0, 1, 2, 3, 4, 6),
+        )
+        ExtraType.BYE -> Triple(Res.string.scoring_bye_title, stringResource(Res.string.scoring_byes_hint), listOf(1, 2, 3, 4))
+        ExtraType.LEG_BYE -> Triple(Res.string.scoring_leg_bye_title, stringResource(Res.string.scoring_byes_hint), listOf(1, 2, 3, 4))
     }
-    DesiSheet(stringResource(title), onDismiss, stringResource(hint)) {
+    DesiSheet(stringResource(title), onDismiss, hint) {
         RunPad(
             keys = options.map { PadKey("$it", "$it") },
             onKey = { onPick(it.id.toInt()) },
@@ -152,12 +159,13 @@ internal fun ExtraRunsSheet(type: ExtraType, onPick: (runs: Int) -> Unit, onDism
 
 /**
  * How a batter got out: the dismissal, then (for a run out) who and how many runs were completed, then
- * the fielder if the dismissal has one. Only the striker can be out any way but run out.
+ * the fielder if the dismissal has one. Only the striker can be out any way but run out. [nonStriker] is
+ * null when the last batter is batting alone.
  */
 @Composable
 internal fun WicketSheet(
     striker: Player,
-    nonStriker: Player,
+    nonStriker: Player?,
     fielders: List<Player>,
     onConfirm: (DismissalKind, playerOut: Player, fielder: Player?, runsCompleted: Int) -> Unit,
     onDismiss: () -> Unit,
@@ -178,7 +186,7 @@ internal fun WicketSheet(
                 if (!it.hasFielder) fielder = null
             },
         )
-        if (!kind.strikerOnly) {
+        if (!kind.strikerOnly && nonStriker != null) {
             SectionLabel(stringResource(Res.string.scoring_wicket_who), Modifier.padding(top = DesiTheme.space.s2))
             SegmentedControl(listOf(striker, nonStriker), selected = out, label = { it.name }, onSelect = { out = it })
         }
@@ -195,7 +203,7 @@ internal fun WicketSheet(
         PrimaryButton(
             text = stringResource(Res.string.scoring_wicket_confirm),
             onClick = {
-                val playerOut = if (kind.strikerOnly) striker else out
+                val playerOut = if (kind.strikerOnly || nonStriker == null) striker else out
                 onConfirm(kind, playerOut, fielder?.takeIf { kind.hasFielder }, if (kind.allowsRuns) runs else 0)
             },
             modifier = Modifier.fillMaxWidth().padding(top = DesiTheme.space.s2),
@@ -215,6 +223,22 @@ internal val DismissalKind.label: StringResource
         DismissalKind.HIT_BALL_TWICE -> Res.string.scoring_dismissal_hit_twice
         DismissalKind.OTHER -> Res.string.scoring_dismissal_other
     }
+
+/** A ball that breaks rules the match set to warn: what it breaks, then record it anyway or think again. */
+@Composable
+internal fun RuleWarningSheet(pending: PendingBall, onRecord: () -> Unit, onCancel: () -> Unit) {
+    DesiSheet(stringResource(Res.string.scoring_rule_warning_title), onCancel) {
+        pending.warnings.forEach { warning ->
+            Text(stringResource(warning.label), style = DesiTheme.type.body, color = DesiTheme.colors.ink)
+        }
+        PrimaryButton(
+            text = stringResource(Res.string.scoring_rule_warning_record),
+            onClick = onRecord,
+            modifier = Modifier.fillMaxWidth().padding(top = DesiTheme.space.s2),
+        )
+        GhostButton(stringResource(Res.string.scoring_rule_warning_cancel), onClick = onCancel, modifier = Modifier.fillMaxWidth())
+    }
+}
 
 /** Penalty runs to either side: the team, then how many (5 by default, as in the laws). */
 @Composable

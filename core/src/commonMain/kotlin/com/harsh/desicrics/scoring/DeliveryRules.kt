@@ -5,35 +5,86 @@ import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.InningsScore
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.MatchStatus
+import com.harsh.desicrics.model.RuleMode
 
 /**
- * Why [delivery] can't be the next ball given the match so far, or null if it can.
- * Checked on the device before sending and again on the server, so a buggy or hostile client
- * can't corrupt a scorecard.
+ * Why [delivery] can't be the next ball given the match so far, or null if it can: either it makes no
+ * sense, or it breaks a match rule the scorer chose to enforce. Checked on the device before sending and
+ * again on the server, so a buggy or hostile client can't corrupt a scorecard.
  */
-fun MatchState.validate(delivery: Delivery, nextSeq: Int): DeliveryError? {
+fun MatchState.validate(delivery: Delivery, nextSeq: Int): DeliveryError? =
+    deliveryError(delivery, nextSeq) ?: ruleBreaks(delivery).firstOrNull { it.mode == RuleMode.ENFORCE }?.error
+
+/** Match rules set to warn that [delivery] breaks. The app asks the scorer before recording it. */
+fun MatchState.warnings(delivery: Delivery): List<DeliveryError> =
+    ruleBreaks(delivery).filter { it.mode == RuleMode.WARN }.map { it.error }
+
+/** A match rule a ball would break, and how firmly the match holds it. */
+data class RuleBreak(val error: DeliveryError, val mode: RuleMode)
+
+/**
+ * The rule [bowlerId] would break by bowling the next ball, if any, so the bowler picker can hide or flag them.
+ * [RuleMode.OFF] rules never show up here.
+ */
+fun MatchState.bowlerRuleBreak(bowlerId: String): RuleBreak? {
+    val rules = match.rules
+    val card = current.bowlers.firstOrNull { it.player.id == bowlerId }
+    return when {
+        rules.consecutiveOversMode != RuleMode.OFF && bowlerId == current.previousOverBowlerId ->
+            RuleBreak(DeliveryError.CONSECUTIVE_OVERS, rules.consecutiveOversMode)
+        rules.bowlerOverLimitMode != RuleMode.OFF && card != null &&
+            card.legalBalls >= rules.overLimit(match.oversPerInnings) * 6 ->
+            RuleBreak(DeliveryError.BOWLER_OVER_LIMIT, rules.bowlerOverLimitMode)
+        else -> null
+    }
+}
+
+/** Every rule [delivery] breaks that the match hasn't switched off. */
+private fun MatchState.ruleBreaks(delivery: Delivery): List<RuleBreak> {
+    val rules = match.rules
+    val innings = current
+    val crease = listOfNotNull(delivery.strikerId, delivery.nonStrikerId)
+    return listOfNotNull(
+        RuleBreak(DeliveryError.RETIRED_CANNOT_RETURN, rules.retiredReturnMode)
+            .takeIf { crease.any { it in innings.returnBlocked } },
+        RuleBreak(DeliveryError.MUST_RETIRE, rules.retireAtMode).takeIf {
+            innings.batters.any { it.player.id in crease && it.runs >= rules.retireAtRuns && it.retiredAtWickets == null }
+        },
+        bowlerRuleBreak(delivery.bowlerId),
+        RuleBreak(DeliveryError.NOT_OUT_ON_FREE_HIT, rules.freeHitMode).takeIf {
+            val kind = delivery.wicket?.kind
+            innings.isFreeHit && kind != null && !kind.possibleOn(ExtraType.NO_BALL)
+        },
+    ).filter { it.mode != RuleMode.OFF }
+}
+
+private fun MatchState.deliveryError(delivery: Delivery, nextSeq: Int): DeliveryError? {
     val innings = current
     val batting = innings.battingTeam.players.map { it.id }.toSet()
     val bowling = innings.bowlingTeam.players.map { it.id }.toSet()
     val out = innings.batters.filter { it.isOut }.map { it.player.id }.toSet()
-    val crease = setOf(delivery.strikerId, delivery.nonStrikerId)
+    val crease = setOfNotNull(delivery.strikerId, delivery.nonStrikerId)
 
     return when {
         isComplete -> DeliveryError.MATCH_OVER
         delivery.seq != nextSeq -> DeliveryError.STALE
         delivery.innings != innings.number -> DeliveryError.WRONG_INNINGS
         delivery.strikerId == delivery.nonStrikerId -> DeliveryError.SAME_BATTER
+        // Batting alone is only for the last batter, when the match lets the last man stand.
+        delivery.nonStrikerId == null && (!match.rules.lastManStands || innings.canComeIn.any { it.id != delivery.strikerId }) ->
+            DeliveryError.NON_STRIKER_MISSING
         !batting.containsAll(crease) -> DeliveryError.BATTER_NOT_IN_TEAM
         crease.any { it in out } -> DeliveryError.BATTER_ALREADY_OUT
         innings.strikerId != null && innings.strikerId != delivery.strikerId -> DeliveryError.WRONG_STRIKER
         innings.nonStrikerId != null && innings.nonStrikerId != delivery.nonStrikerId -> DeliveryError.WRONG_NON_STRIKER
         delivery.bowlerId !in bowling -> DeliveryError.BOWLER_NOT_IN_TEAM
-        // Mid-over bowler changes go through MatchEvent.ReplaceBowler. Bowling two overs in a row is allowed:
-        // small local sides often have to.
+        // Mid-over bowler changes go through MatchEvent.ReplaceBowler. Whether one bowler can bowl two overs
+        // in a row is a match rule (ruleBreaks), since small local sides often have to.
         innings.bowlerId != null && innings.bowlerId != delivery.bowlerId -> DeliveryError.OVER_NOT_FINISHED
         delivery.runsOffBat !in 0..7 -> DeliveryError.RUNS_OUT_OF_RANGE
-        else -> extrasError(delivery) ?: wicketError(delivery, bowling)
+        else -> extrasError(delivery, match.rules) ?: wicketError(delivery, bowling)
     }
 }
 
@@ -61,12 +112,21 @@ fun MatchState.validate(event: MatchEvent, nextSeq: Int): DeliveryError? {
 /** English message for API error responses. */
 fun MatchState.rejectionReason(event: MatchEvent, nextSeq: Int): String? = validate(event, nextSeq)?.message
 
-private fun extrasError(delivery: Delivery): DeliveryError? = when (delivery.extra) {
-    null -> DeliveryError.EXTRA_RUNS_ON_LEGAL_BALL.takeIf { delivery.extraRuns != 0 }
-    ExtraType.WIDE -> DeliveryError.INVALID_WIDE.takeIf { delivery.runsOffBat != 0 || delivery.extraRuns !in 1..5 }
-    ExtraType.NO_BALL -> DeliveryError.INVALID_NO_BALL.takeIf { delivery.extraRuns != 1 }
-    ExtraType.BYE, ExtraType.LEG_BYE ->
-        DeliveryError.INVALID_BYES.takeIf { delivery.runsOffBat != 0 || delivery.extraRuns !in 1..4 }
+private fun extrasError(delivery: Delivery, rules: MatchRules): DeliveryError? {
+    val extra = delivery.extra
+    if (delivery.isWideOrNoBall &&
+        (delivery.extraPenalty != rules.penalty(extra!!) || delivery.countsAsBall != rules.countsAsBall(extra))
+    ) {
+        return DeliveryError.EXTRA_NOT_PER_RULES
+    }
+    val penalty = delivery.extraPenalty
+    return when (extra) {
+        null -> DeliveryError.EXTRA_RUNS_ON_LEGAL_BALL.takeIf { delivery.extraRuns != 0 }
+        ExtraType.WIDE -> DeliveryError.INVALID_WIDE.takeIf { delivery.runsOffBat != 0 || delivery.extraRuns !in penalty..penalty + 4 }
+        ExtraType.NO_BALL -> DeliveryError.INVALID_NO_BALL.takeIf { delivery.extraRuns != penalty }
+        ExtraType.BYE, ExtraType.LEG_BYE ->
+            DeliveryError.INVALID_BYES.takeIf { delivery.runsOffBat != 0 || delivery.extraRuns !in 1..4 }
+    } ?: DeliveryError.EXTRA_NOT_PER_RULES.takeIf { !delivery.isWideOrNoBall && delivery.countsAsBall }
 }
 
 private fun wicketError(delivery: Delivery, bowling: Set<String>): DeliveryError? {
@@ -97,8 +157,10 @@ enum class DeliveryError(val message: String) {
     OVER_NOT_FINISHED("The over isn't finished yet"),
     RUNS_OUT_OF_RANGE("Runs off the bat must be between 0 and 7"),
     EXTRA_RUNS_ON_LEGAL_BALL("A legal ball can't have extra runs"),
-    INVALID_WIDE("A wide is 1–5 runs with nothing off the bat"),
-    INVALID_NO_BALL("A no-ball carries exactly 1 penalty run"),
+    INVALID_WIDE("A wide is its penalty plus up to 4 runs, with nothing off the bat"),
+    INVALID_NO_BALL("A no-ball carries exactly the match's penalty"),
+    EXTRA_NOT_PER_RULES("That extra doesn't match this match's rules"),
+    NON_STRIKER_MISSING("Pick a non-striker. Only the last batter can bat alone, and only if the match allows it"),
     INVALID_BYES("Byes and leg byes are 1–4 runs with nothing off the bat"),
     OUT_PLAYER_NOT_AT_CREASE("Only a batter at the crease can be out"),
     ONLY_STRIKER_CAN_BE_OUT("Only the striker can be out that way"),
@@ -110,6 +172,13 @@ enum class DeliveryError(val message: String) {
     BATTERS_MISSING("Pick both batters first"),
     NO_BOWLER_TO_REPLACE("Nobody is bowling yet"),
     PENALTY_OUT_OF_RANGE("Penalty runs must be between 1 and 10"),
+
+    // Match rules; these apply only as strictly as the scorer set them.
+    RETIRED_CANNOT_RETURN("The match rules don't let that retired batter back in yet"),
+    MUST_RETIRE("A batter has reached the retirement score and must retire"),
+    BOWLER_OVER_LIMIT("That bowler has bowled all their overs"),
+    CONSECUTIVE_OVERS("That bowler bowled the previous over"),
+    NOT_OUT_ON_FREE_HIT("It's a free hit: the batter can't be out that way"),
 }
 
 /** The match row with its denormalised summary, status and result refreshed from [state]. */

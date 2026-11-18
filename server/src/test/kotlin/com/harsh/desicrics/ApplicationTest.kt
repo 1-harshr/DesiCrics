@@ -9,13 +9,16 @@ import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.auth.TokenVerifier
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
+import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.InningsScore
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchResult
+import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.PlayerRole
+import com.harsh.desicrics.model.RuleMode
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.model.UserProfile
@@ -38,6 +41,7 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import java.util.UUID
 import kotlin.test.Test
+import kotlin.test.assertNull
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -59,7 +63,7 @@ class ApplicationTest {
             setBody(UpdateProfileRequest(name = "Asha", phone = "+91 98765 43210", role = PlayerRole.ALL_ROUNDER))
         }
 
-    private suspend fun HttpClient.createMatch(uid: String): MatchDetails =
+    private suspend fun HttpClient.createMatch(uid: String, rules: MatchRules = MatchRules(), overs: Int = 1): MatchDetails =
         post("/matches") {
             bearerAuth("test-$uid")
             contentType(ContentType.Application.Json)
@@ -67,7 +71,8 @@ class ApplicationTest {
                 CreateMatchRequest(
                     teamAName = "Strikers", teamAPlayers = listOf("Asha", "Bilal", "Chetan"),
                     teamBName = "Royals", teamBPlayers = listOf("Dev", "Esha"),
-                    oversPerInnings = 1, tossWinner = TeamSide.A, tossDecision = TossDecision.BAT,
+                    oversPerInnings = overs, tossWinner = TeamSide.A, tossDecision = TossDecision.BAT,
+                    rules = rules,
                 ),
             )
         }.body()
@@ -219,6 +224,39 @@ class ApplicationTest {
         val undone = client.delete("/matches/${match.id}/last") { bearerAuth("test-asha") }.body<MatchDetails>()
         assertTrue(undone.events.isEmpty())
         assertEquals(1, undone.deliveries.size)
+    }
+
+    @Test
+    fun matchRulesAreKeptAndApplied() = apiTest { client ->
+        client.setUpProfile("asha")
+        val rules = MatchRules.Gully.copy(widePenalty = 2, wideRebowled = false, consecutiveOversMode = RuleMode.ENFORCE)
+        val match = client.createMatch("asha", rules, overs = 2).match
+        val (a1, a2, a3) = match.teamA.players
+        val (b1, b2) = match.teamB.players
+        assertEquals(rules, client.get("/matches/${match.id}") { bearerAuth("test-dev") }.body<MatchDetails>().match.rules)
+
+        // A wide scored with the laws' penalty is refused; the match's own is stored on the ball.
+        val lawsWide = Delivery(0, innings = 1, strikerId = a1.id, nonStrikerId = a2.id, bowlerId = b1.id, extra = ExtraType.WIDE, extraRuns = 1)
+        assertEquals(HttpStatusCode.Conflict, client.record("asha", match.id, lawsWide).status)
+        val wide = lawsWide.copy(extraRuns = 2, extraPenalty = 2, countsAsBall = true)
+        val afterWide = client.record("asha", match.id, wide).body<MatchDetails>()
+        assertEquals("Strikers 2/0 (0.1)", afterWide.match.scoreSummary)
+        assertEquals(wide, afterWide.deliveries.single().copy(timestamp = 0))
+
+        // Two wickets leave a3 alone, which Gully rules allow.
+        var seq = 1
+        for (batter in listOf(a1, a3)) {
+            val ball = Delivery(seq++, innings = 1, strikerId = batter.id, nonStrikerId = a2.id, bowlerId = b1.id, wicket = Wicket(DismissalKind.BOWLED, batter.id))
+            assertEquals(HttpStatusCode.OK, client.record("asha", match.id, ball).status)
+        }
+        val alone = Delivery(seq++, innings = 1, strikerId = a2.id, nonStrikerId = null, bowlerId = b1.id, runsOffBat = 1)
+        val afterAlone = client.record("asha", match.id, alone).body<MatchDetails>()
+        assertNull(afterAlone.deliveries.last().nonStrikerId)
+
+        // Finish the over, then b1 can't bowl the next one.
+        repeat(2) { client.record("asha", match.id, alone.copy(seq = seq++, runsOffBat = 0)) }
+        assertEquals(HttpStatusCode.Conflict, client.record("asha", match.id, alone.copy(seq = seq)).status)
+        assertEquals(HttpStatusCode.OK, client.record("asha", match.id, alone.copy(seq = seq, bowlerId = b2.id)).status)
     }
 
     @Test

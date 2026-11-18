@@ -54,6 +54,7 @@ internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifi
                 listOf(card.player.name, "${card.runs}", "${card.balls}", "${card.fours}", "${card.sixes}", card.strikeRate.format2()),
                 subtitle = when (card.retired) {
                     Retirement.HURT -> stringResource(Res.string.scorecard_retired_hurt)
+                    Retirement.NOT_OUT -> stringResource(Res.string.scorecard_retired_not_out)
                     Retirement.OUT -> stringResource(Res.string.scorecard_retired_out)
                     null -> dismissalText(card.dismissal)
                 },

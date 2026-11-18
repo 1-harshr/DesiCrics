@@ -99,7 +99,7 @@ fun commentaryText(ball: BallEvent): String {
             else stringResource(Res.string.commentary_out, out, dismissal)
         }
         d.extra == ExtraType.WIDE ->
-            if (d.extraRuns <= 1) stringResource(Res.string.commentary_wide)
+            if (d.extraRuns <= d.extraPenalty) stringResource(Res.string.commentary_wide)
             else pluralStringResource(Res.plurals.commentary_wide_runs, d.extraRuns, d.extraRuns)
         d.extra == ExtraType.NO_BALL ->
             if (d.runsOffBat == 0) stringResource(Res.string.commentary_no_ball)
@@ -141,6 +141,13 @@ val DeliveryError.label: StringResource
         DeliveryError.BATTERS_MISSING -> Res.string.scoring_error_batters_missing
         DeliveryError.NO_BOWLER_TO_REPLACE -> Res.string.scoring_error_no_bowler_to_replace
         DeliveryError.PENALTY_OUT_OF_RANGE -> Res.string.scoring_error_penalty_out_of_range
+        DeliveryError.EXTRA_NOT_PER_RULES -> Res.string.scoring_error_extra_not_per_rules
+        DeliveryError.NON_STRIKER_MISSING -> Res.string.scoring_error_non_striker_missing
+        DeliveryError.RETIRED_CANNOT_RETURN -> Res.string.scoring_error_retired_cannot_return
+        DeliveryError.MUST_RETIRE -> Res.string.scoring_error_must_retire
+        DeliveryError.BOWLER_OVER_LIMIT -> Res.string.scoring_error_bowler_over_limit
+        DeliveryError.CONSECUTIVE_OVERS -> Res.string.scoring_error_consecutive_overs
+        DeliveryError.NOT_OUT_ON_FREE_HIT -> Res.string.scoring_error_not_out_on_free_hit
     }
 
 // Previews: sample teams and players only; every line of text comes from string resources.

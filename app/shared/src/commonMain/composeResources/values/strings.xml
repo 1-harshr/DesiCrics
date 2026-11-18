@@ -151,8 +151,10 @@
     <string name="scoring_error_over_not_finished">The over isn't finished yet.</string>
     <string name="scoring_error_runs_out_of_range">Runs off the bat must be between 0 and 7.</string>
     <string name="scoring_error_extra_runs_on_legal_ball">A legal ball can't have extra runs.</string>
-    <string name="scoring_error_invalid_wide">A wide is 1 to 5 runs with nothing off the bat.</string>
-    <string name="scoring_error_invalid_no_ball">A no-ball carries exactly 1 penalty run.</string>
+    <string name="scoring_error_invalid_wide">A wide is its penalty plus up to 4 runs, with nothing off the bat.</string>
+    <string name="scoring_error_invalid_no_ball">A no-ball carries exactly the match's penalty.</string>
+    <string name="scoring_error_extra_not_per_rules">That extra doesn't match this match's rules.</string>
+    <string name="scoring_error_non_striker_missing">Pick a non-striker. Only the last batter can bat alone, and only if the match rules allow it.</string>
     <string name="scoring_error_invalid_byes">Byes and leg byes are 1 to 4 runs with nothing off the bat.</string>
     <string name="scoring_error_out_player_not_at_crease">Only a batter at the crease can be out.</string>
     <string name="scoring_error_only_striker_can_be_out">Only the striker can be out that way.</string>
@@ -222,6 +224,7 @@
     <string name="new_match_error_too_many_players">A team can have at most 20 players.</string>
     <string name="new_match_error_player_name_invalid">Player names can be at most 60 characters.</string>
     <string name="new_match_error_overs">Overs must be between 1 and 50.</string>
+    <string name="new_match_error_rules">Some of the match rules are out of range.</string>
     <string name="new_match_error_create_failed">Couldn't start the match. Check your connection and try again.</string>
 
     <!-- Scoring screen -->
@@ -277,9 +280,15 @@
     <string name="scoring_pick_bowler">Who's bowling?</string>
     <string name="scoring_no_players">Everyone has batted.</string>
     <string name="scoring_wide_title">Wide</string>
-    <string name="scoring_wide_hint">Runs the batters ran. The wide's 1 run is added for you.</string>
+    <plurals name="scoring_wide_hint">
+        <item quantity="one">Runs the batters ran. The wide's %1$d run is added for you.</item>
+        <item quantity="other">Runs the batters ran. The wide's %1$d runs are added for you.</item>
+    </plurals>
     <string name="scoring_no_ball_title">No-ball</string>
-    <string name="scoring_no_ball_hint">Runs off the bat. The no-ball's 1 run is added for you.</string>
+    <plurals name="scoring_no_ball_hint">
+        <item quantity="one">Runs off the bat. The no-ball's %1$d run is added for you.</item>
+        <item quantity="other">Runs off the bat. The no-ball's %1$d runs are added for you.</item>
+    </plurals>
     <string name="scoring_bye_title">Byes</string>
     <string name="scoring_leg_bye_title">Leg byes</string>
     <string name="scoring_byes_hint">How many runs did they run?</string>
@@ -378,6 +387,7 @@
     <string name="scoring_add_new_player_hint">Someone arrived late or is coming in as a substitute.</string>
     <string name="scorecard_retired_hurt">retired hurt</string>
     <string name="scorecard_retired_out">retired out</string>
+    <string name="scorecard_retired_not_out">retired not out</string>
 
     <!-- Match options: penalty runs -->
     <string name="match_options">Match options</string>
@@ -390,4 +400,74 @@
     <string name="match_penalty_fielding_note">Runs for the fielding side go on their own innings total.</string>
     <string name="match_penalty_award">Award %1$d runs</string>
     <string name="scoring_error_penalty_out_of_range">Penalty runs must be between 1 and 10.</string>
+
+    <!-- Match rules: chosen on the new match screen, applied while scoring -->
+    <string name="new_match_section_rules">Rules</string>
+    <string name="new_match_rules_hint">How strictly the app holds you to the rules. Fixed once the match starts.</string>
+    <string name="new_match_rules_customise">Customise rules</string>
+    <string name="rules_preset_relaxed">Relaxed</string>
+    <string name="rules_preset_gully">Gully</string>
+    <string name="rules_preset_club">Club</string>
+    <string name="rules_preset_standard">Standard</string>
+    <string name="rules_preset_custom">Custom</string>
+    <string name="rules_preset_relaxed_hint">No limits. Score whatever happens.</string>
+    <string name="rules_preset_gully_hint">Last man bats on, retired batters come back at the end.</string>
+    <string name="rules_preset_club_hint">Standard rules, but you're only warned when one is broken.</string>
+    <string name="rules_preset_standard_hint">Over limits, free hits, no back-to-back overs, all enforced.</string>
+    <string name="rules_preset_custom_hint">Your own mix of rules.</string>
+    <string name="rules_title">Match rules</string>
+    <string name="rules_done">Done</string>
+    <string name="rules_mode_off">Off</string>
+    <string name="rules_mode_warn">Warn</string>
+    <string name="rules_mode_enforce">Enforce</string>
+    <string name="rules_modes_hint">Warn lets you record the ball anyway. Enforce stops it.</string>
+    <string name="rules_section_batting">Batting</string>
+    <string name="rules_section_bowling">Bowling</string>
+    <string name="rules_section_extras">Extras</string>
+    <string name="rules_last_man">Last man stands</string>
+    <string name="rules_last_man_hint">The last batter can bat alone, so the side is all out only when everyone is.</string>
+    <string name="rules_retired_return">Retired batters return</string>
+    <string name="rules_retired_return_hint">When a batter who retired hurt, or at the run limit, can bat again.</string>
+    <string name="rules_return_any_time">Any time</string>
+    <string name="rules_return_after_wicket">After a wicket</string>
+    <string name="rules_return_at_end">At the end</string>
+    <string name="rules_return_never">Never</string>
+    <string name="rules_retire_at">Retire at a score</string>
+    <string name="rules_retire_at_hint">A batter must retire, not out, on reaching this many runs.</string>
+    <string name="rules_retire_at_label">runs</string>
+    <string name="rules_retire_at_fewer">Fewer runs</string>
+    <string name="rules_retire_at_more">More runs</string>
+    <string name="rules_over_limit">Overs per bowler</string>
+    <string name="rules_over_limit_hint">The most overs one bowler can bowl.</string>
+    <string name="rules_over_limit_even">Even share (%1$d)</string>
+    <string name="rules_over_limit_label">overs each</string>
+    <string name="rules_over_limit_fewer">Fewer overs</string>
+    <string name="rules_over_limit_more">More overs</string>
+    <string name="rules_consecutive">No back-to-back overs</string>
+    <string name="rules_consecutive_hint">The bowler of the last over can't bowl the next one.</string>
+    <string name="rules_wide">Wides</string>
+    <string name="rules_no_ball">No-balls</string>
+    <string name="rules_penalty">Runs it gives</string>
+    <string name="rules_rebowled">Bowled again</string>
+    <string name="rules_counts_as_ball">Counts as a ball</string>
+    <string name="rules_free_hit">Free hit after a no-ball</string>
+    <string name="rules_free_hit_hint">The batter can only be run out off the next ball.</string>
+    <string name="rules_on">On</string>
+
+    <!-- Match rules while scoring -->
+    <string name="scoring_error_retired_cannot_return">The match rules don't let that retired batter back in yet.</string>
+    <string name="scoring_error_must_retire">A batter has reached the retirement score and must retire.</string>
+    <string name="scoring_error_bowler_over_limit">That bowler has bowled all their overs.</string>
+    <string name="scoring_error_consecutive_overs">That bowler bowled the previous over.</string>
+    <string name="scoring_error_not_out_on_free_hit">It's a free hit: the batter can't be out that way.</string>
+    <string name="scoring_rule_warning_title">This breaks a match rule</string>
+    <string name="scoring_rule_warning_record">Record anyway</string>
+    <string name="scoring_rule_warning_cancel">Cancel</string>
+    <string name="scoring_return_not_yet">Retired · rules say not yet</string>
+    <string name="scoring_over_limit_reached">Has bowled all their overs</string>
+    <string name="match_free_hit">Free hit</string>
+    <string name="match_batting_alone">Batting alone · last man</string>
+    <string name="match_must_retire">Reached %1$d · must retire</string>
+    <string name="scoring_retire_not_out">Retired not out</string>
+    <string name="scoring_retire_not_out_hint">Reached the match's retirement score. Not out, and can come back if the rules allow.</string>
 </resources>

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.MatchSetupError
 import com.harsh.desicrics.data.MatchRepository
+import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
 import kotlinx.coroutines.CancellationException
@@ -26,6 +27,7 @@ data class NewMatchFormState(
     val overs: Int = 10,
     val tossWinner: TeamSide = TeamSide.A,
     val tossDecision: TossDecision = TossDecision.BAT,
+    val rules: MatchRules = MatchRules(),
     val saving: Boolean = false,
     val error: NewMatchError? = null,
 ) {
@@ -69,6 +71,7 @@ class NewMatchViewModel(private val matchRepository: MatchRepository) : ViewMode
             oversPerInnings = form.overs,
             tossWinner = form.tossWinner,
             tossDecision = form.tossDecision,
+            rules = form.rules,
         )
         // Same check the server runs, for instant feedback.
         request.validate()?.let { error ->
