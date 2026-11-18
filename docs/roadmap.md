@@ -174,14 +174,14 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 **Goal:** DesiCrics becomes where local cricket gets organised, not only recorded.
 
 ### Level 1 · Playable
-- ⬜ "Looking for": opponents and players by city and date
+- ✅ "Looking for": opponents and players by city and date
 
 ### Level 2 · Complete
-- ⬜ City team and player rankings
-- ⬜ Grounds, umpires and scorers directory
+- ✅ City team and player rankings
+- ✅ Grounds, umpires and scorers directory
 
 ### Level 3 · Delight
-- ⬜ Livestream score overlay (OBS / Larix)
+- ✅ Livestream score overlay (OBS / Larix)
 - ⬜ Paid insights or organiser plan (needs a pricing decision)
 
 **Exit:** at least 20% of weekend matches in a pilot city are arranged through "Looking for".

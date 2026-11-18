@@ -86,6 +86,7 @@ object StatsEngine {
                     playedAt = match.createdAt,
                     team = side.name,
                     opponent = opponent.name,
+                    opponentTeamId = opponent.teamId,
                     oversPerInnings = match.oversPerInnings,
                     tournamentId = match.fixture?.tournamentId,
                     batted = bat != null,

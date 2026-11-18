@@ -22,7 +22,8 @@ Every feature area, what we build, and the phase it lands in. See [roadmap.md](r
 | MVP points | One documented formula that ranks every player in a match, computed from deliveries. | 5 |
 | Leaderboards | Scoped to city, tournament and friends. | 5 |
 | Looking for | Post a need (opponent, player, ground, umpire, scorer) with a city and date; others respond. | 6 |
-| Rankings | City-scoped team and player rankings, weighted by opposition strength. | 6 |
+| Rankings | City-scoped team and player rankings, weighted by opposition strength ([how](#rankings)). | 6 |
+| Directory | Grounds, umpires and scorers by city, added by players. | 6 |
 | Stream overlay | Score overlay feed for OBS / Larix livestreams. No video hosting. | 6 |
 
 ## MVP points
@@ -32,6 +33,13 @@ One formula ranks everyone in a match, from its deliveries (`MvpPoints` in `core
 - **Batting:** 1 per run, +1 per four, +2 per six, +10 for a fifty or +25 for a hundred. From 10 balls faced, add (strike rate − 100) ÷ 10, kept between −5 and +10.
 - **Bowling:** 20 per wicket, 4 per maiden, +5 for three wickets or +15 for five. From 2 overs bowled, add (6 − economy) × 2, kept between −10 and +10.
 - **Fielding:** 8 per catch, 10 per run out or stumping.
+
+## Rankings
+
+Computed when asked for, from completed matches (`Rankings` in `core`).
+
+- **Teams:** Elo over every completed match between two saved teams, oldest first. Everyone starts at 1000, K is 32, a tie counts as half a win. A city's table lists its own teams, but their ratings include matches against visiting sides.
+- **Players:** the sum of a player's MVP points, each match multiplied by the opposing team's rating ÷ 1000. Against a side that isn't a saved team the multiplier is 1.
 
 ## Cricket vocabulary the app supports
 

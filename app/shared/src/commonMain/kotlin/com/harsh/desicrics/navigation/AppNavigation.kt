@@ -14,6 +14,7 @@ import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.model.UserProfile
 import com.harsh.desicrics.ui.system.RegisterForPush
 import org.koin.compose.koinInject
+import com.harsh.desicrics.ui.community.CommunityScreen
 import com.harsh.desicrics.ui.home.HomeScreen
 import com.harsh.desicrics.ui.match.MatchScreen
 import com.harsh.desicrics.ui.newmatch.NewMatchScreen
@@ -52,6 +53,8 @@ import kotlinx.serialization.modules.subclass
 @Serializable data class CompareRoute(val profileId: String, val name: String) : NavKey
 /** All leaderboards, or one tournament's when [tournamentId] is set. */
 @Serializable data class LeaderboardRoute(val tournamentId: String? = null) : NavKey
+/** Looking-for posts, rankings and the directory, for the user's city. */
+@Serializable data object CommunityRoute : NavKey
 /** Opened from a join link or QR code: the teams list with the join sheet filled in. */
 @Serializable data class JoinTeamRoute(val code: String) : NavKey
 
@@ -74,6 +77,7 @@ private val RouteSerialization = SavedStateConfiguration {
             subclass(TournamentRoute::class)
             subclass(CompareRoute::class)
             subclass(LeaderboardRoute::class)
+            subclass(CommunityRoute::class)
         }
     }
 }
@@ -116,6 +120,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     onNotifications = { backStack.add(NotificationsRoute) },
                     onTournaments = { backStack.add(TournamentsRoute) },
                     onLeaderboards = { backStack.add(LeaderboardRoute()) },
+                    onCommunity = { backStack.add(CommunityRoute) },
                 )
             }
             entry<ProfileRoute> {
@@ -185,6 +190,15 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
             }
             entry<LeaderboardRoute> { route ->
                 LeaderboardScreen(route.tournamentId, onOpenPlayer = { backStack.add(PlayerRoute(it)) }, onBack = back)
+            }
+            entry<CommunityRoute> {
+                CommunityScreen(
+                    city = profile.city,
+                    myId = profile.uid,
+                    onOpenPlayer = { backStack.add(PlayerRoute(it)) },
+                    onOpenTeam = { backStack.add(TeamRoute(it)) },
+                    onBack = back,
+                )
             }
             entry<JoinTeamRoute> { route ->
                 TeamsScreen(onOpenTeam = { backStack.replaceLast(TeamRoute(it)) }, onBack = back, joinCode = route.code)

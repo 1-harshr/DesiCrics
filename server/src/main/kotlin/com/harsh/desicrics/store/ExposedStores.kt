@@ -145,6 +145,13 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             .map { it.toMatch(players = emptyList()) }
     }
 
+    override suspend fun completedBetweenSavedTeams(): List<Match> = db.query {
+        MatchesTable.selectAll()
+            .where { (MatchesTable.status eq MatchStatus.COMPLETED) and MatchesTable.teamAId.isNotNull() and MatchesTable.teamBId.isNotNull() }
+            .orderBy(MatchesTable.createdAt)
+            .map { it.toMatch(players = emptyList()) }
+    }
+
     override suspend fun between(teamId: String, otherId: String): List<Match> = db.query {
         MatchesTable.selectAll()
             .where {

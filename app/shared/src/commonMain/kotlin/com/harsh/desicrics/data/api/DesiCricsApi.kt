@@ -3,6 +3,9 @@ package com.harsh.desicrics.data.api
 import com.harsh.desicrics.api.AddMemberRequest
 import com.harsh.desicrics.api.AddOrganiserRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
+import com.harsh.desicrics.api.DirectoryRequest
+import com.harsh.desicrics.api.LookingForRequest
+import com.harsh.desicrics.api.RespondRequest
 import com.harsh.desicrics.api.CustomFixtureRequest
 import com.harsh.desicrics.api.EnterTeamRequest
 import com.harsh.desicrics.api.ReviewEntryRequest
@@ -15,7 +18,13 @@ import com.harsh.desicrics.api.SetRoleRequest
 import com.harsh.desicrics.api.SupportRequest
 import com.harsh.desicrics.api.TeamRequest
 import com.harsh.desicrics.model.CareerStats
+import com.harsh.desicrics.model.DirectoryEntry
+import com.harsh.desicrics.model.DirectoryKind
 import com.harsh.desicrics.model.Follow
+import com.harsh.desicrics.model.LookingForKind
+import com.harsh.desicrics.model.LookingForPost
+import com.harsh.desicrics.model.PlayerRanking
+import com.harsh.desicrics.model.TeamRanking
 import com.harsh.desicrics.model.FormatFilter
 import com.harsh.desicrics.model.LeaderboardMetric
 import com.harsh.desicrics.model.LeaderboardRow
@@ -258,6 +267,33 @@ class DesiCricsApi(
 
     suspend fun uploadTeamLogo(teamId: String, jpeg: ByteArray): SavedTeam =
         call { put("$baseUrl/teams/$teamId/logo") { it(); contentType(ContentType.Image.JPEG); setBody(jpeg) } }.body()
+
+    // Community.
+
+    suspend fun lookingFor(city: String, kind: LookingForKind?): List<LookingForPost> =
+        call { get("$baseUrl/looking-for") { it(); parameter("city", city); kind?.let { k -> parameter("kind", k.name) } } }.body()
+
+    suspend fun myLookingFor(): List<LookingForPost> = call { get("$baseUrl/looking-for/mine", it) }.body()
+
+    suspend fun postLookingFor(request: LookingForRequest): LookingForPost = call { post("$baseUrl/looking-for") { it(); json(request) } }.body()
+
+    suspend fun respond(postId: String, request: RespondRequest): LookingForPost =
+        call { post("$baseUrl/looking-for/$postId/responses") { it(); json(request) } }.body()
+
+    suspend fun closeLookingFor(postId: String): LookingForPost = call { post("$baseUrl/looking-for/$postId/close", it) }.body()
+
+    suspend fun directory(city: String, kind: DirectoryKind?): List<DirectoryEntry> =
+        call { get("$baseUrl/directory") { it(); parameter("city", city); kind?.let { k -> parameter("kind", k.name) } } }.body()
+
+    suspend fun addDirectoryEntry(request: DirectoryRequest): DirectoryEntry = call { post("$baseUrl/directory") { it(); json(request) } }.body()
+
+    suspend fun removeDirectoryEntry(id: String) {
+        call { delete("$baseUrl/directory/$id", it) }
+    }
+
+    suspend fun teamRankings(city: String): List<TeamRanking> = call { get("$baseUrl/rankings/teams") { it(); parameter("city", city) } }.body()
+
+    suspend fun playerRankings(city: String): List<PlayerRanking> = call { get("$baseUrl/rankings/players") { it(); parameter("city", city) } }.body()
 
     /** Removes the latest ball or event. */
     suspend fun undoLast(matchId: String): MatchDetails =

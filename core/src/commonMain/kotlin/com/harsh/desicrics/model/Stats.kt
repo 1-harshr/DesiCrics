@@ -34,6 +34,8 @@ data class PlayerMatchLine(
     /** Runs off the bat per wagon wheel zone, when the match kept one. */
     val zones: Map<FieldZone, Int> = emptyMap(),
     val won: Boolean = false,
+    /** The opposing saved team, if it was one, for rankings weighted by opposition strength. */
+    val opponentTeamId: String? = null,
 )
 
 /** Match length, for filtering stats: the overs a side gets. */

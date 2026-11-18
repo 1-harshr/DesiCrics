@@ -5,9 +5,11 @@ import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.DirectoryKind
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.FollowType
+import com.harsh.desicrics.model.LookingForKind
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.NotificationKind
@@ -260,6 +262,40 @@ object PushTokensTable : Table("push_tokens") {
     val platform = varchar("platform", 10)
     val updatedAt = long("updated_at")
     override val primaryKey = PrimaryKey(token)
+}
+
+object LookingForPostsTable : Table("looking_for_posts") {
+    val id = varchar("id", 36)
+    val authorUid = varchar("author_uid", 128)
+    val kind = enumerationByName("kind", 10, LookingForKind::class)
+    val city = varchar("city", 100)
+    val forDate = long("for_date")
+    val note = varchar("note", 500)
+    val teamId = varchar("team_id", 36).nullable()
+    val isOpen = bool("is_open")
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(id)
+}
+
+object LookingForResponsesTable : Table("looking_for_responses") {
+    val postId = reference("post_id", LookingForPostsTable.id, onDelete = ReferenceOption.CASCADE)
+    val uid = varchar("uid", 128)
+    val message = varchar("message", 500)
+    val phone = varchar("phone", 20)
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(postId, uid)
+}
+
+object DirectoryEntriesTable : Table("directory_entries") {
+    val id = varchar("id", 36)
+    val kind = enumerationByName("kind", 10, DirectoryKind::class)
+    val name = varchar("name", 100)
+    val city = varchar("city", 100)
+    val phone = varchar("phone", 20)
+    val notes = varchar("notes", 500)
+    val addedBy = varchar("added_by", 128)
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(id)
 }
 
 /** A connected database plus the pool behind it, so the server can close it on shutdown. */

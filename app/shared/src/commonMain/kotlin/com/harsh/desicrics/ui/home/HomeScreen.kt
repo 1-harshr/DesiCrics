@@ -92,6 +92,7 @@ fun HomeScreen(
     onNotifications: () -> Unit,
     onTournaments: () -> Unit,
     onLeaderboards: () -> Unit,
+    onCommunity: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -99,7 +100,7 @@ fun HomeScreen(
     var takingOver by rememberSaveable { mutableStateOf(false) }
     HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile, onTakeOver = { takingOver = true }, onTeams = onTeams,
         onSearch = onSearch, onNotifications = onNotifications, onTournaments = onTournaments,
-        onLeaderboards = onLeaderboards, playerPhoto = playerPhoto)
+        onLeaderboards = onLeaderboards, onCommunity = onCommunity, playerPhoto = playerPhoto)
     if (takingOver) {
         TakeOverSheet(
             state = takeOver,
@@ -158,6 +159,7 @@ fun HomeContent(
     onNotifications: () -> Unit = {},
     onTournaments: () -> Unit = {},
     onLeaderboards: () -> Unit = {},
+    onCommunity: () -> Unit = {},
     playerPhoto: String? = null,
 ) {
     val space = DesiTheme.space
@@ -180,6 +182,7 @@ fun HomeContent(
                     GhostButton(stringResource(Res.string.home_leaderboards), onClick = onLeaderboards, modifier = Modifier.weight(1f))
                     GhostButton(stringResource(Res.string.home_take_over), onClick = onTakeOver, modifier = Modifier.weight(1f))
                 }
+                GhostButton(stringResource(Res.string.home_community), onClick = onCommunity, modifier = Modifier.fillMaxWidth())
             }
         }
         if (state.loadFailed) {

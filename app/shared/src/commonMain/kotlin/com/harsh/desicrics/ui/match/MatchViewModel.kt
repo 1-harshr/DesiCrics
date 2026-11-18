@@ -120,6 +120,7 @@ class MatchViewModel(
 
     /** The public scorecard anyone can open. */
     val shareLink: String = social.matchLink(matchId)
+    val overlayLink: String = social.overlayLink(matchId)
 
 
     private val uid = authRepository.currentUser?.uid

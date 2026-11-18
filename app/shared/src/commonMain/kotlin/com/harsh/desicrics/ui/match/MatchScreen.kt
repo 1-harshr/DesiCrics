@@ -103,6 +103,7 @@ fun MatchScreen(
         ui = ui,
         actions = MatchActions(
             onShareLink = { shareMessage?.let(shareText) },
+            onShareOverlay = { shareText(viewModel.overlayLink) },
             onStartFixture = viewModel::startFixture,
             onBack = onBack,
             onSelectStriker = viewModel::selectStriker,
@@ -151,6 +152,7 @@ class MatchActions(
     val onRecordPendingBall: () -> Unit,
     val onDropPendingBall: () -> Unit,
     val onShareLink: () -> Unit = {},
+    val onShareOverlay: () -> Unit = {},
     val onStartFixture: (SquadRequest, SquadRequest, TeamSide, TossDecision) -> Unit = { _, _, _, _ -> },
 )
 
@@ -713,6 +715,10 @@ private fun ScoringSheets(
                 },
                 SheetOption(stringResource(Res.string.match_share_card), stringResource(Res.string.match_share_card_hint)) {
                     onSheet(ScoringSheet.ShareCard)
+                },
+                SheetOption(stringResource(Res.string.match_share_overlay), stringResource(Res.string.match_share_overlay_hint)) {
+                    actions.onShareOverlay()
+                    onClose()
                 },
             ),
             onDismiss = onClose,

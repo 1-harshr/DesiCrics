@@ -8,10 +8,12 @@ import com.harsh.desicrics.scoring.BatterCard
 import com.harsh.desicrics.scoring.Retirement
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.service.ApiException
+import com.harsh.desicrics.service.CommunityService
 import com.harsh.desicrics.service.MatchService
 import com.harsh.desicrics.service.TournamentService
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -20,7 +22,20 @@ import io.ktor.server.routing.get
  * Pages anyone can open without signing in, for links shared outside the app. Phones with the app open
  * these links in it directly; this is what everyone else sees.
  */
-fun Route.publicRoutes(matches: MatchService, tournaments: TournamentService, androidCertFingerprints: List<String> = emptyList()) {
+fun Route.publicRoutes(
+    matches: MatchService,
+    tournaments: TournamentService,
+    community: CommunityService,
+    androidCertFingerprints: List<String> = emptyList(),
+) {
+    // Livestream overlay: an OBS / Larix browser source polls the JSON and draws a score bar.
+    get("/m/{id}/overlay.json") { call.respond(community.overlay(matches.details(call.parameters["id"].orEmpty()))) }
+    get("/overlay/{id}") {
+        val id = call.parameters["id"].orEmpty().filter { it.isLetterOrDigit() || it == '-' }
+        matches.details(id)
+        call.respondText(overlayPage(id), ContentType.Text.Html)
+    }
+
     // Digital Asset Links: lets Android verify that this domain's /join, /m and /t links belong to the app.
     get("/.well-known/assetlinks.json") {
         val fingerprints = androidCertFingerprints.joinToString(",") { "\"${it.escapeJson()}\"" }
@@ -155,6 +170,49 @@ internal fun tournamentPage(details: TournamentDetails): String {
     }
     return page(t.name, body, refreshSeconds = if (details.fixtures.any { it.status == MatchStatus.IN_PROGRESS }) 30 else null)
 }
+
+/**
+ * A transparent score bar for the bottom of a livestream. Add the page as a browser source (1920×1080) in
+ * OBS or Larix; it fetches the score every 2 seconds and keeps the last one if a fetch fails.
+ */
+internal fun overlayPage(matchId: String): String = """
+    <!doctype html>
+    <html><head><meta charset="utf-8"><title>DesiCrics overlay</title>
+    <style>
+      html, body { margin: 0; background: transparent; font-family: system-ui, sans-serif; }
+      .bar { position: fixed; left: 40px; right: 40px; bottom: 40px; display: flex; align-items: stretch;
+             border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,.35); font-size: 28px; }
+      .team { background: #0b6b3a; color: #fff; padding: 14px 22px; font-weight: 800; }
+      .score { background: #fff; color: #14201a; padding: 14px 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+      .score small { font-weight: 600; color: #5c6b62; margin-left: 10px; }
+      .mid { flex: 1; background: rgba(20,32,26,.92); color: #fff; padding: 10px 22px; font-size: 22px; line-height: 1.35; }
+      .detail { background: #f4b400; color: #14201a; padding: 14px 22px; font-weight: 700; }
+      .ball { display: inline-block; min-width: 30px; margin-right: 6px; text-align: center; border-radius: 15px; background: #2a352f; }
+    </style></head>
+    <body><div class="bar" id="bar" hidden>
+      <div class="team" id="team"></div>
+      <div class="score"><span id="score"></span><small id="overs"></small></div>
+      <div class="mid"><div id="batters"></div><div id="bowler"></div></div>
+      <div class="detail" id="detail"></div>
+    </div>
+    <script>
+      const text = (id, value) => { document.getElementById(id).textContent = value || ""; };
+      async function refresh() {
+        try {
+          const r = await fetch("/m/$matchId/overlay.json", { cache: "no-store" });
+          if (!r.ok) return;
+          const s = await r.json();
+          text("team", s.battingTeam); text("score", s.score); text("overs", s.overs + " ov"); text("detail", s.detail);
+          text("batters", [s.striker ? s.striker + "*" : null, s.nonStriker].filter(Boolean).join("   "));
+          const bowler = document.getElementById("bowler");
+          bowler.textContent = s.bowler ? s.bowler + "   " : "";
+          (s.thisOver || []).forEach(b => { const e = document.createElement("span"); e.className = "ball"; e.textContent = b; bowler.appendChild(e); });
+          document.getElementById("bar").hidden = false;
+        } catch (e) { /* keep the last score on screen */ }
+      }
+      refresh(); setInterval(refresh, 2000);
+    </script></body></html>
+""".trimIndent()
 
 /** A small mobile-first page in the app's colours. [body] must already be HTML-escaped. */
 internal fun page(title: String, body: String, refreshSeconds: Int? = null): String = """

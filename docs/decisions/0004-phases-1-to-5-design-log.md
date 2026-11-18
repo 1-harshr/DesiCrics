@@ -57,6 +57,20 @@ Phases 1 (Level 3) to 5 were built in one unattended stretch. These are the ques
 | How is the exit criterion checked? | `StatsEngineTest` plays 10 matches and recounts each player's numbers straight from the scorecards. |
 | Voice scoring: how far to trust speech? | Runs and extras are recorded from speech. "Out" opens the wicket sheet, and anything unrecognised asks again. The parser understands English and Hindi cricket words. |
 
+## Phase 6: cricket network
+
+Built after Phase 5 in the same stretch, because it needed no decisions from outside the code.
+
+| Question | Answer |
+|---|---|
+| Who can see the phone number in a reply to a "looking for" post? | Only the post's author. Replies are one per person, never on your own post, and the public list shows only how many there are. |
+| How long does a post stay up? | Until its date passes or the author closes it. Old posts drop off the list on their own, with no clean-up job. |
+| Who can post for a team? | Only its admins. Anyone can post for themselves. |
+| How is "opposition strength" measured for rankings? | Elo for saved teams (it's simple, and well understood by players). A player's MVP points are scaled by the rating of the side they came against ([features.md](../features.md#rankings)). |
+| Store the ratings, or compute them? | Compute them on request. Local cricket is small enough per city, and a stored rating would need rewriting on every undo. Worth revisiting if the query gets slow. |
+| Who keeps the directory honest? | Anyone signed in can add an entry; only whoever added it can remove it. Moderation waits until there's abuse to moderate. |
+| What does a streamer need from the overlay? | A URL to paste into OBS or Larix as a browser source: a transparent score bar at `/overlay/{matchId}` that polls `/m/{matchId}/overlay.json` every 2 seconds. Polling, not the WebSocket, so it survives a flaky stream PC. It's public, like the match page. |
+
 ## Checking
 
 - The real APK was driven on an emulator against the new server (on a throwaway Postgres), through onboarding, a team with a placeholder, a match from a saved squad to its result, profile stats, a best-of-three tournament to its second fixture, and the home screen widget. That run found four bugs (a Google sign-up blocked by Firebase's empty phone string, a fixture card showing its placeholder toss, "1 matches", and a stretched form chart), all fixed in 8e53b2a.
@@ -70,4 +84,5 @@ Phases 1 (Level 3) to 5 were built in one unattended stretch. These are the ques
 - **Hosting** (Cloud Run vs Fly.io). It blocks the staging deploy and the move from the `images` table to object storage.
 - **The public domain** and its `assetlinks.json`, for verified App Links.
 - **A Firebase service account** on the server, for push.
-- Nothing deferred within Phases 0–5 beyond the items above, which need decisions or credentials.
+- **Paid insights or an organiser plan** (Phase 6). It needs a pricing decision.
+- Nothing deferred within Phases 0–6 beyond the items above, which need decisions or credentials.

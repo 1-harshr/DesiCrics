@@ -25,6 +25,9 @@ class SocialRepository(private val api: DesiCricsApi, private val config: ApiCon
 
     suspend fun savePushToken(token: String) = api.savePushToken(token)
 
+    /** A browser source for OBS or Larix: the match's score as a bar along the bottom of a livestream. */
+    fun overlayLink(matchId: String): String = "${config.publicUrl.trimEnd('/')}/overlay/$matchId"
+
     /** The public scorecard anyone can open, in or out of the app. */
     fun matchLink(matchId: String): String = "${config.publicUrl.trimEnd('/')}/m/$matchId"
 }

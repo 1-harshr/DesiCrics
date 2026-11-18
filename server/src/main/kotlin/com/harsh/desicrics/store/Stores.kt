@@ -3,10 +3,13 @@ package com.harsh.desicrics.store
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.SupportRequest
 import com.harsh.desicrics.model.Delivery
+import com.harsh.desicrics.model.DirectoryEntry
+import com.harsh.desicrics.model.DirectoryKind
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.LookingForKind
 import com.harsh.desicrics.model.Notification
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Player
@@ -52,6 +55,9 @@ interface MatchStore {
 
     /** Newest first: matches either of whose teams is named like [query]. */
     suspend fun search(query: String, limit: Int): List<Match>
+
+    /** Completed matches between two saved teams, for city rankings. */
+    suspend fun completedBetweenSavedTeams(): List<Match>
 
     /** Match rows (without rosters) where saved teams [teamId] and [otherId] played each other. */
     suspend fun between(teamId: String, otherId: String): List<Match>
@@ -214,4 +220,32 @@ interface ImageStore {
     suspend fun save(id: String, ownerUid: String, contentType: String, bytes: ByteArray, at: Long)
     /** The content type and bytes, or null. */
     suspend fun get(id: String): Pair<String, ByteArray>?
+}
+
+/** "Looking for" posts and the directory. Rows come back raw; the service attaches people and teams. */
+interface CommunityStore {
+    data class PostRow(
+        val id: String, val authorUid: String, val kind: LookingForKind, val city: String, val date: Long,
+        val note: String, val teamId: String?, val open: Boolean,
+    )
+    data class ResponseRow(val uid: String, val message: String, val phone: String, val createdAt: Long)
+
+    suspend fun addPost(post: PostRow, at: Long)
+    suspend fun post(id: String): PostRow?
+    /** Open posts in [city] (any case) from [fromDate] on, soonest first. */
+    suspend fun openPosts(city: String, kind: LookingForKind?, fromDate: Long): List<PostRow>
+    suspend fun postsBy(uid: String): List<PostRow>
+    suspend fun close(id: String)
+    /** False if they already responded. */
+    suspend fun respond(postId: String, response: ResponseRow): Boolean
+    suspend fun responses(postId: String): List<ResponseRow>
+    suspend fun responseCounts(postIds: Collection<String>): Map<String, Int>
+
+    suspend fun addEntry(entry: DirectoryEntry, at: Long)
+    suspend fun entries(city: String, kind: DirectoryKind?): List<DirectoryEntry>
+    suspend fun entry(id: String): DirectoryEntry?
+    suspend fun removeEntry(id: String)
+
+    /** Saved teams based in [city] (any case). */
+    suspend fun teamIdsInCity(city: String): List<String>
 }
