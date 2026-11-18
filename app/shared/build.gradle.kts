@@ -78,6 +78,16 @@ kotlin {
             implementation(libs.multiplatformSettings)
             implementation(libs.multiplatformSettings.coroutines)
         }
+        // Screenshot tests: Robolectric draws real screens on the JVM, Roborazzi saves them as PNGs.
+        getByName("androidHostTest").dependencies {
+            implementation(libs.junit)
+            implementation(libs.robolectric)
+            implementation(libs.roborazzi)
+            implementation(libs.roborazzi.compose)
+            implementation(libs.androidx.compose.uiTestJunit4)
+            implementation(libs.androidx.compose.uiTestManifest)
+            implementation(libs.androidx.activity.compose)
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)

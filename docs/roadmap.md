@@ -33,7 +33,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 ### Level 3 · Delight
 - ⬜ Staging server deploy (needs the hosting decision)
 - ✅ Crashlytics + basic analytics events (match, team, tournament, claim, handover; no personal data)
-- ⬜ Compose screenshot tests for components
+- ✅ Compose screenshot tests: the main screens render to `app/shared/screenshots/` (Robolectric + Roborazzi, `ScreenshotTest`)
 
 **Exit:** a new user installs the debug APK, signs in, and their profile is saved on the staging server.
 

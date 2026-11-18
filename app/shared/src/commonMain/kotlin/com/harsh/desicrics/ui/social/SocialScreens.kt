@@ -1,5 +1,6 @@
 package com.harsh.desicrics.ui.social
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,6 +16,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -133,19 +136,18 @@ fun NotificationsContent(state: NotificationsUiState, onOpenMatch: (String) -> U
     }
 }
 
+/** A sentence that can wrap, unlike a player row's one-line name, with a dot while unread. */
 @Composable
 private fun NotificationRow(notification: Notification, onClick: () -> Unit) {
-    val text = notificationText(notification)
-    PlayerRow(
-        name = text,
-        avatar = { Avatar(notification.playerName ?: notification.matchTitle) },
-        onClick = onClick,
-        modifier = Modifier,
-        subtitle = null,
-        trailing = {
-            if (!notification.read) Text("●", color = DesiTheme.colors.brand, style = DesiTheme.type.label.copy(fontWeight = FontWeight.Bold))
-        },
-    )
+    Row(
+        Modifier.fillMaxWidth().clip(DesiTheme.radius.md).clickable(role = Role.Button, onClick = onClick).padding(vertical = DesiTheme.space.s3),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
+    ) {
+        Avatar(notification.playerName ?: notification.matchTitle)
+        Text(notificationText(notification), style = DesiTheme.type.body, color = DesiTheme.colors.ink, maxLines = 3, modifier = Modifier.weight(1f))
+        if (!notification.read) Text("●", color = DesiTheme.colors.brand, style = DesiTheme.type.label.copy(fontWeight = FontWeight.Bold))
+    }
 }
 
 /** The inbox stores facts; this words them in the user's language. */

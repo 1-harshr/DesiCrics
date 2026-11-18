@@ -12,4 +12,4 @@ iOS is out of scope for now.
 | [ui-conventions.md](ui-conventions.md) | String resources, design tokens and the UI review checklist |
 | [architecture.md](architecture.md) | Stack, module layout, data model, scoring contract |
 | [roadmap.md](roadmap.md) | Phases 0–6, each split into three levels, with exit criteria and status |
-| [decisions/](decisions/) | Architecture decision records |
+| [decisions/](decisions/) | Architecture decision records, including [0004](decisions/0004-phases-1-to-5-design-log.md), the design log for Phases 1–5 |

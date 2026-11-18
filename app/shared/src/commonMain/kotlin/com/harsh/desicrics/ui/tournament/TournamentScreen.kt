@@ -73,9 +73,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-private enum class TournamentTab { FIXTURES, TABLE, TEAMS, STATS }
+internal enum class TournamentTab { FIXTURES, TABLE, TEAMS, STATS }
 
-private sealed interface TournamentSheet {
+internal sealed interface TournamentSheet {
     data object EnterTeam : TournamentSheet
     data object AddOrganiser : TournamentSheet
     data object AddFixture : TournamentSheet
@@ -139,7 +139,7 @@ fun TournamentScreen(
 }
 
 @Composable
-private fun TournamentContent(
+internal fun TournamentContent(
     state: TournamentUiState,
     onBack: () -> Unit,
     onShare: () -> Unit,
@@ -149,11 +149,12 @@ private fun TournamentContent(
     onStart: () -> Unit,
     onReview: (teamId: String, confirm: Boolean) -> Unit,
     onLeaderboard: () -> Unit = {},
+    initialTab: TournamentTab = TournamentTab.FIXTURES,
 ) {
     val details = state.details
     val space = DesiTheme.space
     val colors = DesiTheme.colors
-    var tab by rememberSaveable { mutableStateOf(TournamentTab.FIXTURES) }
+    var tab by rememberSaveable { mutableStateOf(initialTab) }
     DesiScaffold(
         title = details?.tournament?.name.orEmpty(),
         onBack = onBack,
