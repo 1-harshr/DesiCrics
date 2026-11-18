@@ -36,7 +36,7 @@ flowchart LR
 | Android UI | Jetpack Compose, Material 3 + `DesiTheme`, Navigation 3 | Single activity, edge-to-edge, min SDK 26. The back stack is a list of `@Serializable` `NavKey` routes (`navigation/AppNavigation.kt`); each entry gets its own saved state and ViewModels. Sign-in and onboarding sit outside it, driven by the session |
 | Android data | Ktor client, DataStore, Koin, Coil 3 | No local database: scoring is online, and each ball is saved on the server before the next |
 | Shared | `core`: `DeliveryRules`, DTOs, validation | The same code checks a ball on the device and on the server |
-| Server | Ktor 3, Exposed, Postgres (H2 for tests), Flyway | All scoring rules and permission checks live here. Database chosen by `DATABASE_URL` |
+| Server | Ktor 3, Exposed, Postgres (H2 for tests; CI also runs them on Postgres via `TEST_POSTGRES_URL`), Flyway | All scoring rules and permission checks live here. Database chosen by `DATABASE_URL` |
 | Auth | Firebase Auth on device, Firebase Admin SDK token check on the server | Phone OTP and Google sign-in |
 | Realtime | Ktor WebSockets, one channel per match; the app polls if the socket drops | Followers subscribe; scorers write over REST. Each change sends the whole scorecard. Subscribers live in the server's memory (`LiveMatches`), which is right for one instance; a second instance needs Postgres LISTEN/NOTIFY (or similar) between them |
 | Push / crashes | FCM, Crashlytics | |

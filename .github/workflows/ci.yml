@@ -13,6 +13,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # The server tests run on H2 locally; in CI they also run on the Postgres the server uses in production.
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: desicrics
+          POSTGRES_USER: desicrics
+          POSTGRES_PASSWORD: desicrics
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U desicrics -d desicrics"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +41,11 @@ jobs:
 
       - name: Unit tests (core, app, server)
         run: ./gradlew :core:jvmTest :core:testAndroidHostTest :app:designsystem:compileAndroidMain :app:shared:testAndroidHostTest :server:test
+
+      - name: Server tests on Postgres
+        env:
+          TEST_POSTGRES_URL: jdbc:postgresql://localhost:5432/desicrics
+        run: ./gradlew :server:test --rerun-tasks
 
       # google-services.json is gitignored. Add its contents as the GOOGLE_SERVICES_JSON repository
       # secret to also build the APK; without it this step is skipped.

@@ -29,6 +29,7 @@ import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
+import java.sql.DriverManager
 import java.util.UUID
 import kotlinx.serialization.json.Json
 
@@ -42,9 +43,25 @@ private val fakeTokens = TokenVerifier { token ->
     }
 }
 
-/** A fresh in-memory database per test. Push messages go to [push]; the client can open WebSockets. */
+/**
+ * Set TEST_POSTGRES_URL (e.g. jdbc:postgresql://localhost:55432/desicrics, user and password "desicrics")
+ * to run the suite against real Postgres instead of H2, each test in a schema of its own.
+ */
+private val testPostgres: String? = System.getenv("TEST_POSTGRES_URL")
+
+/** A fresh, empty database for one test. */
+private fun freshDatabase(): DatabaseConfig {
+    val postgres = testPostgres ?: return DatabaseConfig(
+        url = "jdbc:h2:mem:${UUID.randomUUID()};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1",
+    )
+    val schema = "t_" + UUID.randomUUID().toString().replace("-", "")
+    DriverManager.getConnection(postgres, "desicrics", "desicrics").use { it.createStatement().execute("CREATE SCHEMA $schema") }
+    return DatabaseConfig(url = "$postgres?currentSchema=$schema", user = "desicrics", password = "desicrics", maxPoolSize = 2)
+}
+
+/** A fresh database per test. Push messages go to [push]; the client can open WebSockets. */
 fun apiTest(push: PushSender = LoggingPushSender, block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
-    val config = ServerConfig(database = DatabaseConfig(url = "jdbc:h2:mem:${UUID.randomUUID()};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1"))
+    val config = ServerConfig(database = freshDatabase())
     application { module(config, fakeTokens, push) }
     block(
         createClient {
