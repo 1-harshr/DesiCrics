@@ -165,4 +165,33 @@ class ScoringEngineTest {
         assertNull(innings.nonStrikerId)
         assertNull(innings.bowlerId)
     }
+
+    @Test
+    fun oversListEachBallWithItsNumber() {
+        ball("a1", "a2", "b1", runs = 4)
+        ball("a1", "a2", "b1", extra = ExtraType.WIDE, extraRuns = 1)
+        ball("a1", "a2", "b1", runs = 1)
+        repeat(4) { ball("a2", "a1", "b1") }
+        ball("a1", "a2", "b2", wicket = Wicket(DismissalKind.CAUGHT, "a1", fielderId = "b3"))
+        val overs = state().current.overs
+
+        assertEquals(2, overs.size)
+        val first = overs.first()
+        assertEquals(1, first.number)
+        assertEquals("Dev", first.bowler.name)
+        // The wide shares "0.2" with the ball bowled after it.
+        assertEquals(listOf("0.1", "0.2", "0.2", "0.3", "0.4", "0.5", "0.6"), first.balls.map { it.ballNumber })
+        assertEquals(6, first.runs)
+        assertEquals("6/0", first.scoreAfter)
+
+        val second = overs.last()
+        assertEquals("Esha", second.bowler.name)
+        assertEquals("1.1", second.balls.single().ballNumber)
+        assertEquals(1, second.wickets)
+        assertEquals("6/1", second.scoreAfter)
+        val wicket = second.balls.single()
+        assertEquals("Asha", wicket.playerOut?.name)
+        assertEquals("Farhan", wicket.fielder?.name)
+        assertEquals("Asha", wicket.striker.name)
+    }
 }

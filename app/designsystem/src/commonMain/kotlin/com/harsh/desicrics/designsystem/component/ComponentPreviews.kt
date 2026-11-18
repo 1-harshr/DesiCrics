@@ -106,8 +106,6 @@ private fun ContentStates() {
         Avatar("Aarav Shah")
         Avatar("Zoya", size = 64)
     }
-    SyncIndicator(pendingCount = 0, label = "All balls synced")
-    SyncIndicator(pendingCount = 3, label = "3 balls waiting to sync")
 }
 
 @Preview

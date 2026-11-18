@@ -58,6 +58,7 @@ object ScoringEngine {
         var bowler: String? = null
         var previousOverBowler: String? = null
         val currentOver = mutableListOf<Delivery>()
+        val overs = mutableListOf<OverSummary>()
         var overJustCompleted = false
         var overRuns = 0
 
@@ -71,6 +72,9 @@ object ScoringEngine {
             batters.getOrPut(d.nonStrikerId) { BatterCard(battingTeam.player(d.nonStrikerId)) }
             val bowlerCard = bowlers.getOrPut(d.bowlerId) { BowlerCard(bowlingTeam.player(d.bowlerId)) }
 
+            // Before counting this ball, so a wide in the third slot is "x.3", like the ball that follows it.
+            val ballNumber = "${legalBalls / 6}.${legalBalls % 6 + 1}"
+            val overNumber = legalBalls / 6 + 1
             runs += d.totalRuns
             if (d.isLegal) legalBalls++
             extras += d
@@ -95,6 +99,26 @@ object ScoringEngine {
             if (d.runsRun % 2 == 1) {
                 striker = nonStriker.also { nonStriker = striker }
             }
+
+            val event = BallEvent(
+                ballNumber = ballNumber,
+                delivery = d,
+                striker = strikerCard.player,
+                bowler = bowlerCard.player,
+                playerOut = d.wicket?.let { battingTeam.player(it.playerOutId) },
+                fielder = d.wicket?.fielderId?.let { bowlingTeam.player(it) },
+            )
+            val wicketsAfter = wickets + if (d.wicket != null) 1 else 0
+            val over = overs.lastOrNull()?.takeIf { it.number == overNumber }
+            val updated = OverSummary(
+                number = overNumber,
+                bowler = bowlerCard.player,
+                balls = (over?.balls ?: emptyList()) + event,
+                runs = (over?.runs ?: 0) + d.totalRuns,
+                wickets = (over?.wickets ?: 0) + if (d.wicket != null) 1 else 0,
+                scoreAfter = "$runs/$wicketsAfter",
+            )
+            if (over == null) overs += updated else overs[overs.lastIndex] = updated
 
             d.wicket?.let { wicket ->
                 wickets++
@@ -146,6 +170,7 @@ object ScoringEngine {
             previousOverBowlerId = previousOverBowler,
             target = target,
             isComplete = isComplete,
+            overs = overs.toList(),
         )
     }
 

@@ -57,9 +57,8 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ⬜ All 14 wicket types, penalty runs
 - ⬜ Retired / retired hurt, substitutes
 - ⬜ Revise target (rain), declare
-- 🟡 Scorecard and over-by-over tabs (scorecard done)
-- ⬜ Auto-generated commentary text
-- ⬜ Offline event queue with sync status
+- ✅ Scorecard and over-by-over tabs
+- ✅ Auto-generated commentary text (per ball, on the Overs tab)
 
 ### Level 3 · Delight
 - ⬜ Wagon wheel (8 fielding zones)
@@ -67,7 +66,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ⬜ Scorer handover to another device
 - ⬜ Powerplay configuration
 
-**Exit:** a 20-over match scored in airplane mode syncs afterwards and its totals match a paper scorebook.
+**Exit:** a 20-over match scored on one phone ends with totals that match a paper scorebook.
 
 ---
 

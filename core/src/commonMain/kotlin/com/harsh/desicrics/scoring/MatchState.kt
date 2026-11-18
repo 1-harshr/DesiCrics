@@ -44,6 +44,8 @@ data class InningsState(
     val previousOverBowlerId: String?,
     val target: Int?,
     val isComplete: Boolean,
+    /** Every over started so far, oldest first, for the over-by-over view and commentary. */
+    val overs: List<OverSummary> = emptyList(),
 ) {
     val scoreText: String get() = "$runs/$wickets"
     val oversText: String get() = formatOvers(legalBalls)
@@ -56,6 +58,29 @@ data class InningsState(
     val yetToBat: List<Player>
         get() = battingTeam.players.filter { player -> batters.none { it.player.id == player.id } }
 }
+
+/** One over: who bowled it, each ball in order, and the score once it ended (or so far). */
+data class OverSummary(
+    /** 1-based. */
+    val number: Int,
+    val bowler: Player,
+    val balls: List<BallEvent>,
+    val runs: Int,
+    val wickets: Int,
+    /** Innings total after the last ball of this over. */
+    val scoreAfter: String,
+)
+
+/** A delivery with the players it involved, ready to describe. */
+data class BallEvent(
+    /** Over and ball as scorers write it, e.g. "2.4". Extras share the number of the ball that follows. */
+    val ballNumber: String,
+    val delivery: Delivery,
+    val striker: Player,
+    val bowler: Player,
+    val playerOut: Player?,
+    val fielder: Player?,
+)
 
 data class Extras(
     val wides: Int = 0,

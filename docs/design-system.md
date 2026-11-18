@@ -235,7 +235,6 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `MatchCard` | `Content.kt` | A match in a feed: status slot (e.g. `LiveBadge`), meta, team lines, footer |
 | `LiveBadge` | `Content.kt` | Red dot plus LIVE |
 | `PlayerRow` / `Avatar` | `Content.kt` | Avatar (photo slot, initial or person icon), name, secondary line |
-| `SyncIndicator` | `Content.kt` | Count of deliveries waiting to sync; hidden at zero |
 | `DesiCard` / `SectionLabel` | `Content.kt` | Flat bordered surface; uppercase section label |
 | `PrimaryButton` / `TonalButton` / `GhostButton` | `Buttons.kt` | 52dp pills. Primary: brand fill, optional trailing arrow, spinner while loading, faded brand when disabled. Tonal: soft `sunk` fill with a brand-tinted leading icon, for secondary options. Ghost: outline |
 | `DesiScaffold` / `FullScreenLoading` | `Structure.kt` | Screen frame with title and back icon; centred spinner |

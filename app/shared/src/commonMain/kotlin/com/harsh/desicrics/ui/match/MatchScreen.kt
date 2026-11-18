@@ -114,7 +114,14 @@ class MatchActions(
     val onDismissError: () -> Unit,
 )
 
-private enum class MatchTab { LIVE, SCORECARD }
+private enum class MatchTab { LIVE, SCORECARD, OVERS }
+
+private val MatchTab.label
+    get() = when (this) {
+        MatchTab.LIVE -> Res.string.match_tab_live
+        MatchTab.SCORECARD -> Res.string.match_tab_scorecard
+        MatchTab.OVERS -> Res.string.match_tab_overs
+    }
 
 /** A choice the scorer is making in a bottom sheet. */
 private sealed interface ScoringSheet {
@@ -156,7 +163,7 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     SegmentedControl(
         options = MatchTab.entries,
         selected = tab,
-        label = { stringResource(if (it == MatchTab.LIVE) Res.string.match_tab_live else Res.string.match_tab_scorecard) },
+        label = { stringResource(it.label) },
         onSelect = { tab = it },
         modifier = Modifier.padding(horizontal = DesiTheme.space.screen, vertical = DesiTheme.space.s3),
     )
@@ -180,6 +187,8 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
                 }
             }
             MatchTab.SCORECARD -> state.innings.forEach { InningsScorecard(it) }
+            // Latest innings first, so the over in progress is at the top.
+            MatchTab.OVERS -> state.innings.asReversed().forEach { InningsOvers(it, showTitle = state.innings.size > 1) }
         }
     }
     // The pad only shows with the live view, so the scorecard gets the whole screen.
@@ -479,7 +488,7 @@ private fun MessageScreen(message: StringResource, onBack: () -> Unit) {
 
 /** How a ball looks in the over strip: "4", "W", "2wd", "nb", "1lb", "•". */
 @Composable
-private fun ballFor(delivery: Delivery): Ball {
+internal fun ballFor(delivery: Delivery): Ball {
     if (delivery.wicket != null) return Ball(stringResource(Res.string.scoring_ball_wicket), BallKind.Wicket)
     val extra = delivery.extra ?: return when (delivery.runsOffBat) {
         0 -> Ball("•", BallKind.Dot)

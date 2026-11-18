@@ -226,6 +226,7 @@
     <string name="match_offline">Can't reach the server. Retrying…</string>
     <string name="match_tab_live">Live</string>
     <string name="match_tab_scorecard">Scorecard</string>
+    <string name="match_tab_overs">Overs</string>
     <string name="match_innings_label">%1$s · %2$s</string>
     <string name="match_innings_first">1st innings</string>
     <string name="match_innings_second">2nd innings</string>
@@ -309,4 +310,48 @@
     <string name="scorecard_extras">Extras %1$d (wd %2$d, nb %3$d, b %4$d, lb %5$d)</string>
     <string name="scorecard_yet_to_bat">Yet to bat: %1$s</string>
     <string name="scorecard_not_started">This innings hasn't started yet.</string>
+
+    <!-- Over by over and commentary -->
+    <string name="overs_over">Over %1$d</string>
+    <plurals name="overs_runs">
+        <item quantity="one">%1$d run</item>
+        <item quantity="other">%1$d runs</item>
+    </plurals>
+    <plurals name="overs_wickets">
+        <item quantity="one">%1$d wicket</item>
+        <item quantity="other">%1$d wickets</item>
+    </plurals>
+    <string name="overs_summary">%1$s · %2$s</string>
+    <string name="overs_empty">No balls bowled yet.</string>
+    <string name="commentary_line">%1$s to %2$s, %3$s</string>
+    <string name="commentary_dot">no run</string>
+    <plurals name="commentary_runs">
+        <item quantity="one">%1$d run</item>
+        <item quantity="other">%1$d runs</item>
+    </plurals>
+    <string name="commentary_four">FOUR</string>
+    <string name="commentary_six">SIX</string>
+    <string name="commentary_wide">wide</string>
+    <plurals name="commentary_wide_runs">
+        <item quantity="one">wide, %1$d run</item>
+        <item quantity="other">wide, %1$d runs</item>
+    </plurals>
+    <string name="commentary_no_ball">no-ball</string>
+    <plurals name="commentary_no_ball_runs">
+        <item quantity="one">no-ball, %1$d off the bat</item>
+        <item quantity="other">no-ball, %1$d off the bat</item>
+    </plurals>
+    <plurals name="commentary_byes">
+        <item quantity="one">%1$d bye</item>
+        <item quantity="other">%1$d byes</item>
+    </plurals>
+    <plurals name="commentary_leg_byes">
+        <item quantity="one">%1$d leg bye</item>
+        <item quantity="other">%1$d leg byes</item>
+    </plurals>
+    <string name="commentary_out">OUT! %1$s %2$s</string>
+    <plurals name="commentary_out_after_runs">
+        <item quantity="one">%1$d run, then OUT! %2$s %3$s</item>
+        <item quantity="other">%1$d runs, then OUT! %2$s %3$s</item>
+    </plurals>
 </resources>

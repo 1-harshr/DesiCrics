@@ -8,7 +8,7 @@ Scoring is event-sourced: every delivery is an immutable event. Scorecards, stat
 flowchart LR
   subgraph Android["Android app (Jetpack Compose)"]
     UI[Screens + DesiTheme] --> VM[ViewModels]
-    VM --> Q[Room: event queue + cache]
+    VM --> Q[Ktor API client]
   end
   subgraph Core["core (KMP: android + jvm)"]
     R[Scoring rules engine]
@@ -20,7 +20,7 @@ flowchart LR
     SVC --> DB[(Postgres via Exposed)]
     SVC --> PROJ[Projections: scorecard, stats, points table]
   end
-  Q -- "POST deliveries (idempotent)" --> API
+  Q -- "POST each delivery (idempotent)" --> API
   WS -- "score updates" --> VM
   VM -.uses.-> R
   SVC -.uses.-> R
@@ -34,7 +34,7 @@ flowchart LR
 | Layer | Choice | Notes |
 |---|---|---|
 | Android UI | Jetpack Compose, Material 3 + `DesiTheme`, Navigation Compose with type-safe routes | Single activity, edge-to-edge, min SDK 26 |
-| Android data | Ktor client, Room, DataStore, Koin, Coil 3 | Room holds the outbound event queue and read cache |
+| Android data | Ktor client, DataStore, Koin, Coil 3 | No local database: scoring is online, and each ball is saved on the server before the next |
 | Shared | `core`: `DeliveryRules`, DTOs, validation | The same code checks a ball on the device and on the server |
 | Server | Ktor 3, Exposed, Postgres (H2 for tests), Flyway | All scoring rules and permission checks live here. Database chosen by `DATABASE_URL` |
 | Auth | Firebase Auth on device, Firebase Admin SDK token check on the server | Phone OTP and Google sign-in |

@@ -27,7 +27,7 @@ DesiCrics gives these groups one place to score matches, follow them live, keep 
 ## Principles
 
 - **The server is the source of truth.** Clients send events; the server derives the score.
-- **Offline first for scorers.** Grounds have bad network.
+- **Scoring needs a connection, and copes with a bad one.** Each ball is saved on the server before the score moves on; if a save fails, the scorer just taps again. There is no offline scoring.
 - **One rules engine.** It lives in `core` and is shared by the app and the server.
 - **Calm by default.** Scoring and following stay fast and free of upsells. Network features live one tab away.
 
@@ -46,7 +46,7 @@ DesiCrics gives these groups one place to score matches, follow them live, keep 
 |---|---|---|
 | Matches scored to completion | ≥ 80% of matches started | 1 |
 | Median tap-to-confirm per ball | ≤ 1.5 s | 1 |
-| Scoring sync failures | 0 lost deliveries | 1 |
+| Balls lost when a save fails | 0 (the ball stays ready to resend) | 1 |
 | Followers per live match | ≥ 3 | 3 |
 | Week-4 retention (players) | ≥ 35% | 5 |
 | Crash-free sessions | ≥ 99.5% | all |

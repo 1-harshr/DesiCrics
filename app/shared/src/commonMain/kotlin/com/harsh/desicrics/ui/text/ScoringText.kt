@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.DismissalKind
+import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchResult
@@ -18,6 +19,7 @@ import com.harsh.desicrics.model.Team
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.scoring.BallEvent
 import com.harsh.desicrics.scoring.DeliveryError
 import com.harsh.desicrics.scoring.Dismissal
 import org.jetbrains.compose.resources.StringResource
@@ -79,6 +81,34 @@ fun dismissalText(dismissal: Dismissal?): String {
             else stringResource(Res.string.scorecard_out_stumped, fielder, bowler)
         DismissalKind.HIT_WICKET -> stringResource(Res.string.scorecard_out_hit_wicket, bowler)
     }
+}
+
+/** One line of commentary: "Dev to Rohan, FOUR", "Dev to Rohan, OUT! Rohan c Esha b Dev". */
+@Composable
+fun commentaryText(ball: BallEvent): String {
+    val d = ball.delivery
+    val event = when {
+        d.wicket != null -> {
+            val kind = d.wicket!!.kind
+            val dismissal = dismissalText(Dismissal(kind, ball.bowler.takeIf { kind.creditedToBowler }, ball.fielder))
+            val out = ball.playerOut?.name.orEmpty()
+            if (d.runsRun > 0) pluralStringResource(Res.plurals.commentary_out_after_runs, d.runsRun, d.runsRun, out, dismissal)
+            else stringResource(Res.string.commentary_out, out, dismissal)
+        }
+        d.extra == ExtraType.WIDE ->
+            if (d.extraRuns <= 1) stringResource(Res.string.commentary_wide)
+            else pluralStringResource(Res.plurals.commentary_wide_runs, d.extraRuns, d.extraRuns)
+        d.extra == ExtraType.NO_BALL ->
+            if (d.runsOffBat == 0) stringResource(Res.string.commentary_no_ball)
+            else pluralStringResource(Res.plurals.commentary_no_ball_runs, d.runsOffBat, d.runsOffBat)
+        d.extra == ExtraType.BYE -> pluralStringResource(Res.plurals.commentary_byes, d.extraRuns, d.extraRuns)
+        d.extra == ExtraType.LEG_BYE -> pluralStringResource(Res.plurals.commentary_leg_byes, d.extraRuns, d.extraRuns)
+        d.runsOffBat == 4 -> stringResource(Res.string.commentary_four)
+        d.runsOffBat == 6 -> stringResource(Res.string.commentary_six)
+        d.runsOffBat == 0 -> stringResource(Res.string.commentary_dot)
+        else -> pluralStringResource(Res.plurals.commentary_runs, d.runsOffBat, d.runsOffBat)
+    }
+    return stringResource(Res.string.commentary_line, ball.bowler.name, ball.striker.name, event)
 }
 
 val DeliveryError.label: StringResource

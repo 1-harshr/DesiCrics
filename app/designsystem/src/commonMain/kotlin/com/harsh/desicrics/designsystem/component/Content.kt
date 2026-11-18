@@ -171,24 +171,6 @@ private fun initials(name: String): String {
         .joinToString("")
 }
 
-/** Shows how many scored balls are still waiting to reach the server. Hidden when nothing is pending. */
-@Composable
-fun SyncIndicator(pendingCount: Int, label: String, modifier: Modifier = Modifier) {
-    if (pendingCount <= 0) return
-    val colors = DesiTheme.colors
-    Row(
-        modifier
-            .clip(DesiTheme.radius.full)
-            .background(colors.sunk)
-            .padding(horizontal = DesiTheme.space.s3, vertical = DesiTheme.space.s1),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s1),
-    ) {
-        Icon(painterResource(DesiIcons.Sync), contentDescription = null, tint = colors.event.extra, modifier = Modifier.size(DesiTheme.size.iconSmall))
-        Text(label, style = DesiTheme.type.caption, color = colors.ink)
-    }
-}
-
 /** An uppercase section label. */
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier) {

@@ -51,7 +51,6 @@ private fun Catalogue() {
             PrimaryButton("Start match", onClick = {})
             GhostButton("Add player", onClick = {})
         }
-        SyncIndicator(pendingCount = 3, label = "3 balls waiting to sync")
     }
 }
 
