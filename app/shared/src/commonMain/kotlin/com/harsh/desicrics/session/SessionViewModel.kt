@@ -26,7 +26,6 @@ sealed interface SessionState {
     /** Signed in with Firebase but hasn't created a cricket profile yet. */
     data class NeedsProfile(val user: AuthUser) : SessionState
     data class SignedIn(val profile: UserProfile) : SessionState
-    /** Signed in, but the profile couldn't be loaded (usually no network). */
     /** Signed in, but the profile couldn't be loaded (usually no connection). */
     data object Error : SessionState
 }
@@ -47,7 +46,10 @@ class SessionViewModel(
                 userRepository.observeProfile(user.uid)
                     .map { profile -> if (profile == null) SessionState.NeedsProfile(user) else SessionState.SignedIn(profile) }
                     .onStart { emit(SessionState.Loading) }
-                    .catch { emit(SessionState.Error) }
+                    .catch { e ->
+                        println("DesiCrics: couldn't load the profile: $e")
+                        emit(SessionState.Error)
+                    }
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SessionState.Loading)
