@@ -44,6 +44,18 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    signingConfigs {
+        // A debug key for this project only, so its SHA fingerprints don't clash with OAuth clients
+        // registered elsewhere for the shared ~/.android/debug.keystore. Kept out of git (see README.md);
+        // without it, as on CI, debug builds fall back to the default debug key.
+        val projectDebugKey = file("debug.keystore")
+        if (projectDebugKey.exists()) getByName("debug") {
+            storeFile = projectDebugKey
+            storePassword = "android"
+            keyAlias = "desicrics-debug"
+            keyPassword = "android"
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
