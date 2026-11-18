@@ -11,9 +11,13 @@ import com.harsh.desicrics.store.SocialStore
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-/** Sends push messages to devices; returns the tokens the push service says are gone, so they can be dropped. */
-fun interface PushSender {
+/** Sends push messages to devices; each call returns the tokens the push service says are gone, so they can be dropped. */
+interface PushSender {
+    /** A message the phone shows as a notification. */
     suspend fun send(tokens: List<String>, title: String, body: String, data: Map<String, String>): List<String>
+
+    /** A silent message the app handles itself, e.g. to update a live score it's already showing. */
+    suspend fun sendData(tokens: List<String>, data: Map<String, String>): List<String>
 }
 
 /** Used when no push credentials are configured: the inbox still fills, nothing is pushed. */
@@ -24,6 +28,8 @@ object LoggingPushSender : PushSender {
         log.info("Push (not configured) to {} devices: {} - {}", tokens.size, title, body)
         return emptyList()
     }
+
+    override suspend fun sendData(tokens: List<String>, data: Map<String, String>): List<String> = emptyList()
 }
 
 /**
@@ -50,6 +56,31 @@ class Notifier(
                 notify(matchFollowers, NotificationKind.MATCH_RESULT, match, title, detail = match.scoreSummary, message = "$title: ${match.scoreSummary}")
         }
         if (before != null) milestones(before, after, title)
+        liveProgress(before, after, matchFollowers)
+    }
+
+    /**
+     * Keeps followers' live score notification current: an update at the end of each over and at each
+     * wicket (not every ball, to go easy on batteries), and an "ended" message when the match is over.
+     * Silent data messages, not inbox entries; the app shows one quiet notification per match.
+     */
+    private suspend fun liveProgress(before: MatchDetails?, after: MatchDetails, followers: Set<String>) {
+        val match = after.match
+        val ended = before?.match?.status == MatchStatus.IN_PROGRESS && match.status == MatchStatus.COMPLETED
+        val ball = after.deliveries.lastOrNull()?.takeIf { after.deliveries.size > (before?.deliveries?.size ?: 0) }
+        val overDone = ball != null && ball.isLegal && (match.innings.lastOrNull()?.legalBalls ?: 0) % 6 == 0
+        if (!ended && (match.status != MatchStatus.IN_PROGRESS || ball == null || (!overDone && ball.wicket == null))) return
+        val tokens = social.pushTokens(followers).values.flatten()
+        if (tokens.isEmpty()) return
+        val data = mapOf(
+            "type" to if (ended) "live_ended" else "live",
+            "matchId" to match.id,
+            "title" to "${match.teamA.name} vs ${match.teamB.name}",
+            "score" to match.scoreSummary,
+        )
+        runCatching { push.sendData(tokens, data) }
+            .onSuccess { gone -> social.deletePushTokens(gone) }
+            .onFailure { log.warn("Live push failed", it) }
     }
 
     private suspend fun milestones(before: MatchDetails, after: MatchDetails, title: String) {

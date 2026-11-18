@@ -23,14 +23,16 @@ class FcmPushSender(serviceAccountPath: String, projectId: String) : PushSender 
     }
 
     override suspend fun send(tokens: List<String>, title: String, body: String, data: Map<String, String>): List<String> =
+        multicast(tokens) { it.setNotification(Notification.builder().setTitle(title).setBody(body).build()).putAllData(data) }
+
+    override suspend fun sendData(tokens: List<String>, data: Map<String, String>): List<String> =
+        multicast(tokens) { it.putAllData(data) }
+
+    private suspend fun multicast(tokens: List<String>, build: (MulticastMessage.Builder) -> MulticastMessage.Builder): List<String> =
         withContext(Dispatchers.IO) {
             // FCM takes up to 500 tokens per call.
             tokens.chunked(500).flatMap { batch ->
-                val message = MulticastMessage.builder()
-                    .addAllTokens(batch)
-                    .setNotification(Notification.builder().setTitle(title).setBody(body).build())
-                    .putAllData(data)
-                    .build()
+                val message = build(MulticastMessage.builder().addAllTokens(batch)).build()
                 val response = messaging.sendEachForMulticast(message)
                 response.responses.mapIndexedNotNull { i, sent ->
                     batch[i].takeIf { !sent.isSuccessful && sent.exception?.messagingErrorCode == MessagingErrorCode.UNREGISTERED }

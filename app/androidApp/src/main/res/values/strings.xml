@@ -2,4 +2,6 @@
     <string name="app_name">DesiCrics</string>
     <!-- The notification channel for push messages, shown in Android's notification settings. -->
     <string name="notifications_channel">Match updates</string>
+    <!-- The quiet channel for the running score of followed matches. -->
+    <string name="live_scores_channel">Live scores</string>
 </resources>

@@ -66,6 +66,9 @@ class SocialTest {
             )
             assertEquals(50, inbox[1].value)
             assertEquals(3, push.sent.size)
+            // Live score updates: end of over 1, then Asha's wicket ends the innings and Royals' ends the match.
+            assertEquals(listOf("live", "live", "live_ended"), push.data.map { it.getValue("type") })
+            assertEquals("Strikers 36/0 (1.0)", push.data.first().getValue("score"))
             // The scorer isn't told about their own match.
             assertTrue(client.get("/notifications") { bearerAuth("test-asha") }.body<List<Notification>>().isEmpty())
 

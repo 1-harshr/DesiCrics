@@ -57,9 +57,15 @@ fun apiTest(push: PushSender = LoggingPushSender, block: suspend ApplicationTest
 /** Keeps every push message instead of sending it. */
 class RecordingPushSender : PushSender {
     val sent = mutableListOf<String>()
+    val data = mutableListOf<Map<String, String>>()
 
     override suspend fun send(tokens: List<String>, title: String, body: String, data: Map<String, String>): List<String> {
         sent += body
+        return emptyList()
+    }
+
+    override suspend fun sendData(tokens: List<String>, data: Map<String, String>): List<String> {
+        this.data += data
         return emptyList()
     }
 }
