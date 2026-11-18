@@ -245,6 +245,11 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `OtpField` | `OtpField.kt` | One-time code in separate boxes; one text field underneath, so paste and SMS autofill work |
 | `SegmentedControl` | `Selection.kt` | 2–4 exclusive options in one pill with a sliding raised thumb (batting hand, pace or spin) |
 | `OptionCard` | `Selection.kt` | Large choice with icon, title and one-line description, laid out in a grid; brand outline and tick when selected (playing role) |
+| `BrandHeader` | `Forms.kt` | Green header for form screens: back, large title, subtitle, and an optional card that hangs below the green |
+| `BrandStatusBar` | `Forms.kt` | Fixed green strip behind the status bar, so its light icons stay readable while a `BrandHeader` scrolls away |
+| `NumberStepper` | `Forms.kt` | − and + around a big number with a caption (overs per innings) |
+| `RemovableChip` | `Forms.kt` | Brand-soft chip with a remove button, for items added to a list (players in a squad) |
+| `DesiSheet` | `Structure.kt` | Bottom sheet with a title and hint, for quick decisions in a flow (pick a player, runs off an extra, how out) |
 | `PlayerCard` | `Selection.kt` | Avatar with initials, name, role line and style tags; the live preview on profile setup |
 
 Illustrations live in `DesiIllustrations` (drawn with `Image`, not tinted). `BallMark` is the app icon's ball and speed lines, used in the sign-in header.

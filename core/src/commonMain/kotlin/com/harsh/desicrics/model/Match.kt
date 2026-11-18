@@ -17,6 +17,8 @@ data class Match(
     /** Denormalised for list screens, e.g. "Strikers 145/6 (20.0) · Royals 98/3 (12.4)". */
     val scoreSummary: String = "",
     val result: MatchResult? = null,
+    /** Score of each innings started so far, for list screens that don't load the deliveries. */
+    val innings: List<InningsScore> = emptyList(),
 ) {
     val battingFirst: TeamSide
         get() = if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other
@@ -74,3 +76,12 @@ data class MatchResult(
 
 @Serializable
 enum class MarginUnit { RUNS, WICKETS }
+
+/** One innings' total, kept on the match row so feeds can show "142/6 (16.4)" per team. */
+@Serializable
+data class InningsScore(
+    val battingSide: TeamSide,
+    val runs: Int,
+    val wickets: Int,
+    val legalBalls: Int,
+)

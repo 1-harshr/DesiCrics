@@ -45,19 +45,19 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 
 ### Level 1 · Playable
 - ✅ Delivery rules engine with tests: extras, wickets off extras, fielders, innings end, typed results and errors
-- ⬜ Rebuild home, new match and scoring screens in Crease, moving their text to string resources
-- ⬜ Quick match: ad-hoc teams, typed player names, overs
-- ⬜ Toss sheet
-- ⬜ Run pad: 0–6, wides, no-balls, byes, leg byes
-- ⬜ Common wickets: bowled, caught, LBW, run out, stumped
-- ⬜ Strike rotation, over end, innings end, result
-- ⬜ Undo last ball
+- ✅ Rebuild home, new match and scoring screens in Crease, moving their text to string resources
+- ✅ Quick match: ad-hoc teams, typed player names, overs
+- ✅ Toss (on the new match screen)
+- ✅ Run pad: 0–6, wides, no-balls, byes, leg byes
+- ✅ Common wickets: bowled, caught, LBW, run out, stumped, with the fielder
+- ✅ Strike rotation, over end, innings end, result
+- ✅ Undo last ball
 
 ### Level 2 · Complete
 - ⬜ All 14 wicket types, penalty runs
 - ⬜ Retired / retired hurt, substitutes
 - ⬜ Revise target (rain), declare
-- ⬜ Scorecard and over-by-over tabs
+- 🟡 Scorecard and over-by-over tabs (scorecard done)
 - ⬜ Auto-generated commentary text
 - ⬜ Offline event queue with sync status
 

@@ -35,6 +35,28 @@ fun resultText(match: Match, result: MatchResult): String {
     return pluralStringResource(plural, result.margin, match.team(winner).name, result.margin)
 }
 
+/**
+ * One line on where a match stands: the result once it's over, the chase in the second innings
+ * ("Royals need 27 off 20 balls"), or the toss before that.
+ */
+@Composable
+fun matchStatusText(match: Match): String {
+    match.result?.let { return resultText(match, it) }
+    val chase = match.innings.getOrNull(1)
+    val first = match.innings.firstOrNull()
+    if (chase != null && first != null) {
+        val needed = (first.runs + 1 - chase.runs).coerceAtLeast(0)
+        val balls = (match.oversPerInnings * 6 - chase.legalBalls).coerceAtLeast(0)
+        return pluralStringResource(Res.plurals.match_need_runs, balls, match.team(chase.battingSide).name, needed, balls)
+    }
+    val toss = if (match.tossDecision == TossDecision.BAT) Res.string.match_toss_chose_bat else Res.string.match_toss_chose_bowl
+    return stringResource(toss, match.team(match.tossWinner).name)
+}
+
+/** "20 overs". */
+@Composable
+fun oversText(overs: Int): String = pluralStringResource(Res.plurals.match_overs, overs, overs)
+
 /** The scorebook line under a batter: "c Rohit b Bumrah", "run out (Jadeja)", "not out". */
 @Composable
 fun dismissalText(dismissal: Dismissal?): String {

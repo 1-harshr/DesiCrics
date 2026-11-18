@@ -98,15 +98,18 @@ fun ScoreHeader(
 enum class PadKeyStyle { Runs, Four, Six, Wicket, Extra, Utility }
 
 @Immutable
-data class PadKey(val id: String, val label: String, val style: PadKeyStyle = PadKeyStyle.Runs)
+data class PadKey(val id: String, val label: String, val style: PadKeyStyle = PadKeyStyle.Runs, val enabled: Boolean = true)
 
-/** The 4-column scoring keypad. Keys are 64dp tall, as the thumb-zone rule asks. */
+/**
+ * The 4-column scoring keypad. Keys are 64dp tall, as the thumb-zone rule asks. A key works when both
+ * [enabled] and its own [PadKey.enabled] are true, so Undo can stay live while the run keys wait.
+ */
 @Composable
 fun RunPad(keys: List<PadKey>, onKey: (PadKey) -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
         keys.chunked(PAD_COLUMNS).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
-                row.forEach { key -> PadKeyButton(key, enabled, { onKey(key) }, Modifier.weight(1f)) }
+                row.forEach { key -> PadKeyButton(key, enabled && key.enabled, { onKey(key) }, Modifier.weight(1f)) }
                 repeat(PAD_COLUMNS - row.size) { Box(Modifier.weight(1f)) }
             }
         }
@@ -136,8 +139,8 @@ private fun PadKeyButton(key: PadKey, enabled: Boolean, onClick: () -> Unit, mod
         modifier
             .height(DesiTheme.size.scoringTarget)
             .clip(DesiTheme.radius.lg)
-            .background(if (isWicket) event.wicket else colors.surface)
-            .border(1.dp, if (isWicket) event.wicket else colors.line, DesiTheme.radius.lg)
+            .background(if (isWicket && enabled) event.wicket else colors.surface)
+            .border(1.dp, if (isWicket && enabled) event.wicket else colors.line, DesiTheme.radius.lg)
             .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

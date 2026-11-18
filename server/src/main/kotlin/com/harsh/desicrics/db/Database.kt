@@ -52,6 +52,8 @@ object MatchesTable : Table("matches") {
     val resultWinner = enumerationByName("result_winner", 1, TeamSide::class).nullable()
     val resultMargin = integer("result_margin").nullable()
     val resultMarginUnit = enumerationByName("result_margin_unit", 10, MarginUnit::class).nullable()
+    /** JSON list of InningsScore. */
+    val inningsScores = text("innings_scores")
     override val primaryKey = PrimaryKey(id)
 }
 

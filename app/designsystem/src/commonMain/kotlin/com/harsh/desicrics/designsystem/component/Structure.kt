@@ -3,13 +3,17 @@ package com.harsh.desicrics.designsystem.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -96,6 +100,7 @@ fun DesiTextField(
     singleLine: Boolean = true,
     enabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     prefix: String? = null,
     leadingIcon: DrawableResource? = null,
@@ -114,6 +119,7 @@ fun DesiTextField(
         singleLine = singleLine,
         enabled = enabled,
         keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         visualTransformation = visualTransformation,
         textStyle = DesiTheme.type.bodyLg,
         shape = DesiTheme.radius.md,
@@ -171,10 +177,37 @@ fun <T> ChoiceChips(
 }
 
 /**
- * A bottom sheet listing options, e.g. dismissal types. Feature code builds flows such as the wicket
- * sheet on top of this.
+ * A bottom sheet with a title and an optional hint, for quick decisions in a flow (pick a player, how
+ * many runs, how out). [content] goes underneath, with room left for the navigation bar.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DesiSheet(
+    title: String,
+    onDismiss: () -> Unit,
+    hint: String? = null,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val colors = DesiTheme.colors
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surface, shape = DesiTheme.radius.lg) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = DesiTheme.space.s5)
+                .padding(bottom = DesiTheme.space.s6),
+            verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1)) {
+                Text(title, style = DesiTheme.type.titleMd, color = colors.ink)
+                if (hint != null) Text(hint, style = DesiTheme.type.body, color = colors.muted)
+            }
+            content()
+        }
+    }
+}
+
+/** A bottom sheet listing options as chips. Feature code builds richer flows on [DesiSheet]. */
 @Composable
 fun ChoiceSheet(
     title: String,
@@ -182,19 +215,12 @@ fun ChoiceSheet(
     onSelect: (index: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val colors = DesiTheme.colors
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surface, shape = DesiTheme.radius.lg) {
-        Column(
-            Modifier.fillMaxWidth().padding(horizontal = DesiTheme.space.s5).padding(bottom = DesiTheme.space.s6),
-            verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4),
-        ) {
-            Text(title, style = DesiTheme.type.titleMd, color = colors.ink)
-            ChoiceChips(
-                options = options.indices.toList(),
-                selected = null,
-                label = { options[it] },
-                onSelect = onSelect,
-            )
-        }
+    DesiSheet(title, onDismiss) {
+        ChoiceChips(
+            options = options.indices.toList(),
+            selected = null,
+            label = { options[it] },
+            onSelect = onSelect,
+        )
     }
 }

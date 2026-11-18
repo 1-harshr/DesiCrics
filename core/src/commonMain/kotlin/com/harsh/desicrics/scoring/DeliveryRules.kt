@@ -2,6 +2,7 @@ package com.harsh.desicrics.scoring
 
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.InningsScore
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchStatus
 
@@ -90,4 +91,5 @@ fun Match.withScore(state: MatchState): Match = copy(
     scoreSummary = state.scoreSummary,
     status = if (state.isComplete) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
     result = state.result,
+    innings = state.innings.map { InningsScore(it.battingSide, it.runs, it.wickets, it.legalBalls) },
 )

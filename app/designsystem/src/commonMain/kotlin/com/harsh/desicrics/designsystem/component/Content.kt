@@ -79,7 +79,7 @@ fun MatchCard(
     DesiCard(modifier, onClick) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f)) { status() }
-            if (meta != null) Text(meta, style = DesiTheme.type.data, color = colors.muted, maxLines = 1)
+            if (meta != null) Text(meta, style = DesiTheme.type.caption, color = colors.muted, maxLines = 1)
         }
         teams.forEach { team ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
@@ -104,7 +104,7 @@ fun MatchCard(
                 }
             }
         }
-        if (footer != null) Text(footer, style = DesiTheme.type.data, color = colors.muted)
+        if (footer != null) Text(footer, style = DesiTheme.type.body, color = colors.ink)
     }
 }
 

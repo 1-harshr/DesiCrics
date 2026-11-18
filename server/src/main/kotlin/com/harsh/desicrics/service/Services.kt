@@ -109,6 +109,14 @@ class MatchService(
         return MatchDetails(updated, remaining)
     }
 
+    /** Recomputes the stored score of matches scored before per-innings scores existed. Safe to run on every start. */
+    suspend fun backfillInningsScores() {
+        for (id in matches.idsMissingInningsScores()) {
+            val (match, deliveries) = matches.details(id) ?: continue
+            matches.updateScore(match.withScore(ScoringEngine.compute(match, deliveries)))
+        }
+    }
+
     private suspend fun scorersMatch(user: FirebasePrincipal, matchId: String): MatchDetails {
         val details = details(matchId)
         if (details.match.createdBy != user.uid) {

@@ -8,6 +8,7 @@ import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.auth.TokenVerifier
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
+import com.harsh.desicrics.model.InningsScore
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchResult
@@ -169,6 +170,7 @@ class ApplicationTest {
         val listed = client.get("/matches") { bearerAuth("test-dev") }.body<List<Match>>().single { it.id == match.id }
         assertEquals(MatchStatus.COMPLETED, listed.status)
         assertEquals(MatchResult(TeamSide.A, 4, MarginUnit.RUNS), listed.result)
+        assertEquals(listOf(InningsScore(TeamSide.A, 4, 0, 6), InningsScore(TeamSide.B, 0, 1, 1)), listed.innings)
         val details = client.get("/matches/${match.id}") { bearerAuth("test-dev") }.body<MatchDetails>()
         assertEquals(a2.id, details.deliveries.last().wicket?.fielderId)
     }

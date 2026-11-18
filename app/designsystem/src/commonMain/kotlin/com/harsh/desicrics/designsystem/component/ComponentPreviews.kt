@@ -144,6 +144,27 @@ private fun SelectionLight() = PreviewSurface(darkTheme = false) { SelectionStat
 @Composable
 private fun SelectionDark() = PreviewSurface(darkTheme = true) { SelectionStates() }
 
+// Forms
+
+@Composable
+private fun FormStates() {
+    BrandHeader(title = "New match", subtitle = "Two teams, the toss, and you're scoring.", onBack = {})
+    NumberStepper(10, {}, label = "overs per innings", decreaseLabel = "Fewer", increaseLabel = "More")
+    NumberStepper(1, {}, label = "overs per innings", decreaseLabel = "Fewer", increaseLabel = "More")
+    Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        RemovableChip("Rohan", removeLabel = "Remove Rohan", onRemove = {})
+        RemovableChip("Aarav Shah", removeLabel = "Remove Aarav Shah", onRemove = {})
+    }
+}
+
+@Preview
+@Composable
+private fun FormsLight() = PreviewSurface(darkTheme = false) { FormStates() }
+
+@Preview
+@Composable
+private fun FormsDark() = PreviewSurface(darkTheme = true) { FormStates() }
+
 // Scoring
 
 private val PreviewOver = listOf(

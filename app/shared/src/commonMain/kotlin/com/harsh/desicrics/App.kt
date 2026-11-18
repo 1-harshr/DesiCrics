@@ -105,6 +105,7 @@ private fun MainNavHost(profile: UserProfile, onSignOut: () -> Unit) {
     NavHost(navController, startDestination = HomeRoute) {
         composable<HomeRoute> {
             HomeScreen(
+                playerName = profile.name,
                 onNewMatch = { navController.navigate(NewMatchRoute) },
                 onOpenMatch = { navController.navigate(MatchRoute(it)) },
                 onProfile = { navController.navigate(ProfileRoute) },

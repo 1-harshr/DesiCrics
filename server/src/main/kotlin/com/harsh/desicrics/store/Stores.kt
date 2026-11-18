@@ -31,4 +31,10 @@ interface MatchStore {
 
     /** Removes ball [seq] and saves the refreshed match row in one transaction. Returns false if it didn't exist. */
     suspend fun removeDelivery(match: Match, seq: Int): Boolean
+
+    /** Matches with balls bowled but no per-innings scores, i.e. scored before scores were stored. */
+    suspend fun idsMissingInningsScores(): List<String>
+
+    /** Saves the match row's score fields (summary, status, result, innings). */
+    suspend fun updateScore(match: Match)
 }

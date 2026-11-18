@@ -27,6 +27,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 fun main() {
@@ -45,6 +46,7 @@ fun Application.module(
     val users = ExposedUserStore(database)
     val profiles = ProfileService(users)
     val matches = MatchService(ExposedMatchStore(database), users)
+    launch { matches.backfillInningsScores() }
 
     install(CallLogging)
     install(ContentNegotiation) {

@@ -59,16 +59,37 @@ data class CreateMatchRequest(
     val tossWinner: TeamSide,
     val tossDecision: TossDecision,
 ) {
-    fun validationError(): String? = when {
-        teamAName.isBlank() || teamBName.isBlank() -> "Give both teams a name"
-        teamAName.trim().equals(teamBName.trim(), ignoreCase = true) -> "Teams need different names"
-        teamAName.length > 60 || teamBName.length > 60 -> "Team names must be 60 characters or fewer"
-        teamAPlayers.size < 2 || teamBPlayers.size < 2 -> "Each team needs at least 2 players"
-        teamAPlayers.size > 20 || teamBPlayers.size > 20 -> "Teams can have at most 20 players"
-        (teamAPlayers + teamBPlayers).any { it.isBlank() || it.length > 60 } -> "Player names must be 1–60 characters"
-        oversPerInnings !in 1..50 -> "Overs must be between 1 and 50"
+    /** Checked on the device for instant feedback and again on the server. */
+    fun validate(): MatchSetupError? = when {
+        teamAName.isBlank() || teamBName.isBlank() -> MatchSetupError.TEAM_NAME_MISSING
+        teamAName.trim().equals(teamBName.trim(), ignoreCase = true) -> MatchSetupError.SAME_TEAM_NAMES
+        teamAName.length > MAX_NAME || teamBName.length > MAX_NAME -> MatchSetupError.TEAM_NAME_TOO_LONG
+        teamAPlayers.size < MIN_PLAYERS || teamBPlayers.size < MIN_PLAYERS -> MatchSetupError.TOO_FEW_PLAYERS
+        teamAPlayers.size > MAX_PLAYERS || teamBPlayers.size > MAX_PLAYERS -> MatchSetupError.TOO_MANY_PLAYERS
+        (teamAPlayers + teamBPlayers).any { it.isBlank() || it.length > MAX_NAME } -> MatchSetupError.PLAYER_NAME_INVALID
+        oversPerInnings !in OVERS -> MatchSetupError.OVERS_OUT_OF_RANGE
         else -> null
     }
+
+    /** English message for API error responses; the app shows its own localised text for [validate]. */
+    fun validationError(): String? = validate()?.message
+
+    companion object {
+        const val MIN_PLAYERS = 2
+        const val MAX_PLAYERS = 20
+        const val MAX_NAME = 60
+        val OVERS = 1..50
+    }
+}
+
+enum class MatchSetupError(val message: String) {
+    TEAM_NAME_MISSING("Give both teams a name"),
+    SAME_TEAM_NAMES("Teams need different names"),
+    TEAM_NAME_TOO_LONG("Team names must be 60 characters or fewer"),
+    TOO_FEW_PLAYERS("Each team needs at least 2 players"),
+    TOO_MANY_PLAYERS("Teams can have at most 20 players"),
+    PLAYER_NAME_INVALID("Player names must be 1–60 characters"),
+    OVERS_OUT_OF_RANGE("Overs must be between 1 and 50"),
 }
 
 /** A match with every ball bowled so far, which is everything a scorecard needs. */

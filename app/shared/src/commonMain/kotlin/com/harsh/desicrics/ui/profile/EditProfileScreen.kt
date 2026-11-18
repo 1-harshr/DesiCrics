@@ -15,30 +15,24 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.api.ProfileError
+import com.harsh.desicrics.designsystem.component.BrandHeader
+import com.harsh.desicrics.designsystem.component.BrandStatusBar
 import com.harsh.desicrics.designsystem.component.DesiTextField
 import com.harsh.desicrics.designsystem.component.FullScreenLoading
 import com.harsh.desicrics.designsystem.component.OptionCard
@@ -56,7 +50,6 @@ import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -106,8 +99,7 @@ fun EditProfileContent(
         return
     }
     Column(Modifier.fillMaxSize().background(colors.bg).imePadding()) {
-        // A fixed green strip behind the status bar, so its light icons stay readable while the form scrolls.
-        Spacer(Modifier.fillMaxWidth().background(colors.brandStrong).windowInsetsTopHeight(WindowInsets.statusBars))
+        BrandStatusBar()
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
             Header(state, isOnboarding, onBack)
             Column(
@@ -124,7 +116,6 @@ fun EditProfileContent(
 
 @Composable
 private fun Header(state: ProfileFormState, isOnboarding: Boolean, onBack: (() -> Unit)?) {
-    val colors = DesiTheme.colors
     val title = if (isOnboarding) Res.string.profile_setup_title else Res.string.profile_edit_title
     val role = stringResource(state.role.label)
     val city = state.city.trim()
@@ -132,29 +123,12 @@ private fun Header(state: ProfileFormState, isOnboarding: Boolean, onBack: (() -
         add(stringResource(state.battingStyle.label))
         if (state.bowlingStyle != BowlingStyle.NONE) add(stringResource(state.bowlingStyle.label))
     }
-
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .drawBehind {
-                // Green behind everything except the bottom of the card, which hangs onto the page.
-                drawRect(colors.brandStrong, size = Size(size.width, size.height - CardOverhang.toPx()))
-            }
-            .padding(horizontal = DesiTheme.space.screen)
-            .padding(top = if (onBack == null) DesiTheme.space.s8 else DesiTheme.space.s2),
-        verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
+    BrandHeader(
+        title = stringResource(title),
+        subtitle = stringResource(Res.string.profile_setup_intro),
+        onBack = onBack,
+        overhang = CardOverhang,
     ) {
-        if (onBack != null) {
-            IconButton(onClick = onBack, modifier = Modifier.offset(x = -DesiTheme.space.s3)) {
-                Icon(painterResource(DesiIcons.Back), stringResource(Res.string.common_back), tint = colors.onBrandStrong)
-            }
-        }
-        Text(stringResource(title), style = DesiTheme.type.scoreLg, color = colors.onBrandStrong)
-        Text(
-            stringResource(Res.string.profile_setup_intro),
-            style = DesiTheme.type.bodyLg,
-            color = colors.onBrandStrong.copy(alpha = 0.78f),
-        )
         PlayerCard(
             name = state.name,
             namePlaceholder = stringResource(Res.string.profile_name_placeholder),

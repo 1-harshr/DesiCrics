@@ -10,8 +10,10 @@ import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.Wicket
+import com.harsh.desicrics.scoring.DeliveryError
 import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.scoring.ScoringEngine
+import com.harsh.desicrics.scoring.validate
 import com.harsh.desicrics.util.nowMillis
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,6 +30,14 @@ data class Selection(
     val bowlerId: String? = null,
 )
 
+/** Why the last action didn't go through. The screen picks the text. */
+sealed interface ScoringError {
+    /** The engine rejected the ball before it was sent. */
+    data class Rejected(val error: DeliveryError) : ScoringError
+    data object SaveFailed : ScoringError
+    data object LoadFailed : ScoringError
+}
+
 data class MatchUiState(
     val loading: Boolean = true,
     val notFound: Boolean = false,
@@ -38,9 +48,9 @@ data class MatchUiState(
     val selection: Selection = Selection(),
     /** A ball or undo is being saved; scoring is paused until the server confirms. */
     val saving: Boolean = false,
-    /** Set while the latest refresh failed; the last good scorecard stays on screen. */
-    val connectionError: String? = null,
-    val error: String? = null,
+    /** The latest refresh failed; the last good scorecard stays on screen. */
+    val offline: Boolean = false,
+    val error: ScoringError? = null,
 ) {
     val strikerId: String? get() = state?.current?.strikerId ?: selection.strikerId
     val nonStrikerId: String? get() = state?.current?.nonStrikerId ?: selection.nonStrikerId
@@ -78,17 +88,13 @@ class MatchViewModel(
                                 snapshot == null -> current.copy(loading = false, notFound = true)
                                 // Don't let a poll overwrite the local state mid-save.
                                 current.saving -> current
-                                else -> current.withSnapshot(snapshot.match, snapshot.deliveries).copy(connectionError = null)
+                                else -> current.withSnapshot(snapshot.match, snapshot.deliveries).copy(offline = false)
                             }
                         }
                     },
-                    onFailure = { e ->
+                    onFailure = {
                         _state.update {
-                            if (it.match == null) {
-                                it.copy(loading = false, error = e.message ?: "Couldn't load the match")
-                            } else {
-                                it.copy(connectionError = "Can't reach the server, retrying…")
-                            }
+                            if (it.match == null) it.copy(loading = false, error = ScoringError.LoadFailed) else it.copy(offline = true)
                         }
                     },
                 )
@@ -114,11 +120,9 @@ class MatchViewModel(
         ExtraType.BYE, ExtraType.LEG_BYE -> record(extra = extra, extraRuns = runs)
     }
 
-    fun recordWicket(kind: DismissalKind, nonStrikerOut: Boolean) {
-        val ui = _state.value
-        val outId = (if (kind == DismissalKind.RUN_OUT && nonStrikerOut) ui.nonStrikerId else ui.strikerId) ?: return
-        record(wicket = Wicket(kind, outId))
-    }
+    /** [runsCompleted] only counts for a run out; every other dismissal ends the ball with no runs. */
+    fun recordWicket(kind: DismissalKind, playerOutId: String, fielderId: String?, runsCompleted: Int = 0) =
+        record(runsOffBat = if (kind.allowsRuns) runsCompleted else 0, wicket = Wicket(kind, playerOutId, fielderId))
 
     private fun record(
         runsOffBat: Int = 0,
@@ -141,6 +145,11 @@ class MatchViewModel(
             wicket = wicket,
             timestamp = nowMillis(),
         )
+        // The same check the server runs, so a mistake shows straight away and in the user's language.
+        ui.state.validate(delivery, delivery.seq)?.let { error ->
+            _state.update { it.copy(error = ScoringError.Rejected(error)) }
+            return
+        }
         save { matchRepository.recordDelivery(match.id, delivery) }
     }
 
@@ -163,7 +172,7 @@ class MatchViewModel(
                 throw e
             } catch (e: Exception) {
                 // Keep the scorer's selection so they can just tap again.
-                _state.update { it.copy(saving = false, error = e.message ?: "Couldn't save that ball") }
+                _state.update { it.copy(saving = false, error = ScoringError.SaveFailed) }
             }
         }
     }

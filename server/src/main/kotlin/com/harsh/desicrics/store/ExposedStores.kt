@@ -19,14 +19,17 @@ import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inSubQuery
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.update
 import org.jetbrains.exposed.v1.jdbc.upsert
+import kotlinx.serialization.json.Json
 import java.sql.SQLException
 
 class ExposedUserStore(private val db: Database) : UserStore {
@@ -152,6 +155,17 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
         }
     }
 
+    override suspend fun idsMissingInningsScores(): List<String> = db.query {
+        val withBalls = DeliveriesTable.select(DeliveriesTable.matchId).withDistinct()
+        MatchesTable.select(MatchesTable.id)
+            .where { (MatchesTable.inningsScores eq "[]") and (MatchesTable.id inSubQuery withBalls) }
+            .map { it[MatchesTable.id] }
+    }
+
+    override suspend fun updateScore(match: Match) {
+        db.query { updateScore(match) }
+    }
+
     private fun JdbcTransaction.updateScore(match: Match) {
         MatchesTable.update({ MatchesTable.id eq match.id }) {
             it[scoreSummary] = match.scoreSummary
@@ -177,6 +191,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             tossDecision = this[MatchesTable.tossDecision],
             status = this[MatchesTable.status],
             scoreSummary = this[MatchesTable.scoreSummary],
+            innings = Json.decodeFromString(this[MatchesTable.inningsScores]),
             result = when {
                 this[MatchesTable.status] != MatchStatus.COMPLETED -> null
                 else -> MatchResult(
@@ -210,6 +225,7 @@ private fun UpdateBuilder<*>.setResult(match: Match) {
     this[MatchesTable.resultWinner] = match.result?.winner
     this[MatchesTable.resultMargin] = match.result?.margin
     this[MatchesTable.resultMarginUnit] = match.result?.marginUnit
+    this[MatchesTable.inningsScores] = Json.encodeToString(match.innings)
 }
 
 /** SQLSTATE 23505 means a unique or primary-key violation in both H2 and Postgres. */

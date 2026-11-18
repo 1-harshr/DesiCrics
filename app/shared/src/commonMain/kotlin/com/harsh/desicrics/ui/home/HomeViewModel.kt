@@ -13,7 +13,8 @@ import kotlinx.coroutines.flow.stateIn
 data class HomeUiState(
     val loading: Boolean = true,
     val matches: List<Match> = emptyList(),
-    val error: String? = null,
+    /** The latest refresh failed; the last list we got stays on screen. */
+    val loadFailed: Boolean = false,
 )
 
 class HomeViewModel(
@@ -28,7 +29,7 @@ class HomeViewModel(
         .scan(HomeUiState()) { previous, result ->
             result.fold(
                 onSuccess = { HomeUiState(loading = false, matches = it) },
-                onFailure = { previous.copy(loading = false, error = it.message ?: "Couldn't load matches") },
+                onFailure = { previous.copy(loading = false, loadFailed = true) },
             )
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())

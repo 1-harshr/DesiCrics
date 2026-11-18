@@ -158,4 +158,155 @@
     <string name="scoring_error_no_runs_on_dismissal">No runs count on that dismissal.</string>
     <string name="scoring_error_fielder_not_allowed">That dismissal doesn't have a fielder.</string>
     <string name="scoring_error_fielder_not_in_team">The fielder must be from the fielding side.</string>
+
+    <!-- Home -->
+    <string name="home_greeting">Hi, %1$s</string>
+    <string name="home_profile">Your profile</string>
+    <string name="home_start_title">Start a match</string>
+    <string name="home_start_body">Pick the teams, do the toss and score it ball by ball.</string>
+    <string name="home_start_action">New match</string>
+    <string name="home_section_live">Live now</string>
+    <string name="home_section_recent">Recent matches</string>
+    <string name="home_empty_title">No matches yet</string>
+    <string name="home_empty_body">Matches you start show up here, live while you score.</string>
+    <string name="home_error">Can't reach the server. Retrying…</string>
+    <string name="home_status_result">Result</string>
+    <string name="home_status_not_started">Not started</string>
+    <string name="home_meta_scoring">%1$s · You're scoring</string>
+    <plurals name="match_overs">
+        <item quantity="one">%1$d over</item>
+        <item quantity="other">%1$d overs</item>
+    </plurals>
+    <plurals name="match_need_runs">
+        <item quantity="one">%1$s need %2$d off %3$d ball</item>
+        <item quantity="other">%1$s need %2$d off %3$d balls</item>
+    </plurals>
+    <string name="match_toss_chose_bat">%1$s won the toss and chose to bat</string>
+    <string name="match_toss_chose_bowl">%1$s won the toss and chose to bowl</string>
+
+    <!-- New match -->
+    <string name="new_match_title">New match</string>
+    <string name="new_match_subtitle">Two teams, the toss, and you're scoring.</string>
+    <string name="new_match_section_teams">Teams</string>
+    <string name="new_match_team_a">Team A</string>
+    <string name="new_match_team_b">Team B</string>
+    <string name="new_match_team_name">Team name</string>
+    <string name="new_match_add_player">Add a player</string>
+    <string name="new_match_add_player_action">Add player</string>
+    <string name="new_match_remove_player">Remove %1$s</string>
+    <plurals name="new_match_player_count">
+        <item quantity="one">%1$d player</item>
+        <item quantity="other">%1$d players</item>
+    </plurals>
+    <string name="new_match_players_hint">At least 2 players. Press enter after each name.</string>
+    <string name="new_match_section_overs">Overs</string>
+    <string name="new_match_overs_label">overs per innings</string>
+    <string name="new_match_overs_fewer">Fewer overs</string>
+    <string name="new_match_overs_more">More overs</string>
+    <string name="new_match_section_toss">Toss</string>
+    <string name="new_match_toss_won">Who won the toss?</string>
+    <string name="new_match_toss_chose">They chose to</string>
+    <string name="new_match_toss_bat">Bat</string>
+    <string name="new_match_toss_bowl">Bowl</string>
+    <string name="new_match_bats_first">%1$s bat first.</string>
+    <string name="new_match_start">Start match</string>
+    <string name="new_match_error_team_name_missing">Give both teams a name.</string>
+    <string name="new_match_error_same_team_names">The teams need different names.</string>
+    <string name="new_match_error_team_name_too_long">Team names can be at most 60 characters.</string>
+    <string name="new_match_error_too_few_players">Each team needs at least 2 players.</string>
+    <string name="new_match_error_too_many_players">A team can have at most 20 players.</string>
+    <string name="new_match_error_player_name_invalid">Player names can be at most 60 characters.</string>
+    <string name="new_match_error_overs">Overs must be between 1 and 50.</string>
+    <string name="new_match_error_create_failed">Couldn't start the match. Check your connection and try again.</string>
+
+    <!-- Scoring screen -->
+    <string name="match_title">%1$s vs %2$s</string>
+    <string name="match_not_found">This match doesn't exist any more.</string>
+    <string name="match_load_failed">Couldn't load the match. Check your connection and try again.</string>
+    <string name="match_offline">Can't reach the server. Retrying…</string>
+    <string name="match_tab_live">Live</string>
+    <string name="match_tab_scorecard">Scorecard</string>
+    <string name="match_innings_label">%1$s · %2$s</string>
+    <string name="match_innings_first">1st innings</string>
+    <string name="match_innings_second">2nd innings</string>
+    <string name="match_overs_of">%1$s / %2$d ov</string>
+    <string name="match_run_rate">CRR %1$s</string>
+    <string name="match_target">Target %1$d</string>
+    <plurals name="match_need">
+        <item quantity="one">Need %1$d off %2$d ball</item>
+        <item quantity="other">Need %1$d off %2$d balls</item>
+    </plurals>
+    <string name="match_first_innings_score">%1$s %2$s (%3$s)</string>
+    <string name="match_section_crease">At the crease</string>
+    <string name="match_section_this_over">This over</string>
+    <string name="match_over_empty">No balls yet this over.</string>
+    <string name="match_choose_striker">Choose the striker</string>
+    <string name="match_choose_non_striker">Choose the non-striker</string>
+    <string name="match_choose_opening_bowler">Choose the opening bowler</string>
+    <string name="match_choose_next_bowler">Choose the next bowler</string>
+    <string name="match_on_strike">On strike</string>
+    <string name="match_batter_score">%1$d (%2$d)</string>
+    <string name="match_pick_players_first">Pick both batters and the bowler to start scoring.</string>
+    <string name="match_undo_last_ball">Undo last ball</string>
+    <string name="match_not_your_match">Only the scorer can update this match. Scores refresh on their own.</string>
+    <string name="match_dismiss">OK</string>
+
+    <!-- Run pad keys and ball labels -->
+    <string name="scoring_key_wide">Wd</string>
+    <string name="scoring_key_no_ball">Nb</string>
+    <string name="scoring_key_bye">Bye</string>
+    <string name="scoring_key_leg_bye">Lb</string>
+    <string name="scoring_key_out">OUT</string>
+    <string name="scoring_key_undo">Undo</string>
+    <string name="scoring_ball_wicket">W</string>
+    <string name="scoring_ball_wide">wd</string>
+    <string name="scoring_ball_no_ball">nb</string>
+    <string name="scoring_ball_bye">b</string>
+    <string name="scoring_ball_leg_bye">lb</string>
+    <string name="scoring_ball_extra_with_runs">%1$d%2$s</string>
+
+    <!-- Scoring sheets -->
+    <string name="scoring_pick_striker">Who's on strike?</string>
+    <string name="scoring_pick_non_striker">Who's at the other end?</string>
+    <string name="scoring_pick_bowler">Who's bowling?</string>
+    <string name="scoring_pick_bowler_hint">%1$s bowled the last over, so can't bowl this one.</string>
+    <string name="scoring_no_players">Everyone has batted.</string>
+    <string name="scoring_wide_title">Wide</string>
+    <string name="scoring_wide_hint">Runs the batters ran. The wide's 1 run is added for you.</string>
+    <string name="scoring_no_ball_title">No-ball</string>
+    <string name="scoring_no_ball_hint">Runs off the bat. The no-ball's 1 run is added for you.</string>
+    <string name="scoring_bye_title">Byes</string>
+    <string name="scoring_leg_bye_title">Leg byes</string>
+    <string name="scoring_byes_hint">How many runs did they run?</string>
+    <string name="scoring_wicket_title">Wicket</string>
+    <string name="scoring_wicket_how">How out?</string>
+    <string name="scoring_wicket_who">Who's out?</string>
+    <string name="scoring_wicket_runs">Runs completed before the run out</string>
+    <string name="scoring_wicket_fielder">Fielder (optional)</string>
+    <string name="scoring_wicket_keeper">Keeper (optional)</string>
+    <string name="scoring_wicket_confirm">Out</string>
+    <string name="scoring_dismissal_bowled">Bowled</string>
+    <string name="scoring_dismissal_caught">Caught</string>
+    <string name="scoring_dismissal_lbw">LBW</string>
+    <string name="scoring_dismissal_run_out">Run out</string>
+    <string name="scoring_dismissal_stumped">Stumped</string>
+    <string name="scoring_dismissal_hit_wicket">Hit wicket</string>
+    <string name="scoring_error_save_failed">Couldn't save that ball. Check your connection and try again.</string>
+
+    <!-- Scorecard -->
+    <string name="scorecard_innings">%1$s innings</string>
+    <string name="scorecard_batter">Batter</string>
+    <string name="scorecard_bowler">Bowler</string>
+    <string name="scorecard_runs">R</string>
+    <string name="scorecard_balls">B</string>
+    <string name="scorecard_fours">4s</string>
+    <string name="scorecard_sixes">6s</string>
+    <string name="scorecard_strike_rate">SR</string>
+    <string name="scorecard_overs">O</string>
+    <string name="scorecard_maidens">M</string>
+    <string name="scorecard_wickets">W</string>
+    <string name="scorecard_economy">Econ</string>
+    <string name="scorecard_extras">Extras %1$d (wd %2$d, nb %3$d, b %4$d, lb %5$d)</string>
+    <string name="scorecard_yet_to_bat">Yet to bat: %1$s</string>
+    <string name="scorecard_not_started">This innings hasn't started yet.</string>
 </resources>
