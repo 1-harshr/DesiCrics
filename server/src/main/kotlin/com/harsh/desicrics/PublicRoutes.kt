@@ -20,7 +20,15 @@ import io.ktor.server.routing.get
  * Pages anyone can open without signing in, for links shared outside the app. Phones with the app open
  * these links in it directly; this is what everyone else sees.
  */
-fun Route.publicRoutes(matches: MatchService, tournaments: TournamentService) {
+fun Route.publicRoutes(matches: MatchService, tournaments: TournamentService, androidCertFingerprints: List<String> = emptyList()) {
+    // Digital Asset Links: lets Android verify that this domain's /join, /m and /t links belong to the app.
+    get("/.well-known/assetlinks.json") {
+        val fingerprints = androidCertFingerprints.joinToString(",") { "\"${it.escapeJson()}\"" }
+        val body = """[{"relation":["delegate_permission/common.handle_all_urls"],""" +
+            """"target":{"namespace":"android_app","package_name":"com.harsh.desicrics","sha256_cert_fingerprints":[$fingerprints]}}]"""
+        call.respondText(body, ContentType.Application.Json)
+    }
+
     get("/t/{id}") {
         val details = try {
             tournaments.details(call.parameters["id"].orEmpty())
@@ -174,6 +182,8 @@ internal fun page(title: String, body: String, refreshSeconds: Int? = null): Str
     <body>$body</body>
     </html>
 """.trimIndent()
+
+private fun String.escapeJson(): String = replace("\\", "\\\\").replace("\"", "\\\"")
 
 internal fun String.escapeHtml(): String =
     replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'", "&#39;")

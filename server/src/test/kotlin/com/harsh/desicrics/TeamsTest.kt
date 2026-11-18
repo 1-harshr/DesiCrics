@@ -195,6 +195,13 @@ class TeamsTest {
     }
 
     @Test
+    fun assetLinksListTheApp() = apiTest { client ->
+        val links = client.get("/.well-known/assetlinks.json")
+        assertEquals(HttpStatusCode.OK, links.status)
+        assertTrue("\"package_name\":\"com.harsh.desicrics\"" in links.bodyAsText())
+    }
+
+    @Test
     fun supportMessagesAreSaved() = apiTest { client ->
         client.setUpProfile("asha")
         val ok = client.post("/support") { bearerAuth("test-asha"); jsonBody(SupportRequest(SupportCategory.BUG, "Undo froze")) }

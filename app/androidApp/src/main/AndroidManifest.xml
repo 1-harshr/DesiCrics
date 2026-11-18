@@ -29,8 +29,9 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Join links and public scorecards on the DesiCrics server open in the app. -->
-            <intent-filter>
+            <!-- Join links, scorecards and tournaments on the DesiCrics server open in the app. Verified
+                 through the server's /.well-known/assetlinks.json once ANDROID_SHA256_FINGERPRINTS is set. -->
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />

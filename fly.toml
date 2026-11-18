@@ -1,0 +1,28 @@
+# Fly.io config for the server, if hosting goes that way (see docs/deploy.md). Deploy from the repo root
+# after `./gradlew :server:buildFatJar`:  fly deploy --config fly.toml --dockerfile server/Dockerfile server
+app = "desicrics-staging"
+primary_region = "bom"
+
+[build]
+  dockerfile = "server/Dockerfile"
+
+[env]
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  # Live scores hold WebSockets, so keep one machine up rather than scaling to zero.
+  auto_stop_machines = "off"
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    method = "GET"
+    path = "/"
+    interval = "30s"
+    timeout = "5s"
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

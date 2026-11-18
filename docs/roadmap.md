@@ -31,7 +31,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ CI: build, unit tests, server tests (`.github/workflows/ci.yml`)
 
 ### Level 3 · Delight
-- ⬜ Staging server deploy (needs the hosting decision)
+- 🟡 Staging server deploy: the image builds and boots on Postgres, and both hosting options are scripted in [deploy.md](deploy.md); the deploy itself waits for the hosting decision
 - ✅ Crashlytics + basic analytics events (match, team, tournament, claim, handover; no personal data)
 - ✅ Compose screenshot tests: the main screens render to `app/shared/screenshots/` (Robolectric + Roborazzi, `ScreenshotTest`)
 
@@ -88,7 +88,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ Settings, support form (no attachments yet), account deletion
 
 ### Level 3 · Delight
-- 🟡 WhatsApp invite links: shared through the share sheet and opened by the app; verified App Links need the deployed domain's assetlinks.json
+- 🟡 WhatsApp invite links: shared through the share sheet and opened by the app; the server serves assetlinks.json and the manifest asks Android to verify, so only the domain and `ANDROID_SHA256_FINGERPRINTS` remain
 - ✅ Reuse last match's squad
 - ✅ Team head-to-head record
 

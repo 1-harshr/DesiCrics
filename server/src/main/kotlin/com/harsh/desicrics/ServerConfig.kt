@@ -12,12 +12,18 @@ data class ServerConfig(
     val database: DatabaseConfig = DatabaseConfig(),
     /** Path to a Firebase service account key, for push messages. Without one, notifications only go to the inbox. */
     val firebaseServiceAccount: String? = null,
+    /**
+     * SHA-256 fingerprints of the app's signing certificates, for Android App Links: the server publishes
+     * them at /.well-known/assetlinks.json so join and match links open the app without asking.
+     */
+    val androidCertFingerprints: List<String> = emptyList(),
 ) {
     companion object {
         fun fromEnv(env: Map<String, String> = System.getenv()) = ServerConfig(
             port = env["PORT"]?.toIntOrNull() ?: 8080,
             firebaseProjectId = env["FIREBASE_PROJECT_ID"] ?: "desicrics-45117",
             firebaseServiceAccount = env["FIREBASE_SERVICE_ACCOUNT"]?.takeIf { it.isNotBlank() },
+            androidCertFingerprints = env["ANDROID_SHA256_FINGERPRINTS"].orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() },
             database = DatabaseConfig(
                 url = env["DATABASE_URL"] ?: DatabaseConfig.LOCAL_URL,
                 user = env["DATABASE_USER"] ?: DatabaseConfig.LOCAL_USER,

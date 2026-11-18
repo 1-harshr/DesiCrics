@@ -1,0 +1,76 @@
+# Deploying the server
+
+The server is one container (`server/Dockerfile`) talking to one Postgres. Everything environment-specific comes from env vars. The image has been checked to build, start, apply every migration to an empty Postgres 17, and serve pages.
+
+Hosting is still undecided (see [ADR 0001](decisions/0001-backend-stack.md)). Both options are written out below, so staging is a few commands once it's decided.
+
+## Build the image
+
+`core` has an Android target, so the image doesn't compile the source. Build the jar first:
+
+```sh
+./gradlew :server:buildFatJar
+docker build -t desicrics-server server
+```
+
+## Settings
+
+| Variable | Needed | What it is |
+|---|---|---|
+| `DATABASE_URL` | Yes | JDBC URL, e.g. `jdbc:postgresql://host:5432/desicrics`. Flyway migrates it on start. |
+| `DATABASE_USER`, `DATABASE_PASSWORD` | Yes | Postgres credentials. |
+| `DATABASE_POOL_SIZE` | No | Default 10. Keep it under the database's connection limit. |
+| `PORT` | Set by the host | Default 8080. |
+| `FIREBASE_PROJECT_ID` | No | Default `desicrics-45117`. Used to verify sign-in tokens. |
+| `FIREBASE_SERVICE_ACCOUNT` | For push | Path to a Firebase service account JSON key (mount it as a secret file). Without it, notifications only go to the in-app inbox. |
+| `ANDROID_SHA256_FINGERPRINTS` | For verified links | Comma-separated SHA-256 fingerprints of the app's signing certificates (`./gradlew :app:androidApp:signingReport`, or Play Console › App integrity). Served at `/.well-known/assetlinks.json`, so `/join`, `/m` and `/t` links open the app without a chooser. |
+
+Then build the app against the deployed address:
+
+```sh
+./gradlew :app:androidApp:assembleRelease -Pdesicrics.apiBaseUrl=https://<host> -Pdesicrics.publicUrl=https://<host>
+```
+
+## Option A: Cloud Run + Cloud SQL
+
+```sh
+gcloud artifacts repositories create desicrics --repository-format=docker --location=asia-south1
+docker tag desicrics-server asia-south1-docker.pkg.dev/<project>/desicrics/server
+docker push asia-south1-docker.pkg.dev/<project>/desicrics/server
+
+gcloud sql instances create desicrics --database-version=POSTGRES_17 --tier=db-f1-micro --region=asia-south1
+gcloud sql databases create desicrics --instance=desicrics
+gcloud sql users create desicrics --instance=desicrics --password=<password>
+
+gcloud run deploy desicrics-server \
+  --image=asia-south1-docker.pkg.dev/<project>/desicrics/server \
+  --region=asia-south1 --allow-unauthenticated \
+  --add-cloudsql-instances=<project>:asia-south1:desicrics \
+  --set-env-vars=DATABASE_URL='jdbc:postgresql:///desicrics?cloudSqlInstance=<project>:asia-south1:desicrics&socketFactory=com.google.cloud.sql.postgres.SocketFactory',DATABASE_USER=desicrics \
+  --set-secrets=DATABASE_PASSWORD=db-password:latest,/secrets/firebase.json=firebase-admin:latest \
+  --set-env-vars=FIREBASE_SERVICE_ACCOUNT=/secrets/firebase.json \
+  --min-instances=1 --max-instances=1 --timeout=3600
+```
+
+- `--max-instances=1` keeps live scores on one instance. Watchers are kept in memory, and a second instance needs Postgres LISTEN/NOTIFY between them (see architecture.md).
+- `--timeout=3600` lets WebSockets stay open for an hour; the app reconnects after that.
+- The Cloud SQL socket factory is a dependency the server doesn't include yet (`com.google.cloud.sql:postgres-socket-factory`). The alternative is Cloud SQL's private IP with a plain `jdbc:postgresql://<ip>/desicrics` URL.
+
+## Option B: Fly.io + Neon
+
+```sh
+fly launch --no-deploy --copy-config --name desicrics-staging   # uses fly.toml
+fly secrets set DATABASE_URL='jdbc:postgresql://<neon-host>/desicrics?sslmode=require' \
+  DATABASE_USER=<user> DATABASE_PASSWORD=<password>
+fly secrets set FIREBASE_SERVICE_ACCOUNT=/secrets/firebase.json   # and add the key as a Fly file secret
+./gradlew :server:buildFatJar
+fly deploy --config fly.toml --dockerfile server/Dockerfile server
+```
+
+`fly.toml` keeps one machine always running (no scale to zero), for the same WebSocket reason.
+
+## After the first deploy
+
+1. Open `https://<host>/` and check it answers "DesiCrics API".
+2. Check `https://<host>/.well-known/assetlinks.json` lists the app's fingerprint.
+3. Sign in on a phone with the app built for that host, score a ball, and open the match link in a browser.

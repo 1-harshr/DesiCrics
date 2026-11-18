@@ -121,7 +121,7 @@ fun Application.module(
 
     routing {
         get("/") { call.respondText("DesiCrics API") }
-        publicRoutes(matches, tournaments)
+        publicRoutes(matches, tournaments, config.androidCertFingerprints)
         imageRoutes(images)
         authenticate("firebase") {
             profileRoutes(profiles)
