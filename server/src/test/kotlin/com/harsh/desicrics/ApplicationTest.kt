@@ -49,43 +49,6 @@ import kotlin.test.assertTrue
 
 class ApplicationTest {
 
-    /** Tokens look like "test-<uid>" so tests can act as any user without Firebase. */
-    private val fakeTokens = TokenVerifier { token -> token.removePrefix("test-").takeIf { it != token }?.let { FirebasePrincipal(it) } }
-
-    private fun apiTest(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
-        val config = ServerConfig(database = DatabaseConfig(url = "jdbc:h2:mem:${UUID.randomUUID()};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1"))
-        application { module(config, fakeTokens) }
-        block(createClient { install(ContentNegotiation) { json() } })
-    }
-
-    private suspend fun HttpClient.setUpProfile(uid: String) =
-        put("/me") {
-            bearerAuth("test-$uid")
-            contentType(ContentType.Application.Json)
-            setBody(UpdateProfileRequest(name = "Asha", phone = "+91 98765 43210", role = PlayerRole.ALL_ROUNDER))
-        }
-
-    private suspend fun HttpClient.createMatch(uid: String, rules: MatchRules = MatchRules(), overs: Int = 1): MatchDetails =
-        post("/matches") {
-            bearerAuth("test-$uid")
-            contentType(ContentType.Application.Json)
-            setBody(
-                CreateMatchRequest(
-                    teamAName = "Strikers", teamAPlayers = listOf("Asha", "Bilal", "Chetan"),
-                    teamBName = "Royals", teamBPlayers = listOf("Dev", "Esha"),
-                    oversPerInnings = overs, tossWinner = TeamSide.A, tossDecision = TossDecision.BAT,
-                    rules = rules,
-                ),
-            )
-        }.body()
-
-    private suspend fun HttpClient.record(uid: String, matchId: String, delivery: Delivery) =
-        post("/matches/$matchId/deliveries") {
-            bearerAuth("test-$uid")
-            contentType(ContentType.Application.Json)
-            setBody(delivery)
-        }
-
     @Test
     fun rootIsPublic() = apiTest { client ->
         assertEquals("DesiCrics API", client.get("/").bodyAsText())
@@ -122,7 +85,7 @@ class ApplicationTest {
         val response = client.post("/matches") {
             bearerAuth("test-nobody")
             contentType(ContentType.Application.Json)
-            setBody(CreateMatchRequest("A", listOf("a", "b"), "B", listOf("c", "d"), 2, TeamSide.A, TossDecision.BAT))
+            setBody(CreateMatchRequest(squad("A", "a", "b"), squad("B", "c", "d"), 2, TeamSide.A, TossDecision.BAT))
         }
         assertEquals(HttpStatusCode.Conflict, response.status)
     }

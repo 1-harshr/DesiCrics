@@ -23,6 +23,8 @@ import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inSubQuery
+import org.jetbrains.exposed.v1.core.isNull
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
@@ -37,8 +39,9 @@ import java.sql.SQLException
 
 class ExposedUserStore(private val db: Database) : UserStore {
 
+    /** Deleted accounts read as having no profile, so signing up again starts from scratch. */
     override suspend fun get(uid: String): UserProfile? = db.query {
-        UsersTable.selectAll().where { UsersTable.uid eq uid }.singleOrNull()?.toProfile()
+        UsersTable.selectAll().where { (UsersTable.uid eq uid) and UsersTable.deletedAt.isNull() }.singleOrNull()?.toProfile()
     }
 
     override suspend fun upsert(profile: UserProfile) {
@@ -54,6 +57,7 @@ class ExposedUserStore(private val db: Database) : UserStore {
                 it[battingStyle] = profile.battingStyle
                 it[bowlingStyle] = profile.bowlingStyle
                 it[createdAt] = profile.createdAt
+                it[deletedAt] = null
             }
         }
     }
@@ -81,6 +85,37 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             .toList()
         // List cards don't show rosters, so skip loading players here.
         rows.map { it.toMatch(players = emptyList()) }
+    }
+
+    override suspend fun forPlayer(profileId: String, limit: Int): List<Match> = db.query {
+        val played = MatchPlayersTable.select(MatchPlayersTable.matchId).where { MatchPlayersTable.profileId eq profileId }
+        MatchesTable.selectAll()
+            .where { (MatchesTable.id inSubQuery played) or (MatchesTable.scorerUid eq profileId) or (MatchesTable.createdBy eq profileId) }
+            .orderBy(MatchesTable.createdAt, SortOrder.DESC)
+            .limit(limit)
+            .map { it.toMatch(players = emptyList()) }
+    }
+
+    override suspend fun between(teamId: String, otherId: String): List<Match> = db.query {
+        MatchesTable.selectAll()
+            .where {
+                ((MatchesTable.teamAId eq teamId) and (MatchesTable.teamBId eq otherId)) or
+                    ((MatchesTable.teamAId eq otherId) and (MatchesTable.teamBId eq teamId))
+            }
+            .map { it.toMatch(players = emptyList()) }
+    }
+
+    override suspend fun lastSquad(teamId: String): List<String> = db.query {
+        val latest = MatchesTable.selectAll()
+            .where { (MatchesTable.teamAId eq teamId) or (MatchesTable.teamBId eq teamId) }
+            .orderBy(MatchesTable.createdAt, SortOrder.DESC)
+            .limit(1)
+            .singleOrNull() ?: return@query emptyList()
+        val side = if (latest[MatchesTable.teamAId] == teamId) TeamSide.A else TeamSide.B
+        MatchPlayersTable.selectAll()
+            .where { (MatchPlayersTable.matchId eq latest[MatchesTable.id]) and (MatchPlayersTable.side eq side) }
+            .orderBy(MatchPlayersTable.position)
+            .mapNotNull { it[MatchPlayersTable.profileId] }
     }
 
     override suspend fun details(matchId: String): MatchDetails? = db.query {
@@ -115,6 +150,8 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[scoreSummary] = match.scoreSummary
                 it[rules] = Json.encodeToString(match.rules)
                 it[scorerUid] = match.scorerUid
+                it[teamAId] = match.teamA.teamId
+                it[teamBId] = match.teamB.teamId
                 it.setResult(match)
             }
             insertRoster(match.id, TeamSide.A, match.teamA)
@@ -189,6 +226,9 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[MatchPlayersTable.side] = side
                 it[MatchPlayersTable.position] = position
                 it[name] = player.name
+                it[profileId] = player.profileId
+                it[isCaptain] = false
+                it[isKeeper] = false
             }
         }
     }
@@ -217,6 +257,9 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[MatchPlayersTable.side] = side
                 it[position] = index
                 it[name] = player.name
+                it[profileId] = player.profileId
+                it[isCaptain] = player.id == team.captainId
+                it[isKeeper] = player.id == team.keeperId
             }
         }
     }
@@ -266,11 +309,16 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
     }
 
     private fun ResultRow.toMatch(players: List<ResultRow>): Match {
-        fun team(side: TeamSide, name: String) = Team(
-            name = name,
-            players = players.filter { it[MatchPlayersTable.side] == side }
-                .map { Player(it[MatchPlayersTable.id], it[MatchPlayersTable.name]) },
-        )
+        fun team(side: TeamSide, name: String): Team {
+            val rows = players.filter { it[MatchPlayersTable.side] == side }
+            return Team(
+                name = name,
+                players = rows.map { Player(it[MatchPlayersTable.id], it[MatchPlayersTable.name], it[MatchPlayersTable.profileId]) },
+                teamId = this[if (side == TeamSide.A) MatchesTable.teamAId else MatchesTable.teamBId],
+                captainId = rows.firstOrNull { it[MatchPlayersTable.isCaptain] }?.get(MatchPlayersTable.id),
+                keeperId = rows.firstOrNull { it[MatchPlayersTable.isKeeper] }?.get(MatchPlayersTable.id),
+            )
+        }
         return Match(
             id = this[MatchesTable.id],
             createdBy = this[MatchesTable.createdBy],
@@ -342,5 +390,5 @@ private val MatchEvent.typeName: String
     }
 
 /** SQLSTATE 23505 means a unique or primary-key violation in both H2 and Postgres. */
-private fun Throwable.isUniqueViolation(): Boolean =
+internal fun Throwable.isUniqueViolation(): Boolean =
     generateSequence(this) { it.cause }.any { it is SQLException && it.sqlState == "23505" }

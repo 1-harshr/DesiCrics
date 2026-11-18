@@ -2,6 +2,7 @@ package com.harsh.desicrics.di
 
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.MatchRepository
+import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.data.UserRepository
 import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.data.api.IdTokenProvider
@@ -10,7 +11,10 @@ import com.harsh.desicrics.ui.home.HomeViewModel
 import com.harsh.desicrics.ui.match.MatchViewModel
 import com.harsh.desicrics.ui.newmatch.NewMatchViewModel
 import com.harsh.desicrics.ui.profile.EditProfileViewModel
+import com.harsh.desicrics.ui.profile.ProfileViewModel
 import com.harsh.desicrics.ui.signin.SignInViewModel
+import com.harsh.desicrics.ui.teams.TeamViewModel
+import com.harsh.desicrics.ui.teams.TeamsViewModel
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
 import io.ktor.client.HttpClient
@@ -44,6 +48,7 @@ val dataModule = module {
     singleOf(::DesiCricsApi)
     singleOf(::UserRepository)
     singleOf(::MatchRepository)
+    singleOf(::TeamRepository)
 }
 
 val viewModelModule = module {
@@ -53,6 +58,9 @@ val viewModelModule = module {
     viewModelOf(::HomeViewModel)
     viewModelOf(::NewMatchViewModel)
     viewModel { (matchId: String) -> MatchViewModel(matchId, get(), get()) }
+    viewModelOf(::TeamsViewModel)
+    viewModelOf(::ProfileViewModel)
+    viewModel { (teamId: String) -> TeamViewModel(teamId, get(), get()) }
 }
 
 /** Called once per process: from the Android `Application`, and from the iOS app's init. */

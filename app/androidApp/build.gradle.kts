@@ -37,6 +37,11 @@ android {
         // The Ktor server. Locally the app calls localhost and `adb reverse tcp:8080 tcp:8080` forwards it
         val apiBaseUrl = providers.gradleProperty("desicrics.apiBaseUrl").getOrElse("http://localhost:8080")
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        // Where join links and public scorecards point. The same server, reachable from outside: set it
+        // to the deployed address (and add its Digital Asset Links file) once there is one.
+        val publicUrl = providers.gradleProperty("desicrics.publicUrl").getOrElse(apiBaseUrl)
+        buildConfigField("String", "PUBLIC_URL", "\"$publicUrl\"")
+        manifestPlaceholders["publicHost"] = publicUrl.substringAfter("://").substringBefore("/").substringBefore(":")
     }
     packaging {
         resources {

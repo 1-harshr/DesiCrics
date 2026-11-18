@@ -8,7 +8,9 @@ import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.MatchStatus
+import com.harsh.desicrics.api.SupportCategory
 import com.harsh.desicrics.model.PlayerRole
+import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
 import kotlinx.coroutines.Dispatchers
@@ -36,7 +38,49 @@ object UsersTable : Table("users") {
     val battingStyle = enumerationByName("batting_style", 20, BattingStyle::class)
     val bowlingStyle = enumerationByName("bowling_style", 30, BowlingStyle::class)
     val createdAt = long("created_at")
+    /** Set when the account was deleted; the row stays, cleared, so old scorecards still resolve. */
+    val deletedAt = long("deleted_at").nullable()
     override val primaryKey = PrimaryKey(uid)
+}
+
+/** A player across matches: a user (id = their UID) or a placeholder someone else added. */
+object PlayersTable : Table("players") {
+    val id = varchar("id", 128)
+    val userUid = varchar("user_uid", 128).nullable()
+    val name = varchar("name", 100)
+    val phone = varchar("phone", 20)
+    val claimCode = varchar("claim_code", 8).nullable()
+    val createdBy = varchar("created_by", 128)
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(id)
+}
+
+object TeamsTable : Table("teams") {
+    val id = varchar("id", 36)
+    val name = varchar("name", 60)
+    val city = varchar("city", 100)
+    val joinCode = varchar("join_code", 8)
+    val createdBy = varchar("created_by", 128)
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(id)
+}
+
+object TeamMembersTable : Table("team_members") {
+    val teamId = reference("team_id", TeamsTable.id, onDelete = ReferenceOption.CASCADE)
+    val playerId = reference("player_id", PlayersTable.id)
+    val role = enumerationByName("role", 10, TeamRole::class)
+    val joinedAt = long("joined_at")
+    override val primaryKey = PrimaryKey(teamId, playerId)
+}
+
+object SupportRequestsTable : Table("support_requests") {
+    val id = varchar("id", 36)
+    val uid = varchar("uid", 128)
+    val category = enumerationByName("category", 10, SupportCategory::class)
+    val message = varchar("message", 4000)
+    val appVersion = varchar("app_version", 40)
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(id)
 }
 
 object MatchesTable : Table("matches") {
@@ -58,16 +102,21 @@ object MatchesTable : Table("matches") {
     /** JSON MatchRules. */
     val rules = text("rules")
     val scorerUid = varchar("scorer_uid", 128)
+    val teamAId = varchar("team_a_id", 36).nullable()
+    val teamBId = varchar("team_b_id", 36).nullable()
     override val primaryKey = PrimaryKey(id)
 }
 
-/** A player in one match. A nullable link to [UsersTable] comes with "add player by phone number". */
+/** A player in one match; [profileId] links them to [PlayersTable] when they aren't a typed-in guest. */
 object MatchPlayersTable : Table("match_players") {
     val id = varchar("id", 36)
     val matchId = reference("match_id", MatchesTable.id, onDelete = ReferenceOption.CASCADE).index()
     val side = enumerationByName("side", 1, TeamSide::class)
     val position = integer("position")
     val name = varchar("name", 60)
+    val profileId = varchar("profile_id", 128).nullable()
+    val isCaptain = bool("is_captain")
+    val isKeeper = bool("is_keeper")
     override val primaryKey = PrimaryKey(id)
 }
 

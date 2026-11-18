@@ -51,6 +51,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.navigation3.ui)
+            implementation(libs.qrose)
             implementation(libs.androidx.lifecycle.viewmodelNavigation3)
 
             implementation(project.dependencies.platform(libs.koin.bom))

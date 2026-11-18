@@ -34,8 +34,12 @@ import com.harsh.desicrics.ui.signin.SignInScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * The whole app. [link] is the path of a link it was opened with ("/join/{code}", "/m/{matchId}"); it waits
+ * until someone is signed in, then [onLinkHandled] clears it.
+ */
 @Composable
-fun App() {
+fun App(link: String? = null, onLinkHandled: () -> Unit = {}) {
     DesiTheme {
         Surface(Modifier.fillMaxSize(), color = DesiTheme.colors.bg) {
             val session = koinViewModel<SessionViewModel>()
@@ -45,7 +49,7 @@ fun App() {
                 SessionState.Loading -> FullScreenLoading()
                 SessionState.SignedOut -> SignInScreen()
                 is SessionState.NeedsProfile -> EditProfileScreen(isOnboarding = true, onDone = {}, onBack = null)
-                is SessionState.SignedIn -> AppNavigation(current.profile, onSignOut = session::signOut)
+                is SessionState.SignedIn -> AppNavigation(current.profile, onSignOut = session::signOut, link = link, onLinkHandled = onLinkHandled)
                 SessionState.Error -> SessionErrorScreen(onRetry = session::retry, onSignOut = session::signOut)
             }
         }

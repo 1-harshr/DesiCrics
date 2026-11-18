@@ -76,21 +76,21 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 **Goal:** matches are played between saved teams of real users, so stats attach to people.
 
 ### Level 1 · Playable
-- ⬜ Create team (name, logo, city)
-- ⬜ Add members by search or phone number
-- ⬜ Squad selection with captain and keeper
-- ⬜ Placeholder players who can claim their profile later
+- 🟡 Create team (name, city); team logos wait for photo storage, like profile photos
+- ✅ Add members by search or phone number
+- ✅ Squad selection with captain and keeper
+- ✅ Placeholder players who can claim their profile later, by code or verified phone ([ADR 0002](decisions/0002-player-identity.md))
 
 ### Level 2 · Complete
-- ⬜ Team admins; leave or remove a member
-- ⬜ QR code to join a team
-- ⬜ Profile tabs: Matches / Teams
-- ⬜ Settings, support form, account deletion
+- ✅ Team admins; leave or remove a member
+- ✅ QR code to join a team
+- ✅ Profile tabs: Matches / Teams
+- ✅ Settings, support form (no attachments yet), account deletion
 
 ### Level 3 · Delight
-- ⬜ WhatsApp invite links (Android App Links)
-- ⬜ Reuse last match's squad
-- ⬜ Team head-to-head record
+- 🟡 WhatsApp invite links: shared through the share sheet and opened by the app; verified App Links need the deployed domain's assetlinks.json
+- ✅ Reuse last match's squad
+- ✅ Team head-to-head record
 
 **Exit:** a club creates its team once and starts every following match in under 60 seconds.
 

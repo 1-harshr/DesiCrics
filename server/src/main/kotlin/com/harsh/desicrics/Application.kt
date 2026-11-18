@@ -5,9 +5,15 @@ import com.harsh.desicrics.auth.FirebaseTokenVerifier
 import com.harsh.desicrics.auth.TokenVerifier
 import com.harsh.desicrics.db.DatabaseFactory
 import com.harsh.desicrics.service.ApiException
+import com.harsh.desicrics.service.AccountService
 import com.harsh.desicrics.service.MatchService
+import com.harsh.desicrics.service.PlayerService
+import com.harsh.desicrics.service.TeamService
 import com.harsh.desicrics.service.ProfileService
 import com.harsh.desicrics.store.ExposedMatchStore
+import com.harsh.desicrics.store.ExposedPlayerStore
+import com.harsh.desicrics.store.ExposedSupportStore
+import com.harsh.desicrics.store.ExposedTeamStore
 import com.harsh.desicrics.store.ExposedUserStore
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
@@ -44,8 +50,14 @@ fun Application.module(
     monitor.subscribe(ApplicationStopped) { db.close() }
     val database = db.database
     val users = ExposedUserStore(database)
-    val profiles = ProfileService(users)
-    val matches = MatchService(ExposedMatchStore(database), users)
+    val players = ExposedPlayerStore(database)
+    val teamStore = ExposedTeamStore(database)
+    val matchStore = ExposedMatchStore(database)
+    val profiles = ProfileService(users, players)
+    val matches = MatchService(matchStore, users, players, teamStore)
+    val teams = TeamService(teamStore, players, matchStore, users)
+    val playerService = PlayerService(players, users)
+    val account = AccountService(players, teamStore, ExposedSupportStore(database))
     launch { matches.backfillInningsScores() }
 
     install(CallLogging)
@@ -69,9 +81,13 @@ fun Application.module(
 
     routing {
         get("/") { call.respondText("DesiCrics API") }
+        publicRoutes()
         authenticate("firebase") {
             profileRoutes(profiles)
             matchRoutes(matches)
+            teamRoutes(teams)
+            playerRoutes(playerService)
+            accountRoutes(account, matches)
         }
     }
 }

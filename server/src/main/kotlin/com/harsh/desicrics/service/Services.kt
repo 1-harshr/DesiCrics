@@ -5,6 +5,7 @@ import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.HandoverCode
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.MatchSetupError
+import com.harsh.desicrics.api.SquadRequest
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.model.Delivery
@@ -18,6 +19,8 @@ import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.scoring.rejectionReason
 import com.harsh.desicrics.scoring.withScore
 import com.harsh.desicrics.store.MatchStore
+import com.harsh.desicrics.store.PlayerStore
+import com.harsh.desicrics.store.TeamStore
 import com.harsh.desicrics.store.UserStore
 import io.ktor.http.HttpStatusCode
 import java.util.UUID
@@ -27,6 +30,7 @@ class ApiException(val status: HttpStatusCode, override val message: String) : E
 
 class ProfileService(
     private val users: UserStore,
+    private val players: PlayerStore,
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     suspend fun get(user: FirebasePrincipal): UserProfile? = users.get(user.uid)
@@ -48,6 +52,7 @@ class ProfileService(
             createdAt = existing?.createdAt ?: clock(),
         )
         users.upsert(profile)
+        players.syncUser(profile)
         return profile
     }
 }
@@ -59,9 +64,14 @@ class ProfileService(
 class MatchService(
     private val matches: MatchStore,
     private val users: UserStore,
+    private val players: PlayerStore,
+    private val teams: TeamStore,
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     suspend fun recent(limit: Int): List<Match> = matches.recent(limit.coerceIn(1, 100))
+
+    /** Matches the caller played in, scored or created, newest first. */
+    suspend fun mine(user: FirebasePrincipal): List<Match> = matches.forPlayer(user.uid, limit = 100)
 
     suspend fun details(matchId: String): MatchDetails =
         matches.details(matchId) ?: throw ApiException(HttpStatusCode.NotFound, "Match not found")
@@ -71,13 +81,29 @@ class MatchService(
         if (users.get(user.uid) == null) {
             throw ApiException(HttpStatusCode.Conflict, "Set up your profile before starting a match")
         }
-        fun team(name: String, players: List<String>) = Team(name.trim(), players.map { Player(newId(), it.trim()) })
+        val profileIds = (request.teamA.players + request.teamB.players).mapNotNull { it.profileId }
+        if (players.summaries(profileIds).size != profileIds.toSet().size) {
+            throw ApiException(HttpStatusCode.BadRequest, "One of those players doesn't exist")
+        }
+        for (teamId in listOfNotNull(request.teamA.teamId, request.teamB.teamId)) {
+            if (teams.get(teamId) == null) throw ApiException(HttpStatusCode.BadRequest, "One of those teams doesn't exist")
+        }
+        fun team(squad: SquadRequest): Team {
+            val roster = squad.players.map { Player(newId(), it.name.trim(), it.profileId) }
+            return Team(
+                name = squad.name.trim(),
+                players = roster,
+                teamId = squad.teamId,
+                captainId = squad.captain?.let { roster[it].id },
+                keeperId = squad.keeper?.let { roster[it].id },
+            )
+        }
         val match = Match(
             id = newId(),
             createdBy = user.uid,
             createdAt = clock(),
-            teamA = team(request.teamAName, request.teamAPlayers),
-            teamB = team(request.teamBName, request.teamBPlayers),
+            teamA = team(request.teamA),
+            teamB = team(request.teamB),
             oversPerInnings = request.oversPerInnings,
             tossWinner = request.tossWinner,
             tossDecision = request.tossDecision,

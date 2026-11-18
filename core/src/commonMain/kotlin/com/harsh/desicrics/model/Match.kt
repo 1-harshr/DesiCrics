@@ -29,17 +29,26 @@ data class Match(
     fun team(side: TeamSide): Team = if (side == TeamSide.A) teamA else teamB
 }
 
+/** One side of a match. [teamId] links it to a [SavedTeam] when the match was started from one. */
 @Serializable
 data class Team(
     val name: String,
     val players: List<Player>,
+    val teamId: String? = null,
+    /** Match player IDs, not profile IDs. */
+    val captainId: String? = null,
+    val keeperId: String? = null,
 )
 
-/** A player in a match. Not linked to a [UserProfile] yet; that comes with "add player by phone number". */
+/**
+ * A player in one match. [id] is only for this match; [profileId] links them to a user or placeholder
+ * (see [PlayerSummary]) so their stats follow them. Null for a guest typed in by name.
+ */
 @Serializable
 data class Player(
     val id: String,
     val name: String,
+    val profileId: String? = null,
 )
 
 @Serializable

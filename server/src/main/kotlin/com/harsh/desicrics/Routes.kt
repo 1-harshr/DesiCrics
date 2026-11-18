@@ -70,7 +70,7 @@ fun Route.matchRoutes(matches: MatchService) {
     }
 }
 
-private val RoutingCall.user: FirebasePrincipal
+internal val RoutingCall.user: FirebasePrincipal
     get() = principal<FirebasePrincipal>() ?: throw ApiException(HttpStatusCode.Unauthorized, "Sign in required")
 
 private val RoutingCall.matchId: String

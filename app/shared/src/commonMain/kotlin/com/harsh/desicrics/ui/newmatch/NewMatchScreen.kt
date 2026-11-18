@@ -39,12 +39,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.MatchSetupError
+import com.harsh.desicrics.api.SquadPlayer
 import com.harsh.desicrics.designsystem.component.BrandHeader
 import com.harsh.desicrics.designsystem.component.BrandStatusBar
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.component.DesiTextField
 import com.harsh.desicrics.designsystem.component.GhostButton
+import com.harsh.desicrics.designsystem.component.TonalButton
 import com.harsh.desicrics.designsystem.component.NumberStepper
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.RemovableChip
@@ -69,6 +71,7 @@ fun NewMatchScreen(
     viewModel: NewMatchViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var pickingFor by rememberSaveable { mutableStateOf<TeamSide?>(null) }
     LightStatusBarIcons()
     NewMatchContent(
         state = state,
@@ -79,8 +82,41 @@ fun NewMatchScreen(
             onUpdate = viewModel::update,
             onStart = { viewModel.create(onCreated) },
             onBack = onBack,
+            onUseTeam = { side ->
+                viewModel.loadMyTeams()
+                pickingFor = side
+            },
+            onClearTeam = viewModel::clearTeam,
         ),
     )
+    pickingFor?.let { side ->
+        TeamPickerSheet(
+            teams = state.myTeams,
+            onPick = { team ->
+                pickingFor = null
+                viewModel.pickTeam(side, team.id)
+            },
+            onDismiss = { pickingFor = null },
+        )
+    }
+    state.squadTeam?.let { team ->
+        val side = state.squadSide ?: return@let
+        val current = state.side(side)
+        // The squad already picked for this team, or else its last match's, or else everyone.
+        val initial = when {
+            current.teamId == team.id -> current.players.mapNotNull { it.profileId }
+            team.lastSquad.isNotEmpty() -> team.lastSquad
+            else -> team.members.map { it.player.profileId }
+        }
+        SquadSheet(
+            team = team,
+            initial = initial.toSet(),
+            initialCaptain = current.captain?.let { current.players.getOrNull(it)?.profileId }.takeIf { current.teamId == team.id },
+            initialKeeper = current.keeper?.let { current.players.getOrNull(it)?.profileId }.takeIf { current.teamId == team.id },
+            onDone = viewModel::useSquad,
+            onDismiss = viewModel::closeSquad,
+        )
+    }
 }
 
 /** Everything the new match form can ask for, kept together so the content signature stays short. */
@@ -91,6 +127,8 @@ class NewMatchActions(
     val onUpdate: ((NewMatchFormState) -> NewMatchFormState) -> Unit,
     val onStart: () -> Unit,
     val onBack: () -> Unit,
+    val onUseTeam: (TeamSide) -> Unit = {},
+    val onClearTeam: (TeamSide) -> Unit = {},
 )
 
 /** Overs most local matches use, offered as one-tap picks next to the stepper. */
@@ -142,7 +180,8 @@ fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions) {
 @Composable
 private fun TeamCard(side: TeamSide, state: NewMatchFormState, actions: NewMatchActions) {
     val colors = DesiTheme.colors
-    val players = state.players(side)
+    val form = state.side(side)
+    val players = form.players
     val invalid = (state.error as? NewMatchError.Invalid)?.error
     var newPlayer by rememberSaveable(side) { mutableStateOf("") }
     val add = {
@@ -162,10 +201,25 @@ private fun TeamCard(side: TeamSide, state: NewMatchFormState, actions: NewMatch
             error = invalid?.takeIf { state.name(side).isBlank() && it == MatchSetupError.TEAM_NAME_MISSING }?.let { stringResource(it.label) },
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
         )
+        if (form.teamId == null) {
+            TonalButton(stringResource(Res.string.new_match_use_team), onClick = { actions.onUseTeam(side) }, modifier = Modifier.fillMaxWidth())
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+                TonalButton(stringResource(Res.string.new_match_squad_change), onClick = { actions.onUseTeam(side) }, modifier = Modifier.weight(1f))
+                GhostButton(stringResource(Res.string.new_match_squad_clear), onClick = { actions.onClearTeam(side) }, modifier = Modifier.weight(1f))
+            }
+        }
         if (players.isNotEmpty()) {
+            val captain = stringResource(Res.string.new_match_captain_short)
+            val keeper = stringResource(Res.string.new_match_keeper_short)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2), verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
-                players.forEachIndexed { index, name ->
-                    RemovableChip(name, stringResource(Res.string.new_match_remove_player, name), onRemove = { actions.onRemovePlayer(side, index) })
+                players.forEachIndexed { index, player ->
+                    val tags = listOfNotNull(captain.takeIf { index == form.captain }, keeper.takeIf { index == form.keeper })
+                    RemovableChip(
+                        (listOf(player.name) + tags).joinToString(" "),
+                        stringResource(Res.string.new_match_remove_player, player.name),
+                        onRemove = { actions.onRemovePlayer(side, index) },
+                    )
                 }
             }
         }
@@ -306,6 +360,8 @@ private val MatchSetupError.label: StringResource
         MatchSetupError.PLAYER_NAME_INVALID -> Res.string.new_match_error_player_name_invalid
         MatchSetupError.OVERS_OUT_OF_RANGE -> Res.string.new_match_error_overs
         MatchSetupError.RULES_INVALID -> Res.string.new_match_error_rules
+        MatchSetupError.PLAYER_TWICE -> Res.string.new_match_error_player_twice
+        MatchSetupError.CAPTAIN_INVALID -> Res.string.new_match_error_captain
     }
 
 // Previews: sample team and player names only; all labels come from string resources.
@@ -313,10 +369,8 @@ private val MatchSetupError.label: StringResource
 private val PreviewActions = NewMatchActions({ _, _ -> }, { _, _ -> }, { _, _ -> }, {}, {}, {})
 
 private val PreviewFilled = NewMatchFormState(
-    teamAName = "Andheri Strikers",
-    teamAPlayers = listOf("Rohan", "Aarav", "Kabir", "Ishaan"),
-    teamBName = "Powai XI",
-    teamBPlayers = listOf("Dev"),
+    teamA = SideForm("Andheri Strikers", listOf("Rohan", "Aarav", "Kabir", "Ishaan").map { SquadPlayer(it, "id-$it") }, teamId = "t1", captain = 0, keeper = 2),
+    teamB = SideForm("Powai XI", listOf(SquadPlayer("Dev"))),
     overs = 12,
     tossWinner = TeamSide.B,
     tossDecision = TossDecision.BOWL,

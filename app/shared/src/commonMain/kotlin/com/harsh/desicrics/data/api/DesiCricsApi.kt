@@ -1,6 +1,16 @@
 package com.harsh.desicrics.data.api
 
+import com.harsh.desicrics.api.AddMemberRequest
 import com.harsh.desicrics.api.AddPlayerRequest
+import com.harsh.desicrics.api.ClaimRequest
+import com.harsh.desicrics.api.SetRoleRequest
+import com.harsh.desicrics.api.SupportRequest
+import com.harsh.desicrics.api.TeamRequest
+import com.harsh.desicrics.model.HeadToHead
+import com.harsh.desicrics.model.PlayerSummary
+import com.harsh.desicrics.model.SavedTeam
+import com.harsh.desicrics.model.TeamRole
+import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.api.ApiError
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.HandoverCode
@@ -26,8 +36,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 
-/** Where the DesiCrics server is. Android emulators reach the host machine at 10.0.2.2. */
-data class ApiConfig(val baseUrl: String)
+/**
+ * Where the DesiCrics server is. Android emulators reach the host machine at 10.0.2.2. [publicUrl] is the
+ * address people outside the app open (join links, public scorecards); it's the same server.
+ */
+data class ApiConfig(val baseUrl: String, val publicUrl: String = baseUrl)
 
 /** Supplies the signed-in user's Firebase ID token; implemented by [com.harsh.desicrics.data.AuthRepository]. */
 fun interface IdTokenProvider {
@@ -83,6 +96,50 @@ class DesiCricsApi(
         call { post("$baseUrl/handover/$code", it) }.body()
     } catch (e: ApiException) {
         if (e.status == HttpStatusCode.NotFound) null else throw e
+    }
+
+    // Teams, players and the account.
+
+    suspend fun myTeams(): List<TeamSummary> = call { get("$baseUrl/teams/mine", it) }.body()
+
+    suspend fun createTeam(request: TeamRequest): SavedTeam = call { post("$baseUrl/teams") { it(); json(request) } }.body()
+
+    suspend fun team(teamId: String): SavedTeam = call { get("$baseUrl/teams/$teamId", it) }.body()
+
+    suspend fun updateTeam(teamId: String, request: TeamRequest): SavedTeam =
+        call { put("$baseUrl/teams/$teamId") { it(); json(request) } }.body()
+
+    suspend fun addMember(teamId: String, request: AddMemberRequest): SavedTeam =
+        call { post("$baseUrl/teams/$teamId/members") { it(); json(request) } }.body()
+
+    suspend fun setRole(teamId: String, profileId: String, role: TeamRole): SavedTeam =
+        call { put("$baseUrl/teams/$teamId/members/$profileId") { it(); json(SetRoleRequest(role)) } }.body()
+
+    suspend fun removeMember(teamId: String, profileId: String): SavedTeam =
+        call { delete("$baseUrl/teams/$teamId/members/$profileId", it) }.body()
+
+    suspend fun newJoinCode(teamId: String): SavedTeam = call { post("$baseUrl/teams/$teamId/join-code", it) }.body()
+
+    suspend fun joinTeam(code: String): SavedTeam = call { post("$baseUrl/teams/join/$code", it) }.body()
+
+    suspend fun headToHead(teamId: String, otherId: String): HeadToHead =
+        call { get("$baseUrl/teams/$teamId/head-to-head/$otherId", it) }.body()
+
+    suspend fun searchPlayers(query: String): List<PlayerSummary> =
+        call { get("$baseUrl/players/search") { it(); parameter("q", query) } }.body()
+
+    suspend fun claimablePlayers(): List<PlayerSummary> = call { get("$baseUrl/players/claimable", it) }.body()
+
+    suspend fun claimPlayer(request: ClaimRequest): PlayerSummary = call { post("$baseUrl/players/claim") { it(); json(request) } }.body()
+
+    suspend fun myMatches(): List<Match> = call { get("$baseUrl/me/matches", it) }.body()
+
+    suspend fun deleteAccount() {
+        call { delete("$baseUrl/me", it) }
+    }
+
+    suspend fun contactSupport(request: SupportRequest) {
+        call { post("$baseUrl/support") { it(); json(request) } }
     }
 
     /** Removes the latest ball or event. */

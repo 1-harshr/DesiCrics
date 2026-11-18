@@ -4,9 +4,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.MatchSetupError
+import com.harsh.desicrics.api.SquadPlayer
+import com.harsh.desicrics.api.SquadRequest
 import com.harsh.desicrics.data.MatchRepository
+import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.model.MatchRules
+import com.harsh.desicrics.model.PlayerSummary
+import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamSide
+import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.model.TossDecision
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,55 +25,132 @@ sealed interface NewMatchError {
     data object CreateFailed : NewMatchError
 }
 
+/** One side of the new match: typed-in names, or a squad picked from a saved team. */
+data class SideForm(
+    val name: String = "",
+    val players: List<SquadPlayer> = emptyList(),
+    val teamId: String? = null,
+    /** Indexes into [players]. */
+    val captain: Int? = null,
+    val keeper: Int? = null,
+) {
+    fun toRequest() = SquadRequest(name.trim(), players, teamId, captain, keeper)
+
+    /** Drops the player at [index], keeping the captain and keeper pointing at the same people. */
+    fun without(index: Int): SideForm {
+        fun shift(i: Int?) = when {
+            i == null || i == index -> null
+            i > index -> i - 1
+            else -> i
+        }
+        return copy(players = players.filterIndexed { i, _ -> i != index }, captain = shift(captain), keeper = shift(keeper))
+    }
+}
+
 data class NewMatchFormState(
-    val teamAName: String = "",
-    val teamAPlayers: List<String> = emptyList(),
-    val teamBName: String = "",
-    val teamBPlayers: List<String> = emptyList(),
+    val teamA: SideForm = SideForm(),
+    val teamB: SideForm = SideForm(),
     val overs: Int = 10,
     val tossWinner: TeamSide = TeamSide.A,
     val tossDecision: TossDecision = TossDecision.BAT,
     val rules: MatchRules = MatchRules(),
     val saving: Boolean = false,
     val error: NewMatchError? = null,
+    /** The caller's saved teams, loaded when they first open the team picker. */
+    val myTeams: List<TeamSummary>? = null,
+    /** The saved team whose squad is being picked, and for which side. */
+    val squadTeam: SavedTeam? = null,
+    val squadSide: TeamSide? = null,
 ) {
-    fun name(side: TeamSide) = if (side == TeamSide.A) teamAName else teamBName
-    fun players(side: TeamSide) = if (side == TeamSide.A) teamAPlayers else teamBPlayers
+    fun side(side: TeamSide) = if (side == TeamSide.A) teamA else teamB
+    fun name(side: TeamSide) = side(side).name
+    fun players(side: TeamSide) = side(side).players
 }
 
-class NewMatchViewModel(private val matchRepository: MatchRepository) : ViewModel() {
+class NewMatchViewModel(
+    private val matchRepository: MatchRepository,
+    private val teamRepository: TeamRepository,
+) : ViewModel() {
 
     private val _state = MutableStateFlow(NewMatchFormState())
     val state: StateFlow<NewMatchFormState> = _state
 
     fun update(transform: (NewMatchFormState) -> NewMatchFormState) = _state.update { transform(it).copy(error = null) }
 
-    fun setTeamName(side: TeamSide, name: String) = update {
-        if (side == TeamSide.A) it.copy(teamAName = name) else it.copy(teamBName = name)
+    private fun updateSide(side: TeamSide, transform: (SideForm) -> SideForm) = update {
+        if (side == TeamSide.A) it.copy(teamA = transform(it.teamA)) else it.copy(teamB = transform(it.teamB))
     }
 
-    /** Adds a player; blank names and repeats within the team are ignored. */
+    fun setTeamName(side: TeamSide, name: String) = updateSide(side) { it.copy(name = name) }
+
+    /** Adds a guest by name; blank names and repeats within the team are ignored. */
     fun addPlayer(side: TeamSide, name: String) {
         val trimmed = name.trim()
         val players = _state.value.players(side)
         if (trimmed.isEmpty() || players.size >= CreateMatchRequest.MAX_PLAYERS) return
-        if (players.any { it.equals(trimmed, ignoreCase = true) }) return
-        setPlayers(side, players + trimmed)
+        if (players.any { it.name.equals(trimmed, ignoreCase = true) }) return
+        updateSide(side) { it.copy(players = it.players + SquadPlayer(trimmed)) }
     }
 
-    fun removePlayer(side: TeamSide, index: Int) = setPlayers(side, _state.value.players(side).filterIndexed { i, _ -> i != index })
+    fun removePlayer(side: TeamSide, index: Int) = updateSide(side) { it.without(index) }
 
-    private fun setPlayers(side: TeamSide, players: List<String>) = update {
-        if (side == TeamSide.A) it.copy(teamAPlayers = players) else it.copy(teamBPlayers = players)
+    /** Loads the caller's teams for the picker, once. */
+    fun loadMyTeams() {
+        if (_state.value.myTeams != null) return
+        viewModelScope.launch {
+            val teams = try {
+                teamRepository.myTeams()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                emptyList()
+            }
+            _state.update { it.copy(myTeams = teams) }
+        }
     }
+
+    /** Opens the squad picker for [teamId] on [side]. */
+    fun pickTeam(side: TeamSide, teamId: String) {
+        viewModelScope.launch {
+            val team = try {
+                teamRepository.team(teamId)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(error = NewMatchError.CreateFailed) }
+                return@launch
+            }
+            _state.update { it.copy(squadTeam = team, squadSide = side) }
+        }
+    }
+
+    fun closeSquad() = _state.update { it.copy(squadTeam = null, squadSide = null) }
+
+    /** Uses the picked members as [side]'s squad, under the saved team's name. */
+    fun useSquad(players: List<PlayerSummary>, captainId: String?, keeperId: String?) {
+        val form = _state.value
+        val team = form.squadTeam ?: return
+        val side = form.squadSide ?: return
+        updateSide(side) {
+            SideForm(
+                name = team.name,
+                players = players.map { SquadPlayer(it.name, it.profileId) },
+                teamId = team.id,
+                captain = players.indexOfFirst { it.profileId == captainId }.takeIf { it >= 0 },
+                keeper = players.indexOfFirst { it.profileId == keeperId }.takeIf { it >= 0 },
+            )
+        }
+        closeSquad()
+    }
+
+    /** Back to typed-in names, keeping the players as guests. */
+    fun clearTeam(side: TeamSide) = updateSide(side) { SideForm(name = it.name, players = it.players.map { p -> SquadPlayer(p.name) }) }
 
     fun create(onCreated: (matchId: String) -> Unit) {
         val form = _state.value
         val request = CreateMatchRequest(
-            teamAName = form.teamAName.trim(),
-            teamAPlayers = form.teamAPlayers,
-            teamBName = form.teamBName.trim(),
-            teamBPlayers = form.teamBPlayers,
+            teamA = form.teamA.toRequest(),
+            teamB = form.teamB.toRequest(),
             oversPerInnings = form.overs,
             tossWinner = form.tossWinner,
             tossDecision = form.tossDecision,

@@ -78,12 +78,13 @@ fun HomeScreen(
     onNewMatch: () -> Unit,
     onOpenMatch: (matchId: String) -> Unit,
     onProfile: () -> Unit,
+    onTeams: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val takeOver by viewModel.takeOver.collectAsStateWithLifecycle()
     var takingOver by rememberSaveable { mutableStateOf(false) }
-    HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile, onTakeOver = { takingOver = true })
+    HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile, onTakeOver = { takingOver = true }, onTeams = onTeams)
     if (takingOver) {
         TakeOverSheet(
             state = takeOver,
@@ -137,6 +138,7 @@ fun HomeContent(
     onOpenMatch: (matchId: String) -> Unit,
     onProfile: () -> Unit,
     onTakeOver: () -> Unit = {},
+    onTeams: () -> Unit = {},
 ) {
     val space = DesiTheme.space
     val live = state.matches.filter { it.status != MatchStatus.COMPLETED }
@@ -150,7 +152,10 @@ fun HomeContent(
         item { Greeting(playerName, onProfile) }
         item { StartMatchCard(onNewMatch) }
         item {
-            GhostButton(stringResource(Res.string.home_take_over), onClick = onTakeOver, modifier = Modifier.fillMaxWidth().padding(bottom = space.s4))
+            Row(Modifier.padding(bottom = space.s4), horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                GhostButton(stringResource(Res.string.teams_title), onClick = onTeams, modifier = Modifier.weight(1f))
+                GhostButton(stringResource(Res.string.home_take_over), onClick = onTakeOver, modifier = Modifier.weight(1f))
+            }
         }
         if (state.loadFailed) {
             item { Text(stringResource(Res.string.home_error), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
@@ -267,7 +272,7 @@ private fun EmptyMatches() {
 
 /** A match in the feed: each team's score in batting order, with the chase, toss or result underneath. */
 @Composable
-private fun HomeMatchCard(match: Match, isMine: Boolean, onClick: () -> Unit) {
+internal fun HomeMatchCard(match: Match, isMine: Boolean, onClick: () -> Unit) {
     val battingOrder = listOf(match.battingFirst, match.battingFirst.other)
     val current = match.innings.lastOrNull()?.battingSide
     val teams = battingOrder.map { side ->

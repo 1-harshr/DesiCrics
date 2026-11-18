@@ -5,6 +5,7 @@ import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseUser
 import dev.gitlive.firebase.auth.PhoneAuthProvider
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -42,6 +43,19 @@ class AuthRepository(private val auth: FirebaseAuth) : IdTokenProvider {
     override suspend fun idToken(forceRefresh: Boolean): String? = auth.currentUser?.getIdToken(forceRefresh)
 
     suspend fun signOut() = auth.signOut()
+
+    /**
+     * Deletes the Firebase account after the server has cleared the user's data. Firebase can refuse if the
+     * sign-in is old; the data is already gone by then, so the caller just signs out instead.
+     */
+    suspend fun deleteFirebaseUser(): Boolean = try {
+        auth.currentUser?.delete()
+        true
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        false
+    }
 
     private fun FirebaseUser.toAuthUser() = AuthUser(
         uid = uid,

@@ -57,6 +57,7 @@ app/designsystem/     :app:designsystem: Crease tokens, fonts, components (see d
 ## Core entities
 
 - `User` (profile, role, batting style, bowling style)
+- `Player` (profile ID: a user's UID, or a claimable placeholder; see [ADR 0002](decisions/0002-player-identity.md))
 - `Team`, `TeamMember` (role: admin / member)
 - `Match` (type, overs, ball type, pitch type, venue, start time, status)
 - `MatchSquad` (player, isCaptain, isKeeper, status)

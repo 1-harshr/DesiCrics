@@ -55,28 +55,48 @@ enum class ProfileError(val message: String) {
     CITY_TOO_LONG("That city name is too long"),
 }
 
+/** One side of a new match: a saved team's picked squad, or a name and typed-in players. */
+@Serializable
+data class SquadRequest(
+    val name: String,
+    val players: List<SquadPlayer>,
+    val teamId: String? = null,
+    /** Indexes into [players]. */
+    val captain: Int? = null,
+    val keeper: Int? = null,
+)
+
+/** A player picked for a match: a member of a saved team ([profileId]), or a guest known only by name. */
+@Serializable
+data class SquadPlayer(val name: String, val profileId: String? = null)
+
 @Serializable
 data class CreateMatchRequest(
-    val teamAName: String,
-    val teamAPlayers: List<String>,
-    val teamBName: String,
-    val teamBPlayers: List<String>,
+    val teamA: SquadRequest,
+    val teamB: SquadRequest,
     val oversPerInnings: Int,
     val tossWinner: TeamSide,
     val tossDecision: TossDecision,
     val rules: MatchRules = MatchRules(),
 ) {
     /** Checked on the device for instant feedback and again on the server. */
-    fun validate(): MatchSetupError? = when {
-        teamAName.isBlank() || teamBName.isBlank() -> MatchSetupError.TEAM_NAME_MISSING
-        teamAName.trim().equals(teamBName.trim(), ignoreCase = true) -> MatchSetupError.SAME_TEAM_NAMES
-        teamAName.length > MAX_NAME || teamBName.length > MAX_NAME -> MatchSetupError.TEAM_NAME_TOO_LONG
-        teamAPlayers.size < MIN_PLAYERS || teamBPlayers.size < MIN_PLAYERS -> MatchSetupError.TOO_FEW_PLAYERS
-        teamAPlayers.size > MAX_PLAYERS || teamBPlayers.size > MAX_PLAYERS -> MatchSetupError.TOO_MANY_PLAYERS
-        (teamAPlayers + teamBPlayers).any { it.isBlank() || it.length > MAX_NAME } -> MatchSetupError.PLAYER_NAME_INVALID
-        oversPerInnings !in OVERS -> MatchSetupError.OVERS_OUT_OF_RANGE
-        !rules.isValid() -> MatchSetupError.RULES_INVALID
-        else -> null
+    fun validate(): MatchSetupError? {
+        val sides = listOf(teamA, teamB)
+        val profiles = sides.flatMap { side -> side.players.mapNotNull { it.profileId } }
+        return when {
+            sides.any { it.name.isBlank() } -> MatchSetupError.TEAM_NAME_MISSING
+            teamA.name.trim().equals(teamB.name.trim(), ignoreCase = true) -> MatchSetupError.SAME_TEAM_NAMES
+            sides.any { it.name.length > MAX_NAME } -> MatchSetupError.TEAM_NAME_TOO_LONG
+            sides.any { it.players.size < MIN_PLAYERS } -> MatchSetupError.TOO_FEW_PLAYERS
+            sides.any { it.players.size > MAX_PLAYERS } -> MatchSetupError.TOO_MANY_PLAYERS
+            sides.any { side -> side.players.any { it.name.isBlank() || it.name.length > MAX_NAME } } -> MatchSetupError.PLAYER_NAME_INVALID
+            // Nobody can play for both sides, or twice for one.
+            profiles.size != profiles.toSet().size -> MatchSetupError.PLAYER_TWICE
+            sides.any { side -> listOfNotNull(side.captain, side.keeper).any { it !in side.players.indices } } -> MatchSetupError.CAPTAIN_INVALID
+            oversPerInnings !in OVERS -> MatchSetupError.OVERS_OUT_OF_RANGE
+            !rules.isValid() -> MatchSetupError.RULES_INVALID
+            else -> null
+        }
     }
 
     /** English message for API error responses; the app shows its own localised text for [validate]. */
@@ -99,6 +119,8 @@ enum class MatchSetupError(val message: String) {
     PLAYER_NAME_INVALID("Player names must be 1–60 characters"),
     OVERS_OUT_OF_RANGE("Overs must be between 1 and 50"),
     RULES_INVALID("Some of the match rules are out of range"),
+    PLAYER_TWICE("A player can only be picked once"),
+    CAPTAIN_INVALID("The captain and keeper must be in the squad"),
 }
 
 /** A match with every ball bowled and every event so far, which is everything a scorecard needs. */

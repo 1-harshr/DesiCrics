@@ -17,7 +17,7 @@ class DesiCricsApp : Application() {
             modules(
                 module {
                     single { GoogleSignInConfig(webClientId = googleWebClientId()) }
-                    single { ApiConfig(baseUrl = BuildConfig.API_BASE_URL) }
+                    single { ApiConfig(baseUrl = BuildConfig.API_BASE_URL, publicUrl = BuildConfig.PUBLIC_URL) }
                 },
             )
         }
