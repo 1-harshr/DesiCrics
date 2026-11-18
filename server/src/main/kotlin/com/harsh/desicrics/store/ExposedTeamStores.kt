@@ -2,6 +2,7 @@ package com.harsh.desicrics.store
 
 import com.harsh.desicrics.api.SupportRequest
 import com.harsh.desicrics.db.MatchPlayersTable
+import com.harsh.desicrics.db.PlayerMatchLinesTable
 import com.harsh.desicrics.db.PlayersTable
 import com.harsh.desicrics.db.SupportRequestsTable
 import com.harsh.desicrics.db.TeamMembersTable
@@ -133,6 +134,8 @@ class ExposedPlayerStore(private val db: Database) : PlayerStore {
             }
         }
         MatchPlayersTable.update({ MatchPlayersTable.profileId eq placeholderId }) { it[profileId] = userId }
+        // Their stats come too. A user and their own placeholder in one match can't happen: squads pick each person once.
+        PlayerMatchLinesTable.update({ PlayerMatchLinesTable.profileId eq placeholderId }) { it[profileId] = userId }
         PlayersTable.deleteWhere { PlayersTable.id eq placeholder[PlayersTable.id] }
         true
     }

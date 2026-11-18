@@ -43,13 +43,14 @@ import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.UserProfile
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.home.HomeMatchCard
+import com.harsh.desicrics.ui.stats.CareerSection
 import com.harsh.desicrics.ui.teams.TeamRow
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-private enum class ProfileTab { ABOUT, MATCHES, TEAMS }
+private enum class ProfileTab { ABOUT, STATS, MATCHES, TEAMS }
 
 private enum class SettingsSheet { CLAIM, SUPPORT, DELETE }
 
@@ -61,6 +62,7 @@ fun ProfileScreen(
     onBack: () -> Unit,
     onOpenMatch: (String) -> Unit = {},
     onOpenTeam: (String) -> Unit = {},
+    onCompare: () -> Unit = {},
     viewModel: ProfileViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -79,6 +81,7 @@ fun ProfileScreen(
         onOpenTeam = onOpenTeam,
         onClaimSuggested = viewModel::claim,
         onSettings = { sheet = it },
+        stats = { CareerSection(profile.uid, onCompare = onCompare) },
     )
     when (sheet) {
         null -> Unit
@@ -99,6 +102,7 @@ private fun ProfileContent(
     onOpenTeam: (String) -> Unit,
     onClaimSuggested: (String) -> Unit,
     onSettings: (SettingsSheet) -> Unit,
+    stats: @Composable () -> Unit = {},
 ) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
@@ -133,6 +137,7 @@ private fun ProfileContent(
             )
             when (tab) {
                 ProfileTab.ABOUT -> AboutTab(profile, onEdit, onSignOut, onSettings)
+                ProfileTab.STATS -> stats()
                 ProfileTab.MATCHES -> ListTab(state.matches, Res.string.profile_no_matches, state.loadFailed) { matches ->
                     matches.forEach { HomeMatchCard(it, isMine = it.scorerUid == profile.uid, onClick = { onOpenMatch(it.id) }) }
                 }
@@ -269,6 +274,7 @@ private fun ProfileRow(label: StringResource, value: String) {
 private val ProfileTab.label: StringResource
     get() = when (this) {
         ProfileTab.ABOUT -> Res.string.profile_tab_about
+        ProfileTab.STATS -> Res.string.profile_tab_stats
         ProfileTab.MATCHES -> Res.string.profile_tab_matches
         ProfileTab.TEAMS -> Res.string.profile_tab_teams
     }

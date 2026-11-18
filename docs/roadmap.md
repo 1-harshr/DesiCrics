@@ -136,7 +136,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ Tournament key stats (most runs, wickets, sixes)
 
 ### Level 3 · Delight
-- ⬜ Player of the match / tournament
+- ✅ Player of the match / tournament (from MVP points)
 - ✅ Public tournament page link (`/t/{id}`)
 - ✅ Team registration: team admins enter while registration is open; organisers confirm or decline
 - ✅ Fixture reschedule notifications
@@ -150,22 +150,22 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 **Goal:** players open the app between matches to check and compare their numbers.
 
 ### Level 1 · Playable
-- ⬜ Career batting and bowling stats projection
-- ⬜ Stats tab on the profile
+- ✅ Career batting and bowling stats projection (`player_match_lines`, rewritten whenever a match completes or is undone)
+- ✅ Stats tab on the profile, and on every player's page
 
 ### Level 2 · Complete
-- ⬜ Season and format filters
-- ⬜ Leaderboards by city, tournament and friends
-- ⬜ Form chart (last 10 innings)
-- ⬜ MVP points on every scorecard
+- ✅ Season and format filters (format by overs: up to 10, 11–20, longer)
+- ✅ Leaderboards by city, tournament and friends (runs, wickets, MVP, sixes, catches)
+- ✅ Form chart (last 10 innings)
+- ✅ MVP points on every scorecard (formula in [features.md](features.md#mvp-points))
 
 ### Level 3 · Delight
-- ⬜ Batting zones from wagon wheel data
-- ⬜ Compare two players
-- ⬜ Milestone badges
-- ⬜ Voice scoring ("four, next ball")
+- ✅ Batting zones from wagon wheel data
+- ✅ Compare two players
+- ✅ Milestone badges
+- ✅ Voice scoring ("four", "wide two", "chhakka", "out"); wickets open the wicket sheet rather than being recorded from speech
 
-**Exit:** stats for a player with 10 matches match a manual recount.
+**Exit:** stats for a player with 10 matches match a manual recount. Automated by `StatsEngineTest.careerStatsOverTenMatchesMatchARecount`.
 
 ---
 

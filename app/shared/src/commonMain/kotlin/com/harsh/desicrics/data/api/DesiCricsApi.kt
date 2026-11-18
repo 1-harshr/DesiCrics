@@ -14,7 +14,12 @@ import com.harsh.desicrics.api.PushTokenRequest
 import com.harsh.desicrics.api.SetRoleRequest
 import com.harsh.desicrics.api.SupportRequest
 import com.harsh.desicrics.api.TeamRequest
+import com.harsh.desicrics.model.CareerStats
 import com.harsh.desicrics.model.Follow
+import com.harsh.desicrics.model.FormatFilter
+import com.harsh.desicrics.model.LeaderboardMetric
+import com.harsh.desicrics.model.LeaderboardRow
+import com.harsh.desicrics.model.LeaderboardScope
 import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.HeadToHead
 import com.harsh.desicrics.model.Notification
@@ -227,6 +232,26 @@ class DesiCricsApi(
 
     suspend fun startFixture(matchId: String, request: StartFixtureRequest): MatchDetails =
         call { post("$baseUrl/matches/$matchId/start") { it(); json(request) } }.body()
+
+    // Stats.
+
+    suspend fun playerStats(profileId: String, season: Int?, format: FormatFilter): CareerStats =
+        call { get("$baseUrl/players/$profileId/stats") { it(); season?.let { s -> parameter("season", s) }; parameter("format", format.name) } }.body()
+
+    suspend fun compare(a: String, b: String, season: Int?, format: FormatFilter): List<CareerStats> =
+        call {
+            get("$baseUrl/stats/compare") {
+                it(); parameter("a", a); parameter("b", b); season?.let { s -> parameter("season", s) }; parameter("format", format.name)
+            }
+        }.body()
+
+    suspend fun leaderboard(scope: LeaderboardScope, id: String?, metric: LeaderboardMetric, season: Int?): List<LeaderboardRow> =
+        call {
+            get("$baseUrl/leaderboards") {
+                it(); parameter("scope", scope.name); id?.let { v -> parameter("id", v) }; parameter("metric", metric.name)
+                season?.let { s -> parameter("season", s) }
+            }
+        }.body()
 
     /** Removes the latest ball or event. */
     suspend fun undoLast(matchId: String): MatchDetails =

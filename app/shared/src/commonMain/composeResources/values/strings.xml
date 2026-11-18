@@ -764,4 +764,76 @@
     <string name="notification_rescheduled_unset">%1$s no longer has a start time</string>
     <string name="home_tournaments">Tournaments</string>
     <string name="common_ok">OK</string>
+
+    <!-- Stats, MVP, leaderboards, compare -->
+    <string name="profile_tab_stats">Stats</string>
+    <string name="stats_season_all">All time</string>
+    <string name="stats_format_all">All lengths</string>
+    <string name="stats_format_short">Up to 10 overs</string>
+    <string name="stats_format_t20">11–20 overs</string>
+    <string name="stats_format_long">Longer</string>
+    <string name="stats_load_failed">Couldn't load stats. Check your connection.</string>
+    <string name="stats_none">No completed matches here yet. Stats count matches where you were picked from a team, not typed in by name.</string>
+    <string name="stats_summary">%1$d matches · %2$d won · %3$s MVP points</string>
+    <string name="stats_batting">Batting</string>
+    <string name="stats_bowling">Bowling</string>
+    <string name="stats_fielding">Fielding</string>
+    <string name="stats_innings">Inns</string>
+    <string name="stats_runs">Runs</string>
+    <string name="stats_highest">HS</string>
+    <string name="stats_average">Avg</string>
+    <string name="stats_strike_rate">SR</string>
+    <string name="stats_fifties">50s</string>
+    <string name="stats_hundreds">100s</string>
+    <string name="stats_fours">4s</string>
+    <string name="stats_sixes">6s</string>
+    <string name="stats_overs">Overs</string>
+    <string name="stats_wickets">Wkts</string>
+    <string name="stats_best">Best</string>
+    <string name="stats_economy">Econ</string>
+    <string name="stats_five_wickets">5W</string>
+    <string name="stats_catches">Catches</string>
+    <string name="stats_run_outs">Run outs</string>
+    <string name="stats_stumpings">Stumpings</string>
+    <string name="stats_form">Form: runs in the last %1$d matches</string>
+    <string name="stats_form_description">Runs in each of the last %1$d matches, oldest first</string>
+    <string name="stats_zones">Where the runs go</string>
+    <string name="stats_badges">Badges</string>
+    <string name="stats_compare">Compare with someone</string>
+    <string name="stats_dash">–</string>
+    <string name="badge_first_fifty">First fifty</string>
+    <string name="badge_century">Century</string>
+    <string name="badge_five_wickets">Five-wicket haul</string>
+    <string name="badge_runs_500">500 runs</string>
+    <string name="badge_runs_1000">1,000 runs</string>
+    <string name="badge_wickets_25">25 wickets</string>
+    <string name="badge_wickets_50">50 wickets</string>
+    <string name="badge_matches_25">25 matches</string>
+    <string name="badge_matches_50">50 matches</string>
+    <string name="badge_player_of_the_match">Player of the match</string>
+    <string name="compare_title">Compare</string>
+    <string name="compare_pick">Who with?</string>
+    <string name="leaderboards_title">Leaderboards</string>
+    <string name="leaderboard_friends">Friends</string>
+    <string name="leaderboard_city">My city</string>
+    <string name="leaderboard_tournament">Tournament</string>
+    <string name="metric_runs">Runs</string>
+    <string name="metric_wickets">Wickets</string>
+    <string name="metric_mvp">MVP</string>
+    <string name="metric_sixes">Sixes</string>
+    <string name="metric_catches">Catches</string>
+    <string name="leaderboard_empty">Nobody here has stats yet. For My city, set your city on your profile.</string>
+    <plurals name="leaderboard_matches">
+        <item quantity="one">%1$d match</item>
+        <item quantity="other">%1$d matches</item>
+    </plurals>
+    <string name="home_leaderboards">Leaderboards</string>
+    <string name="scorecard_mvp">MVP points</string>
+    <string name="scorecard_player_of_the_match">Player of the match: %1$s</string>
+    <string name="tournament_player_of_tournament">Player of the tournament: %1$s (%2$s pts)</string>
+    <string name="tournament_leaderboard">Tournament leaderboard</string>
+
+    <!-- Voice scoring -->
+    <string name="scoring_voice">Score by voice</string>
+    <string name="scoring_voice_unknown">Didn't catch that. Try "four", "wide two" or "out".</string>
 </resources>

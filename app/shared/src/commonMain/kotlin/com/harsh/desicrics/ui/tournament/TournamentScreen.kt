@@ -60,6 +60,7 @@ import com.harsh.desicrics.model.TournamentTeam
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.home.HomeMatchCard
 import com.harsh.desicrics.ui.social.PlayerLine
+import com.harsh.desicrics.ui.stats.mvpText
 import com.harsh.desicrics.ui.system.rememberShareText
 import com.harsh.desicrics.ui.teams.TeamRow
 import com.harsh.desicrics.ui.text.epochMillisAt
@@ -87,6 +88,7 @@ fun TournamentScreen(
     onOpenMatch: (String) -> Unit,
     onOpenPlayer: (String) -> Unit,
     onBack: () -> Unit,
+    onLeaderboard: () -> Unit = {},
     viewModel: TournamentViewModel = koinViewModel { parametersOf(tournamentId) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -112,6 +114,7 @@ fun TournamentScreen(
         onSheet = { sheet = it },
         onStart = viewModel::start,
         onReview = viewModel::review,
+        onLeaderboard = onLeaderboard,
     )
     when (val current = sheet) {
         null -> Unit
@@ -145,6 +148,7 @@ private fun TournamentContent(
     onSheet: (TournamentSheet) -> Unit,
     onStart: () -> Unit,
     onReview: (teamId: String, confirm: Boolean) -> Unit,
+    onLeaderboard: () -> Unit = {},
 ) {
     val details = state.details
     val space = DesiTheme.space
@@ -194,7 +198,17 @@ private fun TournamentContent(
                     TournamentTab.FIXTURES -> Fixtures(details, state.isOrganiser, onOpenMatch, onSchedule = { onSheet(TournamentSheet.Schedule(it)) }, onAdd = { onSheet(TournamentSheet.AddFixture) })
                     TournamentTab.TABLE -> details.tables.forEachIndexed { group, table -> PointsTable(table, if (details.tables.size > 1) group else null) }
                     TournamentTab.TEAMS -> Teams(state, onSheet, onStart, onReview)
-                    TournamentTab.STATS -> Stats(details.keyStats, onOpenPlayer)
+                    TournamentTab.STATS -> {
+                        details.playerOfTournament?.let { best ->
+                            Text(
+                                stringResource(Res.string.tournament_player_of_tournament, best.name, mvpText(best.value)),
+                                style = DesiTheme.type.bodyStrong,
+                                color = colors.brand,
+                            )
+                        }
+                        Stats(details.keyStats, onOpenPlayer)
+                        GhostButton(stringResource(Res.string.tournament_leaderboard), onClick = onLeaderboard, modifier = Modifier.fillMaxWidth())
+                    }
                 }
             }
         }

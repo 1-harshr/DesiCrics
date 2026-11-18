@@ -89,13 +89,15 @@ fun HomeScreen(
     onSearch: () -> Unit,
     onNotifications: () -> Unit,
     onTournaments: () -> Unit,
+    onLeaderboards: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val takeOver by viewModel.takeOver.collectAsStateWithLifecycle()
     var takingOver by rememberSaveable { mutableStateOf(false) }
     HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile, onTakeOver = { takingOver = true }, onTeams = onTeams,
-        onSearch = onSearch, onNotifications = onNotifications, onTournaments = onTournaments)
+        onSearch = onSearch, onNotifications = onNotifications, onTournaments = onTournaments,
+        onLeaderboards = onLeaderboards)
     if (takingOver) {
         TakeOverSheet(
             state = takeOver,
@@ -153,6 +155,7 @@ fun HomeContent(
     onSearch: () -> Unit = {},
     onNotifications: () -> Unit = {},
     onTournaments: () -> Unit = {},
+    onLeaderboards: () -> Unit = {},
 ) {
     val space = DesiTheme.space
     val feed = state.feed
@@ -170,7 +173,10 @@ fun HomeContent(
                     GhostButton(stringResource(Res.string.teams_title), onClick = onTeams, modifier = Modifier.weight(1f))
                     GhostButton(stringResource(Res.string.home_tournaments), onClick = onTournaments, modifier = Modifier.weight(1f))
                 }
-                GhostButton(stringResource(Res.string.home_take_over), onClick = onTakeOver, modifier = Modifier.fillMaxWidth())
+                Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                    GhostButton(stringResource(Res.string.home_leaderboards), onClick = onLeaderboards, modifier = Modifier.weight(1f))
+                    GhostButton(stringResource(Res.string.home_take_over), onClick = onTakeOver, modifier = Modifier.weight(1f))
+                }
             }
         }
         if (state.loadFailed) {

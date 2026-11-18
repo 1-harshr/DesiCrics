@@ -26,6 +26,9 @@ import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.scoring.InningsState
+import com.harsh.desicrics.scoring.MatchState
+import com.harsh.desicrics.stats.MvpPoints
+import com.harsh.desicrics.ui.stats.mvpText
 import com.harsh.desicrics.scoring.Retirement
 import com.harsh.desicrics.ui.text.dismissalText
 import com.harsh.desicrics.ui.text.label
@@ -98,6 +101,32 @@ internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifi
         )
         innings.bowlers.forEach { card ->
             StatRow(listOf(card.player.name, card.oversText, "${card.maidens}", "${card.runs}", "${card.wickets}", card.economy.format2()))
+        }
+    }
+}
+
+/**
+ * MVP points for everyone who did something, best first (the formula is [MvpPoints]). Once the match is
+ * over, the top player is player of the match.
+ */
+@Composable
+internal fun MatchMvp(state: MatchState) {
+    val points = MvpPoints.forMatch(state)
+    if (points.isEmpty()) return
+    val players = (state.match.teamA.players + state.match.teamB.players).associateBy { it.id }
+    val ranked = points.entries.sortedByDescending { it.value }.take(5).mapNotNull { (id, tenths) -> players[id]?.let { it to tenths } }
+    DesiCard(Modifier.fillMaxWidth()) {
+        SectionLabel(stringResource(Res.string.scorecard_mvp))
+        if (state.isComplete) {
+            ranked.firstOrNull()?.let { (best, _) ->
+                Text(stringResource(Res.string.scorecard_player_of_the_match, best.name), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.brand)
+            }
+        }
+        ranked.forEach { (player, tenths) ->
+            Row {
+                Text(player.name, style = DesiTheme.type.body, color = DesiTheme.colors.ink, modifier = Modifier.weight(1f))
+                Text(mvpText(tenths), style = DesiTheme.type.data, color = DesiTheme.colors.ink)
+            }
         }
     }
 }

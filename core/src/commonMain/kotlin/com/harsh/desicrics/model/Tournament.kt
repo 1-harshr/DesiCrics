@@ -128,6 +128,8 @@ data class TournamentDetails(
     val keyStats: KeyStats = KeyStats(),
     /** The winner's team ID once the tournament is over. */
     val championId: String? = null,
+    /** Most MVP points across the tournament's completed fixtures; value is tenths of a point. */
+    val playerOfTournament: StatLeader? = null,
 )
 
 @Serializable

@@ -22,6 +22,9 @@ import com.harsh.desicrics.ui.profile.ProfileScreen
 import com.harsh.desicrics.ui.social.NotificationsScreen
 import com.harsh.desicrics.ui.social.PlayerScreen
 import com.harsh.desicrics.ui.social.SearchScreen
+import com.harsh.desicrics.ui.stats.CareerSection
+import com.harsh.desicrics.ui.stats.CompareScreen
+import com.harsh.desicrics.ui.stats.LeaderboardScreen
 import com.harsh.desicrics.ui.teams.TeamScreen
 import com.harsh.desicrics.ui.tournament.TournamentScreen
 import com.harsh.desicrics.ui.tournament.TournamentsScreen
@@ -46,6 +49,9 @@ import kotlinx.serialization.modules.subclass
 @Serializable data class PlayerRoute(val profileId: String) : NavKey
 @Serializable data object TournamentsRoute : NavKey
 @Serializable data class TournamentRoute(val tournamentId: String) : NavKey
+@Serializable data class CompareRoute(val profileId: String, val name: String) : NavKey
+/** All leaderboards, or one tournament's when [tournamentId] is set. */
+@Serializable data class LeaderboardRoute(val tournamentId: String? = null) : NavKey
 /** Opened from a join link or QR code: the teams list with the join sheet filled in. */
 @Serializable data class JoinTeamRoute(val code: String) : NavKey
 
@@ -66,6 +72,8 @@ private val RouteSerialization = SavedStateConfiguration {
             subclass(PlayerRoute::class)
             subclass(TournamentsRoute::class)
             subclass(TournamentRoute::class)
+            subclass(CompareRoute::class)
+            subclass(LeaderboardRoute::class)
         }
     }
 }
@@ -106,6 +114,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     onSearch = { backStack.add(SearchRoute) },
                     onNotifications = { backStack.add(NotificationsRoute) },
                     onTournaments = { backStack.add(TournamentsRoute) },
+                    onLeaderboards = { backStack.add(LeaderboardRoute()) },
                 )
             }
             entry<ProfileRoute> {
@@ -116,6 +125,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     onBack = back,
                     onOpenMatch = { backStack.add(MatchRoute(it)) },
                     onOpenTeam = { backStack.add(TeamRoute(it)) },
+                    onCompare = { backStack.add(CompareRoute(profile.uid, profile.name)) },
                 )
             }
             entry<EditProfileRoute> {
@@ -150,6 +160,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     tournamentId = route.tournamentId,
                     onOpenMatch = { backStack.add(MatchRoute(it)) },
                     onOpenPlayer = { backStack.add(PlayerRoute(it)) },
+                    onLeaderboard = { backStack.add(LeaderboardRoute(route.tournamentId)) },
                     onBack = back,
                 )
             }
@@ -163,7 +174,14 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     onOpenTeam = { backStack.add(TeamRoute(it)) },
                     onOpenMatch = { backStack.add(MatchRoute(it)) },
                     onBack = back,
+                    extra = { page -> CareerSection(page.player.profileId, onCompare = { backStack.add(CompareRoute(page.player.profileId, page.player.name)) }) },
                 )
+            }
+            entry<CompareRoute> { route ->
+                CompareScreen(route.profileId, route.name, onBack = back)
+            }
+            entry<LeaderboardRoute> { route ->
+                LeaderboardScreen(route.tournamentId, onOpenPlayer = { backStack.add(PlayerRoute(it)) }, onBack = back)
             }
             entry<JoinTeamRoute> { route ->
                 TeamsScreen(onOpenTeam = { backStack.replaceLast(TeamRoute(it)) }, onBack = back, joinCode = route.code)

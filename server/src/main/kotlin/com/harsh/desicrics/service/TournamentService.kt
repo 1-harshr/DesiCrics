@@ -28,6 +28,7 @@ import com.harsh.desicrics.model.TournamentTeam
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.store.MatchStore
 import com.harsh.desicrics.store.PlayerStore
+import com.harsh.desicrics.store.StatsStore
 import com.harsh.desicrics.store.TeamStore
 import com.harsh.desicrics.store.TournamentStore
 import com.harsh.desicrics.store.UserStore
@@ -51,6 +52,7 @@ class TournamentService(
     private val teams: TeamStore,
     private val players: PlayerStore,
     private val users: UserStore,
+    private val stats: StatsStore,
     /** Tells followers when a fixture moves. */
     private val onRescheduled: suspend (Match) -> Unit = {},
     private val clock: () -> Long = System::currentTimeMillis,
@@ -97,6 +99,7 @@ class TournamentService(
             tables = tables,
             keyStats = keyStats(fixtures),
             championId = if (tournament.started) TournamentEngine.champion(tournament, fixtures) else null,
+            playerOfTournament = playerOfTournament(tournamentId),
         )
     }
 
@@ -242,6 +245,15 @@ class TournamentService(
             .take(5)
             .map { (key, value) -> StatLeader(key.name, key.team, value, key.profileId) }
         return KeyStats(runs.leaders(), wickets.leaders(), sixes.leaders())
+    }
+
+    /** Most MVP points across the tournament, from the stats projection. */
+    private suspend fun playerOfTournament(tournamentId: String): StatLeader? {
+        val best = stats.forTournament(tournamentId).groupBy { it.profileId }
+            .mapValues { (_, lines) -> lines.sumOf { it.mvpTenths } to lines.last().team }
+            .maxByOrNull { it.value.first }?.takeIf { it.value.first > 0 } ?: return null
+        val name = players.summaries(listOf(best.key))[best.key]?.name ?: return null
+        return StatLeader(name, best.value.second, best.value.first, best.key)
     }
 
     private suspend fun tournament(id: String): Tournament =

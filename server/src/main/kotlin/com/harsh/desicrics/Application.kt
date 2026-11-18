@@ -14,12 +14,15 @@ import com.harsh.desicrics.service.AccountService
 import com.harsh.desicrics.service.MatchService
 import com.harsh.desicrics.service.PlayerService
 import com.harsh.desicrics.service.SocialService
+import com.harsh.desicrics.service.StatsProjector
+import com.harsh.desicrics.service.StatsService
 import com.harsh.desicrics.service.TournamentService
 import com.harsh.desicrics.service.TeamService
 import com.harsh.desicrics.service.ProfileService
 import com.harsh.desicrics.store.ExposedMatchStore
 import com.harsh.desicrics.store.ExposedPlayerStore
 import com.harsh.desicrics.store.ExposedSocialStore
+import com.harsh.desicrics.store.ExposedStatsStore
 import com.harsh.desicrics.store.ExposedSupportStore
 import com.harsh.desicrics.store.ExposedTeamStore
 import com.harsh.desicrics.store.ExposedTournamentStore
@@ -73,13 +76,18 @@ fun Application.module(
     val matches = MatchService(matchStore, users, players, teamStore)
     val social = SocialService(socialStore, matchStore, teamStore, players)
     val notifier = Notifier(socialStore, pushSender)
+    val statsStore = ExposedStatsStore(database)
     val tournaments = TournamentService(
-        ExposedTournamentStore(database), matchStore, matches, teamStore, players, users, onRescheduled = notifier::rescheduled,
+        ExposedTournamentStore(database), matchStore, matches, teamStore, players, users, statsStore, onRescheduled = notifier::rescheduled,
     )
     // The live feed first, so watchers see a ball before anything slower runs.
     matches.listen(live)
     matches.listen(notifier)
+    val projector = StatsProjector(statsStore, matchStore)
+    matches.listen(projector)
+    // After the projector, so a finished fixture's stats are in before the next round is made.
     matches.listen(tournaments)
+    launch { projector.backfill() }
     val teams = TeamService(teamStore, players, matchStore, users)
     val playerService = PlayerService(players, users)
     val account = AccountService(players, teamStore, ExposedSupportStore(database))
@@ -120,6 +128,7 @@ fun Application.module(
             socialRoutes(social)
             liveRoutes(matches, live)
             tournamentRoutes(tournaments)
+            statsRoutes(StatsService(statsStore, players, users, teamStore, socialStore))
         }
     }
 }

@@ -77,6 +77,7 @@ import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.scoring.bowlerRuleBreak
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
 import com.harsh.desicrics.ui.system.rememberShareText
+import com.harsh.desicrics.ui.system.rememberSpeechInput
 import com.harsh.desicrics.ui.text.label
 import com.harsh.desicrics.ui.text.resultText
 import com.harsh.desicrics.util.format2
@@ -235,9 +236,12 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
                     GhostButton(stringResource(Res.string.match_undo_last_ball), onClick = actions.onUndo, modifier = Modifier.fillMaxWidth())
                 }
             }
-            MatchTab.SCORECARD -> state.innings.forEach {
-                InningsScorecard(it)
-                InningsWagonWheel(it)
+            MatchTab.SCORECARD -> {
+                state.innings.forEach {
+                    InningsScorecard(it)
+                    InningsWagonWheel(it)
+                }
+                MatchMvp(state)
             }
             // Latest innings first, so the over in progress is at the top.
             MatchTab.OVERS -> state.innings.asReversed().forEach { InningsOvers(it, showTitle = state.innings.size > 1) }
@@ -525,6 +529,23 @@ private fun ScoringPad(ui: MatchUiState, actions: MatchActions, onSheet: (Scorin
         PadKey("out", stringResource(Res.string.scoring_key_out), PadKeyStyle.Wicket, enabled = canScore),
         PadKey("undo", stringResource(Res.string.scoring_key_undo), PadKeyStyle.Utility, enabled = ui.canUndo),
     )
+    var misheard by remember { mutableStateOf(false) }
+    val runs: (Int) -> Unit = { runs ->
+        if (ui.match?.rules?.wagonWheel == true && runs > 0) onSheet(ScoringSheet.Zone(runs)) else actions.onRuns(runs, null)
+    }
+    // Anything unclear opens a sheet or asks again; nothing ambiguous is recorded straight from speech.
+    val listen = rememberSpeechInput { heard ->
+        val command = heard?.let { VoiceCommands.parse(it) } ?: VoiceCommand.Unknown
+        misheard = command == VoiceCommand.Unknown || (!canScore && command != VoiceCommand.Undo)
+        if (misheard) return@rememberSpeechInput
+        when (command) {
+            is VoiceCommand.Runs -> runs(command.runs)
+            is VoiceCommand.Extra -> actions.onExtra(command.type, command.runs)
+            VoiceCommand.Wicket -> onSheet(ScoringSheet.Wicket)
+            VoiceCommand.Undo -> if (ui.canUndo) actions.onUndo()
+            VoiceCommand.Unknown -> Unit
+        }
+    }
     Column(Modifier.fillMaxWidth().background(colors.surface)) {
         HorizontalDivider(color = colors.line)
         Column(
@@ -532,8 +553,18 @@ private fun ScoringPad(ui: MatchUiState, actions: MatchActions, onSheet: (Scorin
             verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
         ) {
             ui.error?.let { ErrorBanner(it, actions.onDismissError) }
-            if (!canScore && !ui.saving && ui.error == null) {
-                Text(stringResource(Res.string.match_pick_players_first), style = DesiTheme.type.body, color = colors.muted)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val hint = when {
+                    misheard -> stringResource(Res.string.scoring_voice_unknown)
+                    !canScore && !ui.saving && ui.error == null -> stringResource(Res.string.match_pick_players_first)
+                    else -> null
+                }
+                Text(hint.orEmpty(), style = DesiTheme.type.body, color = colors.muted, modifier = Modifier.weight(1f))
+                if (listen != null) {
+                    IconButton(onClick = { misheard = false; listen() }, enabled = !ui.saving) {
+                        Icon(painterResource(DesiIcons.Mic), stringResource(Res.string.scoring_voice), tint = colors.brand)
+                    }
+                }
             }
             RunPad(keys, enabled = !ui.saving, onKey = { key ->
                 when (key.id) {
@@ -543,10 +574,7 @@ private fun ScoringPad(ui: MatchUiState, actions: MatchActions, onSheet: (Scorin
                     "lb" -> onSheet(ScoringSheet.Extra(ExtraType.LEG_BYE))
                     "out" -> onSheet(ScoringSheet.Wicket)
                     "undo" -> actions.onUndo()
-                    else -> {
-                        val runs = key.id.toInt()
-                        if (ui.match?.rules?.wagonWheel == true && runs > 0) onSheet(ScoringSheet.Zone(runs)) else actions.onRuns(runs, null)
-                    }
+                    else -> runs(key.id.toInt())
                 }
             })
         }

@@ -25,6 +25,14 @@ Every feature area, what we build, and the phase it lands in. See [roadmap.md](r
 | Rankings | City-scoped team and player rankings, weighted by opposition strength. | 6 |
 | Stream overlay | Score overlay feed for OBS / Larix livestreams. No video hosting. | 6 |
 
+## MVP points
+
+One formula ranks everyone in a match, from its deliveries (`MvpPoints` in `core`). The top scorer is player of the match. The highest total across a tournament is player of the tournament.
+
+- **Batting:** 1 per run, +1 per four, +2 per six, +10 for a fifty or +25 for a hundred. From 10 balls faced, add (strike rate − 100) ÷ 10, kept between −5 and +10.
+- **Bowling:** 20 per wicket, 4 per maiden, +5 for three wickets or +15 for five. From 2 overs bowled, add (6 − economy) × 2, kept between −10 and +10.
+- **Fielding:** 8 per catch, 10 per run out or stumping.
+
 ## Cricket vocabulary the app supports
 
 - **Match types:** limited overs, test, the Hundred, pair cricket, box cricket. Pair and box come after Phase 1.

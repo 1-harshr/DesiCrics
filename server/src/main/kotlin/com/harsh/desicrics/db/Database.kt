@@ -211,6 +211,17 @@ object TournamentTeamsTable : Table("tournament_teams") {
     override val primaryKey = PrimaryKey(tournamentId, teamId)
 }
 
+/** The stats projection; [line] is a JSON PlayerMatchLine. */
+object PlayerMatchLinesTable : Table("player_match_lines") {
+    val matchId = varchar("match_id", 36)
+    val profileId = varchar("profile_id", 128)
+    val playedAt = long("played_at")
+    val tournamentId = varchar("tournament_id", 36).nullable()
+    val oversPerInnings = integer("overs_per_innings")
+    val line = text("line")
+    override val primaryKey = PrimaryKey(matchId, profileId)
+}
+
 object FollowsTable : Table("follows") {
     val uid = varchar("uid", 128)
     val targetType = enumerationByName("target_type", 10, FollowType::class)

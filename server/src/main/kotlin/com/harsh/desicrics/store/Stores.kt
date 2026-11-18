@@ -10,6 +10,7 @@ import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.Notification
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Player
+import com.harsh.desicrics.model.PlayerMatchLine
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
@@ -192,4 +193,16 @@ interface TournamentStore {
     suspend fun addOrganiser(tournamentId: String, uid: String, role: OrganiserRole)
     /** Fixes the teams' groups and marks the tournament started. False if it already was. */
     suspend fun markStarted(tournamentId: String, teams: List<TournamentTeam>): Boolean
+}
+
+/** The stats projection: one line per linked player per completed match. */
+interface StatsStore {
+    /** Replaces every line of [matchId] with [lines] (none, if it's no longer complete). */
+    suspend fun replace(matchId: String, lines: List<PlayerMatchLine>)
+    suspend fun forProfiles(profileIds: Collection<String>): List<PlayerMatchLine>
+    suspend fun forTournament(tournamentId: String): List<PlayerMatchLine>
+    /** Completed matches with no lines yet, e.g. finished before stats existed. */
+    suspend fun completedMatchesWithoutLines(): List<String>
+    /** Profile IDs of users who live in [city] (any case). */
+    suspend fun profilesInCity(city: String): List<String>
 }
