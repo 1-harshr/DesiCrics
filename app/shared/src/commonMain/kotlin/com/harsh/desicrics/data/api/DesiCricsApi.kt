@@ -1,6 +1,13 @@
 package com.harsh.desicrics.data.api
 
 import com.harsh.desicrics.api.AddMemberRequest
+import com.harsh.desicrics.api.AddOrganiserRequest
+import com.harsh.desicrics.api.CreateTournamentRequest
+import com.harsh.desicrics.api.CustomFixtureRequest
+import com.harsh.desicrics.api.EnterTeamRequest
+import com.harsh.desicrics.api.ReviewEntryRequest
+import com.harsh.desicrics.api.ScheduleRequest
+import com.harsh.desicrics.api.StartFixtureRequest
 import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.ClaimRequest
 import com.harsh.desicrics.api.PushTokenRequest
@@ -14,6 +21,8 @@ import com.harsh.desicrics.model.Notification
 import com.harsh.desicrics.model.PlayerPage
 import com.harsh.desicrics.model.SearchResults
 import com.harsh.desicrics.model.TodayFeed
+import com.harsh.desicrics.model.TournamentDetails
+import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
@@ -189,6 +198,35 @@ class DesiCricsApi(
             while (true) emit(receiveDeserialized<MatchDetails>())
         }
     }
+
+    // Tournaments.
+
+    suspend fun myTournaments(): List<TournamentSummary> = call { get("$baseUrl/tournaments/mine", it) }.body()
+
+    suspend fun createTournament(request: CreateTournamentRequest): TournamentDetails =
+        call { post("$baseUrl/tournaments") { it(); json(request) } }.body()
+
+    suspend fun tournament(id: String): TournamentDetails = call { get("$baseUrl/tournaments/$id", it) }.body()
+
+    suspend fun enterTeam(id: String, teamId: String): TournamentDetails =
+        call { post("$baseUrl/tournaments/$id/teams") { it(); json(EnterTeamRequest(teamId)) } }.body()
+
+    suspend fun reviewEntry(id: String, teamId: String, confirm: Boolean): TournamentDetails =
+        call { put("$baseUrl/tournaments/$id/teams/$teamId") { it(); json(ReviewEntryRequest(confirm)) } }.body()
+
+    suspend fun addOrganiser(id: String, profileId: String): TournamentDetails =
+        call { post("$baseUrl/tournaments/$id/organisers") { it(); json(AddOrganiserRequest(profileId)) } }.body()
+
+    suspend fun startTournament(id: String): TournamentDetails = call { post("$baseUrl/tournaments/$id/start", it) }.body()
+
+    suspend fun addFixture(id: String, request: CustomFixtureRequest): TournamentDetails =
+        call { post("$baseUrl/tournaments/$id/fixtures") { it(); json(request) } }.body()
+
+    suspend fun schedule(matchId: String, scheduledAt: Long?): MatchDetails =
+        call { put("$baseUrl/matches/$matchId/schedule") { it(); json(ScheduleRequest(scheduledAt)) } }.body()
+
+    suspend fun startFixture(matchId: String, request: StartFixtureRequest): MatchDetails =
+        call { post("$baseUrl/matches/$matchId/start") { it(); json(request) } }.body()
 
     /** Removes the latest ball or event. */
     suspend fun undoLast(matchId: String): MatchDetails =

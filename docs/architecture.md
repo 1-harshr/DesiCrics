@@ -64,7 +64,7 @@ app/designsystem/     :app:designsystem: Crease tokens, fonts, components (see d
 - `Toss`
 - `Innings`
 - `Delivery` (innings, seq, over, ball, striker, non-striker, bowler, runs, extra type, extra runs, wicket type, dismissed player, fielder, fielding zone)
-- `Tournament`, `TournamentTeam`, `Fixture` (group)
+- `Tournament`, `TournamentTeam`, organisers; fixtures are `Match`es with a `FixtureInfo` ([ADR 0003](decisions/0003-tournament-fixtures.md))
 - `Follow`, `Notification`
 - Projections (server-written only): `Scorecard`, `Partnership`, `PlayerStats`, `PointsTable`, `MvpPoints`
 

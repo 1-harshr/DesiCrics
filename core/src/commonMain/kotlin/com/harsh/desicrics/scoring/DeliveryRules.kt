@@ -199,7 +199,14 @@ const val MAX_TARGET = 999
 /** The match row with its denormalised summary, status and result refreshed from [state]. */
 fun Match.withScore(state: MatchState): Match = copy(
     scoreSummary = state.scoreSummary,
-    status = if (state.isComplete) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
+    // A fixture stays scheduled until it's started; once a ball is bowled it can't be.
+    status = when {
+        state.isComplete -> MatchStatus.COMPLETED
+        status == MatchStatus.SCHEDULED -> MatchStatus.SCHEDULED
+        else -> MatchStatus.IN_PROGRESS
+    },
     result = state.result,
-    innings = state.innings.map { InningsScore(it.battingSide, it.runs, it.wickets, it.legalBalls, it.target, it.maxBalls) },
+    innings = state.innings.map {
+        InningsScore(it.battingSide, it.runs, it.wickets, it.legalBalls, it.target, it.maxBalls, allOut = it.wickets >= it.allOutWickets)
+    },
 )

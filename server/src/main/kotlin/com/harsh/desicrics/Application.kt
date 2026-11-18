@@ -14,6 +14,7 @@ import com.harsh.desicrics.service.AccountService
 import com.harsh.desicrics.service.MatchService
 import com.harsh.desicrics.service.PlayerService
 import com.harsh.desicrics.service.SocialService
+import com.harsh.desicrics.service.TournamentService
 import com.harsh.desicrics.service.TeamService
 import com.harsh.desicrics.service.ProfileService
 import com.harsh.desicrics.store.ExposedMatchStore
@@ -21,6 +22,7 @@ import com.harsh.desicrics.store.ExposedPlayerStore
 import com.harsh.desicrics.store.ExposedSocialStore
 import com.harsh.desicrics.store.ExposedSupportStore
 import com.harsh.desicrics.store.ExposedTeamStore
+import com.harsh.desicrics.store.ExposedTournamentStore
 import com.harsh.desicrics.store.ExposedUserStore
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
@@ -68,8 +70,16 @@ fun Application.module(
     val profiles = ProfileService(users, players)
     val socialStore = ExposedSocialStore(database)
     val live = LiveMatches()
-    val matches = MatchService(matchStore, users, players, teamStore, listeners = listOf(live, Notifier(socialStore, pushSender)))
+    val matches = MatchService(matchStore, users, players, teamStore)
     val social = SocialService(socialStore, matchStore, teamStore, players)
+    val notifier = Notifier(socialStore, pushSender)
+    val tournaments = TournamentService(
+        ExposedTournamentStore(database), matchStore, matches, teamStore, players, users, onRescheduled = notifier::rescheduled,
+    )
+    // The live feed first, so watchers see a ball before anything slower runs.
+    matches.listen(live)
+    matches.listen(notifier)
+    matches.listen(tournaments)
     val teams = TeamService(teamStore, players, matchStore, users)
     val playerService = PlayerService(players, users)
     val account = AccountService(players, teamStore, ExposedSupportStore(database))
@@ -100,7 +110,7 @@ fun Application.module(
 
     routing {
         get("/") { call.respondText("DesiCrics API") }
-        publicRoutes(matches)
+        publicRoutes(matches, tournaments)
         authenticate("firebase") {
             profileRoutes(profiles)
             matchRoutes(matches)
@@ -109,6 +119,7 @@ fun Application.module(
             accountRoutes(account, matches)
             socialRoutes(social)
             liveRoutes(matches, live)
+            tournamentRoutes(tournaments)
         }
     }
 }

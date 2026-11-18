@@ -3,6 +3,7 @@ package com.harsh.desicrics
 import com.harsh.desicrics.api.SquadPlayer
 import com.harsh.desicrics.navigation.JoinTeamRoute
 import com.harsh.desicrics.navigation.MatchRoute
+import com.harsh.desicrics.navigation.TournamentRoute
 import com.harsh.desicrics.navigation.routeFor
 import com.harsh.desicrics.ui.newmatch.SideForm
 import kotlin.test.Test
@@ -15,6 +16,7 @@ class SharedLogicAndroidHostTest {
     fun linksOpenTheRightScreen() {
         assertEquals(JoinTeamRoute("AB3XY9"), routeFor("/join/AB3XY9"))
         assertEquals(MatchRoute("m-1"), routeFor("/m/m-1/"))
+        assertEquals(TournamentRoute("t-1"), routeFor("/t/t-1"))
         assertNull(routeFor("/join/"))
         assertNull(routeFor("/somewhere/else"))
     }

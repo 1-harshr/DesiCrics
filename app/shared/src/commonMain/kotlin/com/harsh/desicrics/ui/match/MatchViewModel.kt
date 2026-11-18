@@ -3,17 +3,24 @@ package com.harsh.desicrics.ui.match
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.api.HandoverCode
+import com.harsh.desicrics.api.SquadRequest
+import com.harsh.desicrics.api.StartFixtureRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.MatchRepository
 import com.harsh.desicrics.data.SocialRepository
+import com.harsh.desicrics.data.TeamRepository
+import com.harsh.desicrics.data.TournamentRepository
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.MatchStatus
+import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamSide
+import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.model.Wicket
 import com.harsh.desicrics.scoring.DeliveryError
 import com.harsh.desicrics.scoring.InningsState
@@ -45,6 +52,15 @@ sealed interface ScoringError {
     data object LoadFailed : ScoringError
 }
 
+/** What starting a scheduled fixture needs: the teams to pick squads from, and whether the caller organises it. */
+data class FixtureSetup(
+    val canStart: Boolean,
+    val teamA: SavedTeam?,
+    val teamB: SavedTeam?,
+    val starting: Boolean = false,
+    val failed: Boolean = false,
+)
+
 /** A ball that breaks match rules set to warn, waiting for the scorer to record it anyway or drop it. */
 data class PendingBall(val delivery: Delivery, val warnings: List<DeliveryError>)
 
@@ -66,6 +82,8 @@ data class MatchUiState(
     /** Shown to the scorer until dismissed, so someone else can take over. */
     val handoverCode: HandoverCode? = null,
     val handoverFailed: Boolean = false,
+    /** For a tournament fixture that hasn't started: whether the caller can start it, and its two saved teams. */
+    val fixture: FixtureSetup? = null,
 ) {
     val strikerId: String? get() = state?.current?.strikerId ?: selection.strikerId
     val nonStrikerId: String? get() = state?.current?.nonStrikerId ?: selection.nonStrikerId
@@ -96,6 +114,8 @@ class MatchViewModel(
     private val matchRepository: MatchRepository,
     authRepository: AuthRepository,
     private val social: SocialRepository,
+    private val tournaments: TournamentRepository,
+    private val teams: TeamRepository,
 ) : ViewModel() {
 
     /** The public scorecard anyone can open. */
@@ -121,7 +141,9 @@ class MatchViewModel(
                                 snapshot == null -> current.copy(loading = false, notFound = true)
                                 // Don't let a poll overwrite the local state mid-save.
                                 current.saving -> current
-                                else -> current.withSnapshot(snapshot).copy(offline = false)
+                                else -> current.withSnapshot(snapshot).copy(offline = false).also {
+                                    if (snapshot.match.status == MatchStatus.SCHEDULED) loadFixtureSetup(snapshot.match)
+                                }
                             }
                         }
                     },
@@ -233,6 +255,52 @@ class MatchViewModel(
 
     fun dismissHandover() = _state.update { it.copy(handoverCode = null, handoverFailed = false) }
 
+    /** Loads what starting a scheduled fixture needs, once. */
+    private fun loadFixtureSetup(match: Match) {
+        val tournamentId = match.fixture?.tournamentId ?: return
+        if (_state.value.fixture != null) return
+        _state.update { it.copy(fixture = FixtureSetup(canStart = false, teamA = null, teamB = null)) }
+        viewModelScope.launch {
+            val organiser = try {
+                tournaments.details(tournamentId).tournament.isOrganiser(uid)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                false
+            }
+            suspend fun team(id: String?) = id?.let {
+                try {
+                    teams.team(it)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    null
+                }
+            }
+            val setup = FixtureSetup(organiser, team(match.teamA.teamId), team(match.teamB.teamId))
+            _state.update { it.copy(fixture = setup) }
+        }
+    }
+
+    /** Starts the fixture with these squads and toss; the caller becomes its scorer. */
+    fun startFixture(teamA: SquadRequest, teamB: SquadRequest, tossWinner: TeamSide, tossDecision: TossDecision) {
+        val ui = _state.value
+        val setup = ui.fixture ?: return
+        if (setup.starting) return
+        _state.update { it.copy(fixture = setup.copy(starting = true, failed = false)) }
+        viewModelScope.launch {
+            try {
+                val details = tournaments.startFixture(matchId, StartFixtureRequest(teamA, teamB, tossWinner, tossDecision))
+                _state.update { it.withSnapshot(details).copy(fixture = null) }
+                refreshes.update { it + 1 }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(fixture = setup.copy(starting = false, failed = true)) }
+            }
+        }
+    }
+
     fun undo() {
         val ui = _state.value
         if (!ui.canUndo) return
@@ -320,6 +388,7 @@ class MatchViewModel(
         deliveries = details.deliveries,
         events = details.events,
         state = ScoringEngine.compute(details.match, details.deliveries, details.events),
-        isScorer = details.match.scorerUid == uid,
+        // Nobody scores a fixture until it's started with squads and a toss.
+        isScorer = details.match.scorerUid == uid && details.match.status != MatchStatus.SCHEDULED,
     )
 }

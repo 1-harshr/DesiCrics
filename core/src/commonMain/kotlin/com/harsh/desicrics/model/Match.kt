@@ -24,6 +24,8 @@ data class Match(
     val scorerUid: String = createdBy,
     /** When a [MatchStatus.SCHEDULED] fixture is due to start, if anyone said. */
     val scheduledAt: Long? = null,
+    /** Set when the match is a tournament fixture. */
+    val fixture: FixtureInfo? = null,
 ) {
     val battingFirst: TeamSide
         get() = if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other
@@ -104,4 +106,6 @@ data class InningsScore(
     val target: Int? = null,
     /** The innings' ball limit, which rain can cut. Null for rows saved before it was kept. */
     val maxBalls: Int? = null,
+    /** Bowled out, so net run rate counts the full [maxBalls] as faced. */
+    val allOut: Boolean = false,
 )

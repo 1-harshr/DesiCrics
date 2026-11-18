@@ -5,11 +5,15 @@ import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.NotificationKind
+import com.harsh.desicrics.model.OrganiserRole
+import com.harsh.desicrics.model.Stage
+import com.harsh.desicrics.model.TournamentFormat
 import com.harsh.desicrics.api.SupportCategory
 import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.TeamRole
@@ -107,6 +111,11 @@ object MatchesTable : Table("matches") {
     val teamAId = varchar("team_a_id", 36).nullable()
     val teamBId = varchar("team_b_id", 36).nullable()
     val scheduledAt = long("scheduled_at").nullable()
+    val tournamentId = varchar("tournament_id", 36).nullable()
+    val stage = enumerationByName("stage", 15, Stage::class).nullable()
+    val roundNo = integer("round_no").nullable()
+    val fixtureNo = integer("fixture_no").nullable()
+    val groupNo = integer("group_no").nullable()
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -166,6 +175,40 @@ object ScorerHandoversTable : Table("scorer_handovers") {
     val matchId = reference("match_id", MatchesTable.id, onDelete = ReferenceOption.CASCADE)
     val expiresAt = long("expires_at")
     override val primaryKey = PrimaryKey(code)
+}
+
+object TournamentsTable : Table("tournaments") {
+    val id = varchar("id", 36)
+    val name = varchar("name", 80)
+    val city = varchar("city", 100)
+    val format = enumerationByName("format", 20, TournamentFormat::class)
+    val oversPerInnings = integer("overs_per_innings")
+    /** JSON MatchRules. */
+    val rules = text("rules")
+    val groupCount = integer("group_count")
+    val advance = integer("advance")
+    val startsAt = long("starts_at").nullable()
+    val registrationOpen = bool("registration_open")
+    val started = bool("started")
+    val createdBy = varchar("created_by", 128)
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(id)
+}
+
+object TournamentOrganisersTable : Table("tournament_organisers") {
+    val tournamentId = reference("tournament_id", TournamentsTable.id, onDelete = ReferenceOption.CASCADE)
+    val uid = varchar("uid", 128)
+    val role = enumerationByName("role", 15, OrganiserRole::class)
+    override val primaryKey = PrimaryKey(tournamentId, uid)
+}
+
+object TournamentTeamsTable : Table("tournament_teams") {
+    val tournamentId = reference("tournament_id", TournamentsTable.id, onDelete = ReferenceOption.CASCADE)
+    val teamId = reference("team_id", TeamsTable.id)
+    val seed = integer("seed")
+    val groupNo = integer("group_no").nullable()
+    val status = enumerationByName("status", 10, EntryStatus::class)
+    override val primaryKey = PrimaryKey(tournamentId, teamId)
 }
 
 object FollowsTable : Table("follows") {

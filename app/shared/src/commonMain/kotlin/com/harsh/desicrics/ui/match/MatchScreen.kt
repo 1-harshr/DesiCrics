@@ -59,7 +59,9 @@ import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.FieldZone
+import com.harsh.desicrics.api.SquadRequest
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.RuleMode
 import com.harsh.desicrics.model.Player
@@ -100,6 +102,7 @@ fun MatchScreen(
         ui = ui,
         actions = MatchActions(
             onShareLink = { shareMessage?.let(shareText) },
+            onStartFixture = viewModel::startFixture,
             onBack = onBack,
             onSelectStriker = viewModel::selectStriker,
             onSelectNonStriker = viewModel::selectNonStriker,
@@ -147,6 +150,7 @@ class MatchActions(
     val onRecordPendingBall: () -> Unit,
     val onDropPendingBall: () -> Unit,
     val onShareLink: () -> Unit = {},
+    val onStartFixture: (SquadRequest, SquadRequest, TeamSide, TossDecision) -> Unit = { _, _, _, _ -> },
 )
 
 private enum class MatchTab { LIVE, SCORECARD, OVERS }
@@ -192,6 +196,7 @@ fun MatchContent(ui: MatchUiState, actions: MatchActions) {
                 if (ui.notFound) Res.string.match_not_found else Res.string.match_load_failed,
                 actions.onBack,
             )
+            state.match.status == MatchStatus.SCHEDULED -> FixturePending(state.match, ui.fixture, actions.onStartFixture, actions.onBack)
             else -> Scoring(ui, state, actions)
         }
     }

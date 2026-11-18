@@ -34,6 +34,7 @@
                 <data android:host="${publicHost}" />
                 <data android:pathPrefix="/join/" />
                 <data android:pathPrefix="/m/" />
+                <data android:pathPrefix="/t/" />
             </intent-filter>
         </activity>
         <service

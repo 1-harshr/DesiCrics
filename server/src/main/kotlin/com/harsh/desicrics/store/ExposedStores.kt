@@ -9,6 +9,7 @@ import com.harsh.desicrics.db.ScorerHandoversTable
 import com.harsh.desicrics.db.UsersTable
 import com.harsh.desicrics.db.query
 import com.harsh.desicrics.model.Delivery
+import com.harsh.desicrics.model.FixtureInfo
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchResult
@@ -100,6 +101,33 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             .map { it.toMatch(players = emptyList()) }
     }
 
+    override suspend fun forTournament(tournamentId: String): List<Match> = db.query {
+        MatchesTable.selectAll()
+            .where { MatchesTable.tournamentId eq tournamentId }
+            .orderBy(MatchesTable.roundNo to SortOrder.ASC, MatchesTable.fixtureNo to SortOrder.ASC, MatchesTable.groupNo to SortOrder.ASC)
+            .map { it.toMatch(players = emptyList()) }
+    }
+
+    override suspend fun startFixture(match: Match): Boolean = db.query {
+        val updated = MatchesTable.update({ (MatchesTable.id eq match.id) and (MatchesTable.status eq MatchStatus.SCHEDULED) }) {
+            it[status] = match.status
+            it[scorerUid] = match.scorerUid
+            it[tossWinner] = match.tossWinner
+            it[tossDecision] = match.tossDecision
+            it[teamAName] = match.teamA.name
+            it[teamBName] = match.teamB.name
+            it[scoreSummary] = match.scoreSummary
+        }
+        if (updated == 0) return@query false
+        insertRoster(match.id, TeamSide.A, match.teamA)
+        insertRoster(match.id, TeamSide.B, match.teamB)
+        true
+    }
+
+    override suspend fun setSchedule(matchId: String, scheduledAt: Long?) {
+        db.query { MatchesTable.update({ MatchesTable.id eq matchId }) { it[MatchesTable.scheduledAt] = scheduledAt } }
+    }
+
     override suspend fun profileIds(matchIds: Collection<String>): Map<String, Set<String>> =
         if (matchIds.isEmpty()) emptyMap() else db.query {
             MatchPlayersTable.select(MatchPlayersTable.matchId, MatchPlayersTable.profileId)
@@ -174,6 +202,11 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[teamAId] = match.teamA.teamId
                 it[teamBId] = match.teamB.teamId
                 it[scheduledAt] = match.scheduledAt
+                it[tournamentId] = match.fixture?.tournamentId
+                it[stage] = match.fixture?.stage
+                it[roundNo] = match.fixture?.round
+                it[fixtureNo] = match.fixture?.number
+                it[groupNo] = match.fixture?.group
                 it.setResult(match)
             }
             insertRoster(match.id, TeamSide.A, match.teamA)
@@ -356,6 +389,9 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             rules = Json.decodeFromString(this[MatchesTable.rules]),
             scorerUid = this[MatchesTable.scorerUid],
             scheduledAt = this[MatchesTable.scheduledAt],
+            fixture = this[MatchesTable.tournamentId]?.let { tournament ->
+                FixtureInfo(tournament, this[MatchesTable.stage]!!, this[MatchesTable.roundNo]!!, this[MatchesTable.fixtureNo]!!, this[MatchesTable.groupNo])
+            },
             result = when {
                 this[MatchesTable.status] != MatchStatus.COMPLETED -> null
                 else -> MatchResult(

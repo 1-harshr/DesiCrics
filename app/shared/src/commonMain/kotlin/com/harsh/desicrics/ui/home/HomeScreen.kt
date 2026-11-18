@@ -88,13 +88,14 @@ fun HomeScreen(
     onTeams: () -> Unit,
     onSearch: () -> Unit,
     onNotifications: () -> Unit,
+    onTournaments: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val takeOver by viewModel.takeOver.collectAsStateWithLifecycle()
     var takingOver by rememberSaveable { mutableStateOf(false) }
     HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile, onTakeOver = { takingOver = true }, onTeams = onTeams,
-        onSearch = onSearch, onNotifications = onNotifications)
+        onSearch = onSearch, onNotifications = onNotifications, onTournaments = onTournaments)
     if (takingOver) {
         TakeOverSheet(
             state = takeOver,
@@ -151,6 +152,7 @@ fun HomeContent(
     onTeams: () -> Unit = {},
     onSearch: () -> Unit = {},
     onNotifications: () -> Unit = {},
+    onTournaments: () -> Unit = {},
 ) {
     val space = DesiTheme.space
     val feed = state.feed
@@ -163,9 +165,12 @@ fun HomeContent(
         item { Greeting(playerName, feed.unreadNotifications, onProfile, onSearch, onNotifications) }
         item { StartMatchCard(onNewMatch) }
         item {
-            Row(Modifier.padding(bottom = space.s4), horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                GhostButton(stringResource(Res.string.teams_title), onClick = onTeams, modifier = Modifier.weight(1f))
-                GhostButton(stringResource(Res.string.home_take_over), onClick = onTakeOver, modifier = Modifier.weight(1f))
+            Column(Modifier.padding(bottom = space.s4), verticalArrangement = Arrangement.spacedBy(space.s2)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                    GhostButton(stringResource(Res.string.teams_title), onClick = onTeams, modifier = Modifier.weight(1f))
+                    GhostButton(stringResource(Res.string.home_tournaments), onClick = onTournaments, modifier = Modifier.weight(1f))
+                }
+                GhostButton(stringResource(Res.string.home_take_over), onClick = onTakeOver, modifier = Modifier.fillMaxWidth())
             }
         }
         if (state.loadFailed) {

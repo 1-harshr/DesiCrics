@@ -4,6 +4,7 @@ import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.MatchRepository
 import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.data.TeamRepository
+import com.harsh.desicrics.data.TournamentRepository
 import com.harsh.desicrics.data.UserRepository
 import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.data.api.IdTokenProvider
@@ -18,6 +19,8 @@ import com.harsh.desicrics.ui.social.NotificationsViewModel
 import com.harsh.desicrics.ui.social.PlayerViewModel
 import com.harsh.desicrics.ui.social.SearchViewModel
 import com.harsh.desicrics.ui.teams.TeamViewModel
+import com.harsh.desicrics.ui.tournament.TournamentViewModel
+import com.harsh.desicrics.ui.tournament.TournamentsViewModel
 import com.harsh.desicrics.ui.teams.TeamsViewModel
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
@@ -60,6 +63,7 @@ val dataModule = module {
     singleOf(::MatchRepository)
     singleOf(::TeamRepository)
     singleOf(::SocialRepository)
+    singleOf(::TournamentRepository)
 }
 
 val viewModelModule = module {
@@ -68,11 +72,13 @@ val viewModelModule = module {
     viewModelOf(::EditProfileViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::NewMatchViewModel)
-    viewModel { (matchId: String) -> MatchViewModel(matchId, get(), get(), get()) }
+    viewModel { (matchId: String) -> MatchViewModel(matchId, get(), get(), get(), get(), get()) }
     viewModelOf(::TeamsViewModel)
     viewModelOf(::ProfileViewModel)
     viewModel { (teamId: String) -> TeamViewModel(teamId, get(), get(), get()) }
     viewModelOf(::SearchViewModel)
+    viewModelOf(::TournamentsViewModel)
+    viewModel { (tournamentId: String) -> TournamentViewModel(tournamentId, get(), get(), get()) }
     viewModelOf(::NotificationsViewModel)
     viewModel { (profileId: String, myId: String?) -> PlayerViewModel(profileId, get(), myId) }
 }

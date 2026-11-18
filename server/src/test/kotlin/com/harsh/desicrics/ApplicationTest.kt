@@ -143,7 +143,7 @@ class ApplicationTest {
         assertEquals(MatchStatus.COMPLETED, listed.status)
         assertEquals(MatchResult(TeamSide.A, 4, MarginUnit.RUNS), listed.result)
         assertEquals(
-            listOf(InningsScore(TeamSide.A, 4, 0, 6, maxBalls = 6), InningsScore(TeamSide.B, 0, 1, 1, target = 5, maxBalls = 6)),
+            listOf(InningsScore(TeamSide.A, 4, 0, 6, maxBalls = 6), InningsScore(TeamSide.B, 0, 1, 1, target = 5, maxBalls = 6, allOut = true)),
             listed.innings,
         )
         val details = client.get("/matches/${match.id}") { bearerAuth("test-dev") }.body<MatchDetails>()

@@ -38,6 +38,7 @@ import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.home.HomeMatchCard
 import com.harsh.desicrics.ui.teams.TeamRow
+import com.harsh.desicrics.ui.text.formatDayAndTime
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -153,6 +154,9 @@ fun notificationText(n: Notification): String = when (n.kind) {
     NotificationKind.MATCH_RESULT -> stringResource(Res.string.notification_result, n.matchTitle, n.detail.orEmpty())
     NotificationKind.MILESTONE_RUNS -> stringResource(Res.string.notification_runs, n.playerName.orEmpty(), n.value ?: 0, n.matchTitle)
     NotificationKind.MILESTONE_WICKETS -> stringResource(Res.string.notification_wickets, n.playerName.orEmpty(), n.value ?: 0, n.matchTitle)
+    NotificationKind.FIXTURE_RESCHEDULED -> n.detail?.toLongOrNull()
+        ?.let { stringResource(Res.string.notification_rescheduled, n.matchTitle, formatDayAndTime(it)) }
+        ?: stringResource(Res.string.notification_rescheduled_unset, n.matchTitle)
 }
 
 @Composable

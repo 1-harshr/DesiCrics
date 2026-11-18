@@ -6,6 +6,7 @@ import com.harsh.desicrics.api.HandoverCode
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.MatchSetupError
 import com.harsh.desicrics.api.SquadRequest
+import com.harsh.desicrics.api.StartFixtureRequest
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.live.MatchListener
@@ -25,6 +26,7 @@ import com.harsh.desicrics.store.TeamStore
 import com.harsh.desicrics.store.UserStore
 import io.ktor.http.HttpStatusCode
 import java.util.UUID
+import java.util.concurrent.CopyOnWriteArrayList
 
 /** A failure the client should see, with the HTTP status to send. */
 class ApiException(val status: HttpStatusCode, override val message: String) : Exception(message)
@@ -68,9 +70,16 @@ class MatchService(
     private val players: PlayerStore,
     private val teams: TeamStore,
     /** Told about every change: the live feed and notifications. */
-    private val listeners: List<MatchListener> = emptyList(),
+    listeners: List<MatchListener> = emptyList(),
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
+    private val listeners = CopyOnWriteArrayList(listeners)
+
+    /** For listeners that need this service themselves, like tournaments advancing a round. */
+    fun listen(listener: MatchListener) {
+        listeners += listener
+    }
+
     suspend fun recent(limit: Int): List<Match> = matches.recent(limit.coerceIn(1, 100))
 
     /** Matches the caller played in, scored or created, newest first. */
@@ -84,23 +93,7 @@ class MatchService(
         if (users.get(user.uid) == null) {
             throw ApiException(HttpStatusCode.Conflict, "Set up your profile before starting a match")
         }
-        val profileIds = (request.teamA.players + request.teamB.players).mapNotNull { it.profileId }
-        if (players.summaries(profileIds).size != profileIds.toSet().size) {
-            throw ApiException(HttpStatusCode.BadRequest, "One of those players doesn't exist")
-        }
-        for (teamId in listOfNotNull(request.teamA.teamId, request.teamB.teamId)) {
-            if (teams.get(teamId) == null) throw ApiException(HttpStatusCode.BadRequest, "One of those teams doesn't exist")
-        }
-        fun team(squad: SquadRequest): Team {
-            val roster = squad.players.map { Player(newId(), it.name.trim(), it.profileId) }
-            return Team(
-                name = squad.name.trim(),
-                players = roster,
-                teamId = squad.teamId,
-                captainId = squad.captain?.let { roster[it].id },
-                keeperId = squad.keeper?.let { roster[it].id },
-            )
-        }
+        checkSquads(request)
         val match = Match(
             id = newId(),
             createdBy = user.uid,
@@ -115,6 +108,69 @@ class MatchService(
         )
         matches.create(match)
         return MatchDetails(match, emptyList()).also { announce(null, it) }
+    }
+
+    /** Saves a tournament fixture: saved teams, no squads yet. */
+    suspend fun createFixture(match: Match) {
+        matches.create(match)
+        announce(null, MatchDetails(match, emptyList()))
+    }
+
+    /**
+     * Starts a scheduled fixture with the squads and toss in [request]; the caller becomes its scorer.
+     * Whether they're allowed to is the tournament's call, checked before this.
+     */
+    suspend fun startFixture(user: FirebasePrincipal, matchId: String, request: StartFixtureRequest): MatchDetails {
+        val before = details(matchId)
+        val fixture = before.match
+        if (fixture.status != MatchStatus.SCHEDULED) throw ApiException(HttpStatusCode.Conflict, "That match has already started")
+        if (request.teamA.teamId != fixture.teamA.teamId || request.teamB.teamId != fixture.teamB.teamId) {
+            throw ApiException(HttpStatusCode.BadRequest, "Pick squads from the teams in this fixture")
+        }
+        val asMatch = CreateMatchRequest(
+            request.teamA.copy(name = fixture.teamA.name), request.teamB.copy(name = fixture.teamB.name),
+            fixture.oversPerInnings, request.tossWinner, request.tossDecision, fixture.rules,
+        )
+        asMatch.validationError()?.let { throw ApiException(HttpStatusCode.BadRequest, it) }
+        checkSquads(asMatch)
+        val started = fixture.copy(
+            teamA = team(asMatch.teamA),
+            teamB = team(asMatch.teamB),
+            tossWinner = request.tossWinner,
+            tossDecision = request.tossDecision,
+            status = MatchStatus.IN_PROGRESS,
+            scorerUid = user.uid,
+        )
+        val next = MatchDetails(started, emptyList()).rescored()
+        if (!matches.startFixture(next.match)) throw ApiException(HttpStatusCode.Conflict, "That match has already started")
+        return next.also { announce(before, it) }
+    }
+
+    suspend fun schedule(matchId: String, scheduledAt: Long?): MatchDetails {
+        matches.setSchedule(matchId, scheduledAt)
+        return details(matchId)
+    }
+
+    /** Every linked player and team must exist. */
+    private suspend fun checkSquads(request: CreateMatchRequest) {
+        val profileIds = (request.teamA.players + request.teamB.players).mapNotNull { it.profileId }
+        if (players.summaries(profileIds).size != profileIds.toSet().size) {
+            throw ApiException(HttpStatusCode.BadRequest, "One of those players doesn't exist")
+        }
+        for (teamId in listOfNotNull(request.teamA.teamId, request.teamB.teamId)) {
+            if (teams.get(teamId) == null) throw ApiException(HttpStatusCode.BadRequest, "One of those teams doesn't exist")
+        }
+    }
+
+    private fun team(squad: SquadRequest): Team {
+        val roster = squad.players.map { Player(newId(), it.name.trim(), it.profileId) }
+        return Team(
+            name = squad.name.trim(),
+            players = roster,
+            teamId = squad.teamId,
+            captainId = squad.captain?.let { roster[it].id },
+            keeperId = squad.keeper?.let { roster[it].id },
+        )
     }
 
     suspend fun recordDelivery(user: FirebasePrincipal, matchId: String, delivery: Delivery): MatchDetails {

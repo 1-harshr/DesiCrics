@@ -125,21 +125,21 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 **Goal:** an organiser runs a multi-team event from fixtures to final in the app.
 
 ### Level 1 · Playable
-- ⬜ Create tournament, add teams
-- ⬜ Knockout and round-robin fixture generation
-- ⬜ Points table with NRR
+- ✅ Create tournament, add teams
+- ✅ Knockout and round-robin fixture generation ([ADR 0003](decisions/0003-tournament-fixtures.md))
+- ✅ Points table with NRR
 
 ### Level 2 · Complete
-- ⬜ Groups → quarters → semis → final
-- ⬜ Box league, double out, best of three, custom
-- ⬜ Organisers and co-organisers
-- ⬜ Tournament key stats (most runs, wickets, sixes)
+- ✅ Groups → quarters → semis → final
+- ✅ Box league, double out, best of three, custom
+- ✅ Organisers and co-organisers
+- ✅ Tournament key stats (most runs, wickets, sixes)
 
 ### Level 3 · Delight
 - ⬜ Player of the match / tournament
-- ⬜ Public tournament page link
-- ⬜ Team registration form
-- ⬜ Fixture reschedule notifications
+- ✅ Public tournament page link (`/t/{id}`)
+- ✅ Team registration: team admins enter while registration is open; organisers confirm or decline
+- ✅ Fixture reschedule notifications
 
 **Exit:** an 8-team weekend cup runs without a spreadsheet.
 

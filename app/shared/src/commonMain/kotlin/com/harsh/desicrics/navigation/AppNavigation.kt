@@ -23,6 +23,8 @@ import com.harsh.desicrics.ui.social.NotificationsScreen
 import com.harsh.desicrics.ui.social.PlayerScreen
 import com.harsh.desicrics.ui.social.SearchScreen
 import com.harsh.desicrics.ui.teams.TeamScreen
+import com.harsh.desicrics.ui.tournament.TournamentScreen
+import com.harsh.desicrics.ui.tournament.TournamentsScreen
 import com.harsh.desicrics.ui.teams.TeamsScreen
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.modules.SerializersModule
@@ -42,6 +44,8 @@ import kotlinx.serialization.modules.subclass
 @Serializable data object SearchRoute : NavKey
 @Serializable data object NotificationsRoute : NavKey
 @Serializable data class PlayerRoute(val profileId: String) : NavKey
+@Serializable data object TournamentsRoute : NavKey
+@Serializable data class TournamentRoute(val tournamentId: String) : NavKey
 /** Opened from a join link or QR code: the teams list with the join sheet filled in. */
 @Serializable data class JoinTeamRoute(val code: String) : NavKey
 
@@ -60,6 +64,8 @@ private val RouteSerialization = SavedStateConfiguration {
             subclass(SearchRoute::class)
             subclass(NotificationsRoute::class)
             subclass(PlayerRoute::class)
+            subclass(TournamentsRoute::class)
+            subclass(TournamentRoute::class)
         }
     }
 }
@@ -99,6 +105,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     onTeams = { backStack.add(TeamsRoute) },
                     onSearch = { backStack.add(SearchRoute) },
                     onNotifications = { backStack.add(NotificationsRoute) },
+                    onTournaments = { backStack.add(TournamentsRoute) },
                 )
             }
             entry<ProfileRoute> {
@@ -135,6 +142,17 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     onBack = back,
                 )
             }
+            entry<TournamentsRoute> {
+                TournamentsScreen(onOpen = { backStack.add(TournamentRoute(it)) }, onBack = back)
+            }
+            entry<TournamentRoute> { route ->
+                TournamentScreen(
+                    tournamentId = route.tournamentId,
+                    onOpenMatch = { backStack.add(MatchRoute(it)) },
+                    onOpenPlayer = { backStack.add(PlayerRoute(it)) },
+                    onBack = back,
+                )
+            }
             entry<NotificationsRoute> {
                 NotificationsScreen(onOpenMatch = { backStack.add(MatchRoute(it)) }, onBack = back)
             }
@@ -161,6 +179,7 @@ internal fun routeFor(path: String): NavKey? {
     return when (parts.first()) {
         "join" -> JoinTeamRoute(value)
         "m" -> MatchRoute(value)
+        "t" -> TournamentRoute(value)
         else -> null
     }
 }

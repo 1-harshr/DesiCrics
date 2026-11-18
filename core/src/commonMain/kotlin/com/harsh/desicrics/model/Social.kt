@@ -19,6 +19,8 @@ enum class NotificationKind {
     MILESTONE_RUNS,
     /** A followed player took [Notification.value] wickets. */
     MILESTONE_WICKETS,
+    /** A fixture's start time changed; [Notification.detail] is the new time in epoch milliseconds, or empty if unset. */
+    FIXTURE_RESCHEDULED,
 }
 
 /**

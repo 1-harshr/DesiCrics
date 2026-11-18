@@ -3,16 +3,21 @@ package com.harsh.desicrics.store
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.SupportRequest
 import com.harsh.desicrics.model.Delivery
+import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.Notification
+import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TeamSummary
+import com.harsh.desicrics.model.Tournament
+import com.harsh.desicrics.model.TournamentSummary
+import com.harsh.desicrics.model.TournamentTeam
 import com.harsh.desicrics.model.UserProfile
 
 /**
@@ -32,6 +37,14 @@ interface MatchStore {
 
     /** Newest first: matches [profileId] played in, scored or created. */
     suspend fun forPlayer(profileId: String, limit: Int): List<Match>
+
+    /** A tournament's fixtures (without rosters), by round. */
+    suspend fun forTournament(tournamentId: String): List<Match>
+
+    /** Turns a scheduled fixture into a match in play with [match]'s squads and toss. False if it had already started. */
+    suspend fun startFixture(match: Match): Boolean
+
+    suspend fun setSchedule(matchId: String, scheduledAt: Long?)
 
     /** Profile IDs who played in each of [matchIds]. */
     suspend fun profileIds(matchIds: Collection<String>): Map<String, Set<String>>
@@ -164,4 +177,19 @@ interface SocialStore {
     suspend fun savePushToken(uid: String, token: String, platform: String, at: Long)
     suspend fun pushTokens(uids: Collection<String>): Map<String, List<String>>
     suspend fun deletePushTokens(tokens: Collection<String>)
+}
+
+interface TournamentStore {
+    suspend fun create(tournament: Tournament)
+    /** With its organisers (named) and entered teams. */
+    suspend fun get(tournamentId: String): Tournament?
+    /** Tournaments [uid] organises, or that a team they belong to is in. */
+    suspend fun forUser(uid: String): List<TournamentSummary>
+    /** False if the team was already entered. */
+    suspend fun addTeam(tournamentId: String, team: TournamentTeam): Boolean
+    suspend fun setTeamStatus(tournamentId: String, teamId: String, status: EntryStatus)
+    suspend fun removeTeam(tournamentId: String, teamId: String)
+    suspend fun addOrganiser(tournamentId: String, uid: String, role: OrganiserRole)
+    /** Fixes the teams' groups and marks the tournament started. False if it already was. */
+    suspend fun markStarted(tournamentId: String, teams: List<TournamentTeam>): Boolean
 }

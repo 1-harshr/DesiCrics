@@ -240,7 +240,8 @@ object ScoringEngine {
         val allOutWickets = battingTeam.players.size - if (rules.lastManStands) 0 else 1
         // Also over when nobody is left to fill the crease, e.g. retired batters the rules keep out.
         val battersNeeded = if (rules.lastManStands) 1 else 2
-        val isComplete = declared || wickets >= allOutWickets ||
+        // A fixture without squads yet hasn't started, so it can't be over.
+        val isComplete = battingTeam.players.isNotEmpty() && (declared || wickets >= allOutWickets) ||
             atCrease.size + canComeIn.size < battersNeeded ||
             legalBalls >= maxBalls ||
             (target != null && runs >= target)

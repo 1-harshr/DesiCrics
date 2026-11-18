@@ -1,0 +1,154 @@
+package com.harsh.desicrics.ui.tournament
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.harsh.desicrics.api.CreateTournamentRequest
+import com.harsh.desicrics.data.AuthRepository
+import com.harsh.desicrics.data.TeamRepository
+import com.harsh.desicrics.data.TournamentRepository
+import com.harsh.desicrics.model.PlayerSummary
+import com.harsh.desicrics.model.TeamRole
+import com.harsh.desicrics.model.TeamSummary
+import com.harsh.desicrics.model.TournamentDetails
+import com.harsh.desicrics.model.TournamentSummary
+import com.harsh.desicrics.ui.teams.attempt
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+data class TournamentsUiState(
+    val loading: Boolean = true,
+    val tournaments: List<TournamentSummary> = emptyList(),
+    val loadFailed: Boolean = false,
+    val saving: Boolean = false,
+    val createFailed: Boolean = false,
+)
+
+class TournamentsViewModel(private val repository: TournamentRepository) : ViewModel() {
+    private val _state = MutableStateFlow(TournamentsUiState())
+    val state: StateFlow<TournamentsUiState> = _state
+
+    init {
+        viewModelScope.launch {
+            attempt { repository.mine() }.fold(
+                onSuccess = { list -> _state.update { it.copy(loading = false, tournaments = list) } },
+                onFailure = { _state.update { it.copy(loading = false, loadFailed = true) } },
+            )
+        }
+    }
+
+    fun create(request: CreateTournamentRequest, onCreated: (String) -> Unit) {
+        if (_state.value.saving) return
+        if (request.validate() != null) {
+            _state.update { it.copy(createFailed = true) }
+            return
+        }
+        _state.update { it.copy(saving = true, createFailed = false) }
+        viewModelScope.launch {
+            val result = attempt { repository.create(request) }
+            _state.update { it.copy(saving = false, createFailed = result.isFailure) }
+            result.getOrNull()?.let { onCreated(it.tournament.id) }
+        }
+    }
+
+    fun clearError() = _state.update { it.copy(createFailed = false) }
+}
+
+data class TournamentUiState(
+    val myId: String? = null,
+    val loading: Boolean = true,
+    val details: TournamentDetails? = null,
+    val loadFailed: Boolean = false,
+    val saving: Boolean = false,
+    val actionFailed: Boolean = false,
+    /** The caller's saved teams, to enter one. */
+    val myTeams: List<TeamSummary> = emptyList(),
+    val organiserQuery: String = "",
+    val organiserResults: List<PlayerSummary> = emptyList(),
+) {
+    val isOrganiser: Boolean get() = details?.tournament?.isOrganiser(myId) == true
+
+    /** Teams the caller runs that aren't in yet, for registering while registration is open. */
+    val registrable: List<TeamSummary>
+        get() {
+            val entered = details?.tournament?.teams.orEmpty().map { it.teamId }.toSet()
+            return myTeams.filter { it.id !in entered && (isOrganiser || it.myRole == TeamRole.ADMIN) }
+        }
+}
+
+class TournamentViewModel(
+    private val tournamentId: String,
+    private val repository: TournamentRepository,
+    private val teams: TeamRepository,
+    auth: AuthRepository,
+) : ViewModel() {
+    private val _state = MutableStateFlow(TournamentUiState(myId = auth.currentUser?.uid))
+    val state: StateFlow<TournamentUiState> = _state
+    private var searchJob: Job? = null
+
+    val link: String = repository.link(tournamentId)
+
+    init {
+        refresh()
+        viewModelScope.launch {
+            attempt { teams.myTeams() }.getOrNull()?.let { mine -> _state.update { it.copy(myTeams = mine) } }
+        }
+    }
+
+    /** Fixtures and tables move as matches are played, so the screen reloads when it comes back into view. */
+    fun refresh() {
+        viewModelScope.launch {
+            attempt { repository.details(tournamentId) }.fold(
+                onSuccess = { details -> _state.update { it.copy(loading = false, details = details, loadFailed = false) } },
+                onFailure = { _state.update { it.copy(loading = false, loadFailed = it.details == null) } },
+            )
+        }
+    }
+
+    fun enterTeam(teamId: String) = act { repository.enterTeam(tournamentId, teamId) }
+
+    fun review(teamId: String, confirm: Boolean) = act { repository.review(tournamentId, teamId, confirm) }
+
+    fun start() = act { repository.start(tournamentId) }
+
+    fun addFixture(teamAId: String, teamBId: String) = act { repository.addFixture(tournamentId, teamAId, teamBId) }
+
+    fun addOrganiser(profileId: String) = act { repository.addOrganiser(tournamentId, profileId) }
+
+    fun schedule(matchId: String, at: Long?) {
+        viewModelScope.launch {
+            if (attempt { repository.schedule(matchId, at) }.isFailure) _state.update { it.copy(actionFailed = true) }
+            refresh()
+        }
+    }
+
+    fun searchOrganiser(query: String) {
+        _state.update { it.copy(organiserQuery = query) }
+        searchJob?.cancel()
+        if (query.trim().length < 2) {
+            _state.update { it.copy(organiserResults = emptyList()) }
+            return
+        }
+        searchJob = viewModelScope.launch {
+            delay(300)
+            val results = attempt { teams.search(query) }.getOrDefault(emptyList())
+            _state.update { it.copy(organiserResults = results) }
+        }
+    }
+
+    fun clearError() = _state.update { it.copy(actionFailed = false) }
+
+    private fun act(call: suspend () -> TournamentDetails) {
+        if (_state.value.saving) return
+        _state.update { it.copy(saving = true, actionFailed = false) }
+        viewModelScope.launch {
+            attempt { call() }.fold(
+                onSuccess = { details -> _state.update { it.copy(saving = false, details = details) } },
+                onFailure = { _state.update { it.copy(saving = false, actionFailed = true) } },
+            )
+        }
+    }
+}

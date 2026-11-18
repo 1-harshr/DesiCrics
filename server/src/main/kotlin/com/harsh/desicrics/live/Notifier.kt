@@ -41,9 +41,12 @@ class Notifier(
         val match = after.match
         val title = "${match.teamA.name} vs ${match.teamB.name}"
         val matchFollowers = followersOf(match) - match.scorerUid
+        // A fixture starts when its squads and toss are in, not when the tournament schedules it.
+        val started = (before == null && match.status != MatchStatus.SCHEDULED) ||
+            (before?.match?.status == MatchStatus.SCHEDULED && match.status == MatchStatus.IN_PROGRESS)
         when {
-            before == null -> notify(matchFollowers, NotificationKind.MATCH_STARTED, match, title, message = "$title has started")
-            before.match.status != MatchStatus.COMPLETED && match.status == MatchStatus.COMPLETED ->
+            started -> notify(matchFollowers, NotificationKind.MATCH_STARTED, match, title, message = "$title has started")
+            before != null && before.match.status != MatchStatus.COMPLETED && match.status == MatchStatus.COMPLETED ->
                 notify(matchFollowers, NotificationKind.MATCH_RESULT, match, title, detail = match.scoreSummary, message = "$title: ${match.scoreSummary}")
         }
         if (before != null) milestones(before, after, title)
@@ -70,6 +73,19 @@ class Notifier(
                 notify(followers, NotificationKind.MILESTONE_WICKETS, after.match, title, card.player.name, card.wickets, message = "${card.player.name} took ${card.wickets} wickets in $title")
             }
         }
+    }
+
+    /** A fixture's start time moved: everyone following either team or a player in it hears. */
+    suspend fun rescheduled(match: Match) {
+        val title = "${match.teamA.name} vs ${match.teamB.name}"
+        notify(
+            followersOf(match),
+            NotificationKind.FIXTURE_RESCHEDULED,
+            match,
+            title,
+            detail = match.scheduledAt?.toString().orEmpty(),
+            message = "$title has been rescheduled",
+        )
     }
 
     private suspend fun followersOf(match: Match): Set<String> {

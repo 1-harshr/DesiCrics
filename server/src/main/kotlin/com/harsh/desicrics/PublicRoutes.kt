@@ -3,11 +3,13 @@ package com.harsh.desicrics
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.MatchStatus
+import com.harsh.desicrics.model.TournamentDetails
 import com.harsh.desicrics.scoring.BatterCard
 import com.harsh.desicrics.scoring.Retirement
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.service.ApiException
 import com.harsh.desicrics.service.MatchService
+import com.harsh.desicrics.service.TournamentService
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respondText
@@ -18,7 +20,17 @@ import io.ktor.server.routing.get
  * Pages anyone can open without signing in, for links shared outside the app. Phones with the app open
  * these links in it directly; this is what everyone else sees.
  */
-fun Route.publicRoutes(matches: MatchService) {
+fun Route.publicRoutes(matches: MatchService, tournaments: TournamentService) {
+    get("/t/{id}") {
+        val details = try {
+            tournaments.details(call.parameters["id"].orEmpty())
+        } catch (e: ApiException) {
+            call.respondText(page("Tournament not found", "<h1>Tournament not found</h1>"), ContentType.Text.Html, HttpStatusCode.NotFound)
+            return@get
+        }
+        call.respondText(tournamentPage(details), ContentType.Text.Html)
+    }
+
     get("/m/{id}") {
         val details = try {
             matches.details(call.parameters["id"].orEmpty())
@@ -95,6 +107,45 @@ private fun howOut(card: BatterCard): String {
         DismissalKind.HIT_BALL_TWICE -> "hit the ball twice"
         DismissalKind.OTHER -> "out"
     }
+}
+
+/** The tournament for anyone with the link: champion, tables, fixtures and top performers. */
+internal fun tournamentPage(details: TournamentDetails): String {
+    val t = details.tournament
+    val names = t.teams.associate { it.teamId to it.name }
+    val body = buildString {
+        append("<h1>${t.name.escapeHtml()}</h1><p class=\"muted\">${listOf(t.city, "${t.oversPerInnings} overs").filter { it.isNotBlank() }.joinToString(" · ").escapeHtml()}</p>")
+        details.championId?.let { append("<p class=\"code\">🏆 ${names[it].orEmpty().escapeHtml()}</p>") }
+        details.tables.forEachIndexed { group, table ->
+            val title = if (details.tables.size > 1) "Group ${'A' + group}" else "Points table"
+            append("<div class=\"card\"><h2>$title</h2><table><tr><th>Team</th><th>P</th><th>W</th><th>L</th><th>Pts</th><th>NRR</th></tr>")
+            for (row in table) {
+                append("<tr><td>${row.name.escapeHtml()}</td><td>${row.played}</td><td>${row.won}</td><td>${row.lost}</td><td>${row.points}</td>")
+                append("<td>${"%+.3f".format(row.netRunRate)}</td></tr>")
+            }
+            append("</table></div>")
+        }
+        append("<div class=\"card\"><h2>Fixtures</h2><table>")
+        for (match in details.fixtures) {
+            val status = when (match.status) {
+                MatchStatus.SCHEDULED -> "To play"
+                MatchStatus.COMPLETED -> match.scoreSummary
+                else -> "Live · ${match.scoreSummary}"
+            }
+            append("<tr><td><a href=\"/m/${match.id}\">${match.teamA.name.escapeHtml()} vs ${match.teamB.name.escapeHtml()}</a>")
+            append("<br><span class=\"muted\">${match.fixture?.stage?.name.orEmpty().lowercase().replaceFirstChar { it.uppercase() }} · ${status.escapeHtml()}</span></td></tr>")
+        }
+        append("</table></div>")
+        val stats = details.keyStats
+        for ((title, leaders) in listOf("Most runs" to stats.mostRuns, "Most wickets" to stats.mostWickets, "Most sixes" to stats.mostSixes)) {
+            if (leaders.isEmpty()) continue
+            append("<div class=\"card\"><h2>$title</h2><table>")
+            leaders.forEach { append("<tr><td>${it.name.escapeHtml()} <span class=\"muted\">${it.team.escapeHtml()}</span></td><td>${it.value}</td></tr>") }
+            append("</table></div>")
+        }
+        append("<p class=\"muted\">Run on DesiCrics</p>")
+    }
+    return page(t.name, body, refreshSeconds = if (details.fixtures.any { it.status == MatchStatus.IN_PROGRESS }) 30 else null)
 }
 
 /** A small mobile-first page in the app's colours. [body] must already be HTML-escaped. */
