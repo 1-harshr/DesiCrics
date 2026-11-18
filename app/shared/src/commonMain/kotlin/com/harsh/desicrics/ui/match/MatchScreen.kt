@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,6 +58,7 @@ import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.RuleMode
@@ -97,6 +101,8 @@ fun MatchScreen(
             onSelectNonStriker = viewModel::selectNonStriker,
             onSelectBowler = viewModel::selectBowler,
             onRuns = viewModel::recordRuns,
+            onHandover = viewModel::startHandover,
+            onDismissHandover = viewModel::dismissHandover,
             onExtra = viewModel::recordExtra,
             onWicket = viewModel::recordWicket,
             onUndo = viewModel::undo,
@@ -120,7 +126,9 @@ class MatchActions(
     val onSelectStriker: (playerId: String) -> Unit,
     val onSelectNonStriker: (playerId: String) -> Unit,
     val onSelectBowler: (playerId: String) -> Unit,
-    val onRuns: (Int) -> Unit,
+    val onRuns: (Int, FieldZone?) -> Unit,
+    val onHandover: () -> Unit,
+    val onDismissHandover: () -> Unit,
     val onExtra: (ExtraType, runs: Int) -> Unit,
     val onWicket: (DismissalKind, playerOutId: String, fielderId: String?, runsCompleted: Int) -> Unit,
     val onUndo: () -> Unit,
@@ -157,6 +165,8 @@ private sealed interface ScoringSheet {
     data object MatchOptions : ScoringSheet
     data object Penalty : ScoringSheet
     data object ReviseTarget : ScoringSheet
+    /** Where a scoring shot went, for the wagon wheel. */
+    data class Zone(val runs: Int) : ScoringSheet
 }
 
 /**
@@ -213,7 +223,10 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
                     GhostButton(stringResource(Res.string.match_undo_last_ball), onClick = actions.onUndo, modifier = Modifier.fillMaxWidth())
                 }
             }
-            MatchTab.SCORECARD -> state.innings.forEach { InningsScorecard(it) }
+            MatchTab.SCORECARD -> state.innings.forEach {
+                InningsScorecard(it)
+                InningsWagonWheel(it)
+            }
             // Latest innings first, so the over in progress is at the top.
             MatchTab.OVERS -> state.innings.asReversed().forEach { InningsOvers(it, showTitle = state.innings.size > 1) }
         }
@@ -225,6 +238,33 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
 
     ScoringSheets(sheet, ui, state, actions, onSheet = { sheet = it }, onClose = { sheet = null })
     ui.pendingBall?.let { RuleWarningSheet(it, actions.onRecordPendingBall, actions.onDropPendingBall) }
+    if (ui.handoverCode != null || ui.handoverFailed) HandoverSheet(ui.handoverCode?.code, actions.onDismissHandover)
+    ScoringHaptics(ui)
+}
+
+/**
+ * A buzz the scorer can feel for each new ball, so they can keep their eyes on the field: a strong one for
+ * a wicket, a confirming one for a boundary, a light tick for the rest. Only for balls added while the
+ * screen is open, not the ones loaded with it.
+ */
+@Composable
+private fun ScoringHaptics(ui: MatchUiState) {
+    if (!ui.isScorer) return
+    val haptics = LocalHapticFeedback.current
+    var seen by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(ui.deliveries.size) {
+        val previous = seen
+        seen = ui.deliveries.size
+        if (previous == null || ui.deliveries.size <= previous) return@LaunchedEffect
+        val last = ui.deliveries.last()
+        haptics.performHapticFeedback(
+            when {
+                last.wicket != null -> HapticFeedbackType.Reject
+                last.runsOffBat == 4 || last.runsOffBat == 6 -> HapticFeedbackType.Confirm
+                else -> HapticFeedbackType.VirtualKey
+            },
+        )
+    }
 }
 
 /** The green header: teams, then the batting side's score, overs and where the chase stands. */
@@ -287,6 +327,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onOptions: (() -> 
         } else {
             val details = buildList {
                 add(stringResource(Res.string.match_run_rate, innings.runRate.format2()))
+                if (innings.isPowerplay) add(stringResource(Res.string.match_powerplay))
                 if (innings.isRevised) add(stringResource(Res.string.match_revised))
                 innings.target?.let { add(stringResource(Res.string.match_target, it)) }
                 innings.runsNeeded?.let { add(pluralStringResource(Res.plurals.match_need, innings.ballsRemaining, it, innings.ballsRemaining)) }
@@ -487,7 +528,10 @@ private fun ScoringPad(ui: MatchUiState, actions: MatchActions, onSheet: (Scorin
                     "lb" -> onSheet(ScoringSheet.Extra(ExtraType.LEG_BYE))
                     "out" -> onSheet(ScoringSheet.Wicket)
                     "undo" -> actions.onUndo()
-                    else -> actions.onRuns(key.id.toInt())
+                    else -> {
+                        val runs = key.id.toInt()
+                        if (ui.match?.rules?.wagonWheel == true && runs > 0) onSheet(ScoringSheet.Zone(runs)) else actions.onRuns(runs, null)
+                    }
                 }
             })
         }
@@ -591,6 +635,10 @@ private fun ScoringSheets(
                 SheetOption(stringResource(Res.string.match_penalty), stringResource(Res.string.match_penalty_hint)) {
                     onSheet(ScoringSheet.Penalty)
                 },
+                SheetOption(stringResource(Res.string.match_handover), stringResource(Res.string.match_handover_hint)) {
+                    actions.onHandover()
+                    onClose()
+                },
                 SheetOption(stringResource(Res.string.match_revise), stringResource(Res.string.match_revise_hint)) {
                     onSheet(ScoringSheet.ReviseTarget)
                 },
@@ -609,6 +657,14 @@ private fun ScoringSheets(
             fieldingTeam = innings.bowlingTeam.name,
             onAward = { toBatting, runs ->
                 actions.onPenalty(toBatting, runs)
+                onClose()
+            },
+            onDismiss = onClose,
+        )
+        is ScoringSheet.Zone -> ZoneSheet(
+            runs = sheet.runs,
+            onPick = { zone ->
+                actions.onRuns(sheet.runs, zone)
                 onClose()
             },
             onDismiss = onClose,
@@ -712,7 +768,7 @@ private fun previewBalls(): List<Delivery> {
 private fun previewUi(deliveries: List<Delivery>, isScorer: Boolean = true) =
     MatchUiState(loading = false, match = PreviewMatch, deliveries = deliveries, state = ScoringEngine.compute(PreviewMatch, deliveries), isScorer = isScorer)
 
-private val PreviewActions = MatchActions({}, {}, {}, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _ -> }, {}, { _, _ -> }, {}, {})
+private val PreviewActions = MatchActions({}, {}, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _ -> }, {}, { _, _ -> }, {}, {})
 
 @Preview
 @Composable

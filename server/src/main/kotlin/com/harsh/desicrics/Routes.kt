@@ -59,7 +59,14 @@ fun Route.matchRoutes(matches: MatchService) {
             delete("/last") {
                 call.respond(matches.undoLast(call.user, call.matchId))
             }
+            post("/handover") {
+                call.respond(matches.startHandover(call.user, call.matchId))
+            }
         }
+    }
+    post("/handover/{code}") {
+        val code = call.parameters["code"] ?: throw ApiException(HttpStatusCode.BadRequest, "Missing code")
+        call.respond(matches.takeHandover(call.user, code))
     }
 }
 

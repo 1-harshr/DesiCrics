@@ -31,6 +31,8 @@ data class Delivery(
     val extraPenalty: Int = 1,
     /** A wide or no-ball the match doesn't re-bowl, so it counts as one of the over's six. */
     val countsAsBall: Boolean = false,
+    /** Where the shot went, when the match tracks a wagon wheel. Only for runs off the bat. */
+    val zone: FieldZone? = null,
 ) {
     /** Counts as one of the over's six balls. */
     val isLegal: Boolean get() = !isWideOrNoBall || countsAsBall
@@ -45,6 +47,20 @@ data class Delivery(
     /** Runs charged to the bowler: byes and leg byes are not. */
     val bowlerRuns: Int
         get() = runsOffBat + if (isWideOrNoBall) extraRuns else 0
+}
+
+/** The eight wagon wheel sectors, named from the batter's side, so they read the same for left-handers. */
+@Serializable
+enum class FieldZone {
+    THIRD_MAN, POINT, COVER, LONG_OFF, LONG_ON, MID_WICKET, SQUARE_LEG, FINE_LEG;
+
+    companion object {
+        /**
+         * Clockwise from straight down the ground, as the batter sees it: off side on the right, so a wagon
+         * wheel drawn in this order reads the same for left- and right-handers.
+         */
+        val Clockwise = listOf(LONG_OFF, COVER, POINT, THIRD_MAN, FINE_LEG, SQUARE_LEG, MID_WICKET, LONG_ON)
+    }
 }
 
 @Serializable

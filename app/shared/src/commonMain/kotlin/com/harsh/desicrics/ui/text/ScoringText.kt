@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchResult
@@ -115,6 +116,18 @@ fun commentaryText(ball: BallEvent): String {
     return stringResource(Res.string.commentary_line, ball.bowler.name, ball.striker.name, event)
 }
 
+val FieldZone.label: StringResource
+    get() = when (this) {
+        FieldZone.THIRD_MAN -> Res.string.zone_third_man
+        FieldZone.POINT -> Res.string.zone_point
+        FieldZone.COVER -> Res.string.zone_cover
+        FieldZone.LONG_OFF -> Res.string.zone_long_off
+        FieldZone.LONG_ON -> Res.string.zone_long_on
+        FieldZone.MID_WICKET -> Res.string.zone_mid_wicket
+        FieldZone.SQUARE_LEG -> Res.string.zone_square_leg
+        FieldZone.FINE_LEG -> Res.string.zone_fine_leg
+    }
+
 val DeliveryError.label: StringResource
     get() = when (this) {
         DeliveryError.MATCH_OVER -> Res.string.scoring_error_match_over
@@ -151,6 +164,7 @@ val DeliveryError.label: StringResource
         DeliveryError.NOT_OUT_ON_FREE_HIT -> Res.string.scoring_error_not_out_on_free_hit
         DeliveryError.REVISED_OVERS_INVALID -> Res.string.scoring_error_revised_overs_invalid
         DeliveryError.REVISED_TARGET_INVALID -> Res.string.scoring_error_revised_target_invalid
+        DeliveryError.ZONE_WITHOUT_RUNS -> Res.string.scoring_error_zone_without_runs
     }
 
 // Previews: sample teams and players only; every line of text comes from string resources.

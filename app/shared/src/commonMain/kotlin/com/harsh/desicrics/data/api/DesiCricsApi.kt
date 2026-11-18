@@ -3,6 +3,7 @@ package com.harsh.desicrics.data.api
 import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.ApiError
 import com.harsh.desicrics.api.CreateMatchRequest
+import com.harsh.desicrics.api.HandoverCode
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.model.Delivery
@@ -73,6 +74,16 @@ class DesiCricsApi(
 
     suspend fun addPlayer(matchId: String, request: AddPlayerRequest): MatchDetails =
         call { post("$baseUrl/matches/$matchId/players") { it(); json(request) } }.body()
+
+    suspend fun startHandover(matchId: String): HandoverCode =
+        call { post("$baseUrl/matches/$matchId/handover", it) }.body()
+
+    /** Null if the code is wrong or has expired. */
+    suspend fun takeHandover(code: String): MatchDetails? = try {
+        call { post("$baseUrl/handover/$code", it) }.body()
+    } catch (e: ApiException) {
+        if (e.status == HttpStatusCode.NotFound) null else throw e
+    }
 
     /** Removes the latest ball or event. */
     suspend fun undoLast(matchId: String): MatchDetails =

@@ -5,6 +5,7 @@ import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.PlayerRole
@@ -56,6 +57,7 @@ object MatchesTable : Table("matches") {
     val inningsScores = text("innings_scores")
     /** JSON MatchRules. */
     val rules = text("rules")
+    val scorerUid = varchar("scorer_uid", 128)
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -85,6 +87,7 @@ object DeliveriesTable : Table("deliveries") {
     val fielderId = reference("fielder_id", MatchPlayersTable.id).nullable()
     val extraPenalty = integer("extra_penalty")
     val countsAsBall = bool("counts_as_ball")
+    val zone = enumerationByName("zone", 12, FieldZone::class).nullable()
     val createdAt = long("created_at")
     override val primaryKey = PrimaryKey(matchId, seq)
 }
@@ -103,6 +106,14 @@ object MatchEventsTable : Table("match_events") {
     val target = integer("target").nullable()
     val createdAt = long("created_at")
     override val primaryKey = PrimaryKey(matchId, seq)
+}
+
+/** Codes a scorer shows so someone else can take over the match. */
+object ScorerHandoversTable : Table("scorer_handovers") {
+    val code = varchar("code", 6)
+    val matchId = reference("match_id", MatchesTable.id, onDelete = ReferenceOption.CASCADE)
+    val expiresAt = long("expires_at")
+    override val primaryKey = PrimaryKey(code)
 }
 
 /** A connected database plus the pool behind it, so the server can close it on shutdown. */

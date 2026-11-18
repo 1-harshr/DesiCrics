@@ -22,6 +22,8 @@ import kotlinx.serialization.Serializable
 //   POST   /matches/{id}/events             MatchEvent → MatchDetails
 //   POST   /matches/{id}/players            AddPlayerRequest → MatchDetails
 //   DELETE /matches/{id}/last               → MatchDetails (undoes the latest ball or event)
+//   POST   /matches/{id}/handover           → HandoverCode (scorer only)
+//   POST   /handover/{code}                 → MatchDetails (the caller becomes the scorer)
 
 @Serializable
 data class UpdateProfileRequest(
@@ -118,6 +120,10 @@ data class AddPlayerRequest(val side: TeamSide, val name: String) {
         else -> null
     }
 }
+
+/** A short-lived code the scorer shows so someone else can take over scoring on their phone. */
+@Serializable
+data class HandoverCode(val code: String, val expiresAt: Long)
 
 @Serializable
 data class ApiError(val message: String)

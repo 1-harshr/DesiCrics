@@ -44,6 +44,15 @@ interface MatchStore {
     /** Adds a player to one side of an existing match, after the current squad. */
     suspend fun addPlayer(matchId: String, side: TeamSide, player: Player)
 
+    /** Saves a handover code for the match, replacing any earlier one. False if [code] is already in use. */
+    suspend fun saveHandover(matchId: String, code: String, expiresAt: Long): Boolean
+
+    /**
+     * Uses up [code]: if it's still valid at [now], [newScorer] becomes the match's scorer. Returns the
+     * match ID, or null if the code is unknown or expired.
+     */
+    suspend fun takeHandover(code: String, now: Long, newScorer: String): String?
+
     /** Matches with balls bowled but no per-innings scores, i.e. scored before scores were stored. */
     suspend fun idsMissingInningsScores(): List<String>
 

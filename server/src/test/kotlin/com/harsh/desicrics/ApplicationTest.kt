@@ -3,6 +3,7 @@ package com.harsh.desicrics
 import com.harsh.desicrics.api.ApiError
 import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.CreateMatchRequest
+import com.harsh.desicrics.api.HandoverCode
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.auth.FirebasePrincipal
@@ -10,6 +11,7 @@ import com.harsh.desicrics.auth.TokenVerifier
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.InningsScore
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
@@ -286,6 +288,29 @@ class ApplicationTest {
         val three = Delivery(3, innings = 2, strikerId = b1.id, nonStrikerId = b2.id, bowlerId = a1.id, runsOffBat = 3)
         val won = client.record("asha", match.id, three).body<MatchDetails>()
         assertEquals(MatchResult(TeamSide.B, 1, MarginUnit.WICKETS), won.match.result)
+    }
+
+    @Test
+    fun scoringHandsOverWithACode() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev")
+        val match = client.createMatch("asha", MatchRules(wagonWheel = true)).match
+        val (a1, a2) = match.teamA.players
+        val b1 = match.teamB.players.first()
+
+        // Only the scorer can make a code.
+        assertEquals(HttpStatusCode.Forbidden, client.post("/matches/${match.id}/handover") { bearerAuth("test-dev") }.status)
+        val code = client.post("/matches/${match.id}/handover") { bearerAuth("test-asha") }.body<HandoverCode>()
+        assertEquals(6, code.code.length)
+
+        val taken = client.post("/handover/${code.code}") { bearerAuth("test-dev") }.body<MatchDetails>()
+        assertEquals("dev", taken.match.scorerUid)
+        // Codes work once, and the old scorer can't score any more.
+        assertEquals(HttpStatusCode.NotFound, client.post("/handover/${code.code}") { bearerAuth("test-dev") }.status)
+        val four = Delivery(0, innings = 1, strikerId = a1.id, nonStrikerId = a2.id, bowlerId = b1.id, runsOffBat = 4, zone = FieldZone.COVER)
+        assertEquals(HttpStatusCode.Forbidden, client.record("asha", match.id, four).status)
+        val scored = client.record("dev", match.id, four).body<MatchDetails>()
+        assertEquals(FieldZone.COVER, scored.deliveries.single().zone)
     }
 
     @Test

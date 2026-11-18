@@ -20,6 +20,8 @@ data class Match(
     /** Score of each innings started so far, for list screens that don't load the deliveries. */
     val innings: List<InningsScore> = emptyList(),
     val rules: MatchRules = MatchRules(),
+    /** Who scores the match now. Starts as [createdBy]; a handover code moves it to another device's user. */
+    val scorerUid: String = createdBy,
 ) {
     val battingFirst: TeamSide
         get() = if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other

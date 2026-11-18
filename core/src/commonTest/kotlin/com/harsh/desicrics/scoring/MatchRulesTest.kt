@@ -3,6 +3,7 @@ package com.harsh.desicrics.scoring
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchRules
@@ -249,6 +250,27 @@ class MatchRulesTest {
         ball("a1", "a2", extra = ExtraType.NO_BALL, extraRuns = 1)
         assertFalse(state().current.isFreeHit)
         ball("a1", "a2", wicket = Wicket(DismissalKind.BOWLED, "a1"))
+    }
+
+    @Test
+    fun wagonWheelZonesAddUpPerBatter() {
+        match = match(MatchRules(wagonWheel = true))
+        deliveries += delivery("a1", "a2", runs = 4).copy(zone = FieldZone.COVER)
+        deliveries += delivery("a1", "a2", runs = 2).copy(zone = FieldZone.COVER)
+        deliveries += delivery("a1", "a2", runs = 1).copy(zone = FieldZone.FINE_LEG)
+        deliveries += delivery("a2", "a1", runs = 6).copy(zone = FieldZone.LONG_ON)
+        val innings = state().current
+        assertEquals(mapOf(FieldZone.COVER to 6, FieldZone.FINE_LEG to 1), innings.zoneRuns("a1"))
+        assertEquals(13, innings.zoneRuns().values.sum())
+        assertEquals(DeliveryError.ZONE_WITHOUT_RUNS, error(delivery("a2", "a1").copy(zone = FieldZone.POINT)))
+    }
+
+    @Test
+    fun powerplayCoversTheFirstOvers() {
+        match = match(MatchRules(powerplayOvers = 1))
+        assertTrue(state().current.isPowerplay)
+        repeat(6) { ball("a1", "a2") }
+        assertFalse(state().current.isPowerplay)
     }
 
     @Test

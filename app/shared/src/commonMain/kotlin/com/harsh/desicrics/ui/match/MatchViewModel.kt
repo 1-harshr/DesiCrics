@@ -2,12 +2,14 @@ package com.harsh.desicrics.ui.match
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.harsh.desicrics.api.HandoverCode
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.MatchRepository
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.TeamSide
@@ -60,6 +62,9 @@ data class MatchUiState(
     val offline: Boolean = false,
     val error: ScoringError? = null,
     val pendingBall: PendingBall? = null,
+    /** Shown to the scorer until dismissed, so someone else can take over. */
+    val handoverCode: HandoverCode? = null,
+    val handoverFailed: Boolean = false,
 ) {
     val strikerId: String? get() = state?.current?.strikerId ?: selection.strikerId
     val nonStrikerId: String? get() = state?.current?.nonStrikerId ?: selection.nonStrikerId
@@ -132,7 +137,8 @@ class MatchViewModel(
 
     fun dismissError() = _state.update { it.copy(error = null) }
 
-    fun recordRuns(runs: Int) = record(runsOffBat = runs)
+    /** [zone] is where the shot went, when the match keeps a wagon wheel. */
+    fun recordRuns(runs: Int, zone: FieldZone? = null) = record(runsOffBat = runs, zone = zone)
 
     fun recordExtra(extra: ExtraType, runs: Int) {
         val penalty = _state.value.match?.rules?.penalty(extra) ?: return
@@ -154,6 +160,7 @@ class MatchViewModel(
         extra: ExtraType? = null,
         extraRuns: Int = 0,
         wicket: Wicket? = null,
+        zone: FieldZone? = null,
     ) {
         val ui = _state.value
         if (!ui.canScore) return
@@ -172,6 +179,7 @@ class MatchViewModel(
             timestamp = nowMillis(),
             extraPenalty = if (extra != null && wideOrNoBall) match.rules.penalty(extra) else 1,
             countsAsBall = wideOrNoBall && match.rules.countsAsBall(extra),
+            zone = zone,
         )
         // The same check the server runs, so a mistake shows straight away and in the user's language.
         ui.state.validate(delivery, delivery.seq)?.let { error ->
@@ -201,6 +209,23 @@ class MatchViewModel(
     }
 
     fun dropPendingBall() = _state.update { it.copy(pendingBall = null) }
+
+    fun startHandover() {
+        val match = _state.value.match ?: return
+        if (!_state.value.isScorer) return
+        viewModelScope.launch {
+            try {
+                val code = matchRepository.startHandover(match.id)
+                _state.update { it.copy(handoverCode = code, handoverFailed = false) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(handoverFailed = true) }
+            }
+        }
+    }
+
+    fun dismissHandover() = _state.update { it.copy(handoverCode = null, handoverFailed = false) }
 
     fun undo() {
         val ui = _state.value
@@ -289,6 +314,6 @@ class MatchViewModel(
         deliveries = details.deliveries,
         events = details.events,
         state = ScoringEngine.compute(details.match, details.deliveries, details.events),
-        isScorer = details.match.createdBy == uid,
+        isScorer = details.match.scorerUid == uid,
     )
 }

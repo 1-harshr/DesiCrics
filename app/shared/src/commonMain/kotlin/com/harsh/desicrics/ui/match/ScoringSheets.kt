@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiSheet
@@ -37,10 +38,12 @@ import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.RunPad
 import com.harsh.desicrics.designsystem.component.SectionLabel
 import com.harsh.desicrics.designsystem.component.SegmentedControl
+import com.harsh.desicrics.designsystem.component.WagonWheel
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.scoring.InningsState
@@ -282,6 +285,36 @@ internal fun ReviseTargetSheet(innings: InningsState, matchOvers: Int, onRevise:
             enabled = !chase || parsedTarget != null,
             modifier = Modifier.fillMaxWidth().padding(top = DesiTheme.space.s2),
         )
+    }
+}
+
+/** Where a scoring shot went: tap a sector of the field, or skip. Skipping still records the runs. */
+@Composable
+internal fun ZoneSheet(runs: Int, onPick: (FieldZone?) -> Unit, onDismiss: () -> Unit) {
+    val labels = FieldZone.Clockwise.map { stringResource(it.label) }
+    DesiSheet(pluralStringResource(Res.plurals.scoring_zone_title, runs, runs), onDismiss, stringResource(Res.string.scoring_zone_hint)) {
+        WagonWheel(labels = labels, onSector = { onPick(FieldZone.Clockwise[it]) })
+        GhostButton(stringResource(Res.string.scoring_zone_skip), onClick = { onPick(null) }, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+/** The handover code, big enough to read off from across the pitch. */
+@Composable
+internal fun HandoverSheet(code: String?, onDismiss: () -> Unit) {
+    DesiSheet(stringResource(Res.string.match_handover), onDismiss) {
+        if (code == null) {
+            Text(stringResource(Res.string.match_handover_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        } else {
+            Text(
+                code.chunked(3).joinToString(" "),
+                style = DesiTheme.type.scoreXl,
+                color = DesiTheme.colors.ink,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
+            Text(stringResource(Res.string.match_handover_code_hint), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+        }
+        PrimaryButton(text = stringResource(Res.string.rules_done), onClick = onDismiss, modifier = Modifier.fillMaxWidth())
     }
 }
 

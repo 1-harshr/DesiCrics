@@ -25,7 +25,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +44,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.designsystem.component.Avatar
+import com.harsh.desicrics.designsystem.component.DesiSheet
+import com.harsh.desicrics.designsystem.component.DesiTextField
+import com.harsh.desicrics.designsystem.component.GhostButton
+import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.LiveBadge
 import com.harsh.desicrics.designsystem.component.MatchCard
 import com.harsh.desicrics.designsystem.component.SectionLabel
@@ -70,7 +81,47 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile)
+    val takeOver by viewModel.takeOver.collectAsStateWithLifecycle()
+    var takingOver by rememberSaveable { mutableStateOf(false) }
+    HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile, onTakeOver = { takingOver = true })
+    if (takingOver) {
+        TakeOverSheet(
+            state = takeOver,
+            onSubmit = { code ->
+                viewModel.takeOver(code) { matchId ->
+                    takingOver = false
+                    onOpenMatch(matchId)
+                }
+            },
+            onDismiss = {
+                takingOver = false
+                viewModel.resetTakeOver()
+            },
+        )
+    }
+}
+
+/** Enter the code from the scorer's phone to carry on scoring here. */
+@Composable
+private fun TakeOverSheet(state: TakeOverState, onSubmit: (String) -> Unit, onDismiss: () -> Unit) {
+    var code by rememberSaveable { mutableStateOf("") }
+    DesiSheet(stringResource(Res.string.home_take_over), onDismiss, stringResource(Res.string.home_take_over_hint)) {
+        DesiTextField(
+            value = code,
+            onValueChange = { new -> code = new.filter { it.isDigit() }.take(6) },
+            label = stringResource(Res.string.home_take_over_code),
+            error = stringResource(Res.string.home_take_over_failed).takeIf { state.failed },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(onDone = { if (code.length == 6) onSubmit(code) }),
+        )
+        PrimaryButton(
+            text = stringResource(Res.string.home_take_over_submit),
+            onClick = { onSubmit(code) },
+            enabled = code.length == 6,
+            loading = state.saving,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 /**
@@ -85,6 +136,7 @@ fun HomeContent(
     onNewMatch: () -> Unit,
     onOpenMatch: (matchId: String) -> Unit,
     onProfile: () -> Unit,
+    onTakeOver: () -> Unit = {},
 ) {
     val space = DesiTheme.space
     val live = state.matches.filter { it.status != MatchStatus.COMPLETED }
@@ -96,7 +148,10 @@ fun HomeContent(
         verticalArrangement = Arrangement.spacedBy(space.s3),
     ) {
         item { Greeting(playerName, onProfile) }
-        item { StartMatchCard(onNewMatch, Modifier.padding(bottom = space.s4)) }
+        item { StartMatchCard(onNewMatch) }
+        item {
+            GhostButton(stringResource(Res.string.home_take_over), onClick = onTakeOver, modifier = Modifier.fillMaxWidth().padding(bottom = space.s4))
+        }
         if (state.loadFailed) {
             item { Text(stringResource(Res.string.home_error), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
         }
@@ -110,11 +165,11 @@ fun HomeContent(
         }
         if (live.isNotEmpty()) {
             item { SectionLabel(stringResource(Res.string.home_section_live)) }
-            items(live, key = { it.id }) { HomeMatchCard(it, isMine = it.createdBy == currentUid, onClick = { onOpenMatch(it.id) }) }
+            items(live, key = { it.id }) { HomeMatchCard(it, isMine = it.scorerUid == currentUid, onClick = { onOpenMatch(it.id) }) }
         }
         if (recent.isNotEmpty()) {
             item { SectionLabel(stringResource(Res.string.home_section_recent), Modifier.padding(top = space.s4)) }
-            items(recent, key = { it.id }) { HomeMatchCard(it, isMine = it.createdBy == currentUid, onClick = { onOpenMatch(it.id) }) }
+            items(recent, key = { it.id }) { HomeMatchCard(it, isMine = it.scorerUid == currentUid, onClick = { onOpenMatch(it.id) }) }
         }
         item { Box(Modifier.windowInsetsPadding(WindowInsets.navigationBars)) }
     }

@@ -39,6 +39,11 @@ data class MatchRules(
 
     /** The ball after a no-ball is a free hit: the batter can't be out in any way a no-ball rules out. */
     val freeHitMode: RuleMode = RuleMode.OFF,
+
+    /** Ask where each scoring shot went, for the wagon wheel. Off by default: it's an extra tap per ball. */
+    val wagonWheel: Boolean = false,
+    /** Fielding-restriction overs at the start of each innings, shown on the scoreboard. 0 for none. */
+    val powerplayOvers: Int = 0,
 ) {
     /** The bowler's over limit for a match of [oversPerInnings] overs. */
     fun overLimit(oversPerInnings: Int): Int = bowlerOverLimit ?: ((oversPerInnings + 4) / 5)
@@ -59,7 +64,7 @@ data class MatchRules(
     /** Checked on the device and again on the server. */
     fun isValid(): Boolean =
         retireAtRuns in RETIRE_AT && widePenalty in PENALTY && noBallPenalty in PENALTY &&
-            (bowlerOverLimit == null || bowlerOverLimit in 1..50)
+            (bowlerOverLimit == null || bowlerOverLimit in 1..50) && powerplayOvers in 0..50
 
     companion object {
         val RETIRE_AT = 5..200
@@ -72,6 +77,7 @@ data class MatchRules(
             bowlerOverLimitMode = RuleMode.ENFORCE,
             consecutiveOversMode = RuleMode.ENFORCE,
             freeHitMode = RuleMode.ENFORCE,
+            powerplayOvers = 6,
         )
 
         /** Standard conditions, but the scorer is warned instead of stopped. */

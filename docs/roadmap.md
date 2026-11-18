@@ -62,10 +62,10 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ Auto-generated commentary text (per ball, on the Overs tab)
 
 ### Level 3 · Delight
-- ⬜ Wagon wheel (8 fielding zones)
-- ⬜ Haptics per event type
-- ⬜ Scorer handover to another device
-- ⬜ Powerplay configuration
+- ✅ Wagon wheel (8 fielding zones): optional per match; a tap per scoring shot, shown per innings and per batter on the scorecard
+- ✅ Haptics per event type (wicket, boundary, other)
+- ✅ Scorer handover to another device with a one-time 6-digit code (10 minutes)
+- ✅ Powerplay configuration (overs per innings, shown on the scoreboard)
 
 **Exit:** a 20-over match scored on one phone ends with totals that match a paper scorebook. Automated by `ScorebookReconciliationTest`: 50 seeded 20-over matches, each checked against the scorebook cross-checks (batting + extras, bowling + byes + leg byes + penalties, balls, wickets).
 

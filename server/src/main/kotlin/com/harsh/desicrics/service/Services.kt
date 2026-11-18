@@ -2,6 +2,7 @@ package com.harsh.desicrics.service
 
 import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.CreateMatchRequest
+import com.harsh.desicrics.api.HandoverCode
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.MatchSetupError
 import com.harsh.desicrics.api.UpdateProfileRequest
@@ -146,6 +147,27 @@ class MatchService(
         }
     }
 
+    /** A code the scorer shows so someone else can take over scoring; valid for [HANDOVER_TTL_MS]. */
+    suspend fun startHandover(user: FirebasePrincipal, matchId: String): HandoverCode {
+        scorersMatch(user, matchId)
+        val expiresAt = clock() + HANDOVER_TTL_MS
+        repeat(5) {
+            val code = (0 until 6).map { HANDOVER_DIGITS.random() }.joinToString("")
+            if (matches.saveHandover(matchId, code, expiresAt)) return HandoverCode(code, expiresAt)
+        }
+        throw ApiException(HttpStatusCode.ServiceUnavailable, "Couldn't make a handover code. Try again")
+    }
+
+    /** The caller becomes the scorer of the match the code was made for. Codes work once. */
+    suspend fun takeHandover(user: FirebasePrincipal, code: String): MatchDetails {
+        if (users.get(user.uid) == null) {
+            throw ApiException(HttpStatusCode.Conflict, "Set up your profile before scoring a match")
+        }
+        val matchId = matches.takeHandover(code.trim(), clock(), user.uid)
+            ?: throw ApiException(HttpStatusCode.NotFound, "That handover code is wrong or has expired")
+        return details(matchId)
+    }
+
     private fun MatchDetails.state() = ScoringEngine.compute(match, deliveries, events)
 
     private fun MatchDetails.rescored() = copy(match = match.withScore(state()))
@@ -161,11 +183,16 @@ class MatchService(
 
     private suspend fun scorersMatch(user: FirebasePrincipal, matchId: String): MatchDetails {
         val details = details(matchId)
-        if (details.match.createdBy != user.uid) {
+        if (details.match.scorerUid != user.uid) {
             throw ApiException(HttpStatusCode.Forbidden, "Only the scorer can change this match")
         }
         return details
     }
 
     private fun newId() = UUID.randomUUID().toString()
+
+    private companion object {
+        const val HANDOVER_TTL_MS = 10 * 60 * 1000L
+        val HANDOVER_DIGITS = '0'..'9'
+    }
 }

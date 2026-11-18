@@ -5,6 +5,7 @@ import com.harsh.desicrics.db.DeliveriesTable
 import com.harsh.desicrics.db.MatchEventsTable
 import com.harsh.desicrics.db.MatchPlayersTable
 import com.harsh.desicrics.db.MatchesTable
+import com.harsh.desicrics.db.ScorerHandoversTable
 import com.harsh.desicrics.db.UsersTable
 import com.harsh.desicrics.db.query
 import com.harsh.desicrics.model.Delivery
@@ -113,6 +114,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[status] = match.status
                 it[scoreSummary] = match.scoreSummary
                 it[rules] = Json.encodeToString(match.rules)
+                it[scorerUid] = match.scorerUid
                 it.setResult(match)
             }
             insertRoster(match.id, TeamSide.A, match.teamA)
@@ -137,6 +139,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[fielderId] = delivery.wicket?.fielderId
                 it[extraPenalty] = delivery.extraPenalty
                 it[countsAsBall] = delivery.countsAsBall
+                it[zone] = delivery.zone
                 it[createdAt] = delivery.timestamp
             }
             updateScore(match)
@@ -218,6 +221,31 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
         }
     }
 
+    override suspend fun saveHandover(matchId: String, code: String, expiresAt: Long): Boolean = try {
+        db.query {
+            ScorerHandoversTable.deleteWhere { ScorerHandoversTable.matchId eq matchId }
+            ScorerHandoversTable.insert {
+                it[this.code] = code
+                it[this.matchId] = matchId
+                it[this.expiresAt] = expiresAt
+            }
+        }
+        true
+    } catch (e: Exception) {
+        // The code is the key; a clash means another match holds it, so the caller picks a new one.
+        if (e.isUniqueViolation()) false else throw e
+    }
+
+    override suspend fun takeHandover(code: String, now: Long, newScorer: String): String? = db.query {
+        val row = ScorerHandoversTable.selectAll().where { ScorerHandoversTable.code eq code }.singleOrNull()
+            ?: return@query null
+        ScorerHandoversTable.deleteWhere { ScorerHandoversTable.code eq code }
+        if (row[ScorerHandoversTable.expiresAt] < now) return@query null
+        val matchId = row[ScorerHandoversTable.matchId]
+        MatchesTable.update({ MatchesTable.id eq matchId }) { it[scorerUid] = newScorer }
+        matchId
+    }
+
     override suspend fun idsMissingInningsScores(): List<String> = db.query {
         val withBalls = DeliveriesTable.select(DeliveriesTable.matchId).withDistinct()
         MatchesTable.select(MatchesTable.id)
@@ -256,6 +284,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             scoreSummary = this[MatchesTable.scoreSummary],
             innings = Json.decodeFromString(this[MatchesTable.inningsScores]),
             rules = Json.decodeFromString(this[MatchesTable.rules]),
+            scorerUid = this[MatchesTable.scorerUid],
             result = when {
                 this[MatchesTable.status] != MatchStatus.COMPLETED -> null
                 else -> MatchResult(
@@ -283,6 +312,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             timestamp = this[DeliveriesTable.createdAt],
             extraPenalty = this[DeliveriesTable.extraPenalty],
             countsAsBall = this[DeliveriesTable.countsAsBall],
+            zone = this[DeliveriesTable.zone],
         )
     }
 }

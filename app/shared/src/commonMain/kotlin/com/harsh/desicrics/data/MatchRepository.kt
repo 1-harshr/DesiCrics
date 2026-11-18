@@ -2,6 +2,7 @@ package com.harsh.desicrics.data
 
 import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.CreateMatchRequest
+import com.harsh.desicrics.api.HandoverCode
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.model.Delivery
@@ -34,6 +35,11 @@ class MatchRepository(private val api: DesiCricsApi) {
     suspend fun recordEvent(matchId: String, event: MatchEvent): MatchDetails = api.recordEvent(matchId, event)
 
     suspend fun addPlayer(matchId: String, side: TeamSide, name: String): MatchDetails = api.addPlayer(matchId, AddPlayerRequest(side, name))
+
+    suspend fun startHandover(matchId: String): HandoverCode = api.startHandover(matchId)
+
+    /** Returns the match ID the caller now scores, or null if the code is wrong or has expired. */
+    suspend fun takeHandover(code: String): String? = api.takeHandover(code)?.match?.id
 
     /** Removes the latest ball or event. */
     suspend fun undoLast(matchId: String): MatchDetails = api.undoLast(matchId)

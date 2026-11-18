@@ -8,17 +8,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiCard
+import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.WagonWheel
+import com.harsh.desicrics.model.FieldZone
+import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.scoring.InningsState
 import com.harsh.desicrics.scoring.Retirement
 import com.harsh.desicrics.ui.text.dismissalText
+import com.harsh.desicrics.ui.text.label
 import com.harsh.desicrics.util.format2
 import org.jetbrains.compose.resources.stringResource
 
@@ -89,6 +99,29 @@ internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifi
         innings.bowlers.forEach { card ->
             StatRow(listOf(card.player.name, card.oversText, "${card.maidens}", "${card.runs}", "${card.wickets}", card.economy.format2()))
         }
+    }
+}
+
+/** Where the runs off the bat went, for everyone or one batter. Only shown when the match kept a wagon wheel. */
+@Composable
+internal fun InningsWagonWheel(innings: InningsState) {
+    if (innings.zoneRuns().isEmpty()) return
+    var batterId by remember(innings.number) { mutableStateOf<String?>(null) }
+    val batters = innings.batters.filter { innings.zoneRuns(it.player.id).isNotEmpty() }.map { it.player }
+    val runs = innings.zoneRuns(batterId)
+    DesiCard(Modifier.fillMaxWidth()) {
+        SectionLabel(stringResource(Res.string.scorecard_wagon_wheel))
+        ChoiceChips(
+            options = listOf<Player?>(null) + batters,
+            selected = batters.firstOrNull { it.id == batterId },
+            label = { it?.name ?: stringResource(Res.string.scorecard_wagon_wheel_all) },
+            onSelect = { batterId = it?.id },
+        )
+        WagonWheel(
+            labels = FieldZone.Clockwise.map { stringResource(it.label) },
+            values = FieldZone.Clockwise.map { runs[it] ?: 0 },
+            description = stringResource(Res.string.scorecard_wagon_wheel_description),
+        )
     }
 }
 

@@ -489,4 +489,42 @@
     <string name="scorecard_declared">declared</string>
     <string name="scoring_error_revised_overs_invalid">Revised overs can't be more than the match's or fewer than already bowled.</string>
     <string name="scoring_error_revised_target_invalid">Only the chase has a target, and it needs one.</string>
+
+    <!-- Wagon wheel, powerplay, haptics and scorer handover -->
+    <string name="zone_third_man">Third man</string>
+    <string name="zone_point">Point</string>
+    <string name="zone_cover">Cover</string>
+    <string name="zone_long_off">Long off</string>
+    <string name="zone_long_on">Long on</string>
+    <string name="zone_mid_wicket">Mid-wicket</string>
+    <string name="zone_square_leg">Square leg</string>
+    <string name="zone_fine_leg">Fine leg</string>
+    <plurals name="scoring_zone_title">
+        <item quantity="one">Where did the %1$d run go?</item>
+        <item quantity="other">Where did the %1$d runs go?</item>
+    </plurals>
+    <string name="scoring_zone_hint">Tap the part of the field. Off side is on the right, as the batter sees it.</string>
+    <string name="scoring_zone_skip">Skip</string>
+    <string name="scoring_error_zone_without_runs">Only a shot with runs off the bat goes on the wagon wheel.</string>
+    <string name="scorecard_wagon_wheel">Wagon wheel</string>
+    <string name="scorecard_wagon_wheel_all">Everyone</string>
+    <string name="scorecard_wagon_wheel_description">Runs off the bat by part of the field</string>
+    <string name="rules_section_scoring">Scoring</string>
+    <string name="rules_wagon_wheel">Wagon wheel</string>
+    <string name="rules_wagon_wheel_hint">Ask where each scoring shot went. One more tap per run.</string>
+    <string name="rules_powerplay">Powerplay</string>
+    <string name="rules_powerplay_hint">Fielding restrictions for the first overs of each innings. 0 for none.</string>
+    <string name="rules_powerplay_label">overs</string>
+    <string name="rules_powerplay_fewer">Fewer powerplay overs</string>
+    <string name="rules_powerplay_more">More powerplay overs</string>
+    <string name="match_powerplay">Powerplay</string>
+    <string name="match_handover">Hand over scoring</string>
+    <string name="match_handover_hint">Let someone else carry on scoring on their phone.</string>
+    <string name="match_handover_failed">Couldn't make a handover code. Check your connection and try again.</string>
+    <string name="match_handover_code_hint">On the other phone, tap Take over scoring on the home screen and enter this code. It works once, for 10 minutes. You'll stop being the scorer once they use it.</string>
+    <string name="home_take_over">Take over scoring</string>
+    <string name="home_take_over_hint">Enter the code from the scorer's phone.</string>
+    <string name="home_take_over_code">Handover code</string>
+    <string name="home_take_over_submit">Take over</string>
+    <string name="home_take_over_failed">That code is wrong or has expired.</string>
 </resources>

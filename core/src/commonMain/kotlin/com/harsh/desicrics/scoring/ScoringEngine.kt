@@ -271,6 +271,7 @@ object ScoringEngine {
             isFreeHit = freeHit,
             declared = declared,
             isRevised = revision != null,
+            powerplayBalls = (rules.powerplayOvers * 6).coerceAtMost(maxBalls),
         )
     }
 

@@ -3,6 +3,7 @@ package com.harsh.desicrics.scoring
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
+import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.Player
@@ -60,12 +61,23 @@ data class InningsState(
     val declared: Boolean = false,
     /** Rain changed this innings' overs or target. */
     val isRevised: Boolean = false,
+    /** Balls at the start of the innings bowled under powerplay restrictions. */
+    val powerplayBalls: Int = 0,
 ) {
+    val isPowerplay: Boolean get() = legalBalls < powerplayBalls
+
     val scoreText: String get() = "$runs/$wickets"
     val oversText: String get() = formatOvers(legalBalls)
     val runRate: Double get() = if (legalBalls == 0) 0.0 else runs * 6.0 / legalBalls
     val runsNeeded: Int? get() = target?.let { (it - runs).coerceAtLeast(0) }
     val ballsRemaining: Int get() = (maxBalls - legalBalls).coerceAtLeast(0)
+
+    /** Runs off the bat in each wagon wheel zone, for every batter or just [batterId]. */
+    fun zoneRuns(batterId: String? = null): Map<FieldZone, Int> = overs.asSequence()
+        .flatMap { it.balls }
+        .filter { it.delivery.zone != null && (batterId == null || it.striker.id == batterId) }
+        .groupBy({ it.delivery.zone!! }, { it.delivery.runsOffBat })
+        .mapValues { it.value.sum() }
 
     /** Batting side players who haven't come out to bat yet. */
     val yetToBat: List<Player>

@@ -84,6 +84,7 @@ private fun MatchState.deliveryError(delivery: Delivery, nextSeq: Int): Delivery
         // in a row is a match rule (ruleBreaks), since small local sides often have to.
         innings.bowlerId != null && innings.bowlerId != delivery.bowlerId -> DeliveryError.OVER_NOT_FINISHED
         delivery.runsOffBat !in 0..7 -> DeliveryError.RUNS_OUT_OF_RANGE
+        delivery.zone != null && delivery.runsOffBat == 0 -> DeliveryError.ZONE_WITHOUT_RUNS
         else -> extrasError(delivery, match.rules) ?: wicketError(delivery, bowling)
     }
 }
@@ -182,6 +183,7 @@ enum class DeliveryError(val message: String) {
     PENALTY_OUT_OF_RANGE("Penalty runs must be between 1 and 10"),
     REVISED_OVERS_INVALID("Revised overs must be no more than the match's and no fewer than already bowled"),
     REVISED_TARGET_INVALID("Only the chase has a target, and it needs one"),
+    ZONE_WITHOUT_RUNS("Only a shot with runs off the bat goes on the wagon wheel"),
 
     // Match rules; these apply only as strictly as the scorer set them.
     RETIRED_CANNOT_RETURN("The match rules don't let that retired batter back in yet"),

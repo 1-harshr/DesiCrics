@@ -118,6 +118,26 @@ internal fun RulesSheet(rules: MatchRules, oversPerInnings: Int, onChange: (Matc
             ModeControl(rules.freeHitMode) { onChange(rules.copy(freeHitMode = it)) }
         }
 
+        SectionLabel(stringResource(Res.string.rules_section_scoring), Modifier.padding(top = DesiTheme.space.s4))
+        Rule(Res.string.rules_wagon_wheel, Res.string.rules_wagon_wheel_hint) {
+            SegmentedControl(
+                options = listOf(false, true),
+                selected = rules.wagonWheel,
+                label = { stringResource(if (it) Res.string.rules_on else Res.string.rules_mode_off) },
+                onSelect = { onChange(rules.copy(wagonWheel = it)) },
+            )
+        }
+        Rule(Res.string.rules_powerplay, Res.string.rules_powerplay_hint) {
+            NumberStepper(
+                value = rules.powerplayOvers.coerceAtMost(oversPerInnings),
+                onValueChange = { onChange(rules.copy(powerplayOvers = it)) },
+                label = stringResource(Res.string.rules_powerplay_label),
+                decreaseLabel = stringResource(Res.string.rules_powerplay_fewer),
+                increaseLabel = stringResource(Res.string.rules_powerplay_more),
+                range = 0..oversPerInnings,
+            )
+        }
+
         PrimaryButton(
             text = stringResource(Res.string.rules_done),
             onClick = onDismiss,
