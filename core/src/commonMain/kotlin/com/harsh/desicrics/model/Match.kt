@@ -85,4 +85,8 @@ data class InningsScore(
     val runs: Int,
     val wickets: Int,
     val legalBalls: Int,
+    /** Runs to win, for the chase. Null for the first innings and for rows saved before targets were kept. */
+    val target: Int? = null,
+    /** The innings' ball limit, which rain can cut. Null for rows saved before it was kept. */
+    val maxBalls: Int? = null,
 )

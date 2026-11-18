@@ -57,6 +57,9 @@ data class InningsState(
     val returnBlocked: Set<String> = emptySet(),
     /** The next ball is a free hit. */
     val isFreeHit: Boolean = false,
+    val declared: Boolean = false,
+    /** Rain changed this innings' overs or target. */
+    val isRevised: Boolean = false,
 ) {
     val scoreText: String get() = "$runs/$wickets"
     val oversText: String get() = formatOvers(legalBalls)

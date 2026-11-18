@@ -470,4 +470,23 @@
     <string name="match_must_retire">Reached %1$d · must retire</string>
     <string name="scoring_retire_not_out">Retired not out</string>
     <string name="scoring_retire_not_out_hint">Reached the match's retirement score. Not out, and can come back if the rules allow.</string>
+
+    <!-- Declare and rain revisions -->
+    <string name="match_declare">Declare</string>
+    <string name="match_declare_hint">End this innings now. Undo brings it back.</string>
+    <string name="match_declare_chase_hint">End the chase now and concede the match. Undo brings it back.</string>
+    <string name="match_revise">Rain: revise overs</string>
+    <string name="match_revise_hint">Cut the overs after an interruption. In the chase, set the new target too.</string>
+    <string name="match_revise_first_innings_note">Applies to both innings. Set the chase's target when it starts.</string>
+    <string name="match_revise_overs_label">overs</string>
+    <string name="match_revise_overs_fewer">Fewer overs</string>
+    <string name="match_revise_overs_more">More overs</string>
+    <string name="match_revise_target">New target</string>
+    <string name="match_revise_target_hint">From DLS, a par table, or what both captains agree.</string>
+    <string name="match_revise_target_invalid">Enter a target between 1 and 999.</string>
+    <string name="match_revise_save">Revise</string>
+    <string name="match_revised">Revised</string>
+    <string name="scorecard_declared">declared</string>
+    <string name="scoring_error_revised_overs_invalid">Revised overs can't be more than the match's or fewer than already bowled.</string>
+    <string name="scoring_error_revised_target_invalid">Only the chase has a target, and it needs one.</string>
 </resources>

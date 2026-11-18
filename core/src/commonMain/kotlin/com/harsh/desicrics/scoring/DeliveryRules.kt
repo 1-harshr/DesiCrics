@@ -35,7 +35,7 @@ fun MatchState.bowlerRuleBreak(bowlerId: String): RuleBreak? {
         rules.consecutiveOversMode != RuleMode.OFF && bowlerId == current.previousOverBowlerId ->
             RuleBreak(DeliveryError.CONSECUTIVE_OVERS, rules.consecutiveOversMode)
         rules.bowlerOverLimitMode != RuleMode.OFF && card != null &&
-            card.legalBalls >= rules.overLimit(match.oversPerInnings) * 6 ->
+            card.legalBalls >= rules.overLimit(current.maxBalls / 6) * 6 ->
             RuleBreak(DeliveryError.BOWLER_OVER_LIMIT, rules.bowlerOverLimitMode)
         else -> null
     }
@@ -105,6 +105,14 @@ fun MatchState.validate(event: MatchEvent, nextSeq: Int): DeliveryError? {
                 DeliveryError.BATTERS_MISSING.takeIf { innings.strikerId == null || innings.nonStrikerId == null }
             is MatchEvent.ReplaceBowler -> DeliveryError.NO_BOWLER_TO_REPLACE.takeIf { innings.bowlerId == null }
             is MatchEvent.Penalty -> DeliveryError.PENALTY_OUT_OF_RANGE.takeIf { event.runs !in 1..10 }
+            is MatchEvent.Declare -> null
+            is MatchEvent.ReviseTarget -> when {
+                event.overs !in 1..match.oversPerInnings || event.overs * 6 < innings.legalBalls -> DeliveryError.REVISED_OVERS_INVALID
+                // The first innings has no target to revise; the chase must have one.
+                (innings.number == 1) != (event.target == null) -> DeliveryError.REVISED_TARGET_INVALID
+                event.target != null && event.target !in 1..MAX_TARGET -> DeliveryError.REVISED_TARGET_INVALID
+                else -> null
+            }
         }
     }
 }
@@ -172,6 +180,8 @@ enum class DeliveryError(val message: String) {
     BATTERS_MISSING("Pick both batters first"),
     NO_BOWLER_TO_REPLACE("Nobody is bowling yet"),
     PENALTY_OUT_OF_RANGE("Penalty runs must be between 1 and 10"),
+    REVISED_OVERS_INVALID("Revised overs must be no more than the match's and no fewer than already bowled"),
+    REVISED_TARGET_INVALID("Only the chase has a target, and it needs one"),
 
     // Match rules; these apply only as strictly as the scorer set them.
     RETIRED_CANNOT_RETURN("The match rules don't let that retired batter back in yet"),
@@ -181,10 +191,13 @@ enum class DeliveryError(val message: String) {
     NOT_OUT_ON_FREE_HIT("It's a free hit: the batter can't be out that way"),
 }
 
+/** Highest revised target the app accepts; a sanity bound, not a cricket rule. */
+const val MAX_TARGET = 999
+
 /** The match row with its denormalised summary, status and result refreshed from [state]. */
 fun Match.withScore(state: MatchState): Match = copy(
     scoreSummary = state.scoreSummary,
     status = if (state.isComplete) MatchStatus.COMPLETED else MatchStatus.IN_PROGRESS,
     result = state.result,
-    innings = state.innings.map { InningsScore(it.battingSide, it.runs, it.wickets, it.legalBalls) },
+    innings = state.innings.map { InningsScore(it.battingSide, it.runs, it.wickets, it.legalBalls, it.target, it.maxBalls) },
 )

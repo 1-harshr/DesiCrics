@@ -155,6 +155,8 @@ class MatchService(
         is MatchEvent.SwapEnds -> copy(timestamp = at)
         is MatchEvent.ReplaceBowler -> copy(timestamp = at)
         is MatchEvent.Penalty -> copy(timestamp = at)
+        is MatchEvent.Declare -> copy(timestamp = at)
+        is MatchEvent.ReviseTarget -> copy(timestamp = at)
     }
 
     private suspend fun scorersMatch(user: FirebasePrincipal, matchId: String): MatchDetails {

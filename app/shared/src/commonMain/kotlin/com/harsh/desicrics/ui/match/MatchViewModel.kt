@@ -218,6 +218,12 @@ class MatchViewModel(
 
     fun swapEnds() = recordEvent { seq, innings -> MatchEvent.SwapEnds(seq, innings) }
 
+    /** Ends the current innings; in the chase that concedes the match. */
+    fun declare() = recordEvent { seq, innings -> MatchEvent.Declare(seq, innings) }
+
+    /** Rain: new overs for this innings (both, in the first), and in the chase a new target. */
+    fun reviseTarget(overs: Int, target: Int?) = recordEvent { seq, innings -> MatchEvent.ReviseTarget(seq, innings, overs, target) }
+
     /** Clears the bowler mid-over (an injury, say) so the scorer can pick who finishes it. */
     fun replaceBowler() = recordEvent { seq, innings -> MatchEvent.ReplaceBowler(seq, innings) }
 

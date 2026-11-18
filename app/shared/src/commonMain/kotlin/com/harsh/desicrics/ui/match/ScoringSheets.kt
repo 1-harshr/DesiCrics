@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiSheet
@@ -42,6 +43,8 @@ import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.scoring.InningsState
+import com.harsh.desicrics.scoring.MAX_TARGET
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
@@ -237,6 +240,48 @@ internal fun RuleWarningSheet(pending: PendingBall, onRecord: () -> Unit, onCanc
             modifier = Modifier.fillMaxWidth().padding(top = DesiTheme.space.s2),
         )
         GhostButton(stringResource(Res.string.scoring_rule_warning_cancel), onClick = onCancel, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+/**
+ * Rain: the innings' new overs, no fewer than already bowled, and in the chase the new target. The target is
+ * typed because it can move by dozens of runs.
+ */
+@Composable
+internal fun ReviseTargetSheet(innings: InningsState, matchOvers: Int, onRevise: (overs: Int, target: Int?) -> Unit, onDismiss: () -> Unit) {
+    val minOvers = ((innings.legalBalls + 5) / 6).coerceAtLeast(1)
+    var overs by remember { mutableStateOf((innings.maxBalls / 6).coerceIn(minOvers, matchOvers)) }
+    var target by remember { mutableStateOf(innings.target?.toString().orEmpty()) }
+    val chase = innings.target != null
+    val parsedTarget = target.toIntOrNull()?.takeIf { it in 1..MAX_TARGET }
+
+    DesiSheet(stringResource(Res.string.match_revise), onDismiss, stringResource(Res.string.match_revise_hint)) {
+        NumberStepper(
+            value = overs,
+            onValueChange = { overs = it },
+            label = stringResource(Res.string.match_revise_overs_label),
+            decreaseLabel = stringResource(Res.string.match_revise_overs_fewer),
+            increaseLabel = stringResource(Res.string.match_revise_overs_more),
+            range = minOvers..matchOvers,
+        )
+        if (chase) {
+            DesiTextField(
+                value = target,
+                onValueChange = { new -> target = new.filter { it.isDigit() }.take(3) },
+                label = stringResource(Res.string.match_revise_target),
+                supportingText = stringResource(Res.string.match_revise_target_hint),
+                error = stringResource(Res.string.match_revise_target_invalid).takeIf { parsedTarget == null },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+            )
+        } else {
+            Text(stringResource(Res.string.match_revise_first_innings_note), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        }
+        PrimaryButton(
+            text = stringResource(Res.string.match_revise_save),
+            onClick = { onRevise(overs, if (chase) parsedTarget else null) },
+            enabled = !chase || parsedTarget != null,
+            modifier = Modifier.fillMaxWidth().padding(top = DesiTheme.space.s2),
+        )
     }
 }
 

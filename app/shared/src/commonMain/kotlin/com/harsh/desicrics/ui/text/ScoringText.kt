@@ -47,8 +47,9 @@ fun matchStatusText(match: Match): String {
     val chase = match.innings.getOrNull(1)
     val first = match.innings.firstOrNull()
     if (chase != null && first != null) {
-        val needed = (first.runs + 1 - chase.runs).coerceAtLeast(0)
-        val balls = (match.oversPerInnings * 6 - chase.legalBalls).coerceAtLeast(0)
+        // Older rows have no target or ball limit; they were never revised, so the defaults hold.
+        val needed = ((chase.target ?: (first.runs + 1)) - chase.runs).coerceAtLeast(0)
+        val balls = ((chase.maxBalls ?: (match.oversPerInnings * 6)) - chase.legalBalls).coerceAtLeast(0)
         return pluralStringResource(Res.plurals.match_need_runs, balls, match.team(chase.battingSide).name, needed, balls)
     }
     val toss = if (match.tossDecision == TossDecision.BAT) Res.string.match_toss_chose_bat else Res.string.match_toss_chose_bowl
@@ -148,6 +149,8 @@ val DeliveryError.label: StringResource
         DeliveryError.BOWLER_OVER_LIMIT -> Res.string.scoring_error_bowler_over_limit
         DeliveryError.CONSECUTIVE_OVERS -> Res.string.scoring_error_consecutive_overs
         DeliveryError.NOT_OUT_ON_FREE_HIT -> Res.string.scoring_error_not_out_on_free_hit
+        DeliveryError.REVISED_OVERS_INVALID -> Res.string.scoring_error_revised_overs_invalid
+        DeliveryError.REVISED_TARGET_INVALID -> Res.string.scoring_error_revised_target_invalid
     }
 
 // Previews: sample teams and players only; every line of text comes from string resources.

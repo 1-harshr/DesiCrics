@@ -32,12 +32,21 @@ object ScoringEngine {
         fun penaltiesFor(innings: Int) = penalties.filter {
             (it.innings == innings && it.toBattingSide) || (it.innings != innings && !it.toBattingSide)
         }.sumOf { it.runs }
-        val first = computeInnings(match, 1, match.battingFirst, inningsItems(1), target = null, penaltyRuns = penaltiesFor(1))
+        // A revision in the first innings shortens both; one in the second only the chase.
+        val revisions = events.filterIsInstance<MatchEvent.ReviseTarget>().sortedBy { it.seq }
+        fun revisionFor(innings: Int) = revisions.lastOrNull { it.innings <= innings }
+        val first = computeInnings(
+            match, 1, match.battingFirst, inningsItems(1), target = null, penaltyRuns = penaltiesFor(1), revision = revisionFor(1),
+        )
         if (!first.isComplete) {
             return MatchState(match, listOf(first), isComplete = false, result = null)
         }
+        val chaseRevision = revisionFor(2)
         val second = computeInnings(
-            match, 2, match.battingFirst.other, inningsItems(2), target = first.runs + 1, penaltyRuns = penaltiesFor(2),
+            match, 2, match.battingFirst.other, inningsItems(2),
+            target = chaseRevision?.target ?: (first.runs + 1),
+            penaltyRuns = penaltiesFor(2),
+            revision = chaseRevision,
         )
         return MatchState(
             match = match,
@@ -56,10 +65,12 @@ object ScoringEngine {
         target: Int?,
         /** Penalty runs this innings is credited with, from either innings. */
         penaltyRuns: Int,
+        /** The latest rain revision that applies to this innings, if any. */
+        revision: MatchEvent.ReviseTarget?,
     ): InningsState {
         val battingTeam = match.team(battingSide)
         val bowlingTeam = match.team(battingSide.other)
-        val maxBalls = match.oversPerInnings * 6
+        val maxBalls = (revision?.overs ?: match.oversPerInnings) * 6
         val rules = match.rules
 
         val batters = LinkedHashMap<String, BatterCard>()
@@ -77,6 +88,7 @@ object ScoringEngine {
         var overJustCompleted = false
         var overRuns = 0
         var freeHit = false
+        var declared = false
 
         for (item in timeline) {
             if (item is MatchEvent) {
@@ -99,6 +111,9 @@ object ScoringEngine {
                     is MatchEvent.ReplaceBowler -> bowler = null
                     // Counted up front through penaltyRuns, since some belong to the other innings.
                     is MatchEvent.Penalty -> Unit
+                    is MatchEvent.Declare -> declared = true
+                    // Applied up front through revision, since a first-innings one shortens the chase too.
+                    is MatchEvent.ReviseTarget -> Unit
                 }
                 continue
             }
@@ -225,7 +240,7 @@ object ScoringEngine {
         val allOutWickets = battingTeam.players.size - if (rules.lastManStands) 0 else 1
         // Also over when nobody is left to fill the crease, e.g. retired batters the rules keep out.
         val battersNeeded = if (rules.lastManStands) 1 else 2
-        val isComplete = wickets >= allOutWickets ||
+        val isComplete = declared || wickets >= allOutWickets ||
             atCrease.size + canComeIn.size < battersNeeded ||
             legalBalls >= maxBalls ||
             (target != null && runs >= target)
@@ -254,14 +269,19 @@ object ScoringEngine {
             allOutWickets = allOutWickets,
             returnBlocked = returnBlocked,
             isFreeHit = freeHit,
+            declared = declared,
+            isRevised = revision != null,
         )
     }
 
-    private fun result(first: InningsState, second: InningsState): MatchResult = when {
-        second.runs > first.runs ->
-            MatchResult(second.battingSide, second.allOutWickets - second.wickets, MarginUnit.WICKETS)
-        second.runs == first.runs -> MatchResult.Tie
-        else -> MatchResult(first.battingSide, first.runs - second.runs, MarginUnit.RUNS)
+    /** Against the target, so a revised chase is judged on its par score (target − 1), as DLS does. */
+    private fun result(first: InningsState, second: InningsState): MatchResult {
+        val par = second.target!! - 1
+        return when {
+            second.runs > par -> MatchResult(second.battingSide, second.allOutWickets - second.wickets, MarginUnit.WICKETS)
+            second.runs == par -> MatchResult.Tie
+            else -> MatchResult(first.battingSide, par - second.runs, MarginUnit.RUNS)
+        }
     }
 
     private fun Team.player(id: String): Player = players.firstOrNull { it.id == id } ?: Player(id, "Unknown")

@@ -99,6 +99,8 @@ object MatchEventsTable : Table("match_events") {
     val isOut = bool("is_out")
     val runs = integer("runs")
     val toBattingSide = bool("to_batting_side")
+    val overs = integer("overs").nullable()
+    val target = integer("target").nullable()
     val createdAt = long("created_at")
     override val primaryKey = PrimaryKey(matchId, seq)
 }

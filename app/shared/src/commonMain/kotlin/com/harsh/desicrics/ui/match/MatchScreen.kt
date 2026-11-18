@@ -106,6 +106,8 @@ fun MatchScreen(
             onReplaceBowler = viewModel::replaceBowler,
             onAddPlayer = viewModel::addPlayer,
             onPenalty = viewModel::awardPenalty,
+            onDeclare = viewModel::declare,
+            onReviseTarget = viewModel::reviseTarget,
             onRecordPendingBall = viewModel::recordPendingBall,
             onDropPendingBall = viewModel::dropPendingBall,
         ),
@@ -128,6 +130,8 @@ class MatchActions(
     val onReplaceBowler: () -> Unit,
     val onAddPlayer: (TeamSide, name: String) -> Unit,
     val onPenalty: (toBattingSide: Boolean, runs: Int) -> Unit,
+    val onDeclare: () -> Unit,
+    val onReviseTarget: (overs: Int, target: Int?) -> Unit,
     val onRecordPendingBall: () -> Unit,
     val onDropPendingBall: () -> Unit,
 )
@@ -152,6 +156,7 @@ private sealed interface ScoringSheet {
     data object BowlerOptions : ScoringSheet
     data object MatchOptions : ScoringSheet
     data object Penalty : ScoringSheet
+    data object ReviseTarget : ScoringSheet
 }
 
 /**
@@ -270,7 +275,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onOptions: (() -> 
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
             Text(innings.scoreText, style = DesiTheme.type.scoreXl, color = onGreen)
             Text(
-                stringResource(Res.string.match_overs_of, innings.oversText, match.oversPerInnings),
+                stringResource(Res.string.match_overs_of, innings.oversText, innings.maxBalls / 6),
                 style = DesiTheme.type.data,
                 color = onGreen.copy(alpha = 0.8f),
                 modifier = Modifier.padding(bottom = DesiTheme.space.s2),
@@ -282,6 +287,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onOptions: (() -> 
         } else {
             val details = buildList {
                 add(stringResource(Res.string.match_run_rate, innings.runRate.format2()))
+                if (innings.isRevised) add(stringResource(Res.string.match_revised))
                 innings.target?.let { add(stringResource(Res.string.match_target, it)) }
                 innings.runsNeeded?.let { add(pluralStringResource(Res.plurals.match_need, innings.ballsRemaining, it, innings.ballsRemaining)) }
             }
@@ -585,6 +591,16 @@ private fun ScoringSheets(
                 SheetOption(stringResource(Res.string.match_penalty), stringResource(Res.string.match_penalty_hint)) {
                     onSheet(ScoringSheet.Penalty)
                 },
+                SheetOption(stringResource(Res.string.match_revise), stringResource(Res.string.match_revise_hint)) {
+                    onSheet(ScoringSheet.ReviseTarget)
+                },
+                SheetOption(
+                    stringResource(Res.string.match_declare),
+                    stringResource(if (innings.number == 1) Res.string.match_declare_hint else Res.string.match_declare_chase_hint),
+                ) {
+                    actions.onDeclare()
+                    onClose()
+                },
             ),
             onDismiss = onClose,
         )
@@ -593,6 +609,15 @@ private fun ScoringSheets(
             fieldingTeam = innings.bowlingTeam.name,
             onAward = { toBatting, runs ->
                 actions.onPenalty(toBatting, runs)
+                onClose()
+            },
+            onDismiss = onClose,
+        )
+        ScoringSheet.ReviseTarget -> ReviseTargetSheet(
+            innings = innings,
+            matchOvers = state.match.oversPerInnings,
+            onRevise = { overs, target ->
+                actions.onReviseTarget(overs, target)
                 onClose()
             },
             onDismiss = onClose,
@@ -687,7 +712,7 @@ private fun previewBalls(): List<Delivery> {
 private fun previewUi(deliveries: List<Delivery>, isScorer: Boolean = true) =
     MatchUiState(loading = false, match = PreviewMatch, deliveries = deliveries, state = ScoringEngine.compute(PreviewMatch, deliveries), isScorer = isScorer)
 
-private val PreviewActions = MatchActions({}, {}, {}, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _ -> }, {}, {})
+private val PreviewActions = MatchActions({}, {}, {}, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _ -> }, {}, { _, _ -> }, {}, {})
 
 @Preview
 @Composable

@@ -177,7 +177,10 @@ class ApplicationTest {
         val listed = client.get("/matches") { bearerAuth("test-dev") }.body<List<Match>>().single { it.id == match.id }
         assertEquals(MatchStatus.COMPLETED, listed.status)
         assertEquals(MatchResult(TeamSide.A, 4, MarginUnit.RUNS), listed.result)
-        assertEquals(listOf(InningsScore(TeamSide.A, 4, 0, 6), InningsScore(TeamSide.B, 0, 1, 1)), listed.innings)
+        assertEquals(
+            listOf(InningsScore(TeamSide.A, 4, 0, 6, maxBalls = 6), InningsScore(TeamSide.B, 0, 1, 1, target = 5, maxBalls = 6)),
+            listed.innings,
+        )
         val details = client.get("/matches/${match.id}") { bearerAuth("test-dev") }.body<MatchDetails>()
         assertEquals(a2.id, details.deliveries.last().wicket?.fielderId)
     }
@@ -257,6 +260,32 @@ class ApplicationTest {
         repeat(2) { client.record("asha", match.id, alone.copy(seq = seq++, runsOffBat = 0)) }
         assertEquals(HttpStatusCode.Conflict, client.record("asha", match.id, alone.copy(seq = seq)).status)
         assertEquals(HttpStatusCode.OK, client.record("asha", match.id, alone.copy(seq = seq, bowlerId = b2.id)).status)
+    }
+
+    @Test
+    fun declareAndRevisedTarget() = apiTest { client ->
+        client.setUpProfile("asha")
+        val match = client.createMatch("asha", overs = 5).match
+        val (a1, a2) = match.teamA.players
+        val (b1, b2) = match.teamB.players
+        suspend fun event(event: MatchEvent) = client.post("/matches/${match.id}/events") {
+            bearerAuth("test-asha")
+            contentType(ContentType.Application.Json)
+            setBody(event)
+        }
+
+        val four = Delivery(0, innings = 1, strikerId = a1.id, nonStrikerId = a2.id, bowlerId = b1.id, runsOffBat = 4)
+        client.record("asha", match.id, four)
+        // Strikers declare on 4; Royals then lose overs to rain and get a new target.
+        assertEquals(HttpStatusCode.OK, event(MatchEvent.Declare(1, 1)).status)
+        assertEquals(HttpStatusCode.Conflict, event(MatchEvent.ReviseTarget(2, 2, overs = 2)).status)
+        val revised = event(MatchEvent.ReviseTarget(2, 2, overs = 2, target = 3)).body<MatchDetails>()
+        assertEquals(MatchEvent.ReviseTarget(2, 2, overs = 2, target = 3), (revised.events.last() as MatchEvent.ReviseTarget).copy(timestamp = 0))
+        assertEquals(InningsScore(TeamSide.B, 0, 0, 0, target = 3, maxBalls = 12), revised.match.innings.last())
+
+        val three = Delivery(3, innings = 2, strikerId = b1.id, nonStrikerId = b2.id, bowlerId = a1.id, runsOffBat = 3)
+        val won = client.record("asha", match.id, three).body<MatchDetails>()
+        assertEquals(MatchResult(TeamSide.B, 1, MarginUnit.WICKETS), won.match.result)
     }
 
     @Test

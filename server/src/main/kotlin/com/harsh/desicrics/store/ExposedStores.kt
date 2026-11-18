@@ -157,6 +157,8 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[isOut] = (event as? MatchEvent.Retire)?.out ?: false
                 it[runs] = (event as? MatchEvent.Penalty)?.runs ?: 0
                 it[toBattingSide] = (event as? MatchEvent.Penalty)?.toBattingSide ?: false
+                it[overs] = (event as? MatchEvent.ReviseTarget)?.overs
+                it[target] = (event as? MatchEvent.ReviseTarget)?.target
                 it[createdAt] = event.timestamp
             }
             updateScore(match)
@@ -197,6 +199,9 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             SWAP_ENDS -> MatchEvent.SwapEnds(seq, innings, at)
             REPLACE_BOWLER -> MatchEvent.ReplaceBowler(seq, innings, at)
             PENALTY -> MatchEvent.Penalty(seq, innings, this[MatchEventsTable.toBattingSide], this[MatchEventsTable.runs], at)
+            DECLARE -> MatchEvent.Declare(seq, innings, at)
+            REVISE_TARGET ->
+                MatchEvent.ReviseTarget(seq, innings, checkNotNull(this[MatchEventsTable.overs]), this[MatchEventsTable.target], at)
             else -> error("Unknown match event type ${this[MatchEventsTable.type]}")
         }
     }
@@ -293,6 +298,8 @@ private const val RETIRE = "retire"
 private const val SWAP_ENDS = "swap_ends"
 private const val REPLACE_BOWLER = "replace_bowler"
 private const val PENALTY = "penalty"
+private const val DECLARE = "declare"
+private const val REVISE_TARGET = "revise_target"
 
 private val MatchEvent.typeName: String
     get() = when (this) {
@@ -300,6 +307,8 @@ private val MatchEvent.typeName: String
         is MatchEvent.SwapEnds -> SWAP_ENDS
         is MatchEvent.ReplaceBowler -> REPLACE_BOWLER
         is MatchEvent.Penalty -> PENALTY
+        is MatchEvent.Declare -> DECLARE
+        is MatchEvent.ReviseTarget -> REVISE_TARGET
     }
 
 /** SQLSTATE 23505 means a unique or primary-key violation in both H2 and Postgres. */

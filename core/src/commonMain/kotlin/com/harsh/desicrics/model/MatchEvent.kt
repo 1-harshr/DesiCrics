@@ -47,6 +47,30 @@ sealed interface MatchEvent {
         override val timestamp: Long = 0,
     ) : MatchEvent
 
+    /** The batting side ends its innings now. In the second innings that concedes the chase. */
+    @Serializable
+    @SerialName("declare")
+    data class Declare(
+        override val seq: Int,
+        override val innings: Int,
+        override val timestamp: Long = 0,
+    ) : MatchEvent
+
+    /**
+     * Rain or bad light cut the match short. In the first innings, [overs] applies to both innings. In the
+     * second it's the chase's overs, and [target] the runs to win, worked out by whatever method the match
+     * uses (DLS, a par table, or agreement).
+     */
+    @Serializable
+    @SerialName("revise_target")
+    data class ReviseTarget(
+        override val seq: Int,
+        override val innings: Int,
+        val overs: Int,
+        val target: Int? = null,
+        override val timestamp: Long = 0,
+    ) : MatchEvent
+
     /** The bowler can't finish the over (injury, say); the scorer picks who bowls the rest of it. */
     @Serializable
     @SerialName("replace_bowler")

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +36,9 @@ internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifi
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
+            if (innings.declared) {
+                Text(stringResource(Res.string.scorecard_declared), style = DesiTheme.type.caption, color = colors.muted, modifier = Modifier.padding(end = DesiTheme.space.s2))
+            }
             Text("${innings.scoreText} (${innings.oversText})", style = DesiTheme.type.scoreMd, color = colors.ink)
         }
         if (innings.batters.isEmpty()) {
