@@ -16,6 +16,7 @@ import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.scoring.InningsState
+import com.harsh.desicrics.scoring.Retirement
 import com.harsh.desicrics.ui.text.dismissalText
 import com.harsh.desicrics.util.format2
 import org.jetbrains.compose.resources.stringResource
@@ -51,7 +52,11 @@ internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifi
         innings.batters.forEach { card ->
             StatRow(
                 listOf(card.player.name, "${card.runs}", "${card.balls}", "${card.fours}", "${card.sixes}", card.strikeRate.format2()),
-                subtitle = dismissalText(card.dismissal),
+                subtitle = when (card.retired) {
+                    Retirement.HURT -> stringResource(Res.string.scorecard_retired_hurt)
+                    Retirement.OUT -> stringResource(Res.string.scorecard_retired_out)
+                    null -> dismissalText(card.dismissal)
+                },
             )
         }
         val extras = innings.extras

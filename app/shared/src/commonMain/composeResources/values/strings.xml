@@ -146,7 +146,6 @@
     <string name="scoring_error_wrong_non_striker">That isn't the non-striker.</string>
     <string name="scoring_error_bowler_not_in_team">The bowler must be from the fielding side.</string>
     <string name="scoring_error_over_not_finished">The over isn't finished yet.</string>
-    <string name="scoring_error_consecutive_overs">A bowler can't bowl two overs in a row.</string>
     <string name="scoring_error_runs_out_of_range">Runs off the bat must be between 0 and 7.</string>
     <string name="scoring_error_extra_runs_on_legal_ball">A legal ball can't have extra runs.</string>
     <string name="scoring_error_invalid_wide">A wide is 1 to 5 runs with nothing off the bat.</string>
@@ -158,6 +157,9 @@
     <string name="scoring_error_no_runs_on_dismissal">No runs count on that dismissal.</string>
     <string name="scoring_error_fielder_not_allowed">That dismissal doesn't have a fielder.</string>
     <string name="scoring_error_fielder_not_in_team">The fielder must be from the fielding side.</string>
+    <string name="scoring_error_batter_not_at_crease">That batter isn't at the crease.</string>
+    <string name="scoring_error_batters_missing">Pick both batters first.</string>
+    <string name="scoring_error_no_bowler_to_replace">Nobody is bowling yet.</string>
 
     <!-- Home -->
     <string name="home_greeting">Hi, %1$s</string>
@@ -270,7 +272,6 @@
     <string name="scoring_pick_striker">Who's on strike?</string>
     <string name="scoring_pick_non_striker">Who's at the other end?</string>
     <string name="scoring_pick_bowler">Who's bowling?</string>
-    <string name="scoring_pick_bowler_hint">%1$s bowled the last over, so can't bowl this one.</string>
     <string name="scoring_no_players">Everyone has batted.</string>
     <string name="scoring_wide_title">Wide</string>
     <string name="scoring_wide_hint">Runs the batters ran. The wide's 1 run is added for you.</string>
@@ -354,4 +355,21 @@
         <item quantity="one">%1$d run, then OUT! %2$s %3$s</item>
         <item quantity="other">%1$d runs, then OUT! %2$s %3$s</item>
     </plurals>
+
+    <!-- Between balls: retirements, swaps, bowler changes, latecomers -->
+    <string name="scoring_player_options">More for %1$s</string>
+    <string name="scoring_retire_hurt">Retired hurt</string>
+    <string name="scoring_retire_hurt_hint">Not out. They can bat again later.</string>
+    <string name="scoring_retire_out">Retired out</string>
+    <string name="scoring_retire_out_hint">Counts as a wicket.</string>
+    <string name="scoring_swap_ends">Swap ends</string>
+    <string name="scoring_swap_ends_hint">Fix who's on strike, e.g. they crossed before a catch.</string>
+    <string name="scoring_change_bowler">Change bowler</string>
+    <string name="scoring_change_bowler_hint">Someone else finishes this over, e.g. after an injury.</string>
+    <string name="scoring_bowled_last_over">Bowled the last over</string>
+    <string name="scoring_can_return">Retired hurt · can bat again</string>
+    <string name="scoring_add_new_player">Add a new player</string>
+    <string name="scoring_add_new_player_hint">Someone arrived late or is coming in as a substitute.</string>
+    <string name="scorecard_retired_hurt">retired hurt</string>
+    <string name="scorecard_retired_out">retired out</string>
 </resources>

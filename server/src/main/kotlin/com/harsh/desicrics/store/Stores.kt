@@ -3,6 +3,9 @@ package com.harsh.desicrics.store
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.Player
+import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.UserProfile
 
 /**
@@ -29,8 +32,17 @@ interface MatchStore {
      */
     suspend fun addDelivery(match: Match, delivery: Delivery): Boolean
 
-    /** Removes ball [seq] and saves the refreshed match row in one transaction. Returns false if it didn't exist. */
-    suspend fun removeDelivery(match: Match, seq: Int): Boolean
+    /** Saves the event and the refreshed match row in one transaction. Returns false if [MatchEvent.seq] is taken. */
+    suspend fun addEvent(match: Match, event: MatchEvent): Boolean
+
+    /**
+     * Removes the ball or event numbered [seq] and saves the refreshed match row in one transaction.
+     * Returns false if neither existed.
+     */
+    suspend fun removeEntry(match: Match, seq: Int): Boolean
+
+    /** Adds a player to one side of an existing match, after the current squad. */
+    suspend fun addPlayer(matchId: String, side: TeamSide, player: Player)
 
     /** Matches with balls bowled but no per-innings scores, i.e. scored before scores were stored. */
     suspend fun idsMissingInningsScores(): List<String>

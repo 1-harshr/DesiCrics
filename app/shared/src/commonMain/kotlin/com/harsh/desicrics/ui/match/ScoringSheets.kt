@@ -1,50 +1,132 @@
 package com.harsh.desicrics.ui.match
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiSheet
+import com.harsh.desicrics.designsystem.component.DesiTextField
 import com.harsh.desicrics.designsystem.component.PadKey
 import com.harsh.desicrics.designsystem.component.PlayerRow
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.RunPad
 import com.harsh.desicrics.designsystem.component.SectionLabel
 import com.harsh.desicrics.designsystem.component.SegmentedControl
+import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.resources.*
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-/** A list of players to tap, e.g. the next batter or the bowler. */
+/**
+ * A list of players to tap, e.g. the next batter or the bowler, with an optional note under each
+ * ([notes] by player ID). [onAddPlayer], when given, lets the scorer add a latecomer or substitute who
+ * then appears in the list.
+ */
 @Composable
 internal fun PlayerSheet(
     title: String,
     players: List<Player>,
     onPick: (Player) -> Unit,
     onDismiss: () -> Unit,
-    hint: String? = null,
+    notes: Map<String, String> = emptyMap(),
+    onAddPlayer: ((name: String) -> Unit)? = null,
 ) {
-    DesiSheet(title, onDismiss, hint) {
+    DesiSheet(title, onDismiss) {
         if (players.isEmpty()) {
             Text(stringResource(Res.string.scoring_no_players), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
         }
         Column(Modifier.fillMaxWidth().clip(DesiTheme.radius.md)) {
             players.forEach { player ->
-                PlayerRow(player.name, onClick = { onPick(player) })
+                PlayerRow(player.name, subtitle = notes[player.id], onClick = { onPick(player) })
+            }
+        }
+        if (onAddPlayer != null) AddPlayerField(onAddPlayer)
+    }
+}
+
+@Composable
+private fun AddPlayerField(onAdd: (String) -> Unit) {
+    val colors = DesiTheme.colors
+    var name by remember { mutableStateOf("") }
+    val add = {
+        if (name.isNotBlank()) onAdd(name.trim())
+        name = ""
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+            DesiTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = stringResource(Res.string.scoring_add_new_player),
+                modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { add() }),
+            )
+            Box(
+                Modifier
+                    .size(DesiTheme.size.touchTarget)
+                    .clip(DesiTheme.radius.full)
+                    .background(if (name.isBlank()) colors.sunk else colors.brand)
+                    .clickable(enabled = name.isNotBlank(), role = Role.Button, onClick = add),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    painterResource(DesiIcons.Add),
+                    contentDescription = stringResource(Res.string.scoring_add_new_player),
+                    tint = if (name.isBlank()) colors.muted else colors.onBrand,
+                )
+            }
+        }
+        Text(stringResource(Res.string.scoring_add_new_player_hint), style = DesiTheme.type.caption, color = colors.muted)
+    }
+}
+
+/** One choice in an [OptionsSheet]. */
+internal class SheetOption(val title: String, val hint: String, val onClick: () -> Unit)
+
+/** A short list of things to do, each with a line on what it means, e.g. retire a batter. */
+@Composable
+internal fun OptionsSheet(title: String, options: List<SheetOption>, onDismiss: () -> Unit) {
+    DesiSheet(title, onDismiss) {
+        Column(Modifier.fillMaxWidth().clip(DesiTheme.radius.md)) {
+            options.forEach { option ->
+                Column(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable(role = Role.Button, onClick = option.onClick)
+                        .padding(vertical = DesiTheme.space.s3),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Text(option.title, style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
+                    Text(option.hint, style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+                }
             }
         }
     }

@@ -1,16 +1,19 @@
 package com.harsh.desicrics.data
 
+import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.TeamSide
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 class MatchRepository(private val api: DesiCricsApi) {
 
@@ -28,7 +31,12 @@ class MatchRepository(private val api: DesiCricsApi) {
     /** The server validates the ball and returns the authoritative scorecard. */
     suspend fun recordDelivery(matchId: String, delivery: Delivery): MatchDetails = api.recordDelivery(matchId, delivery)
 
-    suspend fun undoLastDelivery(matchId: String): MatchDetails = api.undoLastDelivery(matchId)
+    suspend fun recordEvent(matchId: String, event: MatchEvent): MatchDetails = api.recordEvent(matchId, event)
+
+    suspend fun addPlayer(matchId: String, side: TeamSide, name: String): MatchDetails = api.addPlayer(matchId, AddPlayerRequest(side, name))
+
+    /** Removes the latest ball or event. */
+    suspend fun undoLast(matchId: String): MatchDetails = api.undoLast(matchId)
 
     /** Fetches straight away, then every [interval]. Failures are emitted, not thrown, so polling survives a bad network. */
     private fun <T> poll(interval: Duration, fetch: suspend () -> T): Flow<Result<T>> = flow {

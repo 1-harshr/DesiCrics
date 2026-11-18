@@ -1,11 +1,14 @@
 package com.harsh.desicrics.service
 
+import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.MatchDetails
+import com.harsh.desicrics.api.MatchSetupError
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
@@ -84,37 +87,72 @@ class MatchService(
     }
 
     suspend fun recordDelivery(user: FirebasePrincipal, matchId: String, delivery: Delivery): MatchDetails {
-        val (match, deliveries) = scorersMatch(user, matchId)
-        val nextSeq = (deliveries.maxOfOrNull { it.seq } ?: -1) + 1
-        ScoringEngine.compute(match, deliveries).rejectionReason(delivery, nextSeq)?.let {
-            throw ApiException(HttpStatusCode.Conflict, it)
-        }
+        val details = scorersMatch(user, matchId)
+        details.state().rejectionReason(delivery, details.nextSeq)?.let { throw ApiException(HttpStatusCode.Conflict, it) }
         val saved = delivery.copy(timestamp = clock())
-        val updatedDeliveries = deliveries + saved
-        val updated = match.withScore(ScoringEngine.compute(match, updatedDeliveries))
-        if (!matches.addDelivery(updated, saved)) {
+        val next = details.copy(deliveries = details.deliveries + saved).rescored()
+        if (!matches.addDelivery(next.match, saved)) {
             throw ApiException(HttpStatusCode.Conflict, "That ball was already recorded. Refresh and try again")
         }
-        return MatchDetails(updated, updatedDeliveries)
+        return next
     }
 
-    suspend fun undoLastDelivery(user: FirebasePrincipal, matchId: String): MatchDetails {
-        val (match, deliveries) = scorersMatch(user, matchId)
-        val last = deliveries.maxByOrNull { it.seq } ?: throw ApiException(HttpStatusCode.Conflict, "No balls to undo")
-        val remaining = deliveries - last
-        val updated = match.withScore(ScoringEngine.compute(match, remaining))
-        if (!matches.removeDelivery(updated, last.seq)) {
-            throw ApiException(HttpStatusCode.Conflict, "That ball was already undone. Refresh and try again")
+    suspend fun recordEvent(user: FirebasePrincipal, matchId: String, event: MatchEvent): MatchDetails {
+        val details = scorersMatch(user, matchId)
+        details.state().rejectionReason(event, details.nextSeq)?.let { throw ApiException(HttpStatusCode.Conflict, it) }
+        val saved = event.stamped(clock())
+        val next = details.copy(events = details.events + saved).rescored()
+        if (!matches.addEvent(next.match, saved)) {
+            throw ApiException(HttpStatusCode.Conflict, "That was already recorded. Refresh and try again")
         }
-        return MatchDetails(updated, remaining)
+        return next
+    }
+
+    /** Removes the latest ball or event, whichever came last. */
+    suspend fun undoLast(user: FirebasePrincipal, matchId: String): MatchDetails {
+        val details = scorersMatch(user, matchId)
+        val lastSeq = details.nextSeq - 1
+        if (lastSeq < 0) throw ApiException(HttpStatusCode.Conflict, "Nothing to undo")
+        val next = details.copy(
+            deliveries = details.deliveries.filter { it.seq != lastSeq },
+            events = details.events.filter { it.seq != lastSeq },
+        ).rescored()
+        if (!matches.removeEntry(next.match, lastSeq)) {
+            throw ApiException(HttpStatusCode.Conflict, "That was already undone. Refresh and try again")
+        }
+        return next
+    }
+
+    /** A latecomer or substitute joins one side. Allowed at any point, even mid-innings. */
+    suspend fun addPlayer(user: FirebasePrincipal, matchId: String, request: AddPlayerRequest): MatchDetails {
+        request.validationError()?.let { throw ApiException(HttpStatusCode.BadRequest, it) }
+        val details = scorersMatch(user, matchId)
+        if (details.match.team(request.side).players.size >= CreateMatchRequest.MAX_PLAYERS) {
+            throw ApiException(HttpStatusCode.Conflict, MatchSetupError.TOO_MANY_PLAYERS.message)
+        }
+        matches.addPlayer(matchId, request.side, Player(newId(), request.name.trim()))
+        // A bigger side can change whether an innings is over, so refresh the stored score too.
+        val next = details(matchId).rescored()
+        matches.updateScore(next.match)
+        return next
     }
 
     /** Recomputes the stored score of matches scored before per-innings scores existed. Safe to run on every start. */
     suspend fun backfillInningsScores() {
         for (id in matches.idsMissingInningsScores()) {
-            val (match, deliveries) = matches.details(id) ?: continue
-            matches.updateScore(match.withScore(ScoringEngine.compute(match, deliveries)))
+            val details = matches.details(id) ?: continue
+            matches.updateScore(details.rescored().match)
         }
+    }
+
+    private fun MatchDetails.state() = ScoringEngine.compute(match, deliveries, events)
+
+    private fun MatchDetails.rescored() = copy(match = match.withScore(state()))
+
+    private fun MatchEvent.stamped(at: Long): MatchEvent = when (this) {
+        is MatchEvent.Retire -> copy(timestamp = at)
+        is MatchEvent.SwapEnds -> copy(timestamp = at)
+        is MatchEvent.ReplaceBowler -> copy(timestamp = at)
     }
 
     private suspend fun scorersMatch(user: FirebasePrincipal, matchId: String): MatchDetails {

@@ -28,6 +28,7 @@ DesiCrics gives these groups one place to score matches, follow them live, keep 
 
 - **The server is the source of truth.** Clients send events; the server derives the score.
 - **Scoring needs a connection, and copes with a bad one.** Each ball is saved on the server before the score moves on; if a save fails, the scorer just taps again. There is no offline scoring.
+- **Record what happened, don't block it.** Local cricket bends the rules: players arrive late, retire and come back, the same bowler bowls back to back. The scorer can always record it; the engine only rejects what would make the scorecard wrong.
 - **One rules engine.** It lives in `core` and is shared by the app and the server.
 - **Calm by default.** Scoring and following stay fast and free of upsells. Network features live one tab away.
 

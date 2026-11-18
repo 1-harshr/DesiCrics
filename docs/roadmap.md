@@ -55,7 +55,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 
 ### Level 2 · Complete
 - ⬜ All 14 wicket types, penalty runs
-- ⬜ Retired / retired hurt, substitutes
+- ✅ Retired hurt (can return) / retired out, swap ends, change bowler mid-over, add latecomers and substitutes mid-match
 - ⬜ Revise target (rain), declare
 - ✅ Scorecard and over-by-over tabs
 - ✅ Auto-generated commentary text (per ball, on the Overs tab)

@@ -123,7 +123,6 @@ val DeliveryError.label: StringResource
         DeliveryError.WRONG_NON_STRIKER -> Res.string.scoring_error_wrong_non_striker
         DeliveryError.BOWLER_NOT_IN_TEAM -> Res.string.scoring_error_bowler_not_in_team
         DeliveryError.OVER_NOT_FINISHED -> Res.string.scoring_error_over_not_finished
-        DeliveryError.CONSECUTIVE_OVERS -> Res.string.scoring_error_consecutive_overs
         DeliveryError.RUNS_OUT_OF_RANGE -> Res.string.scoring_error_runs_out_of_range
         DeliveryError.EXTRA_RUNS_ON_LEGAL_BALL -> Res.string.scoring_error_extra_runs_on_legal_ball
         DeliveryError.INVALID_WIDE -> Res.string.scoring_error_invalid_wide
@@ -135,6 +134,9 @@ val DeliveryError.label: StringResource
         DeliveryError.NO_RUNS_ON_DISMISSAL -> Res.string.scoring_error_no_runs_on_dismissal
         DeliveryError.FIELDER_NOT_ALLOWED -> Res.string.scoring_error_fielder_not_allowed
         DeliveryError.FIELDER_NOT_IN_TEAM -> Res.string.scoring_error_fielder_not_in_team
+        DeliveryError.BATTER_NOT_AT_CREASE -> Res.string.scoring_error_batter_not_at_crease
+        DeliveryError.BATTERS_MISSING -> Res.string.scoring_error_batters_missing
+        DeliveryError.NO_BOWLER_TO_REPLACE -> Res.string.scoring_error_no_bowler_to_replace
     }
 
 // Previews: sample teams and players only; every line of text comes from string resources.
@@ -182,6 +184,6 @@ private fun ScoringTextPreview() = DesiTheme(darkTheme = false) {
     ) {
         PreviewDismissals.forEach { Text(dismissalText(it), style = DesiTheme.type.body, color = DesiTheme.colors.ink) }
         PreviewResults.forEach { Text(resultText(PreviewMatch, it), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.brand) }
-        Text(stringResource(DeliveryError.CONSECUTIVE_OVERS.label), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        Text(stringResource(DeliveryError.OVER_NOT_FINISHED.label), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
     }
 }

@@ -4,6 +4,7 @@ import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.InningsScore
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchStatus
 
 /**
@@ -28,8 +29,9 @@ fun MatchState.validate(delivery: Delivery, nextSeq: Int): DeliveryError? {
         innings.strikerId != null && innings.strikerId != delivery.strikerId -> DeliveryError.WRONG_STRIKER
         innings.nonStrikerId != null && innings.nonStrikerId != delivery.nonStrikerId -> DeliveryError.WRONG_NON_STRIKER
         delivery.bowlerId !in bowling -> DeliveryError.BOWLER_NOT_IN_TEAM
+        // Mid-over bowler changes go through MatchEvent.ReplaceBowler. Bowling two overs in a row is allowed:
+        // small local sides often have to.
         innings.bowlerId != null && innings.bowlerId != delivery.bowlerId -> DeliveryError.OVER_NOT_FINISHED
-        innings.bowlerId == null && delivery.bowlerId == innings.previousOverBowlerId -> DeliveryError.CONSECUTIVE_OVERS
         delivery.runsOffBat !in 0..7 -> DeliveryError.RUNS_OUT_OF_RANGE
         else -> extrasError(delivery) ?: wicketError(delivery, bowling)
     }
@@ -37,6 +39,26 @@ fun MatchState.validate(delivery: Delivery, nextSeq: Int): DeliveryError? {
 
 /** English message for API error responses; the app shows its own localised text for [validate]. */
 fun MatchState.rejectionReason(delivery: Delivery, nextSeq: Int): String? = validate(delivery, nextSeq)?.message
+
+/** Why [event] can't be recorded next, or null if it can. */
+fun MatchState.validate(event: MatchEvent, nextSeq: Int): DeliveryError? {
+    val innings = current
+    return when {
+        isComplete -> DeliveryError.MATCH_OVER
+        event.seq != nextSeq -> DeliveryError.STALE
+        event.innings != innings.number -> DeliveryError.WRONG_INNINGS
+        else -> when (event) {
+            is MatchEvent.Retire ->
+                DeliveryError.BATTER_NOT_AT_CREASE.takeIf { event.playerId != innings.strikerId && event.playerId != innings.nonStrikerId }
+            is MatchEvent.SwapEnds ->
+                DeliveryError.BATTERS_MISSING.takeIf { innings.strikerId == null || innings.nonStrikerId == null }
+            is MatchEvent.ReplaceBowler -> DeliveryError.NO_BOWLER_TO_REPLACE.takeIf { innings.bowlerId == null }
+        }
+    }
+}
+
+/** English message for API error responses. */
+fun MatchState.rejectionReason(event: MatchEvent, nextSeq: Int): String? = validate(event, nextSeq)?.message
 
 private fun extrasError(delivery: Delivery): DeliveryError? = when (delivery.extra) {
     null -> DeliveryError.EXTRA_RUNS_ON_LEGAL_BALL.takeIf { delivery.extraRuns != 0 }
@@ -72,7 +94,6 @@ enum class DeliveryError(val message: String) {
     WRONG_NON_STRIKER("Wrong non-striker for this ball"),
     BOWLER_NOT_IN_TEAM("The bowler must be from the fielding side"),
     OVER_NOT_FINISHED("The over isn't finished yet"),
-    CONSECUTIVE_OVERS("A bowler can't bowl two overs in a row"),
     RUNS_OUT_OF_RANGE("Runs off the bat must be between 0 and 7"),
     EXTRA_RUNS_ON_LEGAL_BALL("A legal ball can't have extra runs"),
     INVALID_WIDE("A wide is 1–5 runs with nothing off the bat"),
@@ -84,6 +105,9 @@ enum class DeliveryError(val message: String) {
     NO_RUNS_ON_DISMISSAL("No runs count on that dismissal"),
     FIELDER_NOT_ALLOWED("That dismissal doesn't have a fielder"),
     FIELDER_NOT_IN_TEAM("The fielder must be from the fielding side"),
+    BATTER_NOT_AT_CREASE("That batter isn't at the crease"),
+    BATTERS_MISSING("Pick both batters first"),
+    NO_BOWLER_TO_REPLACE("Nobody is bowling yet"),
 }
 
 /** The match row with its denormalised summary, status and result refreshed from [state]. */

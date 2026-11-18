@@ -55,10 +55,11 @@ class DeliveryRulesTest {
     }
 
     @Test
-    fun rejectsTheSameBowlerForConsecutiveOvers() {
+    fun allowsTheSameBowlerForConsecutiveOvers() {
+        // Small local sides often have one bowler bowl back to back.
         val over = (0 until 6).map { ball(it) }
         val next = ball(6, striker = "a2", nonStriker = "a1", bowler = "b1")
-        assertEquals(DeliveryError.CONSECUTIVE_OVERS, reason(over, next))
+        assertNull(reason(over, next))
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.harsh.desicrics
 
 import com.harsh.desicrics.api.ApiError
+import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.UpdateProfileRequest
@@ -11,6 +12,7 @@ import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.InningsScore
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.PlayerRole
@@ -146,7 +148,7 @@ class ApplicationTest {
         val wicket = four.copy(seq = 1, runsOffBat = 0, wicket = Wicket(DismissalKind.BOWLED, a1.id))
         assertEquals("Strikers 4/1 (0.2)", client.record("asha", match.id, wicket).body<MatchDetails>().match.scoreSummary)
 
-        val undone = client.delete("/matches/${match.id}/deliveries/last") { bearerAuth("test-asha") }.body<MatchDetails>()
+        val undone = client.delete("/matches/${match.id}/last") { bearerAuth("test-asha") }.body<MatchDetails>()
         assertEquals(listOf(four.seq), undone.deliveries.map { it.seq })
         assertEquals("Strikers 4/0 (0.1)", undone.match.scoreSummary)
     }
@@ -173,6 +175,39 @@ class ApplicationTest {
         assertEquals(listOf(InningsScore(TeamSide.A, 4, 0, 6), InningsScore(TeamSide.B, 0, 1, 1)), listed.innings)
         val details = client.get("/matches/${match.id}") { bearerAuth("test-dev") }.body<MatchDetails>()
         assertEquals(a2.id, details.deliveries.last().wicket?.fielderId)
+    }
+
+    @Test
+    fun retirementsAndLatecomers() = apiTest { client ->
+        client.setUpProfile("asha")
+        val match = client.createMatch("asha").match
+        val (a1, a2) = match.teamA.players
+        val b1 = match.teamB.players.first()
+        val single = Delivery(0, innings = 1, strikerId = a1.id, nonStrikerId = a2.id, bowlerId = b1.id, runsOffBat = 1)
+        assertEquals(HttpStatusCode.OK, client.record("asha", match.id, single).status)
+
+        // a2 is now on strike and retires hurt; the event shares the sequence with balls.
+        val retire: MatchEvent = MatchEvent.Retire(seq = 1, innings = 1, playerId = a2.id, out = false)
+        val afterRetire = client.post("/matches/${match.id}/events") {
+            bearerAuth("test-asha")
+            contentType(ContentType.Application.Json)
+            setBody(retire)
+        }.body<MatchDetails>()
+        assertEquals(listOf(1), afterRetire.events.map { it.seq })
+        assertEquals(2, afterRetire.nextSeq)
+
+        // A latecomer joins the batting side.
+        val joined = client.post("/matches/${match.id}/players") {
+            bearerAuth("test-asha")
+            contentType(ContentType.Application.Json)
+            setBody(AddPlayerRequest(TeamSide.A, "Zoya"))
+        }.body<MatchDetails>()
+        assertEquals("Zoya", joined.match.teamA.players.last().name)
+
+        // Undo removes the retirement, the latest entry.
+        val undone = client.delete("/matches/${match.id}/last") { bearerAuth("test-asha") }.body<MatchDetails>()
+        assertTrue(undone.events.isEmpty())
+        assertEquals(1, undone.deliveries.size)
     }
 
     @Test

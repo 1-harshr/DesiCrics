@@ -2,12 +2,14 @@ package com.harsh.desicrics.store
 
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.db.DeliveriesTable
+import com.harsh.desicrics.db.MatchEventsTable
 import com.harsh.desicrics.db.MatchPlayersTable
 import com.harsh.desicrics.db.MatchesTable
 import com.harsh.desicrics.db.UsersTable
 import com.harsh.desicrics.db.query
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.Player
@@ -90,7 +92,11 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             .where { DeliveriesTable.matchId eq matchId }
             .orderBy(DeliveriesTable.seq)
             .map { it.toDelivery() }
-        MatchDetails(row.toMatch(players), deliveries)
+        val events = MatchEventsTable.selectAll()
+            .where { MatchEventsTable.matchId eq matchId }
+            .orderBy(MatchEventsTable.seq)
+            .map { it.toEvent() }
+        MatchDetails(row.toMatch(players), deliveries, events)
     }
 
     override suspend fun create(match: Match) {
@@ -137,10 +143,56 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
         if (e.isUniqueViolation()) false else throw e
     }
 
-    override suspend fun removeDelivery(match: Match, seq: Int): Boolean = db.query {
-        val deleted = DeliveriesTable.deleteWhere { (matchId eq match.id) and (DeliveriesTable.seq eq seq) }
+    override suspend fun addEvent(match: Match, event: MatchEvent): Boolean = try {
+        db.query {
+            MatchEventsTable.insert {
+                it[matchId] = match.id
+                it[seq] = event.seq
+                it[innings] = event.innings
+                it[type] = event.typeName
+                it[playerId] = (event as? MatchEvent.Retire)?.playerId
+                it[isOut] = (event as? MatchEvent.Retire)?.out ?: false
+                it[createdAt] = event.timestamp
+            }
+            updateScore(match)
+        }
+        true
+    } catch (e: Exception) {
+        if (e.isUniqueViolation()) false else throw e
+    }
+
+    override suspend fun removeEntry(match: Match, seq: Int): Boolean = db.query {
+        val deleted = DeliveriesTable.deleteWhere { (matchId eq match.id) and (DeliveriesTable.seq eq seq) } +
+            MatchEventsTable.deleteWhere { (matchId eq match.id) and (MatchEventsTable.seq eq seq) }
         if (deleted > 0) updateScore(match)
         deleted > 0
+    }
+
+    override suspend fun addPlayer(matchId: String, side: TeamSide, player: Player) {
+        db.query {
+            val position = MatchPlayersTable.selectAll()
+                .where { (MatchPlayersTable.matchId eq matchId) and (MatchPlayersTable.side eq side) }
+                .count().toInt()
+            MatchPlayersTable.insert {
+                it[id] = player.id
+                it[MatchPlayersTable.matchId] = matchId
+                it[MatchPlayersTable.side] = side
+                it[MatchPlayersTable.position] = position
+                it[name] = player.name
+            }
+        }
+    }
+
+    private fun ResultRow.toEvent(): MatchEvent {
+        val seq = this[MatchEventsTable.seq]
+        val innings = this[MatchEventsTable.innings]
+        val at = this[MatchEventsTable.createdAt]
+        return when (this[MatchEventsTable.type]) {
+            RETIRE -> MatchEvent.Retire(seq, innings, checkNotNull(this[MatchEventsTable.playerId]), this[MatchEventsTable.isOut], at)
+            SWAP_ENDS -> MatchEvent.SwapEnds(seq, innings, at)
+            REPLACE_BOWLER -> MatchEvent.ReplaceBowler(seq, innings, at)
+            else -> error("Unknown match event type ${this[MatchEventsTable.type]}")
+        }
     }
 
     private fun JdbcTransaction.insertRoster(matchId: String, side: TeamSide, team: Team) {
@@ -227,6 +279,17 @@ private fun UpdateBuilder<*>.setResult(match: Match) {
     this[MatchesTable.resultMarginUnit] = match.result?.marginUnit
     this[MatchesTable.inningsScores] = Json.encodeToString(match.innings)
 }
+
+private const val RETIRE = "retire"
+private const val SWAP_ENDS = "swap_ends"
+private const val REPLACE_BOWLER = "replace_bowler"
+
+private val MatchEvent.typeName: String
+    get() = when (this) {
+        is MatchEvent.Retire -> RETIRE
+        is MatchEvent.SwapEnds -> SWAP_ENDS
+        is MatchEvent.ReplaceBowler -> REPLACE_BOWLER
+    }
 
 /** SQLSTATE 23505 means a unique or primary-key violation in both H2 and Postgres. */
 private fun Throwable.isUniqueViolation(): Boolean =

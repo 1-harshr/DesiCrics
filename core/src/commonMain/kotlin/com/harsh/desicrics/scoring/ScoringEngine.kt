@@ -4,6 +4,7 @@ import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
@@ -19,14 +20,16 @@ import com.harsh.desicrics.model.TeamSide
  */
 object ScoringEngine {
 
-    fun compute(match: Match, deliveries: List<Delivery>): MatchState {
-        val sorted = deliveries.sortedBy { it.seq }
-        val first = computeInnings(match, 1, match.battingFirst, sorted.filter { it.innings == 1 }, target = null)
+    fun compute(match: Match, deliveries: List<Delivery>, events: List<MatchEvent> = emptyList()): MatchState {
+        // Balls and between-ball events replay together, in the order they were recorded.
+        val timeline = (deliveries.map { it.seq to it } + events.map { it.seq to it }).sortedBy { it.first }.map { it.second }
+        fun inningsItems(number: Int) = timeline.filter { (it as? Delivery)?.innings == number || (it as? MatchEvent)?.innings == number }
+        val first = computeInnings(match, 1, match.battingFirst, inningsItems(1), target = null)
         if (!first.isComplete) {
             return MatchState(match, listOf(first), isComplete = false, result = null)
         }
         val second = computeInnings(
-            match, 2, match.battingFirst.other, sorted.filter { it.innings == 2 }, target = first.runs + 1,
+            match, 2, match.battingFirst.other, inningsItems(2), target = first.runs + 1,
         )
         return MatchState(
             match = match,
@@ -40,7 +43,8 @@ object ScoringEngine {
         match: Match,
         number: Int,
         battingSide: TeamSide,
-        deliveries: List<Delivery>,
+        /** [Delivery] and [MatchEvent] items in sequence order. */
+        timeline: List<Any>,
         target: Int?,
     ): InningsState {
         val battingTeam = match.team(battingSide)
@@ -62,14 +66,33 @@ object ScoringEngine {
         var overJustCompleted = false
         var overRuns = 0
 
-        for (d in deliveries) {
+        for (item in timeline) {
+            if (item is MatchEvent) {
+                when (item) {
+                    is MatchEvent.Retire -> {
+                        batters[item.playerId]?.let { batters[item.playerId] = it.copy(retired = if (item.out) Retirement.OUT else Retirement.HURT) }
+                        if (item.out) wickets++
+                        if (striker == item.playerId) striker = null
+                        if (nonStriker == item.playerId) nonStriker = null
+                    }
+                    is MatchEvent.SwapEnds -> striker = nonStriker.also { nonStriker = striker }
+                    // The over carries on; the scorer picks who bowls the rest of it.
+                    is MatchEvent.ReplaceBowler -> bowler = null
+                }
+                continue
+            }
+            val d = item as Delivery
             if (overJustCompleted) {
                 currentOver.clear()
                 overJustCompleted = false
             }
 
-            val strikerCard = batters.getOrPut(d.strikerId) { BatterCard(battingTeam.player(d.strikerId)) }
-            batters.getOrPut(d.nonStrikerId) { BatterCard(battingTeam.player(d.nonStrikerId)) }
+            // A retired-hurt batter back at the crease is batting again.
+            for (id in listOf(d.strikerId, d.nonStrikerId)) {
+                val card = batters.getOrPut(id) { BatterCard(battingTeam.player(id)) }
+                if (card.retired == Retirement.HURT) batters[id] = card.copy(retired = null)
+            }
+            val strikerCard = batters.getValue(d.strikerId)
             val bowlerCard = bowlers.getOrPut(d.bowlerId) { BowlerCard(bowlingTeam.player(d.bowlerId)) }
 
             // Before counting this ball, so a wide in the third slot is "x.3", like the ball that follows it.
@@ -147,6 +170,12 @@ object ScoringEngine {
             }
         }
 
+        val atCrease = setOfNotNull(striker, nonStriker)
+        val canComeIn = battingTeam.players.filter { player ->
+            val card = batters[player.id]
+            player.id !in atCrease && (card == null || !card.isOut)
+        }
+
         val isComplete = wickets >= battingTeam.players.size - 1 ||
             legalBalls >= maxBalls ||
             (target != null && runs >= target)
@@ -171,6 +200,7 @@ object ScoringEngine {
             target = target,
             isComplete = isComplete,
             overs = overs.toList(),
+            canComeIn = canComeIn,
         )
     }
 

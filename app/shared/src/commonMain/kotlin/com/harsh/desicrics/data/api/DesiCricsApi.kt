@@ -1,11 +1,13 @@
 package com.harsh.desicrics.data.api
 
+import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.ApiError
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.UserProfile
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -66,8 +68,15 @@ class DesiCricsApi(
     suspend fun recordDelivery(matchId: String, delivery: Delivery): MatchDetails =
         call { post("$baseUrl/matches/$matchId/deliveries") { it(); json(delivery) } }.body()
 
-    suspend fun undoLastDelivery(matchId: String): MatchDetails =
-        call { delete("$baseUrl/matches/$matchId/deliveries/last", it) }.body()
+    suspend fun recordEvent(matchId: String, event: MatchEvent): MatchDetails =
+        call { post("$baseUrl/matches/$matchId/events") { it(); json(event) } }.body()
+
+    suspend fun addPlayer(matchId: String, request: AddPlayerRequest): MatchDetails =
+        call { post("$baseUrl/matches/$matchId/players") { it(); json(request) } }.body()
+
+    /** Removes the latest ball or event. */
+    suspend fun undoLast(matchId: String): MatchDetails =
+        call { delete("$baseUrl/matches/$matchId/last", it) }.body()
 
     /**
      * Sends a request with the user's ID token, retrying once with a fresh token if the cached one has

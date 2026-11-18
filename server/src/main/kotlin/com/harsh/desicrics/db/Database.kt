@@ -85,6 +85,18 @@ object DeliveriesTable : Table("deliveries") {
     override val primaryKey = PrimaryKey(matchId, seq)
 }
 
+/** Between-ball events; [type] picks which of [playerId] and [isOut] apply. */
+object MatchEventsTable : Table("match_events") {
+    val matchId = reference("match_id", MatchesTable.id, onDelete = ReferenceOption.CASCADE)
+    val seq = integer("seq")
+    val innings = integer("innings")
+    val type = varchar("type", 20)
+    val playerId = reference("player_id", MatchPlayersTable.id).nullable()
+    val isOut = bool("is_out")
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(matchId, seq)
+}
+
 /** A connected database plus the pool behind it, so the server can close it on shutdown. */
 class DatabaseHandle(val database: Database, private val dataSource: HikariDataSource) : AutoCloseable {
     override fun close() = dataSource.close()

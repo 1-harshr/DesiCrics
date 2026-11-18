@@ -5,6 +5,7 @@ import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
@@ -31,6 +32,8 @@ class ScoringEngineTest {
     )
 
     private val deliveries = mutableListOf<Delivery>()
+    private val events = mutableListOf<MatchEvent>()
+    private val nextSeq get() = deliveries.size + events.size
 
     private fun ball(
         striker: String,
@@ -42,10 +45,14 @@ class ScoringEngineTest {
         wicket: Wicket? = null,
         innings: Int = 1,
     ) {
-        deliveries += Delivery(deliveries.size, innings, striker, nonStriker, bowler, runs, extra, extraRuns, wicket)
+        deliveries += Delivery(nextSeq, innings, striker, nonStriker, bowler, runs, extra, extraRuns, wicket)
     }
 
-    private fun state() = ScoringEngine.compute(match, deliveries)
+    private fun event(make: (seq: Int) -> MatchEvent) {
+        events += make(nextSeq)
+    }
+
+    private fun state() = ScoringEngine.compute(match, deliveries, events)
 
     @Test
     fun oddRunsSwapStrike() {
@@ -193,5 +200,62 @@ class ScoringEngineTest {
         assertEquals("Asha", wicket.playerOut?.name)
         assertEquals("Farhan", wicket.fielder?.name)
         assertEquals("Asha", wicket.striker.name)
+    }
+
+    @Test
+    fun retiredHurtLeavesTheCreaseAndCanComeBack() {
+        ball("a1", "a2", "b1", runs = 2)
+        event { MatchEvent.Retire(it, 1, "a1", out = false) }
+        var innings = state().current
+        assertNull(innings.strikerId)
+        assertEquals(0, innings.wickets)
+        assertEquals(Retirement.HURT, innings.batters.first { it.player.id == "a1" }.retired)
+        assertEquals(listOf("a1", "a3"), innings.canComeIn.map { it.id })
+
+        // a3 comes in, then a2 is out and a1 returns with the runs already scored.
+        ball("a3", "a2", "b1", wicket = Wicket(DismissalKind.BOWLED, "a3"))
+        ball("a1", "a2", "b1", runs = 1)
+        innings = state().current
+        val returned = innings.batters.first { it.player.id == "a1" }
+        assertNull(returned.retired)
+        assertEquals(3, returned.runs)
+        assertFalse(innings.isComplete)
+    }
+
+    @Test
+    fun retiredOutCountsAsAWicket() {
+        ball("a1", "a2", "b1")
+        event { MatchEvent.Retire(it, 1, "a2", out = true) }
+        val innings = state().current
+        assertEquals(1, innings.wickets)
+        assertTrue(innings.batters.first { it.player.id == "a2" }.isOut)
+        assertEquals(0, innings.bowlers.single().wickets)
+        assertNull(innings.nonStrikerId)
+    }
+
+    @Test
+    fun swapEndsAndReplaceBowlerMidOver() {
+        ball("a1", "a2", "b1")
+        event { MatchEvent.SwapEnds(it, 1) }
+        event { MatchEvent.ReplaceBowler(it, 1) }
+        var innings = state().current
+        assertEquals("a2", innings.strikerId)
+        assertNull(innings.bowlerId)
+
+        // The new bowler finishes the over, which still ends after six legal balls.
+        repeat(5) { ball("a2", "a1", "b2") }
+        innings = state().current
+        assertEquals("1.0", innings.oversText)
+        assertEquals("b2", innings.previousOverBowlerId)
+        assertEquals(listOf(1, 5), innings.bowlers.map { it.legalBalls })
+    }
+
+    @Test
+    fun eventsAreChecked() {
+        ball("a1", "a2", "b1")
+        val state = state()
+        assertEquals(DeliveryError.BATTER_NOT_AT_CREASE, state.validate(MatchEvent.Retire(1, 1, "a3", out = false), nextSeq = 1))
+        assertEquals(DeliveryError.STALE, state.validate(MatchEvent.SwapEnds(5, 1), nextSeq = 1))
+        assertNull(state.validate(MatchEvent.ReplaceBowler(1, 1), nextSeq = 1))
     }
 }

@@ -63,6 +63,7 @@ import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.model.Wicket
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.scoring.InningsState
+import com.harsh.desicrics.scoring.Retirement
 import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
@@ -97,6 +98,10 @@ fun MatchScreen(
             onWicket = viewModel::recordWicket,
             onUndo = viewModel::undo,
             onDismissError = viewModel::dismissError,
+            onRetire = viewModel::retire,
+            onSwapEnds = viewModel::swapEnds,
+            onReplaceBowler = viewModel::replaceBowler,
+            onAddPlayer = viewModel::addPlayer,
         ),
     )
 }
@@ -112,6 +117,10 @@ class MatchActions(
     val onWicket: (DismissalKind, playerOutId: String, fielderId: String?, runsCompleted: Int) -> Unit,
     val onUndo: () -> Unit,
     val onDismissError: () -> Unit,
+    val onRetire: (playerId: String, out: Boolean) -> Unit,
+    val onSwapEnds: () -> Unit,
+    val onReplaceBowler: () -> Unit,
+    val onAddPlayer: (TeamSide, name: String) -> Unit,
 )
 
 private enum class MatchTab { LIVE, SCORECARD, OVERS }
@@ -130,6 +139,8 @@ private sealed interface ScoringSheet {
     data object Bowler : ScoringSheet
     data class Extra(val type: ExtraType) : ScoringSheet
     data object Wicket : ScoringSheet
+    data class BatterOptions(val player: Player) : ScoringSheet
+    data object BowlerOptions : ScoringSheet
 }
 
 /**
@@ -276,15 +287,15 @@ private fun CreaseCard(ui: MatchUiState, innings: InningsState, onChoose: (Scori
 
     DesiCard(Modifier.fillMaxWidth()) {
         SectionLabel(stringResource(Res.string.match_section_crease))
-        BatterSlot(batter(ui.strikerId), innings, onStrike = true, empty = stringResource(Res.string.match_choose_striker), enabled = ui.isScorer) {
+        BatterSlot(batter(ui.strikerId), innings, onStrike = true, empty = stringResource(Res.string.match_choose_striker), ui.canEdit, onChoose) {
             onChoose(ScoringSheet.Striker)
         }
-        BatterSlot(batter(ui.nonStrikerId), innings, onStrike = false, empty = stringResource(Res.string.match_choose_non_striker), enabled = ui.isScorer) {
+        BatterSlot(batter(ui.nonStrikerId), innings, onStrike = false, empty = stringResource(Res.string.match_choose_non_striker), ui.canEdit, onChoose) {
             onChoose(ScoringSheet.NonStriker)
         }
         HorizontalDivider(color = DesiTheme.colors.line)
         if (bowler == null) {
-            EmptySlot(stringResource(chooseBowler), enabled = ui.isScorer) { onChoose(ScoringSheet.Bowler) }
+            EmptySlot(stringResource(chooseBowler), enabled = ui.canEdit) { onChoose(ScoringSheet.Bowler) }
         } else {
             val card = innings.bowlers.firstOrNull { it.player.id == bowler.id }
             SlotRow(
@@ -292,15 +303,24 @@ private fun CreaseCard(ui: MatchUiState, innings: InningsState, onChoose: (Scori
                 name = bowler.name,
                 caption = null,
                 figures = card?.let { "${it.oversText}-${it.maidens}-${it.runs}-${it.wickets}" } ?: "0.0-0-0-0",
+                onOptions = if (ui.canEdit) ({ onChoose(ScoringSheet.BowlerOptions) }) else null,
             )
         }
     }
 }
 
 @Composable
-private fun BatterSlot(player: Player?, innings: InningsState, onStrike: Boolean, empty: String, enabled: Boolean, onChoose: () -> Unit) {
+private fun BatterSlot(
+    player: Player?,
+    innings: InningsState,
+    onStrike: Boolean,
+    empty: String,
+    canEdit: Boolean,
+    onSheet: (ScoringSheet) -> Unit,
+    onChoose: () -> Unit,
+) {
     if (player == null) {
-        EmptySlot(empty, enabled, onChoose)
+        EmptySlot(empty, canEdit, onChoose)
         return
     }
     val card = innings.batters.firstOrNull { it.player.id == player.id }
@@ -309,18 +329,32 @@ private fun BatterSlot(player: Player?, innings: InningsState, onStrike: Boolean
         name = player.name,
         caption = if (onStrike) stringResource(Res.string.match_on_strike) else null,
         figures = stringResource(Res.string.match_batter_score, card?.runs ?: 0, card?.balls ?: 0),
+        onOptions = if (canEdit) ({ onSheet(ScoringSheet.BatterOptions(player)) }) else null,
     )
 }
 
+/** A player at the crease or bowling. With [onOptions], tapping the row opens what the scorer can change. */
 @Composable
-private fun SlotRow(icon: @Composable () -> Unit, name: String, caption: String?, figures: String) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+private fun SlotRow(icon: @Composable () -> Unit, name: String, caption: String?, figures: String, onOptions: (() -> Unit)? = null) {
+    Row(
+        Modifier
+            .clip(DesiTheme.radius.md)
+            .then(
+                if (onOptions == null) Modifier
+                else Modifier.clickable(role = Role.Button, onClickLabel = stringResource(Res.string.scoring_player_options, name), onClick = onOptions),
+            ),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
+    ) {
         icon()
         Column(Modifier.weight(1f)) {
             Text(name, style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
             if (caption != null) Text(caption, style = DesiTheme.type.caption, color = DesiTheme.colors.brand)
         }
         Text(figures, style = DesiTheme.type.scoreMd, color = DesiTheme.colors.ink)
+        if (onOptions != null) {
+            Icon(painterResource(DesiIcons.More), contentDescription = null, tint = DesiTheme.colors.muted, modifier = Modifier.size(DesiTheme.size.iconSmall))
+        }
     }
 }
 
@@ -428,30 +462,62 @@ private fun ScoringSheets(sheet: ScoringSheet?, ui: MatchUiState, innings: Innin
         null -> Unit
         ScoringSheet.Striker, ScoringSheet.NonStriker -> {
             val other = if (sheet == ScoringSheet.Striker) ui.nonStrikerId else ui.strikerId
+            val canReturn = stringResource(Res.string.scoring_can_return)
             PlayerSheet(
                 title = stringResource(if (sheet == ScoringSheet.Striker) Res.string.scoring_pick_striker else Res.string.scoring_pick_non_striker),
-                players = innings.yetToBat.filter { it.id != other },
+                players = innings.canComeIn.filter { it.id != other },
+                notes = innings.batters.filter { it.retired == Retirement.HURT }.associate { it.player.id to canReturn },
                 onPick = {
                     if (sheet == ScoringSheet.Striker) actions.onSelectStriker(it.id) else actions.onSelectNonStriker(it.id)
                     onClose()
                 },
                 onDismiss = onClose,
+                onAddPlayer = { actions.onAddPlayer(innings.battingSide, it) },
             )
         }
         ScoringSheet.Bowler -> {
-            // The bowler of the previous over can't bowl two in a row.
-            val previous = innings.bowlingTeam.players.firstOrNull { it.id == innings.previousOverBowlerId }
+            // Anyone can bowl, even the previous over's bowler; small sides often need to.
+            val bowledLast = stringResource(Res.string.scoring_bowled_last_over)
             PlayerSheet(
                 title = stringResource(Res.string.scoring_pick_bowler),
-                hint = previous?.let { stringResource(Res.string.scoring_pick_bowler_hint, it.name) },
-                players = innings.bowlingTeam.players.filter { it.id != previous?.id },
+                players = innings.bowlingTeam.players,
+                notes = listOfNotNull(innings.previousOverBowlerId).associateWith { bowledLast },
                 onPick = {
                     actions.onSelectBowler(it.id)
                     onClose()
                 },
                 onDismiss = onClose,
+                onAddPlayer = { actions.onAddPlayer(innings.battingSide.other, it) },
             )
         }
+        is ScoringSheet.BatterOptions -> OptionsSheet(
+            title = sheet.player.name,
+            options = listOf(
+                SheetOption(stringResource(Res.string.scoring_retire_hurt), stringResource(Res.string.scoring_retire_hurt_hint)) {
+                    actions.onRetire(sheet.player.id, false)
+                    onClose()
+                },
+                SheetOption(stringResource(Res.string.scoring_retire_out), stringResource(Res.string.scoring_retire_out_hint)) {
+                    actions.onRetire(sheet.player.id, true)
+                    onClose()
+                },
+                SheetOption(stringResource(Res.string.scoring_swap_ends), stringResource(Res.string.scoring_swap_ends_hint)) {
+                    actions.onSwapEnds()
+                    onClose()
+                },
+            ),
+            onDismiss = onClose,
+        )
+        ScoringSheet.BowlerOptions -> OptionsSheet(
+            title = innings.bowlingTeam.players.firstOrNull { it.id == ui.bowlerId }?.name.orEmpty(),
+            options = listOf(
+                SheetOption(stringResource(Res.string.scoring_change_bowler), stringResource(Res.string.scoring_change_bowler_hint)) {
+                    actions.onReplaceBowler()
+                    onClose()
+                },
+            ),
+            onDismiss = onClose,
+        )
         is ScoringSheet.Extra -> ExtraRunsSheet(sheet.type, onPick = { runs ->
             actions.onExtra(sheet.type, runs)
             onClose()
@@ -532,7 +598,7 @@ private fun previewBalls(): List<Delivery> {
 private fun previewUi(deliveries: List<Delivery>, isScorer: Boolean = true) =
     MatchUiState(loading = false, match = PreviewMatch, deliveries = deliveries, state = ScoringEngine.compute(PreviewMatch, deliveries), isScorer = isScorer)
 
-private val PreviewActions = MatchActions({}, {}, {}, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {})
+private val PreviewActions = MatchActions({}, {}, {}, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> })
 
 @Preview
 @Composable

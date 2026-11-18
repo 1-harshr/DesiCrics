@@ -46,6 +46,8 @@ data class InningsState(
     val isComplete: Boolean,
     /** Every over started so far, oldest first, for the over-by-over view and commentary. */
     val overs: List<OverSummary> = emptyList(),
+    /** Batters who can walk in now: those yet to bat and anyone retired hurt, not counting the two at the crease. */
+    val canComeIn: List<Player> = emptyList(),
 ) {
     val scoreText: String get() = "$runs/$wickets"
     val oversText: String get() = formatOvers(legalBalls)
@@ -107,10 +109,15 @@ data class BatterCard(
     val sixes: Int = 0,
     /** Null while not out. */
     val dismissal: Dismissal? = null,
+    /** Set while retired; cleared if a retired-hurt batter comes back. */
+    val retired: Retirement? = null,
 ) {
-    val isOut: Boolean get() = dismissal != null
+    val isOut: Boolean get() = dismissal != null || retired == Retirement.OUT
     val strikeRate: Double get() = if (balls == 0) 0.0 else runs * 100.0 / balls
 }
+
+/** Retired hurt isn't out and can bat again; retired out counts as a wicket. */
+enum class Retirement { HURT, OUT }
 
 /** How a batter got out. The app turns it into "c Rohit b Bumrah" with its own strings. */
 data class Dismissal(

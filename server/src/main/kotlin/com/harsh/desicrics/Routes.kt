@@ -1,9 +1,11 @@
 package com.harsh.desicrics
 
+import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.model.Delivery
+import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.service.ApiException
 import com.harsh.desicrics.service.MatchService
 import com.harsh.desicrics.service.ProfileService
@@ -48,8 +50,14 @@ fun Route.matchRoutes(matches: MatchService) {
             post("/deliveries") {
                 call.respond(matches.recordDelivery(call.user, call.matchId, call.receive<Delivery>()))
             }
-            delete("/deliveries/last") {
-                call.respond(matches.undoLastDelivery(call.user, call.matchId))
+            post("/events") {
+                call.respond(matches.recordEvent(call.user, call.matchId, call.receive<MatchEvent>()))
+            }
+            post("/players") {
+                call.respond(matches.addPlayer(call.user, call.matchId, call.receive<AddPlayerRequest>()))
+            }
+            delete("/last") {
+                call.respond(matches.undoLast(call.user, call.matchId))
             }
         }
     }

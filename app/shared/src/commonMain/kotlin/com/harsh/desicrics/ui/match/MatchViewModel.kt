@@ -9,8 +9,11 @@ import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.Wicket
 import com.harsh.desicrics.scoring.DeliveryError
+import com.harsh.desicrics.scoring.InningsState
 import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.scoring.validate
@@ -43,6 +46,7 @@ data class MatchUiState(
     val notFound: Boolean = false,
     val match: Match? = null,
     val deliveries: List<Delivery> = emptyList(),
+    val events: List<MatchEvent> = emptyList(),
     val state: MatchState? = null,
     val isScorer: Boolean = false,
     val selection: Selection = Selection(),
@@ -60,7 +64,12 @@ data class MatchUiState(
         get() = isScorer && state?.isComplete == false && !saving &&
             strikerId != null && nonStrikerId != null && bowlerId != null
 
-    val canUndo: Boolean get() = isScorer && deliveries.isNotEmpty() && !saving
+    val canUndo: Boolean get() = isScorer && (deliveries.isNotEmpty() || events.isNotEmpty()) && !saving
+
+    /** The scorer can retire batters, swap ends and so on between balls. */
+    val canEdit: Boolean get() = isScorer && state?.isComplete == false && !saving
+
+    val nextSeq: Int get() = (deliveries.map { it.seq } + events.map { it.seq }).maxOrNull()?.plus(1) ?: 0
 }
 
 class MatchViewModel(
@@ -88,7 +97,7 @@ class MatchViewModel(
                                 snapshot == null -> current.copy(loading = false, notFound = true)
                                 // Don't let a poll overwrite the local state mid-save.
                                 current.saving -> current
-                                else -> current.withSnapshot(snapshot.match, snapshot.deliveries).copy(offline = false)
+                                else -> current.withSnapshot(snapshot).copy(offline = false)
                             }
                         }
                     },
@@ -134,7 +143,7 @@ class MatchViewModel(
         if (!ui.canScore) return
         val match = ui.match ?: return
         val delivery = Delivery(
-            seq = (ui.deliveries.maxOfOrNull { it.seq } ?: -1) + 1,
+            seq = ui.nextSeq,
             innings = ui.state!!.current.number,
             strikerId = ui.strikerId!!,
             nonStrikerId = ui.nonStrikerId!!,
@@ -157,7 +166,36 @@ class MatchViewModel(
         val ui = _state.value
         if (!ui.canUndo) return
         val match = ui.match ?: return
-        save { matchRepository.undoLastDelivery(match.id) }
+        save { matchRepository.undoLast(match.id) }
+    }
+
+    /** Retired hurt can bat again later; retired out counts as a wicket. */
+    fun retire(playerId: String, out: Boolean) = recordEvent { seq, innings -> MatchEvent.Retire(seq, innings, playerId, out) }
+
+    fun swapEnds() = recordEvent { seq, innings -> MatchEvent.SwapEnds(seq, innings) }
+
+    /** Clears the bowler mid-over (an injury, say) so the scorer can pick who finishes it. */
+    fun replaceBowler() = recordEvent { seq, innings -> MatchEvent.ReplaceBowler(seq, innings) }
+
+    /** A latecomer or substitute joins [side]; they show up in the player pickers straight away. */
+    fun addPlayer(side: TeamSide, name: String) {
+        val ui = _state.value
+        val match = ui.match ?: return
+        if (!ui.isScorer || name.isBlank()) return
+        save { matchRepository.addPlayer(match.id, side, name.trim()) }
+    }
+
+    private fun recordEvent(make: (seq: Int, innings: Int) -> MatchEvent) {
+        val ui = _state.value
+        if (!ui.canEdit) return
+        val match = ui.match ?: return
+        val state = ui.state ?: return
+        val event = make(ui.nextSeq, state.current.number)
+        state.validate(event, event.seq)?.let { error ->
+            _state.update { it.copy(error = ScoringError.Rejected(error)) }
+            return
+        }
+        save { matchRepository.recordEvent(match.id, event) }
     }
 
     /** Sends the change and shows the server's scorecard straight away instead of waiting for the next poll. */
@@ -166,7 +204,11 @@ class MatchViewModel(
         viewModelScope.launch {
             try {
                 val details = write()
-                _state.update { it.withSnapshot(details.match, details.deliveries).copy(selection = Selection(), saving = false) }
+                _state.update { current ->
+                    val next = current.withSnapshot(details)
+                    val ballAdded = details.deliveries.size > current.deliveries.size
+                    next.copy(selection = next.state?.current?.let { current.selection.stillValid(it, ballAdded) } ?: Selection(), saving = false)
+                }
                 refreshes.update { it + 1 }
             } catch (e: CancellationException) {
                 throw e
@@ -177,11 +219,26 @@ class MatchViewModel(
         }
     }
 
-    private fun MatchUiState.withSnapshot(match: Match, deliveries: List<Delivery>) = copy(
+    /**
+     * Keeps the scorer's picks that still apply after a save, e.g. a new striker picked before the other
+     * batter retired. A pick is dropped once the engine fills that slot or the player can't come in, and
+     * the bowler pick after any new ball, so a finished over always asks who bowls next.
+     */
+    private fun Selection.stillValid(innings: InningsState, ballAdded: Boolean): Selection {
+        val canComeIn = innings.canComeIn.map { it.id }.toSet()
+        return Selection(
+            strikerId = strikerId.takeIf { innings.strikerId == null && it in canComeIn },
+            nonStrikerId = nonStrikerId.takeIf { innings.nonStrikerId == null && it in canComeIn },
+            bowlerId = bowlerId.takeIf { innings.bowlerId == null && !ballAdded },
+        )
+    }
+
+    private fun MatchUiState.withSnapshot(details: MatchDetails) = copy(
         loading = false,
-        match = match,
-        deliveries = deliveries,
-        state = ScoringEngine.compute(match, deliveries),
-        isScorer = match.createdBy == uid,
+        match = details.match,
+        deliveries = details.deliveries,
+        events = details.events,
+        state = ScoringEngine.compute(details.match, details.deliveries, details.events),
+        isScorer = details.match.createdBy == uid,
     )
 }

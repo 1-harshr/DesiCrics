@@ -4,6 +4,7 @@ import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
@@ -17,7 +18,9 @@ import kotlinx.serialization.Serializable
 //   POST   /matches                         CreateMatchRequest → MatchDetails
 //   GET    /matches/{id}                    → MatchDetails
 //   POST   /matches/{id}/deliveries         Delivery → MatchDetails
-//   DELETE /matches/{id}/deliveries/last    → MatchDetails
+//   POST   /matches/{id}/events             MatchEvent → MatchDetails
+//   POST   /matches/{id}/players            AddPlayerRequest → MatchDetails
+//   DELETE /matches/{id}/last               → MatchDetails (undoes the latest ball or event)
 
 @Serializable
 data class UpdateProfileRequest(
@@ -92,12 +95,25 @@ enum class MatchSetupError(val message: String) {
     OVERS_OUT_OF_RANGE("Overs must be between 1 and 50"),
 }
 
-/** A match with every ball bowled so far, which is everything a scorecard needs. */
+/** A match with every ball bowled and every event so far, which is everything a scorecard needs. */
 @Serializable
 data class MatchDetails(
     val match: Match,
     val deliveries: List<Delivery>,
-)
+    val events: List<MatchEvent> = emptyList(),
+) {
+    /** The sequence number the next ball or event must use. */
+    val nextSeq: Int get() = (deliveries.map { it.seq } + events.map { it.seq }).maxOrNull()?.plus(1) ?: 0
+}
+
+/** A latecomer or substitute joining a team mid-match. */
+@Serializable
+data class AddPlayerRequest(val side: TeamSide, val name: String) {
+    fun validationError(): String? = when {
+        name.isBlank() || name.trim().length > CreateMatchRequest.MAX_NAME -> MatchSetupError.PLAYER_NAME_INVALID.message
+        else -> null
+    }
+}
 
 @Serializable
 data class ApiError(val message: String)
