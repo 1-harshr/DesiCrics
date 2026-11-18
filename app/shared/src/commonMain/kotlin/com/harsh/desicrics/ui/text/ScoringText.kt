@@ -14,6 +14,7 @@ import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
@@ -40,11 +41,15 @@ fun resultText(match: Match, result: MatchResult): String {
 
 /**
  * One line on where a match stands: the result once it's over, the chase in the second innings
- * ("Royals need 27 off 20 balls"), or the toss before that.
+ * ("Royals need 27 off 20 balls"), the toss before that, or for a fixture not yet started, when it's due.
  */
 @Composable
 fun matchStatusText(match: Match): String {
     match.result?.let { return resultText(match, it) }
+    // A fixture's toss hasn't happened; its stored toss is only a placeholder until it starts.
+    if (match.status == MatchStatus.SCHEDULED) {
+        return match.scheduledAt?.let { formatDayAndTime(it) } ?: stringResource(Res.string.fixture_to_play)
+    }
     val chase = match.innings.getOrNull(1)
     val first = match.innings.firstOrNull()
     if (chase != null && first != null) {

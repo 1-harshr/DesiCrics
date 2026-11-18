@@ -57,11 +57,15 @@ class AuthRepository(private val auth: FirebaseAuth) : IdTokenProvider {
         false
     }
 
+    /**
+     * Firebase reports missing fields as empty strings on some sign-in methods (a Google account has phone
+     * ""), so blanks count as missing. Otherwise a Google user's "verified" empty phone blocks onboarding.
+     */
     private fun FirebaseUser.toAuthUser() = AuthUser(
         uid = uid,
-        displayName = displayName,
-        email = email,
-        phone = phoneNumber,
-        photoUrl = photoURL,
+        displayName = displayName?.takeIf { it.isNotBlank() },
+        email = email?.takeIf { it.isNotBlank() },
+        phone = phoneNumber?.takeIf { it.isNotBlank() },
+        photoUrl = photoURL?.takeIf { it.isNotBlank() },
     )
 }

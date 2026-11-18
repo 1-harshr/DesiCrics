@@ -774,7 +774,10 @@
     <string name="stats_format_long">Longer</string>
     <string name="stats_load_failed">Couldn't load stats. Check your connection.</string>
     <string name="stats_none">No completed matches here yet. Stats count matches where you were picked from a team, not typed in by name.</string>
-    <string name="stats_summary">%1$d matches · %2$d won · %3$s MVP points</string>
+    <plurals name="stats_summary">
+        <item quantity="one">%1$d match · %2$d won · %3$s MVP points</item>
+        <item quantity="other">%1$d matches · %2$d won · %3$s MVP points</item>
+    </plurals>
     <string name="stats_batting">Batting</string>
     <string name="stats_bowling">Bowling</string>
     <string name="stats_fielding">Fielding</string>
@@ -795,7 +798,10 @@
     <string name="stats_catches">Catches</string>
     <string name="stats_run_outs">Run outs</string>
     <string name="stats_stumpings">Stumpings</string>
-    <string name="stats_form">Form: runs in the last %1$d matches</string>
+    <plurals name="stats_form">
+        <item quantity="one">Form: runs in the last match</item>
+        <item quantity="other">Form: runs in the last %1$d matches</item>
+    </plurals>
     <string name="stats_form_description">Runs in each of the last %1$d matches, oldest first</string>
     <string name="stats_zones">Where the runs go</string>
     <string name="stats_badges">Badges</string>

@@ -68,6 +68,9 @@ import org.koin.core.parameter.parametersOf
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
+/** The form chart always has room for this many matches, the most it shows. */
+private const val FORM_SLOTS = 10
+
 /** MVP points are kept in tenths: 123 is "12.3". */
 fun mvpText(tenths: Int): String = "${tenths / 10}.${kotlin.math.abs(tenths % 10)}"
 
@@ -144,7 +147,7 @@ private fun StatsShareCard(name: String, stats: CareerStats) {
 fun CareerCards(stats: CareerStats) {
     val colors = DesiTheme.colors
     Text(
-        stringResource(Res.string.stats_summary, stats.matches, stats.won, mvpText(stats.mvpTenths)),
+        pluralStringResource(Res.plurals.stats_summary, stats.matches, stats.matches, stats.won, mvpText(stats.mvpTenths)),
         style = DesiTheme.type.bodyStrong,
         color = colors.ink,
     )
@@ -241,21 +244,24 @@ private fun FormChart(form: List<FormEntry>) {
     val most = batted.maxOf { it.runs }.coerceAtLeast(1)
     val description = stringResource(Res.string.stats_form_description, batted.size)
     DesiCard(Modifier.fillMaxWidth()) {
-        SectionLabel(stringResource(Res.string.stats_form, batted.size))
+        SectionLabel(pluralStringResource(Res.plurals.stats_form, batted.size, batted.size))
         Canvas(Modifier.fillMaxWidth().height(96.dp).semantics { contentDescription = description }) {
-            val slot = size.width / batted.size
+            // Ten slots whatever the count, so one match is a slim bar, not a block across the card.
+            val slot = size.width / FORM_SLOTS
             val bar = slot * 0.6f
             batted.forEachIndexed { i, entry ->
                 val height = (entry.runs.toFloat() / most) * size.height
                 drawRoundRect(
                     color = if (entry.runs >= 50) colors.brand else colors.brand.copy(alpha = 0.45f),
-                    topLeft = Offset(i * slot + (slot - bar) / 2, size.height - height.coerceAtLeast(2f)),
+                    topLeft = Offset((FORM_SLOTS - batted.size + i) * slot + (slot - bar) / 2, size.height - height.coerceAtLeast(2f)),
                     size = Size(bar, height.coerceAtLeast(2f)),
                     cornerRadius = CornerRadius(4f, 4f),
                 )
             }
         }
         Row(Modifier.fillMaxWidth()) {
+            // Labels line up under their bars, which sit at the right (newest) end.
+            repeat(FORM_SLOTS - batted.size) { Text("", Modifier.weight(1f)) }
             batted.forEach {
                 Text(
                     "${it.runs}${if (it.notOut) "*" else ""}",
