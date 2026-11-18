@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.MatchRepository
-import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.TodayFeed
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -15,10 +15,12 @@ import kotlinx.coroutines.launch
 
 data class HomeUiState(
     val loading: Boolean = true,
-    val matches: List<Match> = emptyList(),
-    /** The latest refresh failed; the last list we got stays on screen. */
+    val feed: TodayFeed = TodayFeed(),
+    /** The latest refresh failed; the last feed we got stays on screen. */
     val loadFailed: Boolean = false,
-)
+) {
+    val isEmpty: Boolean get() = feed.mine.isEmpty() && feed.live.isEmpty() && feed.upcoming.isEmpty() && feed.recent.isEmpty()
+}
 
 /** Taking over scoring from another phone with its handover code. */
 data class TakeOverState(val saving: Boolean = false, val failed: Boolean = false)
@@ -54,11 +56,11 @@ class HomeViewModel(
 
     val currentUid: String? = authRepository.currentUser?.uid
 
-    val state: StateFlow<HomeUiState> = matchRepository.observeRecentMatches()
-        // Keep showing the last list we got if a later refresh fails.
+    val state: StateFlow<HomeUiState> = matchRepository.observeFeed()
+        // Keep showing the last feed we got if a later refresh fails.
         .scan(HomeUiState()) { previous, result ->
             result.fold(
-                onSuccess = { HomeUiState(loading = false, matches = it) },
+                onSuccess = { HomeUiState(loading = false, feed = it) },
                 onFailure = { previous.copy(loading = false, loadFailed = true) },
             )
         }

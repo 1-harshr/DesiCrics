@@ -7,6 +7,8 @@ import com.harsh.desicrics.api.SquadRequest
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.auth.TokenVerifier
+import com.harsh.desicrics.live.LoggingPushSender
+import com.harsh.desicrics.live.PushSender
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.PlayerRole
@@ -15,6 +17,7 @@ import com.harsh.desicrics.model.TossDecision
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.post
@@ -22,10 +25,12 @@ import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import java.util.UUID
+import kotlinx.serialization.json.Json
 
 /**
  * Tokens look like "test-<uid>" so tests can act as any user without Firebase. "test-<uid>.<phone>" also
@@ -37,11 +42,26 @@ private val fakeTokens = TokenVerifier { token ->
     }
 }
 
-/** A fresh in-memory database per test. */
-fun apiTest(block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
+/** A fresh in-memory database per test. Push messages go to [push]; the client can open WebSockets. */
+fun apiTest(push: PushSender = LoggingPushSender, block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
     val config = ServerConfig(database = DatabaseConfig(url = "jdbc:h2:mem:${UUID.randomUUID()};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1"))
-    application { module(config, fakeTokens) }
-    block(createClient { install(ContentNegotiation) { json() } })
+    application { module(config, fakeTokens, push) }
+    block(
+        createClient {
+            install(ContentNegotiation) { json() }
+            install(WebSockets) { contentConverter = KotlinxWebsocketSerializationConverter(Json { ignoreUnknownKeys = true }) }
+        },
+    )
+}
+
+/** Keeps every push message instead of sending it. */
+class RecordingPushSender : PushSender {
+    val sent = mutableListOf<String>()
+
+    override suspend fun send(tokens: List<String>, title: String, body: String, data: Map<String, String>): List<String> {
+        sent += body
+        return emptyList()
+    }
 }
 
 fun HttpRequestBuilder.jsonBody(body: Any) {

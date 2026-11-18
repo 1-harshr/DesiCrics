@@ -8,6 +8,7 @@ import com.harsh.desicrics.api.MatchSetupError
 import com.harsh.desicrics.api.SquadRequest
 import com.harsh.desicrics.api.UpdateProfileRequest
 import com.harsh.desicrics.auth.FirebasePrincipal
+import com.harsh.desicrics.live.MatchListener
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
@@ -66,6 +67,8 @@ class MatchService(
     private val users: UserStore,
     private val players: PlayerStore,
     private val teams: TeamStore,
+    /** Told about every change: the live feed and notifications. */
+    private val listeners: List<MatchListener> = emptyList(),
     private val clock: () -> Long = System::currentTimeMillis,
 ) {
     suspend fun recent(limit: Int): List<Match> = matches.recent(limit.coerceIn(1, 100))
@@ -111,7 +114,7 @@ class MatchService(
             rules = request.rules,
         )
         matches.create(match)
-        return MatchDetails(match, emptyList())
+        return MatchDetails(match, emptyList()).also { announce(null, it) }
     }
 
     suspend fun recordDelivery(user: FirebasePrincipal, matchId: String, delivery: Delivery): MatchDetails {
@@ -122,7 +125,7 @@ class MatchService(
         if (!matches.addDelivery(next.match, saved)) {
             throw ApiException(HttpStatusCode.Conflict, "That ball was already recorded. Refresh and try again")
         }
-        return next
+        return next.also { announce(details, it) }
     }
 
     suspend fun recordEvent(user: FirebasePrincipal, matchId: String, event: MatchEvent): MatchDetails {
@@ -133,7 +136,7 @@ class MatchService(
         if (!matches.addEvent(next.match, saved)) {
             throw ApiException(HttpStatusCode.Conflict, "That was already recorded. Refresh and try again")
         }
-        return next
+        return next.also { announce(details, it) }
     }
 
     /** Removes the latest ball or event, whichever came last. */
@@ -148,7 +151,7 @@ class MatchService(
         if (!matches.removeEntry(next.match, lastSeq)) {
             throw ApiException(HttpStatusCode.Conflict, "That was already undone. Refresh and try again")
         }
-        return next
+        return next.also { announce(details, it) }
     }
 
     /** A latecomer or substitute joins one side. Allowed at any point, even mid-innings. */
@@ -162,7 +165,7 @@ class MatchService(
         // A bigger side can change whether an innings is over, so refresh the stored score too.
         val next = details(matchId).rescored()
         matches.updateScore(next.match)
-        return next
+        return next.also { announce(details, it) }
     }
 
     /** Recomputes the stored score of matches scored before per-innings scores existed. Safe to run on every start. */
@@ -191,8 +194,11 @@ class MatchService(
         }
         val matchId = matches.takeHandover(code.trim(), clock(), user.uid)
             ?: throw ApiException(HttpStatusCode.NotFound, "That handover code is wrong or has expired")
-        return details(matchId)
+        // Watchers need the new scorer too, so the old one's phone stops offering to score.
+        return details(matchId).also { announce(it, it) }
     }
+
+    private suspend fun announce(before: MatchDetails?, after: MatchDetails) = listeners.forEach { it.changed(before, after) }
 
     private fun MatchDetails.state() = ScoringEngine.compute(match, deliveries, events)
 

@@ -22,6 +22,8 @@ data class Match(
     val rules: MatchRules = MatchRules(),
     /** Who scores the match now. Starts as [createdBy]; a handover code moves it to another device's user. */
     val scorerUid: String = createdBy,
+    /** When a [MatchStatus.SCHEDULED] fixture is due to start, if anyone said. */
+    val scheduledAt: Long? = null,
 ) {
     val battingFirst: TeamSide
         get() = if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other
@@ -68,6 +70,8 @@ enum class TossDecision(val displayName: String) {
 enum class MatchStatus {
     /** Created, but the roster isn't fully saved yet. */
     SETUP,
+    /** A fixture that hasn't started, e.g. from a tournament. It gets its squads and toss when it starts. */
+    SCHEDULED,
     IN_PROGRESS,
     COMPLETED,
 }

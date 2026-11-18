@@ -20,8 +20,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -63,12 +67,15 @@ import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.Team
 import com.harsh.desicrics.model.TeamSide
+import com.harsh.desicrics.model.TodayFeed
 import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.scoring.formatOvers
 import com.harsh.desicrics.ui.text.matchStatusText
 import com.harsh.desicrics.ui.text.oversText
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -79,12 +86,15 @@ fun HomeScreen(
     onOpenMatch: (matchId: String) -> Unit,
     onProfile: () -> Unit,
     onTeams: () -> Unit,
+    onSearch: () -> Unit,
+    onNotifications: () -> Unit,
     viewModel: HomeViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val takeOver by viewModel.takeOver.collectAsStateWithLifecycle()
     var takingOver by rememberSaveable { mutableStateOf(false) }
-    HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile, onTakeOver = { takingOver = true }, onTeams = onTeams)
+    HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile, onTakeOver = { takingOver = true }, onTeams = onTeams,
+        onSearch = onSearch, onNotifications = onNotifications)
     if (takingOver) {
         TakeOverSheet(
             state = takeOver,
@@ -126,8 +136,8 @@ private fun TakeOverSheet(state: TakeOverState, onSubmit: (String) -> Unit, onDi
 }
 
 /**
- * Home without its ViewModel, so previews and tests can render any state: a greeting, the "start a
- * match" card, then live matches and recent results.
+ * Home without its ViewModel, so previews and tests can render any state: a greeting with search and the
+ * inbox, the "start a match" card, then the Today feed: the user's own match, live, upcoming and recent.
  */
 @Composable
 fun HomeContent(
@@ -139,17 +149,18 @@ fun HomeContent(
     onProfile: () -> Unit,
     onTakeOver: () -> Unit = {},
     onTeams: () -> Unit = {},
+    onSearch: () -> Unit = {},
+    onNotifications: () -> Unit = {},
 ) {
     val space = DesiTheme.space
-    val live = state.matches.filter { it.status != MatchStatus.COMPLETED }
-    val recent = state.matches.filter { it.status == MatchStatus.COMPLETED }
+    val feed = state.feed
 
     LazyColumn(
         Modifier.fillMaxSize().background(DesiTheme.colors.bg),
         contentPadding = PaddingValues(start = space.screen, end = space.screen, bottom = space.s8),
         verticalArrangement = Arrangement.spacedBy(space.s3),
     ) {
-        item { Greeting(playerName, onProfile) }
+        item { Greeting(playerName, feed.unreadNotifications, onProfile, onSearch, onNotifications) }
         item { StartMatchCard(onNewMatch) }
         item {
             Row(Modifier.padding(bottom = space.s4), horizontalArrangement = Arrangement.spacedBy(space.s3)) {
@@ -166,22 +177,32 @@ fun HomeContent(
                     CircularProgressIndicator(color = DesiTheme.colors.brand)
                 }
             }
-            state.matches.isEmpty() -> item { EmptyMatches() }
+            state.isEmpty -> item { EmptyMatches() }
         }
-        if (live.isNotEmpty()) {
-            item { SectionLabel(stringResource(Res.string.home_section_live)) }
-            items(live, key = { it.id }) { HomeMatchCard(it, isMine = it.scorerUid == currentUid, onClick = { onOpenMatch(it.id) }) }
-        }
-        if (recent.isNotEmpty()) {
-            item { SectionLabel(stringResource(Res.string.home_section_recent), Modifier.padding(top = space.s4)) }
-            items(recent, key = { it.id }) { HomeMatchCard(it, isMine = it.scorerUid == currentUid, onClick = { onOpenMatch(it.id) }) }
-        }
+        feedSection(Res.string.home_section_mine, feed.mine, currentUid, onOpenMatch, first = true)
+        feedSection(Res.string.home_section_live, feed.live, currentUid, onOpenMatch, first = feed.mine.isEmpty())
+        feedSection(Res.string.home_section_upcoming, feed.upcoming, currentUid, onOpenMatch)
+        feedSection(Res.string.home_section_recent, feed.recent, currentUid, onOpenMatch)
         item { Box(Modifier.windowInsetsPadding(WindowInsets.navigationBars)) }
     }
 }
 
+private fun LazyListScope.feedSection(
+    title: StringResource,
+    matches: List<Match>,
+    currentUid: String?,
+    onOpenMatch: (String) -> Unit,
+    first: Boolean = false,
+) {
+    if (matches.isEmpty()) return
+    item(key = "section-$title") {
+        SectionLabel(stringResource(title), if (first) Modifier else Modifier.padding(top = DesiTheme.space.s4))
+    }
+    items(matches, key = { "$title-${it.id}" }) { HomeMatchCard(it, isMine = it.scorerUid == currentUid, onClick = { onOpenMatch(it.id) }) }
+}
+
 @Composable
-private fun Greeting(playerName: String, onProfile: () -> Unit) {
+private fun Greeting(playerName: String, unread: Int, onProfile: () -> Unit, onSearch: () -> Unit, onNotifications: () -> Unit) {
     val colors = DesiTheme.colors
     val profileLabel = stringResource(Res.string.home_profile)
     Row(
@@ -200,10 +221,23 @@ private fun Greeting(playerName: String, onProfile: () -> Unit) {
                 maxLines = 1,
             )
         }
+        IconButton(onClick = onSearch) {
+            Icon(painterResource(DesiIcons.Search), contentDescription = stringResource(Res.string.home_search), tint = colors.ink)
+        }
+        IconButton(onClick = onNotifications) {
+            BadgedBox(badge = { if (unread > 0) Badge(containerColor = colors.event.wicket) { Text("${unread.coerceAtMost(99)}") } }) {
+                Icon(
+                    painterResource(DesiIcons.Notifications),
+                    contentDescription = pluralStringResource(Res.plurals.home_notifications, unread, unread),
+                    tint = colors.ink,
+                )
+            }
+        }
         Avatar(
             playerName,
             size = 44,
             modifier = Modifier
+                .padding(start = DesiTheme.space.s2)
                 .clip(DesiTheme.radius.full)
                 .clickable(role = Role.Button, onClick = onProfile)
                 .semantics { contentDescription = profileLabel },
@@ -331,13 +365,13 @@ private val PreviewDone = PreviewLive.copy(
 @Preview
 @Composable
 private fun HomePreview() = DesiTheme(darkTheme = false) {
-    HomeContent(HomeUiState(loading = false, matches = listOf(PreviewLive, PreviewNotStarted, PreviewDone)), "Rohan Iyer", "me", {}, {}, {})
+    HomeContent(HomeUiState(loading = false, feed = TodayFeed(mine = listOf(PreviewNotStarted), live = listOf(PreviewLive), recent = listOf(PreviewDone), unreadNotifications = 3)), "Rohan Iyer", "me", {}, {}, {})
 }
 
 @Preview
 @Composable
 private fun HomeDarkPreview() = DesiTheme(darkTheme = true) {
-    HomeContent(HomeUiState(loading = false, matches = listOf(PreviewLive, PreviewDone)), "Rohan Iyer", "me", {}, {}, {})
+    HomeContent(HomeUiState(loading = false, feed = TodayFeed(live = listOf(PreviewLive), recent = listOf(PreviewDone))), "Rohan Iyer", "me", {}, {}, {})
 }
 
 @Preview
@@ -349,5 +383,5 @@ private fun HomeEmptyPreview() = DesiTheme(darkTheme = false) {
 @Preview
 @Composable
 private fun HomeOfflinePreview() = DesiTheme(darkTheme = false) {
-    HomeContent(HomeUiState(loading = false, matches = listOf(PreviewDone), loadFailed = true), "Rohan Iyer", "me", {}, {}, {})
+    HomeContent(HomeUiState(loading = false, feed = TodayFeed(recent = listOf(PreviewDone)), loadFailed = true), "Rohan Iyer", "me", {}, {}, {})
 }

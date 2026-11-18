@@ -10,12 +10,18 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
+import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.model.UserProfile
+import com.harsh.desicrics.ui.system.RegisterForPush
+import org.koin.compose.koinInject
 import com.harsh.desicrics.ui.home.HomeScreen
 import com.harsh.desicrics.ui.match.MatchScreen
 import com.harsh.desicrics.ui.newmatch.NewMatchScreen
 import com.harsh.desicrics.ui.profile.EditProfileScreen
 import com.harsh.desicrics.ui.profile.ProfileScreen
+import com.harsh.desicrics.ui.social.NotificationsScreen
+import com.harsh.desicrics.ui.social.PlayerScreen
+import com.harsh.desicrics.ui.social.SearchScreen
 import com.harsh.desicrics.ui.teams.TeamScreen
 import com.harsh.desicrics.ui.teams.TeamsScreen
 import kotlinx.serialization.Serializable
@@ -33,6 +39,9 @@ import kotlinx.serialization.modules.subclass
 @Serializable data class MatchRoute(val matchId: String) : NavKey
 @Serializable data object TeamsRoute : NavKey
 @Serializable data class TeamRoute(val teamId: String) : NavKey
+@Serializable data object SearchRoute : NavKey
+@Serializable data object NotificationsRoute : NavKey
+@Serializable data class PlayerRoute(val profileId: String) : NavKey
 /** Opened from a join link or QR code: the teams list with the join sheet filled in. */
 @Serializable data class JoinTeamRoute(val code: String) : NavKey
 
@@ -48,6 +57,9 @@ private val RouteSerialization = SavedStateConfiguration {
             subclass(TeamsRoute::class)
             subclass(TeamRoute::class)
             subclass(JoinTeamRoute::class)
+            subclass(SearchRoute::class)
+            subclass(NotificationsRoute::class)
+            subclass(PlayerRoute::class)
         }
     }
 }
@@ -60,6 +72,9 @@ private val RouteSerialization = SavedStateConfiguration {
 fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = null, onLinkHandled: () -> Unit = {}) {
     val backStack = rememberNavBackStack(RouteSerialization, HomeRoute)
     val back: () -> Unit = { backStack.removeLastOrNull() }
+
+    val social = koinInject<SocialRepository>()
+    RegisterForPush(onToken = social::savePushToken)
 
     LaunchedEffect(link) {
         if (link == null) return@LaunchedEffect
@@ -82,6 +97,8 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     onOpenMatch = { backStack.add(MatchRoute(it)) },
                     onProfile = { backStack.add(ProfileRoute) },
                     onTeams = { backStack.add(TeamsRoute) },
+                    onSearch = { backStack.add(SearchRoute) },
+                    onNotifications = { backStack.add(NotificationsRoute) },
                 )
             }
             entry<ProfileRoute> {
@@ -108,7 +125,27 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                 TeamsScreen(onOpenTeam = { backStack.add(TeamRoute(it)) }, onBack = back)
             }
             entry<TeamRoute> { route ->
-                TeamScreen(teamId = route.teamId, onBack = back)
+                TeamScreen(teamId = route.teamId, onBack = back, onOpenPlayer = { backStack.add(PlayerRoute(it)) })
+            }
+            entry<SearchRoute> {
+                SearchScreen(
+                    onOpenTeam = { backStack.add(TeamRoute(it)) },
+                    onOpenPlayer = { backStack.add(PlayerRoute(it)) },
+                    onOpenMatch = { backStack.add(MatchRoute(it)) },
+                    onBack = back,
+                )
+            }
+            entry<NotificationsRoute> {
+                NotificationsScreen(onOpenMatch = { backStack.add(MatchRoute(it)) }, onBack = back)
+            }
+            entry<PlayerRoute> { route ->
+                PlayerScreen(
+                    profileId = route.profileId,
+                    myId = profile.uid,
+                    onOpenTeam = { backStack.add(TeamRoute(it)) },
+                    onOpenMatch = { backStack.add(MatchRoute(it)) },
+                    onBack = back,
+                )
             }
             entry<JoinTeamRoute> { route ->
                 TeamsScreen(onOpenTeam = { backStack.replaceLast(TeamRoute(it)) }, onBack = back, joinCode = route.code)

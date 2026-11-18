@@ -6,6 +6,7 @@ import com.harsh.desicrics.api.HandoverCode
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.MatchRepository
+import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
@@ -94,7 +95,12 @@ class MatchViewModel(
     private val matchId: String,
     private val matchRepository: MatchRepository,
     authRepository: AuthRepository,
+    private val social: SocialRepository,
 ) : ViewModel() {
+
+    /** The public scorecard anyone can open. */
+    val shareLink: String = social.matchLink(matchId)
+
 
     private val uid = authRepository.currentUser?.uid
 

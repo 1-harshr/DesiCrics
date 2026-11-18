@@ -72,6 +72,7 @@ private sealed interface TeamSheet {
 fun TeamScreen(
     teamId: String,
     onBack: () -> Unit,
+    onOpenPlayer: (String) -> Unit = {},
     viewModel: TeamViewModel = koinViewModel { parametersOf(teamId) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -88,7 +89,11 @@ fun TeamScreen(
         onAdd = { sheet = TeamSheet.Add },
         onInvite = { sheet = TeamSheet.Invite },
         onRename = { sheet = TeamSheet.Rename },
-        onMember = { sheet = TeamSheet.Member(it) },
+        onMember = { member ->
+            val canManage = state.isAdmin && member.player.profileId != state.myId
+            if (canManage) sheet = TeamSheet.Member(member) else if (!member.player.isPlaceholder) onOpenPlayer(member.player.profileId)
+        },
+        onFollow = viewModel::toggleFollow,
         onCompare = viewModel::compareWith,
         onLeave = { viewModel.leave(onBack) },
     )
@@ -126,6 +131,11 @@ fun TeamScreen(
             OptionsSheet(
                 title = member.player.name,
                 options = buildList {
+                    if (!member.player.isPlaceholder) {
+                        add(SheetOption(stringResource(Res.string.team_view_player), stringResource(Res.string.team_view_player_hint)) {
+                            close(); onOpenPlayer(member.player.profileId)
+                        })
+                    }
                     if (member.role == TeamRole.MEMBER && !member.player.isPlaceholder) {
                         add(SheetOption(stringResource(Res.string.team_make_admin), stringResource(Res.string.team_make_admin_hint)) {
                             viewModel.setRole(member.player.profileId, TeamRole.ADMIN); close()
@@ -161,6 +171,7 @@ fun TeamContent(
     onMember: (TeamMember) -> Unit,
     onCompare: (String) -> Unit,
     onLeave: () -> Unit,
+    onFollow: () -> Unit = {},
 ) {
     val team = state.team
     val colors = DesiTheme.colors
@@ -180,6 +191,10 @@ fun TeamContent(
                 verticalArrangement = Arrangement.spacedBy(space.s4),
             ) {
                 if (team.city.isNotBlank()) Text(team.city, style = DesiTheme.type.body, color = colors.muted)
+                state.following?.takeIf { state.myRole == null }?.let { following ->
+                    if (following) GhostButton(stringResource(Res.string.following), onClick = onFollow, modifier = Modifier.fillMaxWidth())
+                    else PrimaryButton(stringResource(Res.string.follow), onClick = onFollow, modifier = Modifier.fillMaxWidth())
+                }
                 if (state.actionFailed) {
                     Text(stringResource(Res.string.teams_action_failed), style = DesiTheme.type.body, color = colors.event.wicket)
                 }
@@ -192,12 +207,12 @@ fun TeamContent(
                 SectionLabel(stringResource(Res.string.team_members))
                 DesiCard(Modifier.fillMaxWidth()) {
                     team.members.forEach { member ->
-                        val canManage = state.isAdmin && member.player.profileId != state.myId
+                        val canOpen = (state.isAdmin && member.player.profileId != state.myId) || !member.player.isPlaceholder
                         PlayerRow(
                             name = member.player.name,
                             subtitle = memberSubtitle(member),
                             avatar = { Avatar(member.player.name) },
-                            onClick = if (canManage) ({ onMember(member) }) else null,
+                            onClick = if (canOpen) ({ onMember(member) }) else null,
                         )
                     }
                 }

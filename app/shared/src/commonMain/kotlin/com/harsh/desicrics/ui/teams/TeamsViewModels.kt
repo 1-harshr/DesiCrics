@@ -3,7 +3,9 @@ package com.harsh.desicrics.ui.teams
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.data.AuthRepository
+import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.data.TeamRepository
+import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.HeadToHead
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
@@ -90,6 +92,8 @@ data class TeamUiState(
     /** The caller's other teams, to compare records against. */
     val otherTeams: List<TeamSummary> = emptyList(),
     val headToHead: HeadToHead? = null,
+    /** Null until known. */
+    val following: Boolean? = null,
 ) {
     val myRole: TeamRole? get() = team?.roleOf(myId)
     val isAdmin: Boolean get() = myRole == TeamRole.ADMIN
@@ -98,6 +102,7 @@ data class TeamUiState(
 class TeamViewModel(
     private val teamId: String,
     private val repository: TeamRepository,
+    private val social: SocialRepository,
     authRepository: AuthRepository,
 ) : ViewModel() {
 
@@ -116,6 +121,9 @@ class TeamViewModel(
             )
             attempt { repository.myTeams() }.getOrNull()?.let { teams ->
                 _state.update { it.copy(otherTeams = teams.filter { team -> team.id != teamId }) }
+            }
+            attempt { social.follows() }.getOrNull()?.let { follows ->
+                _state.update { it.copy(following = follows.any { f -> f.type == FollowType.TEAM && f.targetId == teamId }) }
             }
         }
     }
@@ -166,6 +174,15 @@ class TeamViewModel(
     }
 
     fun joinLink(code: String): String = repository.joinLink(code)
+
+    /** Flips straight away and puts it back if the server says no. */
+    fun toggleFollow() {
+        val was = _state.value.following ?: return
+        _state.update { it.copy(following = !was) }
+        viewModelScope.launch {
+            if (attempt { social.setFollowing(FollowType.TEAM, teamId, !was) }.isFailure) _state.update { it.copy(following = was) }
+        }
+    }
 
     fun clearError() = _state.update { it.copy(actionFailed = false) }
 

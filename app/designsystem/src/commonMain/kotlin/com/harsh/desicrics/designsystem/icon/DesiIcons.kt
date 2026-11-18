@@ -9,10 +9,14 @@ import com.harsh.desicrics.designsystem.resources.ic_close
 import com.harsh.desicrics.designsystem.resources.ic_cricket_bat
 import com.harsh.desicrics.designsystem.resources.ic_front_hand
 import com.harsh.desicrics.designsystem.resources.ic_google_logo
+import com.harsh.desicrics.designsystem.resources.ic_groups
 import com.harsh.desicrics.designsystem.resources.ic_location_on
 import com.harsh.desicrics.designsystem.resources.ic_more_horiz
+import com.harsh.desicrics.designsystem.resources.ic_notifications
 import com.harsh.desicrics.designsystem.resources.ic_person
 import com.harsh.desicrics.designsystem.resources.ic_remove
+import com.harsh.desicrics.designsystem.resources.ic_search
+import com.harsh.desicrics.designsystem.resources.ic_share
 import com.harsh.desicrics.designsystem.resources.ic_sports_baseball
 import com.harsh.desicrics.designsystem.resources.ic_sports_cricket
 import com.harsh.desicrics.designsystem.resources.ic_sync
@@ -39,6 +43,10 @@ object DesiIcons {
     val Remove: DrawableResource = Res.drawable.ic_remove
     val Close: DrawableResource = Res.drawable.ic_close
     val More: DrawableResource = Res.drawable.ic_more_horiz
+    val Search: DrawableResource = Res.drawable.ic_search
+    val Notifications: DrawableResource = Res.drawable.ic_notifications
+    val Share: DrawableResource = Res.drawable.ic_share
+    val Teams: DrawableResource = Res.drawable.ic_groups
 
     // Playing roles. Ball is Material's sports_baseball (a ball with a seam); Glove is front_hand.
     val Bat: DrawableResource = Res.drawable.ic_cricket_bat

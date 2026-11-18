@@ -3,10 +3,17 @@ package com.harsh.desicrics.data.api
 import com.harsh.desicrics.api.AddMemberRequest
 import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.ClaimRequest
+import com.harsh.desicrics.api.PushTokenRequest
 import com.harsh.desicrics.api.SetRoleRequest
 import com.harsh.desicrics.api.SupportRequest
 import com.harsh.desicrics.api.TeamRequest
+import com.harsh.desicrics.model.Follow
+import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.HeadToHead
+import com.harsh.desicrics.model.Notification
+import com.harsh.desicrics.model.PlayerPage
+import com.harsh.desicrics.model.SearchResults
+import com.harsh.desicrics.model.TodayFeed
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
@@ -22,6 +29,8 @@ import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.UserProfile
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.websocket.receiveDeserialized
+import io.ktor.client.plugins.websocket.webSocket
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
@@ -35,6 +44,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /**
  * Where the DesiCrics server is. Android emulators reach the host machine at 10.0.2.2. [publicUrl] is the
@@ -140,6 +151,43 @@ class DesiCricsApi(
 
     suspend fun contactSupport(request: SupportRequest) {
         call { post("$baseUrl/support") { it(); json(request) } }
+    }
+
+    // Following, the feed, search and notifications.
+
+    suspend fun feed(): TodayFeed = call { get("$baseUrl/feed", it) }.body()
+
+    suspend fun search(query: String): SearchResults = call { get("$baseUrl/search") { it(); parameter("q", query) } }.body()
+
+    suspend fun playerPage(profileId: String): PlayerPage = call { get("$baseUrl/players/$profileId", it) }.body()
+
+    suspend fun follows(): List<Follow> = call { get("$baseUrl/follows", it) }.body()
+
+    suspend fun setFollowing(type: FollowType, id: String, following: Boolean) {
+        val url = "$baseUrl/follows/${type.name.lowercase()}/$id"
+        call { if (following) put(url, it) else delete(url, it) }
+    }
+
+    suspend fun notifications(): List<Notification> = call { get("$baseUrl/notifications", it) }.body()
+
+    suspend fun markNotificationsRead() {
+        call { post("$baseUrl/notifications/read", it) }
+    }
+
+    suspend fun savePushToken(token: String) {
+        call { put("$baseUrl/me/push-token") { it(); json(PushTokenRequest(token)) } }
+    }
+
+    /**
+     * Every scorecard of [matchId] as it changes, over a WebSocket, starting with the current one. Ends (or
+     * throws) when the connection drops; the caller decides whether to reconnect.
+     */
+    fun liveMatch(matchId: String): Flow<MatchDetails> = flow {
+        val token = tokens.idToken(forceRefresh = false)
+        val url = baseUrl.replaceFirst("http", "ws") + "/matches/$matchId/live"
+        http.webSocket(url, request = { token?.let { bearerAuth(it) } }) {
+            while (true) emit(receiveDeserialized<MatchDetails>())
+        }
     }
 
     /** Removes the latest ball or event. */

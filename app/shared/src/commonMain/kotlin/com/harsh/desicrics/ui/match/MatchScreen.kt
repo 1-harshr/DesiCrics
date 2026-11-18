@@ -74,6 +74,7 @@ import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.scoring.bowlerRuleBreak
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
+import com.harsh.desicrics.ui.system.rememberShareText
 import com.harsh.desicrics.ui.text.label
 import com.harsh.desicrics.ui.text.resultText
 import com.harsh.desicrics.util.format2
@@ -92,10 +93,13 @@ fun MatchScreen(
     viewModel: MatchViewModel = koinViewModel { parametersOf(matchId) },
 ) {
     val ui by viewModel.state.collectAsStateWithLifecycle()
+    val shareText = rememberShareText()
+    val shareMessage = ui.match?.let { stringResource(Res.string.match_share_link_text, stringResource(Res.string.match_title, it.teamA.name, it.teamB.name), viewModel.shareLink) }
     LightStatusBarIcons()
     MatchContent(
         ui = ui,
         actions = MatchActions(
+            onShareLink = { shareMessage?.let(shareText) },
             onBack = onBack,
             onSelectStriker = viewModel::selectStriker,
             onSelectNonStriker = viewModel::selectNonStriker,
@@ -142,6 +146,7 @@ class MatchActions(
     val onReviseTarget: (overs: Int, target: Int?) -> Unit,
     val onRecordPendingBall: () -> Unit,
     val onDropPendingBall: () -> Unit,
+    val onShareLink: () -> Unit = {},
 )
 
 private enum class MatchTab { LIVE, SCORECARD, OVERS }
@@ -167,6 +172,8 @@ private sealed interface ScoringSheet {
     data object ReviseTarget : ScoringSheet
     /** Where a scoring shot went, for the wagon wheel. */
     data class Zone(val runs: Int) : ScoringSheet
+    data object Share : ScoringSheet
+    data object ShareCard : ScoringSheet
 }
 
 /**
@@ -196,7 +203,7 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     var sheet by remember { mutableStateOf<ScoringSheet?>(null) }
     val innings = state.current
 
-    Scoreboard(state, actions.onBack, onOptions = if (ui.canEdit) ({ sheet = ScoringSheet.MatchOptions }) else null)
+    Scoreboard(state, actions.onBack, onShare = { sheet = ScoringSheet.Share }, onOptions = if (ui.canEdit) ({ sheet = ScoringSheet.MatchOptions }) else null)
     SegmentedControl(
         options = MatchTab.entries,
         selected = tab,
@@ -269,7 +276,7 @@ private fun ScoringHaptics(ui: MatchUiState) {
 
 /** The green header: teams, then the batting side's score, overs and where the chase stands. */
 @Composable
-private fun Scoreboard(state: MatchState, onBack: () -> Unit, onOptions: (() -> Unit)?) {
+private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Unit, onOptions: (() -> Unit)?) {
     val colors = DesiTheme.colors
     val onGreen = colors.onBrandStrong
     val innings = state.current
@@ -298,6 +305,9 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onOptions: (() -> 
                 ) {
                     LiveBadge()
                 }
+            }
+            IconButton(onClick = onShare, modifier = Modifier.offset(x = DesiTheme.space.s2)) {
+                Icon(painterResource(DesiIcons.Share), stringResource(Res.string.match_share), tint = onGreen)
             }
             if (onOptions != null) {
                 IconButton(onClick = onOptions, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
@@ -661,6 +671,20 @@ private fun ScoringSheets(
             },
             onDismiss = onClose,
         )
+        ScoringSheet.Share -> OptionsSheet(
+            title = stringResource(Res.string.match_share),
+            options = listOf(
+                SheetOption(stringResource(Res.string.match_share_link), stringResource(Res.string.match_share_link_hint)) {
+                    actions.onShareLink()
+                    onClose()
+                },
+                SheetOption(stringResource(Res.string.match_share_card), stringResource(Res.string.match_share_card_hint)) {
+                    onSheet(ScoringSheet.ShareCard)
+                },
+            ),
+            onDismiss = onClose,
+        )
+        ScoringSheet.ShareCard -> ShareCardSheet(state, onDismiss = onClose)
         is ScoringSheet.Zone -> ZoneSheet(
             runs = sheet.runs,
             onPick = { zone ->

@@ -38,7 +38,7 @@ flowchart LR
 | Shared | `core`: `DeliveryRules`, DTOs, validation | The same code checks a ball on the device and on the server |
 | Server | Ktor 3, Exposed, Postgres (H2 for tests), Flyway | All scoring rules and permission checks live here. Database chosen by `DATABASE_URL` |
 | Auth | Firebase Auth on device, Firebase Admin SDK token check on the server | Phone OTP and Google sign-in |
-| Realtime | Ktor WebSockets (SSE fallback), one channel per match | Followers subscribe; scorers write over REST |
+| Realtime | Ktor WebSockets, one channel per match; the app polls if the socket drops | Followers subscribe; scorers write over REST. Each change sends the whole scorecard. Subscribers live in the server's memory (`LiveMatches`), which is right for one instance; a second instance needs Postgres LISTEN/NOTIFY (or similar) between them |
 | Push / crashes | FCM, Crashlytics | |
 | Infra | Cloud Run + Cloud SQL, or Fly.io + Neon | Undecided; one container either way. GitHub Actions for CI |
 

@@ -22,7 +22,11 @@ import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.inSubQuery
+import org.jetbrains.exposed.v1.core.isNotNull
+import org.jetbrains.exposed.v1.core.like
+import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
@@ -96,6 +100,23 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             .map { it.toMatch(players = emptyList()) }
     }
 
+    override suspend fun profileIds(matchIds: Collection<String>): Map<String, Set<String>> =
+        if (matchIds.isEmpty()) emptyMap() else db.query {
+            MatchPlayersTable.select(MatchPlayersTable.matchId, MatchPlayersTable.profileId)
+                .where { (MatchPlayersTable.matchId inList matchIds) and MatchPlayersTable.profileId.isNotNull() }
+                .groupBy({ it[MatchPlayersTable.matchId] }, { it[MatchPlayersTable.profileId]!! })
+                .mapValues { it.value.toSet() }
+        }
+
+    override suspend fun search(query: String, limit: Int): List<Match> = db.query {
+        val pattern = "%${query.trim().lowercase().escapeLike()}%"
+        MatchesTable.selectAll()
+            .where { (MatchesTable.teamAName.lowerCase() like pattern) or (MatchesTable.teamBName.lowerCase() like pattern) }
+            .orderBy(MatchesTable.createdAt, SortOrder.DESC)
+            .limit(limit)
+            .map { it.toMatch(players = emptyList()) }
+    }
+
     override suspend fun between(teamId: String, otherId: String): List<Match> = db.query {
         MatchesTable.selectAll()
             .where {
@@ -152,6 +173,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[scorerUid] = match.scorerUid
                 it[teamAId] = match.teamA.teamId
                 it[teamBId] = match.teamB.teamId
+                it[scheduledAt] = match.scheduledAt
                 it.setResult(match)
             }
             insertRoster(match.id, TeamSide.A, match.teamA)
@@ -333,6 +355,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             innings = Json.decodeFromString(this[MatchesTable.inningsScores]),
             rules = Json.decodeFromString(this[MatchesTable.rules]),
             scorerUid = this[MatchesTable.scorerUid],
+            scheduledAt = this[MatchesTable.scheduledAt],
             result = when {
                 this[MatchesTable.status] != MatchStatus.COMPLETED -> null
                 else -> MatchResult(

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">DesiCrics</string>
+    <!-- The notification channel for push messages, shown in Android's notification settings. -->
+    <string name="notifications_channel">Match updates</string>
 </resources>

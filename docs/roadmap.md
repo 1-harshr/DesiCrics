@@ -101,20 +101,20 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 **Goal:** people who aren't at the ground follow the match in real time and come back to the app.
 
 ### Level 1 · Playable
-- ⬜ WebSocket live feed per match
-- ⬜ Public read-only match link
-- ⬜ Today feed: live, upcoming, recent
+- ✅ WebSocket live feed per match (whole scorecards; the app falls back to polling if the socket drops)
+- ✅ Public read-only match link (`/m/{id}`, server-rendered, opens in the app when installed)
+- ✅ Today feed: your match, live, upcoming, recent; followed teams and players first
 
 ### Level 2 · Complete
-- ⬜ Follow teams and players
-- ⬜ FCM: match start, result, followed players' milestones
-- ⬜ Notification inbox
-- ⬜ Search: matches, teams, players
+- ✅ Follow teams and players
+- ✅ FCM: match start, result, followed players' milestones (50, 100, 5 wickets). Push needs `FIREBASE_SERVICE_ACCOUNT` on the server; without it notifications only reach the inbox
+- ✅ Notification inbox
+- ✅ Search: matches, teams, players
 
 ### Level 3 · Delight
-- ⬜ Share cards for scorecards and milestones
-- ⬜ Live progress notification for followed matches
-- ⬜ Home screen widget
+- 🟡 Share cards: scorecard image (9:16, for WhatsApp status) and match links; milestone cards to do
+- ⬜ Live progress notification for followed matches (needs a foreground service holding the socket; deferred)
+- ⬜ Home screen widget (Glance; deferred)
 
 **Exit:** a follower sees each ball within 2 seconds of it being scored.
 

@@ -82,3 +82,20 @@ enum class TeamError(val message: String) {
     MEMBER_INVALID("Pick a player or type a name"),
     PHONE_INVALID("Please enter a valid mobile number"),
 }
+
+// Following, notifications, search and live scores.
+//
+//   GET    /feed                          → TodayFeed
+//   GET    /search?q=                     → SearchResults
+//   GET    /players/{id}                  → PlayerPage
+//   GET    /follows                       → List<Follow>
+//   PUT    /follows/{type}/{id}           → 204 (follow a TEAM or PLAYER)
+//   DELETE /follows/{type}/{id}           → 204
+//   GET    /notifications                 → List<Notification>, newest first
+//   POST   /notifications/read            → 204 (marks them all read)
+//   PUT    /me/push-token                 PushTokenRequest → 204
+//   WS     /matches/{id}/live             → MatchDetails after every change
+//   GET    /m/{id}                        → public HTML scorecard, no sign-in
+
+@Serializable
+data class PushTokenRequest(val token: String, val platform: String = "android")

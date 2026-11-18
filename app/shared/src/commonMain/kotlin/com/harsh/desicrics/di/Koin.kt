@@ -2,6 +2,7 @@ package com.harsh.desicrics.di
 
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.MatchRepository
+import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.data.UserRepository
 import com.harsh.desicrics.data.api.DesiCricsApi
@@ -13,6 +14,9 @@ import com.harsh.desicrics.ui.newmatch.NewMatchViewModel
 import com.harsh.desicrics.ui.profile.EditProfileViewModel
 import com.harsh.desicrics.ui.profile.ProfileViewModel
 import com.harsh.desicrics.ui.signin.SignInViewModel
+import com.harsh.desicrics.ui.social.NotificationsViewModel
+import com.harsh.desicrics.ui.social.PlayerViewModel
+import com.harsh.desicrics.ui.social.SearchViewModel
 import com.harsh.desicrics.ui.teams.TeamViewModel
 import com.harsh.desicrics.ui.teams.TeamsViewModel
 import dev.gitlive.firebase.Firebase
@@ -20,6 +24,8 @@ import dev.gitlive.firebase.auth.auth
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.core.context.startKoin
@@ -38,6 +44,10 @@ val dataModule = module {
             install(ContentNegotiation) {
                 json(Json { ignoreUnknownKeys = true })
             }
+            install(WebSockets) {
+                contentConverter = KotlinxWebsocketSerializationConverter(Json { ignoreUnknownKeys = true })
+                pingIntervalMillis = 20_000
+            }
             install(HttpTimeout) {
                 requestTimeoutMillis = 15_000
                 connectTimeoutMillis = 10_000
@@ -49,6 +59,7 @@ val dataModule = module {
     singleOf(::UserRepository)
     singleOf(::MatchRepository)
     singleOf(::TeamRepository)
+    singleOf(::SocialRepository)
 }
 
 val viewModelModule = module {
@@ -57,10 +68,13 @@ val viewModelModule = module {
     viewModelOf(::EditProfileViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::NewMatchViewModel)
-    viewModel { (matchId: String) -> MatchViewModel(matchId, get(), get()) }
+    viewModel { (matchId: String) -> MatchViewModel(matchId, get(), get(), get()) }
     viewModelOf(::TeamsViewModel)
     viewModelOf(::ProfileViewModel)
-    viewModel { (teamId: String) -> TeamViewModel(teamId, get(), get()) }
+    viewModel { (teamId: String) -> TeamViewModel(teamId, get(), get(), get()) }
+    viewModelOf(::SearchViewModel)
+    viewModelOf(::NotificationsViewModel)
+    viewModel { (profileId: String, myId: String?) -> PlayerViewModel(profileId, get(), myId) }
 }
 
 /** Called once per process: from the Android `Application`, and from the iOS app's init. */

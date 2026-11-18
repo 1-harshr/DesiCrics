@@ -38,6 +38,9 @@ kotlin {
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.playServicesAuth)
             implementation(libs.googleid)
+            implementation(libs.androidx.core.ktx)
+            implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.firebase.messaging)
         }
         commonMain.dependencies {
             api(project(":core"))
@@ -63,6 +66,7 @@ kotlin {
             implementation(libs.ktor.clientContentNegotiation)
             implementation(libs.ktor.clientLogging)
             implementation(libs.ktor.clientAuth)
+            implementation(libs.ktor.clientWebsockets)
             implementation(libs.ktor.serializationKotlinxJson)
 
             implementation(libs.gitlive.firebase.auth)

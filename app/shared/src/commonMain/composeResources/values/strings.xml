@@ -632,4 +632,46 @@
     <string name="profile_delete_confirm">Delete my account</string>
     <string name="profile_delete_failed">Couldn't delete your account. Check your connection and try again.</string>
     <string name="common_cancel">Cancel</string>
+
+    <!-- Today feed, search, notifications, following -->
+    <string name="home_section_mine">Your match</string>
+    <string name="home_section_upcoming">Upcoming</string>
+    <string name="home_search">Search</string>
+    <plurals name="home_notifications">
+        <item quantity="zero">Notifications</item>
+        <item quantity="one">Notifications, %1$d unread</item>
+        <item quantity="other">Notifications, %1$d unread</item>
+    </plurals>
+    <string name="search_title">Search</string>
+    <string name="search_hint">Teams, players or matches</string>
+    <string name="search_empty">Nothing matches that.</string>
+    <string name="search_section_teams">Teams</string>
+    <string name="search_section_players">Players</string>
+    <string name="search_section_matches">Matches</string>
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_empty">Nothing yet. Follow teams and players to hear when they play, win, or hit a milestone.</string>
+    <string name="notifications_load_failed">Couldn't load notifications. Check your connection.</string>
+    <string name="notification_started">%1$s has started</string>
+    <string name="notification_result">%1$s: %2$s</string>
+    <string name="notification_runs">%1$s reached %2$d in %3$s</string>
+    <string name="notification_wickets">%1$s took %2$d wickets in %3$s</string>
+    <string name="follow">Follow</string>
+    <string name="following">Following</string>
+    <plurals name="player_followers">
+        <item quantity="one">%1$d follower</item>
+        <item quantity="other">%1$d followers</item>
+    </plurals>
+    <string name="player_load_failed">Couldn't load this player. Check your connection.</string>
+    <string name="player_section_teams">Teams</string>
+    <string name="player_section_matches">Matches</string>
+    <string name="match_share">Share match</string>
+    <string name="match_share_link">Share link</string>
+    <string name="match_share_link_hint">Anyone can follow along live, in the app or a browser.</string>
+    <string name="match_share_link_text">Follow %1$s live on DesiCrics: %2$s</string>
+    <string name="match_share_card">Share scorecard image</string>
+    <string name="match_share_card_hint">A picture of the score, sized for WhatsApp status.</string>
+    <string name="match_share_card_title">Share the score</string>
+    <string name="share_card_footer">Scored on DesiCrics</string>
+    <string name="team_view_player">View player</string>
+    <string name="team_view_player_hint">Their matches, teams and stats.</string>
 </resources>

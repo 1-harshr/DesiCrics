@@ -187,7 +187,7 @@ private fun ResultRow.toPlaceholder() = PlayerSummary(
     isPlaceholder = true,
 )
 
-private fun String.escapeLike() = replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+internal fun String.escapeLike() = replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 class ExposedTeamStore(private val db: Database) : TeamStore {
 
@@ -296,6 +296,17 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
         true
     } catch (e: Exception) {
         if (e.isUniqueViolation()) false else throw e
+    }
+
+    override suspend fun search(query: String, limit: Int): List<TeamSummary> = db.query {
+        val pattern = "%${query.trim().lowercase().escapeLike()}%"
+        val rows = TeamsTable.selectAll().where { TeamsTable.name.lowerCase() like pattern }.orderBy(TeamsTable.name).limit(limit).toList()
+        val count = TeamMembersTable.playerId.count()
+        val sizes = TeamMembersTable.select(TeamMembersTable.teamId, count)
+            .where { TeamMembersTable.teamId inList rows.map { it[TeamsTable.id] } }
+            .groupBy(TeamMembersTable.teamId)
+            .associate { it[TeamMembersTable.teamId] to it[count].toInt() }
+        rows.map { TeamSummary(it[TeamsTable.id], it[TeamsTable.name], it[TeamsTable.city], sizes[it[TeamsTable.id]] ?: 0) }
     }
 
     override suspend fun teamIdsOf(profileId: String): List<String> = db.query {

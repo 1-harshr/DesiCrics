@@ -3,8 +3,10 @@ package com.harsh.desicrics.store
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.SupportRequest
 import com.harsh.desicrics.model.Delivery
+import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.Notification
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
@@ -30,6 +32,12 @@ interface MatchStore {
 
     /** Newest first: matches [profileId] played in, scored or created. */
     suspend fun forPlayer(profileId: String, limit: Int): List<Match>
+
+    /** Profile IDs who played in each of [matchIds]. */
+    suspend fun profileIds(matchIds: Collection<String>): Map<String, Set<String>>
+
+    /** Newest first: matches either of whose teams is named like [query]. */
+    suspend fun search(query: String, limit: Int): List<Match>
 
     /** Match rows (without rosters) where saved teams [teamId] and [otherId] played each other. */
     suspend fun between(teamId: String, otherId: String): List<Match>
@@ -128,10 +136,32 @@ interface TeamStore {
     /** False if [code] is taken. */
     suspend fun setJoinCode(teamId: String, code: String): Boolean
 
+    /** Teams whose name contains [query]. */
+    suspend fun search(query: String, limit: Int): List<TeamSummary>
+
     /** Teams [profileId] belongs to, for removing them when the account is deleted. */
     suspend fun teamIdsOf(profileId: String): List<String>
 }
 
 interface SupportStore {
     suspend fun save(id: String, uid: String, request: SupportRequest, at: Long)
+}
+
+/** Follows, the notification inbox and push tokens. */
+interface SocialStore {
+    suspend fun follow(uid: String, type: FollowType, targetId: String, at: Long)
+    suspend fun unfollow(uid: String, type: FollowType, targetId: String)
+    suspend fun follows(uid: String): List<Pair<FollowType, String>>
+    /** Users following any of [targetIds] of [type]. */
+    suspend fun followers(type: FollowType, targetIds: Collection<String>): Set<String>
+    suspend fun followerCount(type: FollowType, targetId: String): Int
+
+    suspend fun addNotifications(notifications: Map<String, Notification>)
+    suspend fun notifications(uid: String, limit: Int): List<Notification>
+    suspend fun unreadCount(uid: String): Int
+    suspend fun markAllRead(uid: String, at: Long)
+
+    suspend fun savePushToken(uid: String, token: String, platform: String, at: Long)
+    suspend fun pushTokens(uids: Collection<String>): Map<String, List<String>>
+    suspend fun deletePushTokens(tokens: Collection<String>)
 }

@@ -6,8 +6,10 @@ import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.FieldZone
+import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.MatchStatus
+import com.harsh.desicrics.model.NotificationKind
 import com.harsh.desicrics.api.SupportCategory
 import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.TeamRole
@@ -104,6 +106,7 @@ object MatchesTable : Table("matches") {
     val scorerUid = varchar("scorer_uid", 128)
     val teamAId = varchar("team_a_id", 36).nullable()
     val teamBId = varchar("team_b_id", 36).nullable()
+    val scheduledAt = long("scheduled_at").nullable()
     override val primaryKey = PrimaryKey(id)
 }
 
@@ -163,6 +166,36 @@ object ScorerHandoversTable : Table("scorer_handovers") {
     val matchId = reference("match_id", MatchesTable.id, onDelete = ReferenceOption.CASCADE)
     val expiresAt = long("expires_at")
     override val primaryKey = PrimaryKey(code)
+}
+
+object FollowsTable : Table("follows") {
+    val uid = varchar("uid", 128)
+    val targetType = enumerationByName("target_type", 10, FollowType::class)
+    val targetId = varchar("target_id", 128)
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(uid, targetType, targetId)
+}
+
+object NotificationsTable : Table("notifications") {
+    val id = varchar("id", 36)
+    val uid = varchar("uid", 128)
+    val kind = enumerationByName("kind", 20, NotificationKind::class)
+    val matchId = varchar("match_id", 36)
+    val matchTitle = varchar("match_title", 130)
+    val playerName = varchar("player_name", 100).nullable()
+    val amount = integer("amount").nullable()
+    val detail = varchar("detail", 200).nullable()
+    val createdAt = long("created_at")
+    val readAt = long("read_at").nullable()
+    override val primaryKey = PrimaryKey(id)
+}
+
+object PushTokensTable : Table("push_tokens") {
+    val token = varchar("token", 512)
+    val uid = varchar("uid", 128)
+    val platform = varchar("platform", 10)
+    val updatedAt = long("updated_at")
+    override val primaryKey = PrimaryKey(token)
 }
 
 /** A connected database plus the pool behind it, so the server can close it on shutdown. */

@@ -27,6 +27,10 @@ multiplatform-settings = "1.3.0"
 gitlive-firebase = "2.8.0"
 exposed = "1.6.1"
 qrose = "1.3.1"
+firebase-admin = "9.12.0"
+# The Firebase Android BOM gitlive-firebase 2.8.0 is built on. Newer BOMs move Firebase Auth a major version
+# under gitlive, so Messaging follows gitlive rather than the latest BOM.
+firebase-bom = "34.18.0"
 h2 = "2.5.252"
 postgresql = "42.7.14"
 flyway = "13.12.2"
@@ -64,6 +68,7 @@ ktor-serverStatusPages = { module = "io.ktor:ktor-server-status-pages", version.
 ktor-serverCallLogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
 ktor-serverCors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }
 ktor-serverAuth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
+ktor-serverWebsockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor" }
 ktor-serverAuthJwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
 ktor-serializationKotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 
@@ -72,6 +77,7 @@ ktor-clientCore = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-clientContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-clientLogging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-clientAuth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
+ktor-clientWebsockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor" }
 ktor-clientOkhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-clientMock = { module = "io.ktor:ktor-client-mock", version.ref = "ktor" }
 
@@ -108,6 +114,9 @@ androidx-credentials-playServicesAuth = { module = "androidx.credentials:credent
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 
 # Server database: Exposed over JDBC, Postgres in dev and prod, H2 for tests. Flyway owns the schema.
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebase-admin" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
