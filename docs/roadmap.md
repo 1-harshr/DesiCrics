@@ -67,7 +67,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ⬜ Scorer handover to another device
 - ⬜ Powerplay configuration
 
-**Exit:** a 20-over match scored on one phone ends with totals that match a paper scorebook.
+**Exit:** a 20-over match scored on one phone ends with totals that match a paper scorebook. Automated by `ScorebookReconciliationTest`: 50 seeded 20-over matches, each checked against the scorebook cross-checks (batting + extras, bowling + byes + leg byes + penalties, balls, wickets).
 
 ---
 
