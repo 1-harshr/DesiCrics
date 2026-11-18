@@ -6,6 +6,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.lifecycleScope
+import com.harsh.desicrics.widget.MatchWidget
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -25,6 +28,12 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         intent.linkPath()?.let { link.value = it }
+    }
+
+    /** The widget catches up with whatever was just scored or followed here. */
+    override fun onStop() {
+        super.onStop()
+        lifecycleScope.launch { runCatching { MatchWidget.refresh(applicationContext) } }
     }
 
     private fun Intent.linkPath(): String? = data?.takeIf { action == Intent.ACTION_VIEW }?.path

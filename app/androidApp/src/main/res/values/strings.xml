@@ -4,4 +4,15 @@
     <string name="notifications_channel">Match updates</string>
     <!-- The quiet channel for the running score of followed matches. -->
     <string name="live_scores_channel">Live scores</string>
+
+    <!-- Home screen widget -->
+    <string name="widget_description">The score of your match, or the latest one you follow</string>
+    <string name="widget_live">LIVE</string>
+    <string name="widget_result">RESULT</string>
+    <string name="widget_upcoming">UPCOMING</string>
+    <string name="widget_title">%1$s vs %2$s</string>
+    <string name="widget_not_started">Not started yet</string>
+    <string name="widget_signed_out">Open DesiCrics and sign in to see scores here.</string>
+    <string name="widget_nothing">No matches yet. Start one in DesiCrics.</string>
+    <string name="widget_offline">Couldn\'t load the score. Tap to open DesiCrics.</string>
 </resources>

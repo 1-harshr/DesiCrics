@@ -45,6 +45,16 @@
                 <data android:pathPrefix="/t/" />
             </intent-filter>
         </activity>
+        <receiver
+            android:name=".widget.MatchWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/match_widget" />
+        </receiver>
         <service
             android:name=".PushService"
             android:exported="false">

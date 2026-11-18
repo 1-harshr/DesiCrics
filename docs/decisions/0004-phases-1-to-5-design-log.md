@@ -44,6 +44,7 @@ Phases 1 (Level 3) to 5 were built in one unattended stretch. These are the ques
 | How is NRR calculated? | The standard way. A side that's bowled out counts as having faced its full overs. Ties on points go to NRR, then wins, then seed. |
 | A tied knockout match? | The higher seed goes through. There's no super over yet. |
 | Two fixtures finishing at once? | A per-tournament lock, so the next round is only made once. |
+| What does the home screen widget show, and how does it stay current? | The match Home would put first (yours, then live, upcoming, recent). It refreshes on live-score pushes, when you leave the app, and every 30 minutes, the shortest Android allows. |
 | A fixture with no squads looked "complete" to the engine. Why? | All-out was being computed for an empty team. Fixed: an innings with no batters isn't complete. |
 
 ## Phase 5: stats
@@ -58,6 +59,8 @@ Phases 1 (Level 3) to 5 were built in one unattended stretch. These are the ques
 
 ## Checking
 
+- The real APK was driven on an emulator against the new server (on a throwaway Postgres), through onboarding, a team with a placeholder, a match from a saved squad to its result, profile stats, a best-of-three tournament to its second fixture, and the home screen widget. That run found four bugs (a Google sign-up blocked by Firebase's empty phone string, a fixture card showing its placeholder toss, "1 matches", and a stretched form chart), all fixed in 8e53b2a.
+
 - Every server test also runs on real Postgres 17 (`TEST_POSTGRES_URL`, and in CI), not just H2.
 - Screenshot tests (Robolectric + Roborazzi) render the main screens to `app/shared/screenshots/`. Looking at them caught two bugs the compiler and tests couldn't: notification text cut to one line, and the tournament table never being shown in tests.
 
@@ -66,4 +69,4 @@ Phases 1 (Level 3) to 5 were built in one unattended stretch. These are the ques
 - **Hosting** (Cloud Run vs Fly.io). It blocks the staging deploy and the move from the `images` table to object storage.
 - **The public domain** and its `assetlinks.json`, for verified App Links.
 - **A Firebase service account** on the server, for push.
-- **The home screen widget** (Level 3), deferred.
+- Nothing deferred within Phases 0–5 beyond the items above, which need decisions or credentials.

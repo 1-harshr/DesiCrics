@@ -12,6 +12,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.SocialRepository
+import com.harsh.desicrics.widget.MatchWidget
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,8 +38,8 @@ class PushService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         when (message.data["type"]) {
-            "live" -> showLiveScore(message.data)
-            "live_ended" -> message.data["matchId"]?.let { NotificationManagerCompat.from(this).cancel(it, LIVE_ID) }
+            "live" -> showLiveScore(message.data).also { refreshWidget() }
+            "live_ended" -> message.data["matchId"]?.let { NotificationManagerCompat.from(this).cancel(it, LIVE_ID) }.also { refreshWidget() }
             else -> showUpdate(message)
         }
     }
@@ -91,6 +92,10 @@ class PushService : FirebaseMessagingService() {
     private fun post(tag: String?, id: Int, notification: Notification) {
         val manager = NotificationManagerCompat.from(this)
         if (manager.areNotificationsEnabled()) runCatching { manager.notify(tag, id, notification) }
+    }
+
+    private fun refreshWidget() {
+        scope.launch { runCatching { MatchWidget.refresh(applicationContext) } }
     }
 
     override fun onDestroy() {

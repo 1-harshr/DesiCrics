@@ -114,7 +114,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 ### Level 3 · Delight
 - ✅ Share cards: scorecard and player stats images (9:16, for WhatsApp status), and match links
 - ✅ Live progress notification for followed matches: silent pushes at each over and wicket update one quiet notification per match, removed when it ends
-- ⬜ Home screen widget (Glance; deferred)
+- ✅ Home screen widget (Glance): the match that matters most, refreshed on live-score pushes, on leaving the app and every 30 minutes
 
 **Exit:** a follower sees each ball within 2 seconds of it being scored.
 
