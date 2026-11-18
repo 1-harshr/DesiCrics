@@ -27,6 +27,10 @@ dependencies {
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
 
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.testExt.junit)
+
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)
 }
@@ -50,6 +54,10 @@ android {
         val publicUrl = providers.gradleProperty("desicrics.publicUrl").getOrElse(apiBaseUrl)
         buildConfigField("String", "PUBLIC_URL", "\"$publicUrl\"")
         manifestPlaceholders["publicHost"] = publicUrl.substringAfter("://").substringBefore("/").substringBefore(":")
+    }
+    // Robolectric tests run the real services against Android's own notification manager.
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
     }
     packaging {
         resources {

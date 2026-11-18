@@ -49,7 +49,7 @@ jobs:
 
       # google-services.json is gitignored. Add its contents as the GOOGLE_SERVICES_JSON repository
       # secret to also build the APK; without it this step is skipped.
-      - name: Build debug APK
+      - name: Build debug APK and run its tests
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
@@ -58,7 +58,7 @@ jobs:
             exit 0
           fi
           printf '%s' "$GOOGLE_SERVICES_JSON" > app/androidApp/google-services.json
-          ./gradlew :app:androidApp:assembleDebug
+          ./gradlew :app:androidApp:assembleDebug :app:androidApp:testDebugUnitTest
 
       - name: Upload test reports
         if: failure()
