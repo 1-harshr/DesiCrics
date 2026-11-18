@@ -24,12 +24,18 @@ object ScoringEngine {
         // Balls and between-ball events replay together, in the order they were recorded.
         val timeline = (deliveries.map { it.seq to it } + events.map { it.seq to it }).sortedBy { it.first }.map { it.second }
         fun inningsItems(number: Int) = timeline.filter { (it as? Delivery)?.innings == number || (it as? MatchEvent)?.innings == number }
-        val first = computeInnings(match, 1, match.battingFirst, inningsItems(1), target = null)
+        // Penalties to the fielding side land on that side's own innings, so each innings collects the ones
+        // awarded to it from both.
+        val penalties = events.filterIsInstance<MatchEvent.Penalty>()
+        fun penaltiesFor(innings: Int) = penalties.filter {
+            (it.innings == innings && it.toBattingSide) || (it.innings != innings && !it.toBattingSide)
+        }.sumOf { it.runs }
+        val first = computeInnings(match, 1, match.battingFirst, inningsItems(1), target = null, penaltyRuns = penaltiesFor(1))
         if (!first.isComplete) {
             return MatchState(match, listOf(first), isComplete = false, result = null)
         }
         val second = computeInnings(
-            match, 2, match.battingFirst.other, inningsItems(2), target = first.runs + 1,
+            match, 2, match.battingFirst.other, inningsItems(2), target = first.runs + 1, penaltyRuns = penaltiesFor(2),
         )
         return MatchState(
             match = match,
@@ -46,6 +52,8 @@ object ScoringEngine {
         /** [Delivery] and [MatchEvent] items in sequence order. */
         timeline: List<Any>,
         target: Int?,
+        /** Penalty runs this innings is credited with, from either innings. */
+        penaltyRuns: Int,
     ): InningsState {
         val battingTeam = match.team(battingSide)
         val bowlingTeam = match.team(battingSide.other)
@@ -53,10 +61,10 @@ object ScoringEngine {
 
         val batters = LinkedHashMap<String, BatterCard>()
         val bowlers = LinkedHashMap<String, BowlerCard>()
-        var runs = 0
+        var runs = penaltyRuns
         var wickets = 0
         var legalBalls = 0
-        var extras = Extras()
+        var extras = Extras(penalties = penaltyRuns)
         var striker: String? = null
         var nonStriker: String? = null
         var bowler: String? = null
@@ -78,6 +86,8 @@ object ScoringEngine {
                     is MatchEvent.SwapEnds -> striker = nonStriker.also { nonStriker = striker }
                     // The over carries on; the scorer picks who bowls the rest of it.
                     is MatchEvent.ReplaceBowler -> bowler = null
+                    // Counted up front through penaltyRuns, since some belong to the other innings.
+                    is MatchEvent.Penalty -> Unit
                 }
                 continue
             }

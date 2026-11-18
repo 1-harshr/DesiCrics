@@ -78,14 +78,14 @@ object DeliveriesTable : Table("deliveries") {
     val runsOffBat = integer("runs_off_bat")
     val extra = enumerationByName("extra", 10, ExtraType::class).nullable()
     val extraRuns = integer("extra_runs")
-    val wicketKind = enumerationByName("wicket_kind", 15, DismissalKind::class).nullable()
+    val wicketKind = enumerationByName("wicket_kind", 20, DismissalKind::class).nullable()
     val playerOutId = reference("player_out_id", MatchPlayersTable.id).nullable()
     val fielderId = reference("fielder_id", MatchPlayersTable.id).nullable()
     val createdAt = long("created_at")
     override val primaryKey = PrimaryKey(matchId, seq)
 }
 
-/** Between-ball events; [type] picks which of [playerId] and [isOut] apply. */
+/** Between-ball events; [type] picks which of the other columns apply. */
 object MatchEventsTable : Table("match_events") {
     val matchId = reference("match_id", MatchesTable.id, onDelete = ReferenceOption.CASCADE)
     val seq = integer("seq")
@@ -93,6 +93,8 @@ object MatchEventsTable : Table("match_events") {
     val type = varchar("type", 20)
     val playerId = reference("player_id", MatchPlayersTable.id).nullable()
     val isOut = bool("is_out")
+    val runs = integer("runs")
+    val toBattingSide = bool("to_batting_side")
     val createdAt = long("created_at")
     override val primaryKey = PrimaryKey(matchId, seq)
 }

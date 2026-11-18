@@ -53,6 +53,7 @@ fun MatchState.validate(event: MatchEvent, nextSeq: Int): DeliveryError? {
             is MatchEvent.SwapEnds ->
                 DeliveryError.BATTERS_MISSING.takeIf { innings.strikerId == null || innings.nonStrikerId == null }
             is MatchEvent.ReplaceBowler -> DeliveryError.NO_BOWLER_TO_REPLACE.takeIf { innings.bowlerId == null }
+            is MatchEvent.Penalty -> DeliveryError.PENALTY_OUT_OF_RANGE.takeIf { event.runs !in 1..10 }
         }
     }
 }
@@ -74,7 +75,7 @@ private fun wicketError(delivery: Delivery, bowling: Set<String>): DeliveryError
     return when {
         wicket.playerOutId != delivery.strikerId && wicket.playerOutId != delivery.nonStrikerId ->
             DeliveryError.OUT_PLAYER_NOT_AT_CREASE
-        kind.creditedToBowler && wicket.playerOutId != delivery.strikerId -> DeliveryError.ONLY_STRIKER_CAN_BE_OUT
+        kind.strikerOnly && wicket.playerOutId != delivery.strikerId -> DeliveryError.ONLY_STRIKER_CAN_BE_OUT
         !kind.possibleOn(delivery.extra) -> DeliveryError.DISMISSAL_NOT_POSSIBLE_ON_EXTRA
         !kind.allowsRuns && delivery.runsRun > 0 -> DeliveryError.NO_RUNS_ON_DISMISSAL
         wicket.fielderId != null && !kind.hasFielder -> DeliveryError.FIELDER_NOT_ALLOWED
@@ -108,6 +109,7 @@ enum class DeliveryError(val message: String) {
     BATTER_NOT_AT_CREASE("That batter isn't at the crease"),
     BATTERS_MISSING("Pick both batters first"),
     NO_BOWLER_TO_REPLACE("Nobody is bowling yet"),
+    PENALTY_OUT_OF_RANGE("Penalty runs must be between 1 and 10"),
 }
 
 /** The match row with its denormalised summary, status and result refreshed from [state]. */

@@ -172,6 +172,10 @@ class MatchViewModel(
     /** Retired hurt can bat again later; retired out counts as a wicket. */
     fun retire(playerId: String, out: Boolean) = recordEvent { seq, innings -> MatchEvent.Retire(seq, innings, playerId, out) }
 
+    /** Penalty runs to the batting side go on this innings; to the fielding side, on their own innings. */
+    fun awardPenalty(toBattingSide: Boolean, runs: Int) =
+        recordEvent { seq, innings -> MatchEvent.Penalty(seq, innings, toBattingSide, runs) }
+
     fun swapEnds() = recordEvent { seq, innings -> MatchEvent.SwapEnds(seq, innings) }
 
     /** Clears the bowler mid-over (an injury, say) so the scorer can pick who finishes it. */

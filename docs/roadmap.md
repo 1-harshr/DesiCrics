@@ -54,7 +54,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ Undo last ball
 
 ### Level 2 · Complete
-- ⬜ All 14 wicket types, penalty runs
+- ✅ All dismissals in the laws except timed out, plus "Other" for local rules; penalty runs to either side
 - ✅ Retired hurt (can return) / retired out, swap ends, change bowler mid-over, add latecomers and substitutes mid-match
 - ⬜ Revise target (rain), declare
 - ✅ Scorecard and over-by-over tabs

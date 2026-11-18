@@ -204,6 +204,17 @@ class ApplicationTest {
         }.body<MatchDetails>()
         assertEquals("Zoya", joined.match.teamA.players.last().name)
 
+        // A penalty is stored and read back like any event.
+        val penalty: MatchEvent = MatchEvent.Penalty(seq = 2, innings = 1, toBattingSide = true, runs = 5)
+        val afterPenalty = client.post("/matches/${match.id}/events") {
+            bearerAuth("test-asha")
+            contentType(ContentType.Application.Json)
+            setBody(penalty)
+        }.body<MatchDetails>()
+        assertEquals(penalty, afterPenalty.events.last().let { (it as MatchEvent.Penalty).copy(timestamp = 0) })
+        assertEquals("Strikers 6/0 (0.1)", afterPenalty.match.scoreSummary)
+        client.delete("/matches/${match.id}/last") { bearerAuth("test-asha") }
+
         // Undo removes the retirement, the latest entry.
         val undone = client.delete("/matches/${match.id}/last") { bearerAuth("test-asha") }.body<MatchDetails>()
         assertTrue(undone.events.isEmpty())

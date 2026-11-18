@@ -124,4 +124,22 @@ class DeliveryRulesTest {
         val done = ScoringEngine.compute(match, firstInnings + chase)
         assertEquals(DeliveryError.MATCH_OVER, done.validate(chase.copy(seq = 13), nextSeq = 13))
     }
+
+    @Test
+    fun localRuleAndObstructionCanDismissEitherBatterOnAnyBall() {
+        val otherOffWide = ball(0).copy(extra = ExtraType.WIDE, extraRuns = 1, wicket = Wicket(DismissalKind.OTHER, "a2"))
+        assertNull(reason(emptyList(), otherOffWide))
+        val obstructingAfterARun = ball(0, runs = 1).copy(wicket = Wicket(DismissalKind.OBSTRUCTING_FIELD, "a2"))
+        assertNull(reason(emptyList(), obstructingAfterARun))
+    }
+
+    @Test
+    fun hitTheBallTwiceIsTheStrikersOnly() {
+        val nonStriker = ball(0).copy(wicket = Wicket(DismissalKind.HIT_BALL_TWICE, "a2"))
+        assertEquals(DeliveryError.ONLY_STRIKER_CAN_BE_OUT, reason(emptyList(), nonStriker))
+        val offNoBall = ball(0).copy(extra = ExtraType.NO_BALL, extraRuns = 1, wicket = Wicket(DismissalKind.HIT_BALL_TWICE, "a1"))
+        assertNull(reason(emptyList(), offNoBall))
+        val offWide = ball(0).copy(extra = ExtraType.WIDE, extraRuns = 1, wicket = Wicket(DismissalKind.HIT_BALL_TWICE, "a1"))
+        assertEquals(DeliveryError.DISMISSAL_NOT_POSSIBLE_ON_EXTRA, reason(emptyList(), offWide))
+    }
 }

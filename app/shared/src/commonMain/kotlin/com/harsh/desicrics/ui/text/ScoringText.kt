@@ -80,6 +80,9 @@ fun dismissalText(dismissal: Dismissal?): String {
             if (fielder == null) stringResource(Res.string.scorecard_out_stumped_no_fielder, bowler)
             else stringResource(Res.string.scorecard_out_stumped, fielder, bowler)
         DismissalKind.HIT_WICKET -> stringResource(Res.string.scorecard_out_hit_wicket, bowler)
+        DismissalKind.OBSTRUCTING_FIELD -> stringResource(Res.string.scorecard_out_obstructing)
+        DismissalKind.HIT_BALL_TWICE -> stringResource(Res.string.scorecard_out_hit_twice)
+        DismissalKind.OTHER -> stringResource(Res.string.scorecard_out_other)
     }
 }
 
@@ -137,6 +140,7 @@ val DeliveryError.label: StringResource
         DeliveryError.BATTER_NOT_AT_CREASE -> Res.string.scoring_error_batter_not_at_crease
         DeliveryError.BATTERS_MISSING -> Res.string.scoring_error_batters_missing
         DeliveryError.NO_BOWLER_TO_REPLACE -> Res.string.scoring_error_no_bowler_to_replace
+        DeliveryError.PENALTY_OUT_OF_RANGE -> Res.string.scoring_error_penalty_out_of_range
     }
 
 // Previews: sample teams and players only; every line of text comes from string resources.

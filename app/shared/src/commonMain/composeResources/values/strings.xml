@@ -123,6 +123,9 @@
     <string name="scorecard_out_stumped">st %1$s b %2$s</string>
     <string name="scorecard_out_stumped_no_fielder">st b %1$s</string>
     <string name="scorecard_out_hit_wicket">hit wicket b %1$s</string>
+    <string name="scorecard_out_obstructing">obstructing the field</string>
+    <string name="scorecard_out_hit_twice">hit the ball twice</string>
+    <string name="scorecard_out_other">out</string>
 
     <!-- Match result -->
     <plurals name="match_result_won_by_runs">
@@ -283,7 +286,7 @@
     <string name="scoring_wicket_title">Wicket</string>
     <string name="scoring_wicket_how">How out?</string>
     <string name="scoring_wicket_who">Who's out?</string>
-    <string name="scoring_wicket_runs">Runs completed before the run out</string>
+    <string name="scoring_wicket_runs">Runs completed before the wicket</string>
     <string name="scoring_wicket_fielder">Fielder (optional)</string>
     <string name="scoring_wicket_keeper">Keeper (optional)</string>
     <string name="scoring_wicket_confirm">Out</string>
@@ -293,6 +296,9 @@
     <string name="scoring_dismissal_run_out">Run out</string>
     <string name="scoring_dismissal_stumped">Stumped</string>
     <string name="scoring_dismissal_hit_wicket">Hit wicket</string>
+    <string name="scoring_dismissal_obstructing">Obstructing</string>
+    <string name="scoring_dismissal_hit_twice">Hit twice</string>
+    <string name="scoring_dismissal_other">Other (local rule)</string>
     <string name="scoring_error_save_failed">Couldn't save that ball. Check your connection and try again.</string>
 
     <!-- Scorecard -->
@@ -308,7 +314,7 @@
     <string name="scorecard_maidens">M</string>
     <string name="scorecard_wickets">W</string>
     <string name="scorecard_economy">Econ</string>
-    <string name="scorecard_extras">Extras %1$d (wd %2$d, nb %3$d, b %4$d, lb %5$d)</string>
+    <string name="scorecard_extras">Extras %1$d (wd %2$d, nb %3$d, b %4$d, lb %5$d, p %6$d)</string>
     <string name="scorecard_yet_to_bat">Yet to bat: %1$s</string>
     <string name="scorecard_not_started">This innings hasn't started yet.</string>
 
@@ -372,4 +378,16 @@
     <string name="scoring_add_new_player_hint">Someone arrived late or is coming in as a substitute.</string>
     <string name="scorecard_retired_hurt">retired hurt</string>
     <string name="scorecard_retired_out">retired out</string>
+
+    <!-- Match options: penalty runs -->
+    <string name="match_options">Match options</string>
+    <string name="match_penalty">Penalty runs</string>
+    <string name="match_penalty_hint">Award runs to either side, e.g. for the ball hitting a helmet left on the field.</string>
+    <string name="match_penalty_to">Who gets them?</string>
+    <string name="match_penalty_runs">runs</string>
+    <string name="match_penalty_fewer">Fewer runs</string>
+    <string name="match_penalty_more">More runs</string>
+    <string name="match_penalty_fielding_note">Runs for the fielding side go on their own innings total.</string>
+    <string name="match_penalty_award">Award %1$d runs</string>
+    <string name="scoring_error_penalty_out_of_range">Penalty runs must be between 1 and 10.</string>
 </resources>

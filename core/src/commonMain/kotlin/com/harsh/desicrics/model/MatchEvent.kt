@@ -33,6 +33,20 @@ sealed interface MatchEvent {
         override val timestamp: Long = 0,
     ) : MatchEvent
 
+    /**
+     * Penalty runs. To the batting side, they go on the current innings. To the fielding side, they go on
+     * that side's own innings: the one they already batted, or the one they bat next.
+     */
+    @Serializable
+    @SerialName("penalty")
+    data class Penalty(
+        override val seq: Int,
+        override val innings: Int,
+        val toBattingSide: Boolean,
+        val runs: Int,
+        override val timestamp: Long = 0,
+    ) : MatchEvent
+
     /** The bowler can't finish the over (injury, say); the scorer picks who bowls the rest of it. */
     @Serializable
     @SerialName("replace_bowler")

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.DesiTextField
+import com.harsh.desicrics.designsystem.component.NumberStepper
 import com.harsh.desicrics.designsystem.component.PadKey
 import com.harsh.desicrics.designsystem.component.PlayerRow
 import com.harsh.desicrics.designsystem.component.PrimaryButton
@@ -177,9 +178,11 @@ internal fun WicketSheet(
                 if (!it.hasFielder) fielder = null
             },
         )
-        if (kind == DismissalKind.RUN_OUT) {
+        if (!kind.strikerOnly) {
             SectionLabel(stringResource(Res.string.scoring_wicket_who), Modifier.padding(top = DesiTheme.space.s2))
             SegmentedControl(listOf(striker, nonStriker), selected = out, label = { it.name }, onSelect = { out = it })
+        }
+        if (kind.allowsRuns) {
             SectionLabel(stringResource(Res.string.scoring_wicket_runs), Modifier.padding(top = DesiTheme.space.s2))
             ChoiceChips(listOf(0, 1, 2, 3), selected = runs, label = { "$it" }, onSelect = { runs = it })
         }
@@ -192,8 +195,8 @@ internal fun WicketSheet(
         PrimaryButton(
             text = stringResource(Res.string.scoring_wicket_confirm),
             onClick = {
-                val playerOut = if (kind == DismissalKind.RUN_OUT) out else striker
-                onConfirm(kind, playerOut, fielder?.takeIf { kind.hasFielder }, if (kind == DismissalKind.RUN_OUT) runs else 0)
+                val playerOut = if (kind.strikerOnly) striker else out
+                onConfirm(kind, playerOut, fielder?.takeIf { kind.hasFielder }, if (kind.allowsRuns) runs else 0)
             },
             modifier = Modifier.fillMaxWidth().padding(top = DesiTheme.space.s2),
         )
@@ -208,4 +211,39 @@ internal val DismissalKind.label: StringResource
         DismissalKind.RUN_OUT -> Res.string.scoring_dismissal_run_out
         DismissalKind.STUMPED -> Res.string.scoring_dismissal_stumped
         DismissalKind.HIT_WICKET -> Res.string.scoring_dismissal_hit_wicket
+        DismissalKind.OBSTRUCTING_FIELD -> Res.string.scoring_dismissal_obstructing
+        DismissalKind.HIT_BALL_TWICE -> Res.string.scoring_dismissal_hit_twice
+        DismissalKind.OTHER -> Res.string.scoring_dismissal_other
     }
+
+/** Penalty runs to either side: the team, then how many (5 by default, as in the laws). */
+@Composable
+internal fun PenaltySheet(
+    battingTeam: String,
+    fieldingTeam: String,
+    onAward: (toBattingSide: Boolean, runs: Int) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    var toBatting by remember { mutableStateOf(true) }
+    var runs by remember { mutableStateOf(5) }
+    DesiSheet(stringResource(Res.string.match_penalty), onDismiss, stringResource(Res.string.match_penalty_hint)) {
+        SectionLabel(stringResource(Res.string.match_penalty_to))
+        SegmentedControl(listOf(true, false), selected = toBatting, label = { if (it) battingTeam else fieldingTeam }, onSelect = { toBatting = it })
+        if (!toBatting) {
+            Text(stringResource(Res.string.match_penalty_fielding_note), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        }
+        NumberStepper(
+            value = runs,
+            onValueChange = { runs = it },
+            label = stringResource(Res.string.match_penalty_runs),
+            decreaseLabel = stringResource(Res.string.match_penalty_fewer),
+            increaseLabel = stringResource(Res.string.match_penalty_more),
+            range = 1..10,
+        )
+        PrimaryButton(
+            text = stringResource(Res.string.match_penalty_award, runs),
+            onClick = { onAward(toBatting, runs) },
+            modifier = Modifier.fillMaxWidth().padding(top = DesiTheme.space.s2),
+        )
+    }
+}

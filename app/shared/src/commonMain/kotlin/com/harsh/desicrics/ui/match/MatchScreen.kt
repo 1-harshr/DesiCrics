@@ -102,6 +102,7 @@ fun MatchScreen(
             onSwapEnds = viewModel::swapEnds,
             onReplaceBowler = viewModel::replaceBowler,
             onAddPlayer = viewModel::addPlayer,
+            onPenalty = viewModel::awardPenalty,
         ),
     )
 }
@@ -121,6 +122,7 @@ class MatchActions(
     val onSwapEnds: () -> Unit,
     val onReplaceBowler: () -> Unit,
     val onAddPlayer: (TeamSide, name: String) -> Unit,
+    val onPenalty: (toBattingSide: Boolean, runs: Int) -> Unit,
 )
 
 private enum class MatchTab { LIVE, SCORECARD, OVERS }
@@ -141,6 +143,8 @@ private sealed interface ScoringSheet {
     data object Wicket : ScoringSheet
     data class BatterOptions(val player: Player) : ScoringSheet
     data object BowlerOptions : ScoringSheet
+    data object MatchOptions : ScoringSheet
+    data object Penalty : ScoringSheet
 }
 
 /**
@@ -170,7 +174,7 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     var sheet by remember { mutableStateOf<ScoringSheet?>(null) }
     val innings = state.current
 
-    Scoreboard(state, actions.onBack)
+    Scoreboard(state, actions.onBack, onOptions = if (ui.canEdit) ({ sheet = ScoringSheet.MatchOptions }) else null)
     SegmentedControl(
         options = MatchTab.entries,
         selected = tab,
@@ -207,12 +211,12 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
         ScoringPad(ui, actions, onSheet = { sheet = it })
     }
 
-    ScoringSheets(sheet, ui, innings, actions, onClose = { sheet = null })
+    ScoringSheets(sheet, ui, innings, actions, onSheet = { sheet = it }, onClose = { sheet = null })
 }
 
 /** The green header: teams, then the batting side's score, overs and where the chase stands. */
 @Composable
-private fun Scoreboard(state: MatchState, onBack: () -> Unit) {
+private fun Scoreboard(state: MatchState, onBack: () -> Unit, onOptions: (() -> Unit)?) {
     val colors = DesiTheme.colors
     val onGreen = colors.onBrandStrong
     val innings = state.current
@@ -235,8 +239,16 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit) {
                 modifier = Modifier.weight(1f),
             )
             if (!state.isComplete) {
-                Box(Modifier.clip(DesiTheme.radius.full).background(colors.surface).padding(horizontal = DesiTheme.space.s3, vertical = 6.dp)) {
+                Box(
+                    Modifier.padding(start = DesiTheme.space.s2).clip(DesiTheme.radius.full).background(colors.surface)
+                        .padding(horizontal = DesiTheme.space.s3, vertical = 6.dp),
+                ) {
                     LiveBadge()
+                }
+            }
+            if (onOptions != null) {
+                IconButton(onClick = onOptions, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
+                    Icon(painterResource(DesiIcons.More), stringResource(Res.string.match_options), tint = onGreen)
                 }
             }
         }
@@ -456,7 +468,14 @@ private fun ErrorBanner(error: ScoringError, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun ScoringSheets(sheet: ScoringSheet?, ui: MatchUiState, innings: InningsState, actions: MatchActions, onClose: () -> Unit) {
+private fun ScoringSheets(
+    sheet: ScoringSheet?,
+    ui: MatchUiState,
+    innings: InningsState,
+    actions: MatchActions,
+    onSheet: (ScoringSheet) -> Unit,
+    onClose: () -> Unit,
+) {
     fun batter(id: String?) = innings.battingTeam.players.firstOrNull { it.id == id }
     when (sheet) {
         null -> Unit
@@ -506,6 +525,24 @@ private fun ScoringSheets(sheet: ScoringSheet?, ui: MatchUiState, innings: Innin
                     onClose()
                 },
             ),
+            onDismiss = onClose,
+        )
+        ScoringSheet.MatchOptions -> OptionsSheet(
+            title = stringResource(Res.string.match_options),
+            options = listOf(
+                SheetOption(stringResource(Res.string.match_penalty), stringResource(Res.string.match_penalty_hint)) {
+                    onSheet(ScoringSheet.Penalty)
+                },
+            ),
+            onDismiss = onClose,
+        )
+        ScoringSheet.Penalty -> PenaltySheet(
+            battingTeam = innings.battingTeam.name,
+            fieldingTeam = innings.bowlingTeam.name,
+            onAward = { toBatting, runs ->
+                actions.onPenalty(toBatting, runs)
+                onClose()
+            },
             onDismiss = onClose,
         )
         ScoringSheet.BowlerOptions -> OptionsSheet(
@@ -598,7 +635,7 @@ private fun previewBalls(): List<Delivery> {
 private fun previewUi(deliveries: List<Delivery>, isScorer: Boolean = true) =
     MatchUiState(loading = false, match = PreviewMatch, deliveries = deliveries, state = ScoringEngine.compute(PreviewMatch, deliveries), isScorer = isScorer)
 
-private val PreviewActions = MatchActions({}, {}, {}, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> })
+private val PreviewActions = MatchActions({}, {}, {}, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _ -> })
 
 @Preview
 @Composable

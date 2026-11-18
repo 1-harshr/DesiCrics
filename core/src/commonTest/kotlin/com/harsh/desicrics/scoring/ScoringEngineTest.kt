@@ -258,4 +258,33 @@ class ScoringEngineTest {
         assertEquals(DeliveryError.STALE, state.validate(MatchEvent.SwapEnds(5, 1), nextSeq = 1))
         assertNull(state.validate(MatchEvent.ReplaceBowler(1, 1), nextSeq = 1))
     }
+
+    @Test
+    fun penaltiesGoToTheRightInnings() {
+        ball("a1", "a2", "b1", runs = 1)
+        // To the batting side: on this innings, as extras.
+        event { MatchEvent.Penalty(it, 1, toBattingSide = true, runs = 5) }
+        // To the fielding side (Royals): on their own innings, which they haven't batted yet.
+        event { MatchEvent.Penalty(it, 1, toBattingSide = false, runs = 5) }
+        val first = state().current
+        assertEquals(6, first.runs)
+        assertEquals(5, first.extras.penalties)
+
+        repeat(11) { i -> ball(if (i % 2 == 0) "a2" else "a1", if (i % 2 == 0) "a1" else "a2", if (i < 5) "b1" else "b2") }
+        val second = state().current
+        assertEquals(2, second.number)
+        assertEquals(7, second.target)
+        // Royals start their chase with the 5 runs they were awarded.
+        assertEquals(5, second.runs)
+        assertEquals(2, second.runsNeeded)
+    }
+
+    @Test
+    fun penaltyToTheSideThatBattedFirstRaisesTheTarget() {
+        repeat(12) { i -> ball("a1", "a2", if (i < 6) "b1" else "b2") }
+        event { MatchEvent.Penalty(it, 2, toBattingSide = false, runs = 5) }
+        val state = state()
+        assertEquals(5, state.innings.first().runs)
+        assertEquals(6, state.current.target)
+    }
 }

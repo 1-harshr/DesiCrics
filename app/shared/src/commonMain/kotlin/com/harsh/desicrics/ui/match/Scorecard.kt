@@ -61,7 +61,7 @@ internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifi
         }
         val extras = innings.extras
         Text(
-            stringResource(Res.string.scorecard_extras, extras.total, extras.wides, extras.noBalls, extras.byes, extras.legByes),
+            stringResource(Res.string.scorecard_extras, extras.total, extras.wides, extras.noBalls, extras.byes, extras.legByes, extras.penalties),
             style = DesiTheme.type.caption,
             color = colors.muted,
         )

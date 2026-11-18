@@ -58,20 +58,28 @@ enum class DismissalKind(
     val creditedToBowler: Boolean,
     /** Whether a fielder can be named: the catcher, the run-out fielder or the keeper. */
     val hasFielder: Boolean,
-    /** Whether runs can be scored on the ball. Only a run out lets completed runs stand. */
+    /** Whether runs completed before the dismissal still count. */
     val allowsRuns: Boolean,
+    /** Only the striker can be out this way; otherwise either batter can. */
+    val strikerOnly: Boolean = true,
 ) {
     BOWLED("Bowled", creditedToBowler = true, hasFielder = false, allowsRuns = false),
     CAUGHT("Caught", creditedToBowler = true, hasFielder = true, allowsRuns = false),
     LBW("LBW", creditedToBowler = true, hasFielder = false, allowsRuns = false),
-    RUN_OUT("Run out", creditedToBowler = false, hasFielder = true, allowsRuns = true),
+    RUN_OUT("Run out", creditedToBowler = false, hasFielder = true, allowsRuns = true, strikerOnly = false),
     STUMPED("Stumped", creditedToBowler = true, hasFielder = true, allowsRuns = false),
-    HIT_WICKET("Hit wicket", creditedToBowler = true, hasFielder = false, allowsRuns = false);
+    HIT_WICKET("Hit wicket", creditedToBowler = true, hasFielder = false, allowsRuns = false),
+    OBSTRUCTING_FIELD("Obstructing the field", creditedToBowler = false, hasFielder = false, allowsRuns = true, strikerOnly = false),
+    HIT_BALL_TWICE("Hit the ball twice", creditedToBowler = false, hasFielder = false, allowsRuns = false),
+
+    /** A local rule ("one tip one hand", over the wall). Either batter, runs can count, not the bowler's. */
+    OTHER("Out", creditedToBowler = false, hasFielder = false, allowsRuns = true, strikerOnly = false);
 
     /** Whether this dismissal can happen on a ball with [extra]. */
-    fun possibleOn(extra: ExtraType?): Boolean = when (extra) {
-        null -> true
-        ExtraType.WIDE -> this == RUN_OUT || this == STUMPED || this == HIT_WICKET
-        ExtraType.NO_BALL, ExtraType.BYE, ExtraType.LEG_BYE -> this == RUN_OUT
+    fun possibleOn(extra: ExtraType?): Boolean = when (this) {
+        RUN_OUT, OBSTRUCTING_FIELD, OTHER -> true
+        STUMPED, HIT_WICKET -> extra == null || extra == ExtraType.WIDE
+        HIT_BALL_TWICE -> extra == null || extra == ExtraType.NO_BALL
+        BOWLED, CAUGHT, LBW -> extra == null
     }
 }

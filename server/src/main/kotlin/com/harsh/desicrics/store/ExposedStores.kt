@@ -152,6 +152,8 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[type] = event.typeName
                 it[playerId] = (event as? MatchEvent.Retire)?.playerId
                 it[isOut] = (event as? MatchEvent.Retire)?.out ?: false
+                it[runs] = (event as? MatchEvent.Penalty)?.runs ?: 0
+                it[toBattingSide] = (event as? MatchEvent.Penalty)?.toBattingSide ?: false
                 it[createdAt] = event.timestamp
             }
             updateScore(match)
@@ -191,6 +193,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             RETIRE -> MatchEvent.Retire(seq, innings, checkNotNull(this[MatchEventsTable.playerId]), this[MatchEventsTable.isOut], at)
             SWAP_ENDS -> MatchEvent.SwapEnds(seq, innings, at)
             REPLACE_BOWLER -> MatchEvent.ReplaceBowler(seq, innings, at)
+            PENALTY -> MatchEvent.Penalty(seq, innings, this[MatchEventsTable.toBattingSide], this[MatchEventsTable.runs], at)
             else -> error("Unknown match event type ${this[MatchEventsTable.type]}")
         }
     }
@@ -283,12 +286,14 @@ private fun UpdateBuilder<*>.setResult(match: Match) {
 private const val RETIRE = "retire"
 private const val SWAP_ENDS = "swap_ends"
 private const val REPLACE_BOWLER = "replace_bowler"
+private const val PENALTY = "penalty"
 
 private val MatchEvent.typeName: String
     get() = when (this) {
         is MatchEvent.Retire -> RETIRE
         is MatchEvent.SwapEnds -> SWAP_ENDS
         is MatchEvent.ReplaceBowler -> REPLACE_BOWLER
+        is MatchEvent.Penalty -> PENALTY
     }
 
 /** SQLSTATE 23505 means a unique or primary-key violation in both H2 and Postgres. */

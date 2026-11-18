@@ -89,8 +89,9 @@ data class Extras(
     val noBalls: Int = 0,
     val byes: Int = 0,
     val legByes: Int = 0,
+    val penalties: Int = 0,
 ) {
-    val total: Int get() = wides + noBalls + byes + legByes
+    val total: Int get() = wides + noBalls + byes + legByes + penalties
 
     operator fun plus(delivery: Delivery): Extras = when (delivery.extra) {
         ExtraType.WIDE -> copy(wides = wides + delivery.extraRuns)
