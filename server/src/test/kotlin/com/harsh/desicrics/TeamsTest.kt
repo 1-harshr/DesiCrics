@@ -21,7 +21,11 @@ import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.put
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.readRawBytes
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.http.HttpStatusCode
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -197,5 +201,40 @@ class TeamsTest {
         assertEquals(HttpStatusCode.NoContent, ok.status)
         val empty = client.post("/support") { bearerAuth("test-asha"); jsonBody(SupportRequest(SupportCategory.BUG, " ")) }
         assertEquals(HttpStatusCode.BadRequest, empty.status)
+    }
+}
+
+class ImagesTest {
+    private val png = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3)
+
+    @Test
+    fun profilePhotosAndTeamLogos() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev", name = "Dev")
+        val profile = client.put("/me/photo") {
+            bearerAuth("test-asha")
+            contentType(ContentType.Image.PNG)
+            setBody(png)
+        }.body<com.harsh.desicrics.model.UserProfile>()
+        val path = profile.photoUrl!!
+        assertTrue(path.startsWith("/images/"))
+        // Served to anyone, cached for good.
+        val served = client.get(path)
+        assertEquals(HttpStatusCode.OK, served.status)
+        assertTrue(served.readRawBytes().contentEquals(png))
+        assertEquals("public, max-age=31536000, immutable", served.headers[io.ktor.http.HttpHeaders.CacheControl])
+        // And it shows wherever the player does.
+        assertEquals(path, client.get("/players/asha") { bearerAuth("test-dev") }.body<com.harsh.desicrics.model.PlayerPage>().player.photoUrl)
+
+        val team = client.post("/teams") { bearerAuth("test-asha"); jsonBody(com.harsh.desicrics.api.TeamRequest("Strikers")) }.body<SavedTeam>()
+        val notAdmin = client.put("/teams/${team.id}/logo") { bearerAuth("test-dev"); contentType(ContentType.Image.PNG); setBody(png) }
+        assertEquals(HttpStatusCode.Forbidden, notAdmin.status)
+        val withLogo = client.put("/teams/${team.id}/logo") { bearerAuth("test-asha"); contentType(ContentType.Image.PNG); setBody(png) }.body<SavedTeam>()
+        assertTrue(withLogo.logoUrl!!.startsWith("/images/"))
+
+        val text = client.put("/me/photo") { bearerAuth("test-asha"); contentType(ContentType.Text.Plain); setBody("hi") }
+        assertEquals(HttpStatusCode.UnsupportedMediaType, text.status)
+        val huge = client.put("/me/photo") { bearerAuth("test-asha"); contentType(ContentType.Image.JPEG); setBody(ByteArray(1_000_001)) }
+        assertEquals(HttpStatusCode.PayloadTooLarge, huge.status)
     }
 }

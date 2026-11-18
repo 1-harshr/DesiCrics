@@ -66,6 +66,7 @@ object TeamsTable : Table("teams") {
     val name = varchar("name", 60)
     val city = varchar("city", 100)
     val joinCode = varchar("join_code", 8)
+    val logoUrl = varchar("logo_url", 200).nullable()
     val createdBy = varchar("created_by", 128)
     val createdAt = long("created_at")
     override val primaryKey = PrimaryKey(id)
@@ -209,6 +210,15 @@ object TournamentTeamsTable : Table("tournament_teams") {
     val groupNo = integer("group_no").nullable()
     val status = enumerationByName("status", 10, EntryStatus::class)
     override val primaryKey = PrimaryKey(tournamentId, teamId)
+}
+
+object ImagesTable : Table("images") {
+    val id = varchar("id", 36)
+    val ownerUid = varchar("owner_uid", 128)
+    val contentType = varchar("content_type", 30)
+    val bytes = binary("bytes")
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(id)
 }
 
 /** The stats projection; [line] is a JSON PlayerMatchLine. */

@@ -24,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -41,13 +42,16 @@ import com.harsh.desicrics.designsystem.component.PlayerCard
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.SectionLabel
 import com.harsh.desicrics.designsystem.component.SegmentedControl
+import com.harsh.desicrics.designsystem.component.TonalButton
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
+import com.harsh.desicrics.ui.system.rememberImagePicker
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -65,6 +69,7 @@ fun EditProfileScreen(
     viewModel: EditProfileViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val pickPhoto = rememberImagePicker(viewModel::uploadPhoto)
     LightStatusBarIcons()
     EditProfileContent(
         state = state,
@@ -72,6 +77,8 @@ fun EditProfileScreen(
         onUpdate = viewModel::update,
         onSave = { viewModel.save(onDone) },
         onBack = onBack,
+        // A photo needs a profile to belong to, so it waits until after onboarding.
+        onChangePhoto = if (isOnboarding) null else pickPhoto,
     )
 }
 
@@ -92,6 +99,7 @@ fun EditProfileContent(
     onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit,
     onSave: () -> Unit,
     onBack: (() -> Unit)?,
+    onChangePhoto: (() -> Unit)? = null,
 ) {
     val colors = DesiTheme.colors
     if (state.loading) {
@@ -106,11 +114,23 @@ fun EditProfileContent(
                 Modifier.padding(horizontal = DesiTheme.space.screen, vertical = DesiTheme.space.s6),
                 verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s8),
             ) {
+                if (onChangePhoto != null) PhotoSection(state, onChangePhoto)
                 AboutSection(state, onUpdate)
                 GameSection(state, onUpdate)
             }
         }
         SaveBar(state, isOnboarding, onSave)
+    }
+}
+
+@Composable
+private fun PhotoSection(state: ProfileFormState, onChangePhoto: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
+        PhotoAvatar(state.name, state.photoUrl, size = 72)
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1)) {
+            TonalButton(stringResource(Res.string.profile_photo_change), onClick = onChangePhoto, loading = state.uploadingPhoto)
+            if (state.photoFailed) Text(stringResource(Res.string.profile_photo_failed), style = DesiTheme.type.caption, color = DesiTheme.colors.event.wicket)
+        }
     }
 }
 

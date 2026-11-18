@@ -36,6 +36,8 @@ class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfi
 
     suspend fun newJoinCode(teamId: String): SavedTeam = api.newJoinCode(teamId)
 
+    suspend fun uploadLogo(teamId: String, jpeg: ByteArray): SavedTeam = api.uploadTeamLogo(teamId, jpeg)
+
     suspend fun join(code: String): SavedTeam = api.joinTeam(code.trim().uppercase())
 
     suspend fun headToHead(teamId: String, otherId: String): HeadToHead = api.headToHead(teamId, otherId)

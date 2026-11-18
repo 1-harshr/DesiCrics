@@ -11,6 +11,7 @@ import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
+import com.harsh.desicrics.ui.components.PhotoAvatar
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -155,6 +156,8 @@ class TeamViewModel(
     fun rename(name: String, city: String) = act { repository.rename(teamId, name, city) }
 
     fun newJoinCode() = act { repository.newJoinCode(teamId) }
+
+    fun uploadLogo(jpeg: ByteArray) = act { repository.uploadLogo(teamId, jpeg) }
 
     /** Calls [onLeft] once the caller is out of the team. */
     fun leave(onLeft: () -> Unit) {

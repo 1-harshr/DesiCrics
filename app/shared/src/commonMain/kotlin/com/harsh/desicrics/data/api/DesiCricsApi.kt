@@ -253,6 +253,12 @@ class DesiCricsApi(
             }
         }.body()
 
+    suspend fun uploadProfilePhoto(jpeg: ByteArray): UserProfile =
+        call { put("$baseUrl/me/photo") { it(); contentType(ContentType.Image.JPEG); setBody(jpeg) } }.body()
+
+    suspend fun uploadTeamLogo(teamId: String, jpeg: ByteArray): SavedTeam =
+        call { put("$baseUrl/teams/$teamId/logo") { it(); contentType(ContentType.Image.JPEG); setBody(jpeg) } }.body()
+
     /** Removes the latest ball or event. */
     suspend fun undoLast(matchId: String): MatchDetails =
         call { delete("$baseUrl/matches/$matchId/last", it) }.body()

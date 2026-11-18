@@ -107,6 +107,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
             entry<HomeRoute> {
                 HomeScreen(
                     playerName = profile.name,
+                    playerPhoto = profile.photoUrl,
                     onNewMatch = { backStack.add(NewMatchRoute) },
                     onOpenMatch = { backStack.add(MatchRoute(it)) },
                     onProfile = { backStack.add(ProfileRoute) },

@@ -27,7 +27,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ `:app:designsystem` module: tokens, fonts, type, first 10 components ([design-system.md](design-system.md))
 - ✅ `strings.xml` set up in `:app:shared` and `:app:designsystem`; sign-in, profile and session text moved ([ui-conventions.md](ui-conventions.md))
 - ✅ Phone OTP + Google sign-in screens in Crease
-- 🟡 Profile onboarding: name, role, styles done; photo upload to do
+- ✅ Profile onboarding: name, role, styles; photo upload from the profile editor
 - ✅ CI: build, unit tests, server tests (`.github/workflows/ci.yml`)
 
 ### Level 3 · Delight
@@ -76,7 +76,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 **Goal:** matches are played between saved teams of real users, so stats attach to people.
 
 ### Level 1 · Playable
-- 🟡 Create team (name, city); team logos wait for photo storage, like profile photos
+- ✅ Create team (name, logo, city)
 - ✅ Add members by search or phone number
 - ✅ Squad selection with captain and keeper
 - ✅ Placeholder players who can claim their profile later, by code or verified phone ([ADR 0002](decisions/0002-player-identity.md))

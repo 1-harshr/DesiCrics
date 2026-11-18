@@ -11,6 +11,7 @@ import com.harsh.desicrics.live.LoggingPushSender
 import com.harsh.desicrics.live.Notifier
 import com.harsh.desicrics.live.PushSender
 import com.harsh.desicrics.service.AccountService
+import com.harsh.desicrics.service.ImageService
 import com.harsh.desicrics.service.MatchService
 import com.harsh.desicrics.service.PlayerService
 import com.harsh.desicrics.service.SocialService
@@ -19,6 +20,7 @@ import com.harsh.desicrics.service.StatsService
 import com.harsh.desicrics.service.TournamentService
 import com.harsh.desicrics.service.TeamService
 import com.harsh.desicrics.service.ProfileService
+import com.harsh.desicrics.store.ExposedImageStore
 import com.harsh.desicrics.store.ExposedMatchStore
 import com.harsh.desicrics.store.ExposedPlayerStore
 import com.harsh.desicrics.store.ExposedSocialStore
@@ -89,6 +91,7 @@ fun Application.module(
     matches.listen(tournaments)
     launch { projector.backfill() }
     val teams = TeamService(teamStore, players, matchStore, users)
+    val images = ImageService(ExposedImageStore(database), users, teamStore, teams)
     val playerService = PlayerService(players, users)
     val account = AccountService(players, teamStore, ExposedSupportStore(database))
     launch { matches.backfillInningsScores() }
@@ -119,6 +122,7 @@ fun Application.module(
     routing {
         get("/") { call.respondText("DesiCrics API") }
         publicRoutes(matches, tournaments)
+        imageRoutes(images)
         authenticate("firebase") {
             profileRoutes(profiles)
             matchRoutes(matches)
@@ -128,6 +132,7 @@ fun Application.module(
             socialRoutes(social)
             liveRoutes(matches, live)
             tournamentRoutes(tournaments)
+            imageUploadRoutes(images)
             statsRoutes(StatsService(statsStore, players, users, teamStore, socialStore))
         }
     }

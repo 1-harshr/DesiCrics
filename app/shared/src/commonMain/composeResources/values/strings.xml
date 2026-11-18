@@ -836,4 +836,9 @@
     <!-- Voice scoring -->
     <string name="scoring_voice">Score by voice</string>
     <string name="scoring_voice_unknown">Didn't catch that. Try "four", "wide two" or "out".</string>
+
+    <!-- Photos and logos -->
+    <string name="profile_photo_change">Change photo</string>
+    <string name="profile_photo_failed">Couldn't upload that picture. Try a smaller one or check your connection.</string>
+    <string name="team_logo_change">Change logo</string>
 </resources>

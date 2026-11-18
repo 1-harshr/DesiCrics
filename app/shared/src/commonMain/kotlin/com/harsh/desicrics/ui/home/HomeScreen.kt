@@ -71,6 +71,7 @@ import com.harsh.desicrics.model.TodayFeed
 import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.scoring.formatOvers
+import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.text.matchStatusText
 import com.harsh.desicrics.ui.text.oversText
 import org.jetbrains.compose.resources.StringResource
@@ -82,6 +83,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun HomeScreen(
     playerName: String,
+    playerPhoto: String?,
     onNewMatch: () -> Unit,
     onOpenMatch: (matchId: String) -> Unit,
     onProfile: () -> Unit,
@@ -97,7 +99,7 @@ fun HomeScreen(
     var takingOver by rememberSaveable { mutableStateOf(false) }
     HomeContent(state, playerName, viewModel.currentUid, onNewMatch, onOpenMatch, onProfile, onTakeOver = { takingOver = true }, onTeams = onTeams,
         onSearch = onSearch, onNotifications = onNotifications, onTournaments = onTournaments,
-        onLeaderboards = onLeaderboards)
+        onLeaderboards = onLeaderboards, playerPhoto = playerPhoto)
     if (takingOver) {
         TakeOverSheet(
             state = takeOver,
@@ -156,6 +158,7 @@ fun HomeContent(
     onNotifications: () -> Unit = {},
     onTournaments: () -> Unit = {},
     onLeaderboards: () -> Unit = {},
+    playerPhoto: String? = null,
 ) {
     val space = DesiTheme.space
     val feed = state.feed
@@ -165,7 +168,7 @@ fun HomeContent(
         contentPadding = PaddingValues(start = space.screen, end = space.screen, bottom = space.s8),
         verticalArrangement = Arrangement.spacedBy(space.s3),
     ) {
-        item { Greeting(playerName, feed.unreadNotifications, onProfile, onSearch, onNotifications) }
+        item { Greeting(playerName, playerPhoto, feed.unreadNotifications, onProfile, onSearch, onNotifications) }
         item { StartMatchCard(onNewMatch) }
         item {
             Column(Modifier.padding(bottom = space.s4), verticalArrangement = Arrangement.spacedBy(space.s2)) {
@@ -213,7 +216,7 @@ private fun LazyListScope.feedSection(
 }
 
 @Composable
-private fun Greeting(playerName: String, unread: Int, onProfile: () -> Unit, onSearch: () -> Unit, onNotifications: () -> Unit) {
+private fun Greeting(playerName: String, playerPhoto: String?, unread: Int, onProfile: () -> Unit, onSearch: () -> Unit, onNotifications: () -> Unit) {
     val colors = DesiTheme.colors
     val profileLabel = stringResource(Res.string.home_profile)
     Row(
@@ -244,8 +247,9 @@ private fun Greeting(playerName: String, unread: Int, onProfile: () -> Unit, onS
                 )
             }
         }
-        Avatar(
+        PhotoAvatar(
             playerName,
+            playerPhoto,
             size = 44,
             modifier = Modifier
                 .padding(start = DesiTheme.space.s2)

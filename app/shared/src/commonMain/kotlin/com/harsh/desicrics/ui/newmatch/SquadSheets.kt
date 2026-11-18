@@ -25,6 +25,7 @@ import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.teams.TeamRow
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.stringResource
@@ -71,7 +72,7 @@ internal fun SquadSheet(
                 PlayerRow(
                     name = player.name,
                     subtitle = player.role?.let { stringResource(it.label) },
-                    avatar = { Avatar(player.name) },
+                    avatar = { PhotoAvatar(player.name, player.photoUrl) },
                     trailing = {
                         Checkbox(
                             checked = player.profileId in picked,

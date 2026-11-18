@@ -26,7 +26,7 @@ flowchart LR
   SVC -.uses.-> R
   FA[Firebase Auth] -- ID token --> API
   SVC --> FCM[FCM push]
-  SVC --> OBJ[Object storage: photos]
+  SVC --> IMG[(Photos: images table for now)]
 ```
 
 ## Stack
@@ -40,6 +40,7 @@ flowchart LR
 | Auth | Firebase Auth on device, Firebase Admin SDK token check on the server | Phone OTP and Google sign-in |
 | Realtime | Ktor WebSockets, one channel per match; the app polls if the socket drops | Followers subscribe; scorers write over REST. Each change sends the whole scorecard. Subscribers live in the server's memory (`LiveMatches`), which is right for one instance; a second instance needs Postgres LISTEN/NOTIFY (or similar) between them |
 | Push / crashes | FCM, Crashlytics | |
+| Photos | Profile photos and team logos, resized to 512 px JPEG on the phone, kept in an `images` table and served from `/images/{id}` | An interim choice that needs no cloud setup. Move to object storage (GCS or R2) along with the hosting decision; only `ImageStore` changes |
 | Infra | Cloud Run + Cloud SQL, or Fly.io + Neon | Undecided; one container either way. GitHub Actions for CI |
 
 See [ADR 0001](decisions/0001-backend-stack.md) for why there is no Supabase or Firestore.

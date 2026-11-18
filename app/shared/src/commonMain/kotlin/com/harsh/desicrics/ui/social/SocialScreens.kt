@@ -36,6 +36,7 @@ import com.harsh.desicrics.model.PlayerPage
 import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.home.HomeMatchCard
 import com.harsh.desicrics.ui.teams.TeamRow
 import com.harsh.desicrics.ui.text.formatDayAndTime
@@ -95,7 +96,7 @@ internal fun PlayerLine(player: PlayerSummary, onClick: () -> Unit) {
     PlayerRow(
         name = player.name,
         subtitle = listOfNotNull(player.role?.let { stringResource(it.label) }, player.city.ifBlank { null }).joinToString(" · ").ifEmpty { null },
-        avatar = { Avatar(player.name) },
+        avatar = { PhotoAvatar(player.name, player.photoUrl) },
         onClick = onClick,
     )
 }
@@ -202,7 +203,7 @@ fun PlayerContent(
             ) {
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s4)) {
-                        Avatar(page.player.name, size = 64)
+                        PhotoAvatar(page.player.name, page.player.photoUrl, size = 64)
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(space.s1)) {
                             Text(page.player.name, style = DesiTheme.type.titleLg, color = colors.ink)
                             val details = listOfNotNull(

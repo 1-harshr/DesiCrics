@@ -150,6 +150,8 @@ interface TeamStore {
     /** False if [code] is taken. */
     suspend fun setJoinCode(teamId: String, code: String): Boolean
 
+    suspend fun setLogo(teamId: String, url: String?)
+
     /** Teams whose name contains [query]. */
     suspend fun search(query: String, limit: Int): List<TeamSummary>
 
@@ -205,4 +207,11 @@ interface StatsStore {
     suspend fun completedMatchesWithoutLines(): List<String>
     /** Profile IDs of users who live in [city] (any case). */
     suspend fun profilesInCity(city: String): List<String>
+}
+
+/** Small uploaded pictures: profile photos and team logos. */
+interface ImageStore {
+    suspend fun save(id: String, ownerUid: String, contentType: String, bytes: ByteArray, at: Long)
+    /** The content type and bytes, or null. */
+    suspend fun get(id: String): Pair<String, ByteArray>?
 }

@@ -13,6 +13,8 @@ data class PlayerSummary(
     val city: String = "",
     val role: PlayerRole? = null,
     val isPlaceholder: Boolean = false,
+    /** A path on the server ("/images/…") or a full URL, e.g. a Google profile photo. */
+    val photoUrl: String? = null,
 )
 
 @Serializable
@@ -38,6 +40,7 @@ data class SavedTeam(
     val joinCode: String? = null,
     /** Profile IDs who played the team's last match, to start the next one with the same squad. */
     val lastSquad: List<String> = emptyList(),
+    val logoUrl: String? = null,
 ) {
     fun roleOf(profileId: String?): TeamRole? = members.firstOrNull { it.player.profileId == profileId }?.role
 }
@@ -50,6 +53,7 @@ data class TeamSummary(
     val memberCount: Int,
     /** The caller's role, or null if they aren't a member. */
     val myRole: TeamRole? = null,
+    val logoUrl: String? = null,
 )
 
 /** How two saved teams have done against each other in completed matches. */

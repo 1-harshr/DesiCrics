@@ -42,6 +42,7 @@ import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.UserProfile
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.home.HomeMatchCard
 import com.harsh.desicrics.ui.stats.CareerSection
 import com.harsh.desicrics.ui.teams.TeamRow
@@ -117,7 +118,7 @@ private fun ProfileContent(
             verticalArrangement = Arrangement.spacedBy(space.s5),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s4)) {
-                Avatar(profile.name, size = 64)
+                PhotoAvatar(profile.name, profile.photoUrl, size = 64)
                 Column(verticalArrangement = Arrangement.spacedBy(space.s1)) {
                     Text(profile.name, style = DesiTheme.type.titleLg, color = colors.ink)
                     val role = stringResource(profile.role.label)

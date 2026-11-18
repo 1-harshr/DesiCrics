@@ -36,6 +36,7 @@ import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.ui.components.PhotoAvatar
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -114,7 +115,7 @@ internal fun TeamRow(team: TeamSummary, onClick: () -> Unit) {
     val colors = DesiTheme.colors
     DesiCard(Modifier.fillMaxWidth().clip(DesiTheme.radius.lg).clickable(role = Role.Button, onClick = onClick)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-            Avatar(team.name, size = 44)
+            PhotoAvatar(team.name, team.logoUrl, size = 44)
             Column(Modifier.weight(1f)) {
                 Text(team.name, style = DesiTheme.type.bodyStrong, color = colors.ink)
                 val count = pluralStringResource(Res.plurals.teams_member_count, team.memberCount, team.memberCount)

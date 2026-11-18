@@ -51,8 +51,10 @@ import com.harsh.desicrics.model.TeamMember
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.match.OptionsSheet
 import com.harsh.desicrics.ui.match.SheetOption
+import com.harsh.desicrics.ui.system.rememberImagePicker
 import com.harsh.desicrics.ui.system.rememberShareText
 import com.harsh.desicrics.ui.text.label
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
@@ -78,6 +80,7 @@ fun TeamScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sheet by remember { mutableStateOf<TeamSheet?>(null) }
     val share = rememberShareText()
+    val pickLogo = rememberImagePicker { jpeg -> jpeg?.let(viewModel::uploadLogo) }
     val close = {
         sheet = null
         viewModel.clearError()
@@ -94,6 +97,7 @@ fun TeamScreen(
             if (canManage) sheet = TeamSheet.Member(member) else if (!member.player.isPlaceholder) onOpenPlayer(member.player.profileId)
         },
         onFollow = viewModel::toggleFollow,
+        onChangeLogo = pickLogo,
         onCompare = viewModel::compareWith,
         onLeave = { viewModel.leave(onBack) },
     )
@@ -172,6 +176,7 @@ fun TeamContent(
     onCompare: (String) -> Unit,
     onLeave: () -> Unit,
     onFollow: () -> Unit = {},
+    onChangeLogo: () -> Unit = {},
 ) {
     val team = state.team
     val colors = DesiTheme.colors
@@ -190,7 +195,13 @@ fun TeamContent(
                     .padding(horizontal = space.screen, vertical = space.s4),
                 verticalArrangement = Arrangement.spacedBy(space.s4),
             ) {
-                if (team.city.isNotBlank()) Text(team.city, style = DesiTheme.type.body, color = colors.muted)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s4)) {
+                    PhotoAvatar(team.name, team.logoUrl, size = 64)
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(space.s1)) {
+                        if (team.city.isNotBlank()) Text(team.city, style = DesiTheme.type.body, color = colors.muted)
+                        if (state.isAdmin) GhostButton(stringResource(Res.string.team_logo_change), onClick = onChangeLogo)
+                    }
+                }
                 state.following?.takeIf { state.myRole == null }?.let { following ->
                     if (following) GhostButton(stringResource(Res.string.following), onClick = onFollow, modifier = Modifier.fillMaxWidth())
                     else PrimaryButton(stringResource(Res.string.follow), onClick = onFollow, modifier = Modifier.fillMaxWidth())
@@ -211,7 +222,7 @@ fun TeamContent(
                         PlayerRow(
                             name = member.player.name,
                             subtitle = memberSubtitle(member),
-                            avatar = { Avatar(member.player.name) },
+                            avatar = { PhotoAvatar(member.player.name, member.player.photoUrl) },
                             onClick = if (canOpen) ({ onMember(member) }) else null,
                         )
                     }
@@ -281,7 +292,7 @@ private fun AddMemberSheet(
                 PlayerRow(
                     name = player.name,
                     subtitle = listOfNotNull(player.role?.let { stringResource(it.label) }, player.city.ifBlank { null }).joinToString(" · ").ifEmpty { null },
-                    avatar = { Avatar(player.name) },
+                    avatar = { PhotoAvatar(player.name, player.photoUrl) },
                     onClick = { onPick(player) },
                 )
             }

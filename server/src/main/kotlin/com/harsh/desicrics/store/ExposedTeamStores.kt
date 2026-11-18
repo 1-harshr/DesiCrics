@@ -181,6 +181,7 @@ private fun ResultRow.toSummary(): PlayerSummary {
         city = if (isUser) this[UsersTable.city] else "",
         role = if (isUser) this[UsersTable.role] else null,
         isPlaceholder = this[PlayersTable.claimCode] != null,
+        photoUrl = if (isUser) this[UsersTable.photoUrl] else null,
     )
 }
 
@@ -236,6 +237,7 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
                 summaries[id]?.let { TeamMember(it, member[TeamMembersTable.role], codes[id]) }
             },
             joinCode = row[TeamsTable.joinCode],
+            logoUrl = row[TeamsTable.logoUrl],
         )
     }
 
@@ -251,7 +253,7 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
             .associate { it[TeamMembersTable.teamId] to it[count].toInt() }
         TeamsTable.selectAll().where { TeamsTable.id inList mine.keys }.orderBy(TeamsTable.name).map {
             val id = it[TeamsTable.id]
-            TeamSummary(id, it[TeamsTable.name], it[TeamsTable.city], sizes[id] ?: 0, mine[id])
+            TeamSummary(id, it[TeamsTable.name], it[TeamsTable.city], sizes[id] ?: 0, mine[id], it[TeamsTable.logoUrl])
         }
     }
 
@@ -309,7 +311,11 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
             .where { TeamMembersTable.teamId inList rows.map { it[TeamsTable.id] } }
             .groupBy(TeamMembersTable.teamId)
             .associate { it[TeamMembersTable.teamId] to it[count].toInt() }
-        rows.map { TeamSummary(it[TeamsTable.id], it[TeamsTable.name], it[TeamsTable.city], sizes[it[TeamsTable.id]] ?: 0) }
+        rows.map { TeamSummary(it[TeamsTable.id], it[TeamsTable.name], it[TeamsTable.city], sizes[it[TeamsTable.id]] ?: 0, logoUrl = it[TeamsTable.logoUrl]) }
+    }
+
+    override suspend fun setLogo(teamId: String, url: String?) {
+        db.query { TeamsTable.update({ TeamsTable.id eq teamId }) { it[logoUrl] = url } }
     }
 
     override suspend fun teamIdsOf(profileId: String): List<String> = db.query {

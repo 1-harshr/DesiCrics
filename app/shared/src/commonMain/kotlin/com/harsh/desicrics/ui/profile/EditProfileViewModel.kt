@@ -30,6 +30,10 @@ data class ProfileFormState(
     val role: PlayerRole = PlayerRole.BATTER,
     val battingStyle: BattingStyle = BattingStyle.RIGHT_HAND,
     val bowlingStyle: BowlingStyle = BowlingStyle.NONE,
+    /** Kept as it is unless a new one is uploaded, so saving the form never drops an uploaded photo. */
+    val photoUrl: String? = null,
+    val uploadingPhoto: Boolean = false,
+    val photoFailed: Boolean = false,
     val saving: Boolean = false,
     val error: ProfileFormError? = null,
 )
@@ -57,17 +61,36 @@ class EditProfileViewModel(
                     role = it.role,
                     battingStyle = it.battingStyle,
                     bowlingStyle = it.bowlingStyle,
+                    photoUrl = it.photoUrl,
                 )
             } ?: ProfileFormState(
                 loading = false,
                 name = user.displayName ?: authRepository.displayNameHint.orEmpty(),
                 phone = user.phone.orEmpty(),
                 phoneVerified = user.phone != null,
+                // A new profile starts with the sign-in account's photo, e.g. from Google.
+                photoUrl = user.photoUrl,
             )
         }
     }
 
     fun update(transform: (ProfileFormState) -> ProfileFormState) = _state.update { transform(it).copy(error = null) }
+
+    /** Uploads straight away, before the form is saved; needs a profile to attach to, so not during onboarding. */
+    fun uploadPhoto(jpeg: ByteArray?) {
+        if (jpeg == null) return
+        _state.update { it.copy(uploadingPhoto = true, photoFailed = false) }
+        viewModelScope.launch {
+            try {
+                val profile = userRepository.uploadPhoto(jpeg)
+                _state.update { it.copy(photoUrl = profile.photoUrl, uploadingPhoto = false) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(uploadingPhoto = false, photoFailed = true) }
+            }
+        }
+    }
 
     fun save(onSaved: () -> Unit) {
         val form = _state.value
@@ -78,7 +101,7 @@ class EditProfileViewModel(
             role = form.role,
             battingStyle = form.battingStyle,
             bowlingStyle = form.bowlingStyle,
-            photoUrl = authRepository.currentUser?.photoUrl,
+            photoUrl = form.photoUrl,
         )
         // Same check the server runs, for instant feedback.
         request.validate()?.let { error ->

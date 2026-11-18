@@ -24,4 +24,7 @@ class UserRepository(private val api: DesiCricsApi) {
     /** The server keys the profile by the signed-in user, so no UID is sent. */
     suspend fun saveProfile(request: UpdateProfileRequest): UserProfile =
         api.updateProfile(request).also { savedProfiles.emit(it) }
+
+    /** Replaces the profile photo with [jpeg]; the new profile flows to everyone watching it. */
+    suspend fun uploadPhoto(jpeg: ByteArray): UserProfile = api.uploadProfilePhoto(jpeg).also { savedProfiles.emit(it) }
 }
