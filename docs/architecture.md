@@ -33,7 +33,7 @@ flowchart LR
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Android UI | Jetpack Compose, Material 3 + `DesiTheme`, Navigation Compose with type-safe routes | Single activity, edge-to-edge, min SDK 26 |
+| Android UI | Jetpack Compose, Material 3 + `DesiTheme`, Navigation 3 | Single activity, edge-to-edge, min SDK 26. The back stack is a list of `@Serializable` `NavKey` routes (`navigation/AppNavigation.kt`); each entry gets its own saved state and ViewModels. Sign-in and onboarding sit outside it, driven by the session |
 | Android data | Ktor client, DataStore, Koin, Coil 3 | No local database: scoring is online, and each ball is saved on the server before the next |
 | Shared | `core`: `DeliveryRules`, DTOs, validation | The same code checks a ball on the device and on the server |
 | Server | Ktor 3, Exposed, Postgres (H2 for tests), Flyway | All scoring rules and permission checks live here. Database chosen by `DATABASE_URL` |
