@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     // Requires app/androidApp/google-services.json (download from the Firebase console)
     alias(libs.plugins.googleServices)
+    alias(libs.plugins.firebaseCrashlytics)
 }
 
 kotlin {
@@ -21,6 +22,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(project.dependencies.platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)

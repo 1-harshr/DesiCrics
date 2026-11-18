@@ -17,7 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class MatchRepository(private val api: DesiCricsApi) {
+class MatchRepository(private val api: DesiCricsApi, private val analytics: Analytics) {
 
     /** The home feed, refreshed every so often. */
     fun observeFeed(): Flow<Result<TodayFeed>> = poll(FEED_INTERVAL) { api.feed() }
@@ -45,7 +45,12 @@ class MatchRepository(private val api: DesiCricsApi) {
     }
 
     /** Returns the new match's ID. */
-    suspend fun createMatch(request: CreateMatchRequest): String = api.createMatch(request).match.id
+    suspend fun createMatch(request: CreateMatchRequest): String = api.createMatch(request).match.id.also {
+        analytics.log(
+            AnalyticsEvents.MATCH_CREATED,
+            mapOf("overs" to "${request.oversPerInnings}", "saved_teams" to "${listOfNotNull(request.teamA.teamId, request.teamB.teamId).size}"),
+        )
+    }
 
     /** The server validates the ball and returns the authoritative scorecard. */
     suspend fun recordDelivery(matchId: String, delivery: Delivery): MatchDetails = api.recordDelivery(matchId, delivery)
@@ -58,6 +63,7 @@ class MatchRepository(private val api: DesiCricsApi) {
 
     /** Returns the match ID the caller now scores, or null if the code is wrong or has expired. */
     suspend fun takeHandover(code: String): String? = api.takeHandover(code)?.match?.id
+        ?.also { analytics.log(AnalyticsEvents.SCORING_HANDED_OVER, emptyMap()) }
 
     /** Removes the latest ball or event. */
     suspend fun undoLast(matchId: String): MatchDetails = api.undoLast(matchId)

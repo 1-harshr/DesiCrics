@@ -15,11 +15,12 @@ import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
 
 /** Saved teams, finding players, and the account. Every call goes to the server; nothing is cached. */
-class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfig) {
+class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfig, private val analytics: Analytics) {
 
     suspend fun myTeams(): List<TeamSummary> = api.myTeams()
 
-    suspend fun create(name: String, city: String): SavedTeam = api.createTeam(TeamRequest(name.trim(), city.trim()))
+    suspend fun create(name: String, city: String): SavedTeam =
+        api.createTeam(TeamRequest(name.trim(), city.trim())).also { analytics.log(AnalyticsEvents.TEAM_CREATED, emptyMap()) }
 
     suspend fun team(teamId: String): SavedTeam = api.team(teamId)
 
@@ -38,7 +39,8 @@ class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfi
 
     suspend fun uploadLogo(teamId: String, jpeg: ByteArray): SavedTeam = api.uploadTeamLogo(teamId, jpeg)
 
-    suspend fun join(code: String): SavedTeam = api.joinTeam(code.trim().uppercase())
+    suspend fun join(code: String): SavedTeam =
+        api.joinTeam(code.trim().uppercase()).also { analytics.log(AnalyticsEvents.TEAM_JOINED, emptyMap()) }
 
     suspend fun headToHead(teamId: String, otherId: String): HeadToHead = api.headToHead(teamId, otherId)
 
@@ -46,9 +48,11 @@ class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfi
 
     suspend fun claimable(): List<PlayerSummary> = api.claimablePlayers()
 
-    suspend fun claimByCode(code: String): PlayerSummary = api.claimPlayer(ClaimRequest(code = code.trim().uppercase()))
+    suspend fun claimByCode(code: String): PlayerSummary =
+        api.claimPlayer(ClaimRequest(code = code.trim().uppercase())).also { analytics.log(AnalyticsEvents.PLAYER_CLAIMED, mapOf("by" to "code")) }
 
-    suspend fun claim(profileId: String): PlayerSummary = api.claimPlayer(ClaimRequest(profileId = profileId))
+    suspend fun claim(profileId: String): PlayerSummary =
+        api.claimPlayer(ClaimRequest(profileId = profileId)).also { analytics.log(AnalyticsEvents.PLAYER_CLAIMED, mapOf("by" to "phone")) }
 
     suspend fun myMatches(): List<Match> = api.myMatches()
 

@@ -38,18 +38,23 @@ import org.jetbrains.compose.resources.stringResource
  * and recorded as it draws, so the picture is exactly what the user sees.
  */
 @Composable
-internal fun ShareCardSheet(state: MatchState, onDismiss: () -> Unit) {
+internal fun ShareCardSheet(state: MatchState, onDismiss: () -> Unit) =
+    ShareImageSheet(stringResource(Res.string.match_share_card_title), onDismiss) { ShareCard(state) }
+
+/** Any 9:16 card, previewed and shared as a picture. */
+@Composable
+fun ShareImageSheet(title: String, onDismiss: () -> Unit, card: @Composable () -> Unit) {
     val layer = rememberGraphicsLayer()
     val scope = rememberCoroutineScope()
     val shareImage = rememberShareImage()
-    DesiSheet(stringResource(Res.string.match_share_card_title), onDismiss, stringResource(Res.string.match_share_card_hint)) {
+    DesiSheet(title, onDismiss, stringResource(Res.string.match_share_card_hint)) {
         Box(
             Modifier.fillMaxWidth(0.75f).align(Alignment.CenterHorizontally).drawWithContent {
                 layer.record { this@drawWithContent.drawContent() }
                 drawLayer(layer)
             },
         ) {
-            ShareCard(state)
+            card()
         }
         PrimaryButton(
             stringResource(Res.string.match_share),

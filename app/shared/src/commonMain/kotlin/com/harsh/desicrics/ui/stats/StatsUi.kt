@@ -15,7 +15,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
+import com.harsh.desicrics.ui.match.ShareImageSheet
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -78,9 +85,10 @@ fun StatsFilters(filter: StatsFilter, onFilter: (StatsFilter) -> Unit) {
 
 /** A player's career with filters: summary, batting, bowling, fielding, form, zones and badges. */
 @Composable
-fun CareerSection(profileId: String, onCompare: (() -> Unit)? = null) {
+fun CareerSection(profileId: String, onCompare: (() -> Unit)? = null, name: String = "") {
     val viewModel: CareerViewModel = koinViewModel(key = "career-$profileId") { parametersOf(profileId) }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    var sharing by remember { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
         StatsFilters(state.filter, viewModel::setFilter)
         val stats = state.stats
@@ -90,7 +98,45 @@ fun CareerSection(profileId: String, onCompare: (() -> Unit)? = null) {
             stats.matches == 0 -> Text(stringResource(Res.string.stats_none), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
             else -> CareerCards(stats)
         }
+        if (stats != null && stats.matches > 0 && name.isNotBlank()) {
+            GhostButton(stringResource(Res.string.stats_share), onClick = { sharing = true }, modifier = Modifier.fillMaxWidth())
+        }
         if (onCompare != null) GhostButton(stringResource(Res.string.stats_compare), onClick = onCompare, modifier = Modifier.fillMaxWidth())
+        if (sharing && stats != null) {
+            ShareImageSheet(stringResource(Res.string.stats_share_title), onDismiss = { sharing = false }) { StatsShareCard(name, stats) }
+        }
+    }
+}
+
+/** A player's numbers as a 9:16 card for WhatsApp status: runs and wickets big, best figures and badges below. */
+@Composable
+private fun StatsShareCard(name: String, stats: CareerStats) {
+    val colors = DesiTheme.colors
+    val onGreen = colors.onBrandStrong
+    Column(
+        Modifier.fillMaxWidth().aspectRatio(9f / 16f).clip(DesiTheme.radius.lg).background(colors.brandStrong).padding(20.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(name, style = DesiTheme.type.titleLg, color = onGreen, maxLines = 2)
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            listOf(stats.batting.runs to Res.string.share_card_runs, stats.bowling.wickets to Res.string.share_card_wickets).forEach { (value, label) ->
+                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("$value", style = DesiTheme.type.scoreXl, color = onGreen)
+                    Text(stringResource(label), style = DesiTheme.type.data, color = onGreen.copy(alpha = 0.8f), modifier = Modifier.padding(bottom = 8.dp))
+                }
+            }
+            Text(
+                stringResource(
+                    Res.string.share_card_best,
+                    "${stats.batting.highest}${if (stats.batting.highestNotOut) "*" else ""}",
+                    "${stats.bowling.bestWickets}/${stats.bowling.bestRuns}",
+                ),
+                style = DesiTheme.type.bodyStrong,
+                color = onGreen,
+            )
+            stats.badges.take(3).forEach { Text("🏅 " + stringResource(it.label), style = DesiTheme.type.body, color = onGreen) }
+        }
+        Text(stringResource(Res.string.share_card_footer).uppercase(), style = DesiTheme.type.label, color = onGreen.copy(alpha = 0.8f))
     }
 }
 

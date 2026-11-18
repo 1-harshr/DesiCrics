@@ -841,4 +841,9 @@
     <string name="profile_photo_change">Change photo</string>
     <string name="profile_photo_failed">Couldn't upload that picture. Try a smaller one or check your connection.</string>
     <string name="team_logo_change">Change logo</string>
+    <string name="stats_share">Share my stats card</string>
+    <string name="stats_share_title">Share the stats</string>
+    <string name="share_card_runs">runs</string>
+    <string name="share_card_wickets">wickets</string>
+    <string name="share_card_best">Best %1$s · %2$s</string>
 </resources>

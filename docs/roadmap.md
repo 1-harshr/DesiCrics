@@ -32,7 +32,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 
 ### Level 3 · Delight
 - ⬜ Staging server deploy (needs the hosting decision)
-- ⬜ Crashlytics + basic analytics events
+- ✅ Crashlytics + basic analytics events (match, team, tournament, claim, handover; no personal data)
 - ⬜ Compose screenshot tests for components
 
 **Exit:** a new user installs the debug APK, signs in, and their profile is saved on the staging server.
@@ -112,7 +112,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ Search: matches, teams, players
 
 ### Level 3 · Delight
-- 🟡 Share cards: scorecard image (9:16, for WhatsApp status) and match links; milestone cards to do
+- ✅ Share cards: scorecard and player stats images (9:16, for WhatsApp status), and match links
 - ⬜ Live progress notification for followed matches (needs a foreground service holding the socket; deferred)
 - ⬜ Home screen widget (Glance; deferred)
 

@@ -175,7 +175,9 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     onOpenTeam = { backStack.add(TeamRoute(it)) },
                     onOpenMatch = { backStack.add(MatchRoute(it)) },
                     onBack = back,
-                    extra = { page -> CareerSection(page.player.profileId, onCompare = { backStack.add(CompareRoute(page.player.profileId, page.player.name)) }) },
+                    extra = { page ->
+                        CareerSection(page.player.profileId, onCompare = { backStack.add(CompareRoute(page.player.profileId, page.player.name)) }, name = page.player.name)
+                    },
                 )
             }
             entry<CompareRoute> { route ->

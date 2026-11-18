@@ -9,11 +9,12 @@ import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.model.TournamentDetails
 import com.harsh.desicrics.model.TournamentSummary
 
-class TournamentRepository(private val api: DesiCricsApi, private val config: ApiConfig) {
+class TournamentRepository(private val api: DesiCricsApi, private val config: ApiConfig, private val analytics: Analytics) {
 
     suspend fun mine(): List<TournamentSummary> = api.myTournaments()
 
-    suspend fun create(request: CreateTournamentRequest): TournamentDetails = api.createTournament(request)
+    suspend fun create(request: CreateTournamentRequest): TournamentDetails =
+        api.createTournament(request).also { analytics.log(AnalyticsEvents.TOURNAMENT_CREATED, mapOf("format" to request.format.name.lowercase())) }
 
     suspend fun details(id: String): TournamentDetails = api.tournament(id)
 
@@ -29,7 +30,8 @@ class TournamentRepository(private val api: DesiCricsApi, private val config: Ap
 
     suspend fun schedule(matchId: String, scheduledAt: Long?): MatchDetails = api.schedule(matchId, scheduledAt)
 
-    suspend fun startFixture(matchId: String, request: StartFixtureRequest): MatchDetails = api.startFixture(matchId, request)
+    suspend fun startFixture(matchId: String, request: StartFixtureRequest): MatchDetails =
+        api.startFixture(matchId, request).also { analytics.log(AnalyticsEvents.FIXTURE_STARTED, emptyMap()) }
 
     /** The public page anyone can open. */
     fun link(id: String): String = "${config.publicUrl.trimEnd('/')}/t/$id"

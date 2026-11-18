@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import com.harsh.desicrics.auth.GoogleSignInConfig
+import com.harsh.desicrics.data.Analytics
 import com.harsh.desicrics.data.api.ApiConfig
 import com.harsh.desicrics.di.initKoin
 import org.koin.android.ext.koin.androidContext
@@ -18,6 +19,7 @@ class DesiCricsApp : Application() {
                 module {
                     single { GoogleSignInConfig(webClientId = googleWebClientId()) }
                     single { ApiConfig(baseUrl = BuildConfig.API_BASE_URL, publicUrl = BuildConfig.PUBLIC_URL) }
+                    single<Analytics> { FirebaseAnalyticsLogger(get()) }
                 },
             )
         }
