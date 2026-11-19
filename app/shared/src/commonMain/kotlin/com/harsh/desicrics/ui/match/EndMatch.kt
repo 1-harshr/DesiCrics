@@ -163,16 +163,7 @@ internal fun EndedBeforePlay(match: Match, result: MatchResult, canUndo: Boolean
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         MatchupHero(match, onBack, winner = result.winner)
         Column(Modifier.padding(space.screen).padding(top = space.s2), verticalArrangement = Arrangement.spacedBy(space.s4)) {
-            Row(
-                Modifier.fillMaxWidth().clip(DesiTheme.radius.md)
-                    .background(if (result.winner != null) colors.brandSoft else colors.sunk).padding(space.s4),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(space.s3),
-            ) {
-                val tint = if (result.winner != null) colors.brand else colors.ink
-                Icon(painterResource(resultIcon(result)), null, tint = tint, modifier = Modifier.size(DesiTheme.size.icon))
-                Text(resultText(match, result), style = DesiTheme.type.bodyLg.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = tint)
-            }
+            ResultBanner(match, result)
             Text(
                 stringResource(if (result.ending == MatchEnding.WALKOVER) Res.string.end_walkover_note else Res.string.end_called_off_note),
                 style = DesiTheme.type.body,
@@ -180,6 +171,23 @@ internal fun EndedBeforePlay(match: Match, result: MatchResult, canUndo: Boolean
             )
             if (canUndo) GhostButton(stringResource(Res.string.end_reopen_fixture), onUndo, Modifier.fillMaxWidth(), leadingIcon = DesiIcons.History)
         }
+    }
+}
+
+/** How the match ended, tinted for a win. */
+@Composable
+internal fun ResultBanner(match: Match, result: MatchResult) {
+    val colors = DesiTheme.colors
+    val space = DesiTheme.space
+    Row(
+        Modifier.fillMaxWidth().clip(DesiTheme.radius.md)
+            .background(if (result.winner != null) colors.brandSoft else colors.sunk).padding(space.s4),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(space.s3),
+    ) {
+        val tint = if (result.winner != null) colors.brand else colors.ink
+        Icon(painterResource(resultIcon(result)), null, tint = tint, modifier = Modifier.size(DesiTheme.size.icon))
+        Text(resultText(match, result), style = DesiTheme.type.bodyLg.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold), color = tint)
     }
 }
 

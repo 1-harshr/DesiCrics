@@ -231,7 +231,8 @@ fun MatchContent(ui: MatchUiState, actions: MatchActions) {
 
 @Composable
 private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: MatchActions) {
-    var tab by rememberSaveable { mutableStateOf(MatchTab.LIVE) }
+    // A finished match has nothing live to follow, so it opens on its scorecard.
+    var tab by rememberSaveable { mutableStateOf(if (state.isComplete) MatchTab.SCORECARD else MatchTab.LIVE) }
     var sheet by remember { mutableStateOf<ScoringSheet?>(null) }
     val innings = state.current
 
@@ -338,7 +339,12 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
         }
         when (tab) {
             MatchTab.LIVE -> {
-                if (!ui.isScorer) {
+                // Once it's over, how it ended and who starred, rather than a note about who can score.
+                val result = state.result
+                if (state.isComplete && result != null) {
+                    ResultBanner(state.match, result)
+                    MatchMvp(state)
+                } else if (!ui.isScorer) {
                     Text(stringResource(Res.string.match_not_your_match), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
                 }
                 if (state.isComplete && ui.canUndo) {
