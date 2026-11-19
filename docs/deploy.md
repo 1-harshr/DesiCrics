@@ -86,6 +86,7 @@ Render can't build the image itself (no Android SDK), so `.github/workflows/serv
    Render sets `PORT`, and the health check path is `/`.
 4. **Redeploys:** copy the service's Deploy Hook URL into the `RENDER_DEPLOY_HOOK` repository secret, so each new image deploys itself.
 5. Build the app against `https://<service>.onrender.com`, or better, a domain you own pointed at it, so moving hosts later needs no new app build.
+6. **Keep it awake:** in [UptimeRobot](https://uptimerobot.com) (free), add an HTTP(s) monitor for `https://<service>.onrender.com/` every 5 minutes. The server then never sleeps, and Render's free 750 hours a month cover one service running all month. Without it, the app still copes: it wakes the server as it opens and waits up to 75 s for the first answer.
 
 ## After the first deploy
 
