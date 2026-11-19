@@ -185,9 +185,10 @@ class DesiCricsApi(
 
     // Following, the feed, search and notifications.
 
-    suspend fun feedPage(status: String?, last: Match?): List<Match> = call {
+    suspend fun feedPage(status: String?, last: Match?, scope: String?): List<Match> = call {
         get("$baseUrl/feed/matches") {
             it()
+            scope?.let { parameter("scope", it) }
             status?.let { parameter("status", it) }
             last?.let { parameter("before", it.createdAt); parameter("id", it.id) }
         }

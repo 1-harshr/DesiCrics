@@ -951,4 +951,20 @@
     <string name="setup_edit_lineup">Edit lineup</string>
     <string name="setup_linked">Linked player</string>
     <string name="setup_phone">Phone</string>
+    <string name="undo_event">Remove the last match event?</string>
+    <string name="score_saving">Saving…</string>
+    <string name="score_checking">Checking the last score…</string>
+    <string name="score_confirmed">Last confirmed %1$s</string>
+    <string name="hide_deliveries">Hide deliveries</string>
+    <string name="show_deliveries">Show deliveries</string>
+    <string name="team_settings">Team settings</string>
+    <string name="team_confirm_leave">Leave %1$s?</string>
+    <string name="back_to_table">Back to standings</string>
+    <string name="toss_first">%1$s will bat first</string>
+    <string name="stats_terms">Scoring terms</string>
+    <string name="stats_definitions">HS is the highest score in an innings. SR is runs per 100 balls. Economy is runs conceded per over.</string>
+    <string name="feed_following">Following</string>
+    <string name="feed_city">My city</string>
+    <string name="feed_stale">Showing the last matches loaded. Refresh failed.</string>
+    <string name="feed_new">Show new matches</string>
 </resources>

@@ -143,17 +143,18 @@ private val QuickOvers = listOf(5, 6, 8, 10, 12, 20)
 
 /** The new match form without its ViewModel, so previews and tests can render any state. */
 @Composable
-fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions) {
+fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions, initialStep: Int = 0) {
     val colors = DesiTheme.colors
-    var step by rememberSaveable { mutableStateOf(0) }
+    var step by rememberSaveable { mutableStateOf(initialStep) }
     var scheduling by rememberSaveable { mutableStateOf(false) }
     val back = { if (step == 0) actions.onBack() else step-- ; Unit }
+    androidx.navigationevent.compose.NavigationBackHandler(androidx.navigationevent.compose.rememberNavigationEventState(androidx.navigationevent.NavigationEventInfo.None), isBackEnabled = step > 0, onBackCompleted = back)
     if (scheduling) com.harsh.desicrics.ui.tournament.ScheduleSheet(state.scheduledAt, { at ->
         actions.onUpdate { it.copy(scheduledAt = at) }; scheduling = false
     }, { scheduling = false })
     Column(Modifier.fillMaxSize().background(colors.bg).imePadding()) {
         BrandStatusBar()
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+        Column(Modifier.weight(1f).verticalScroll(androidx.compose.runtime.key(step) { rememberScrollState() })) {
             BrandHeader(
                 title = stringResource(if (step == 2) Res.string.setup_details else TeamSide.entries[step].label),
                 subtitle = stringResource(Res.string.setup_step, step + 1),

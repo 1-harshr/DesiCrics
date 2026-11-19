@@ -28,19 +28,31 @@ internal class FeedModel(private val repo: SocialRepository) : ViewModel() {
     var loading by mutableStateOf(false)
     var failed by mutableStateOf(false)
     var more by mutableStateOf(true)
+    var scope by mutableStateOf<String?>(null)
+        private set
+    var incoming by mutableStateOf(emptyList<Match>())
+        private set
     private var job: Job? = null
     init { load(null) }
 
-    fun load(status: String?, append: Boolean = false) {
-        if (append && loading) return
+    fun load(status: String?, append: Boolean = false, audience: String? = scope, background: Boolean = false) {
+        if ((append || background) && loading) return
         job?.cancel()
-        if (filter != status) rows = emptyList()
+        if (filter != status || scope != audience) { rows = emptyList(); incoming = emptyList() }
+        scope = audience
         filter = status
-        loading = true
+        loading = !background
         failed = false
         job = viewModelScope.launch {
             try {
-                val next = repo.feedPage(status, if (append) rows.lastOrNull() else null)
+                val next = repo.feedPage(status, if (append) rows.lastOrNull() else null, audience)
+                if (background && rows.isNotEmpty()) {
+                    val updates = next.associateBy { it.id }
+                    incoming = next.takeWhile { m -> rows.none { it.id == m.id } }
+                    rows = rows.map { updates[it.id] ?: it }
+                    return@launch
+                }
+                incoming = emptyList()
                 rows = if (append) (rows + next).distinctBy { it.id } else next
                 more = next.size == 30
             } catch (e: CancellationException) { throw e }
@@ -54,6 +66,7 @@ internal class FeedModel(private val repo: SocialRepository) : ViewModel() {
 internal fun FeedScreen(onOpen: (String) -> Unit, community: () -> Unit, rankings: () -> Unit) {
     val repo = koinInject<SocialRepository>()
     val model = viewModel { FeedModel(repo) }
+    LaunchedEffect(model.filter, model.scope) { while (true) { kotlinx.coroutines.delay(30_000); model.load(model.filter, background = true) } }
     val filters = listOf(null, "IN_PROGRESS", "SCHEDULED", "COMPLETED")
     val labels = listOf(Res.string.feed_all, Res.string.home_section_live, Res.string.home_section_upcoming, Res.string.home_section_recent)
     DesiScaffold(stringResource(Res.string.tab_feed), actions = {
@@ -65,6 +78,11 @@ internal fun FeedScreen(onOpen: (String) -> Unit, community: () -> Unit, ranking
                 TextButton(onClick = community) { Text(stringResource(Res.string.home_community)) }
                 TextButton(onClick = rankings) { Text(stringResource(Res.string.home_leaderboards)) }
             } }
+            item { ChoiceChips(listOf(null, "following", "city"), model.scope, label = {
+                stringResource(when (it) { "following" -> Res.string.feed_following; "city" -> Res.string.feed_city; else -> Res.string.feed_all })
+            }, onSelect = { model.load(model.filter, audience = it) }) }
+            if (model.incoming.isNotEmpty()) item { GhostButton(stringResource(Res.string.feed_new), { model.load(model.filter) }) }
+            if (model.failed && model.rows.isNotEmpty()) item { Text(stringResource(Res.string.feed_stale)) }
             item { ChoiceChips(filters, model.filter, label = { stringResource(labels[filters.indexOf(it)]) }, onSelect = { model.load(it) }) }
             items(model.rows, key = { it.id }) { HomeMatchCard(it, false) { onOpen(it.id) } }
             item {

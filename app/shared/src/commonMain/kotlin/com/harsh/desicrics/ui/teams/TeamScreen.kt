@@ -1,5 +1,6 @@
 package com.harsh.desicrics.ui.teams
 
+import androidx.compose.material3.TextButton
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.StringResource
 import com.harsh.desicrics.util.format2
@@ -190,7 +191,21 @@ fun TeamContent(
     val team = state.team
     val colors = DesiTheme.colors
     val space = DesiTheme.space
-    DesiScaffold(title = team?.name ?: stringResource(Res.string.teams_title), onBack = onBack) { padding ->
+    var settings by rememberSaveable { mutableStateOf(false) }
+    var confirmLeave by rememberSaveable { mutableStateOf(false) }
+    if (settings) DesiSheet(stringResource(Res.string.team_settings), { settings = false }) {
+        if (state.isAdmin) {
+            GhostButton(stringResource(Res.string.team_logo_change), { settings = false; onChangeLogo() })
+            GhostButton(stringResource(Res.string.team_rename), { settings = false; onRename() })
+        }
+        GhostButton(stringResource(Res.string.team_leave), { settings = false; confirmLeave = true })
+    }
+    if (confirmLeave) DesiSheet(stringResource(Res.string.team_confirm_leave, team?.name.orEmpty()), { confirmLeave = false }) {
+        GhostButton(stringResource(Res.string.team_leave), { confirmLeave = false; onLeave() })
+    }
+    DesiScaffold(title = team?.name ?: stringResource(Res.string.teams_title), onBack = onBack, actions = {
+        if (state.myRole != null) TextButton(onClick = { settings = true }) { Text(stringResource(Res.string.team_settings)) }
+    }) { padding ->
         when {
             team == null && state.loading -> FullScreenLoading(Modifier.padding(padding))
             team == null -> Text(
@@ -208,7 +223,6 @@ fun TeamContent(
                     PhotoAvatar(team.name, team.logoUrl, size = 64)
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(space.s1)) {
                         if (team.city.isNotBlank()) Text(team.city, style = DesiTheme.type.body, color = colors.muted)
-                        if (state.isAdmin) GhostButton(stringResource(Res.string.team_logo_change), onClick = onChangeLogo)
                     }
                 }
                 state.following?.takeIf { state.myRole == null }?.let { following ->
@@ -240,8 +254,6 @@ fun TeamContent(
                 if (state.otherTeams.isNotEmpty()) {
                     RecordAgainst(state.otherTeams, state.headToHead?.let { h2h -> state.otherTeams.firstOrNull { it.id == h2h.opponentId } }, state, onCompare)
                 }
-                if (state.isAdmin) GhostButton(stringResource(Res.string.team_rename), onClick = onRename, modifier = Modifier.fillMaxWidth())
-                if (state.myRole != null) GhostButton(stringResource(Res.string.team_leave), onClick = onLeave, modifier = Modifier.fillMaxWidth())
             }
         }
     }

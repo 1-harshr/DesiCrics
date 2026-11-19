@@ -144,8 +144,10 @@ private fun NotificationRow(notification: Notification, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
     ) {
-        Avatar(notification.playerName ?: notification.matchTitle)
-        Text(notificationText(notification), style = DesiTheme.type.body, color = DesiTheme.colors.ink, maxLines = 3, modifier = Modifier.weight(1f))
+        Column(Modifier.weight(1f)) {
+            Text(formatDayAndTime(notification.createdAt), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+            Text(notificationText(notification), style = if (notification.read) DesiTheme.type.body else DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
+        }
         if (!notification.read) Text("●", color = DesiTheme.colors.brand, style = DesiTheme.type.label.copy(fontWeight = FontWeight.Bold))
     }
 }

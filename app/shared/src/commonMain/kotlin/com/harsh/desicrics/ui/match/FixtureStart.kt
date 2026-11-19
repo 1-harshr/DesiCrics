@@ -81,7 +81,7 @@ internal fun FixturePending(
                     if (squad == null) stringResource(Res.string.fixture_pick_squad, team.name)
                     else stringResource(Res.string.fixture_squad_ready, team.name, squad.players.size),
                     onClick = { picking = side },
-                    enabled = true,
+                    enabled = match.fixture == null || (if (side == TeamSide.A) setup.teamA else setup.teamB) != null,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -94,6 +94,7 @@ internal fun FixturePending(
                 label = { stringResource(if (it == TossDecision.BAT) Res.string.new_match_toss_bat else Res.string.new_match_toss_bowl) },
                 onSelect = { tossDecision = it },
             )
+            Text(stringResource(Res.string.toss_first, match.team(if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other).name), style = DesiTheme.type.bodyStrong)
             if (setup.failed) Text(stringResource(Res.string.fixture_start_failed), style = DesiTheme.type.body, color = colors.event.wicket)
             val a = squads[TeamSide.A]
             val b = squads[TeamSide.B]

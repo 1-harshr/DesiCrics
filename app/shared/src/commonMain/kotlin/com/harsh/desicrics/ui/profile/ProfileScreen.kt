@@ -82,7 +82,7 @@ fun ProfileScreen(
         onOpenTeam = onOpenTeam,
         onClaimSuggested = viewModel::claim,
         onSettings = { sheet = it },
-        stats = { CareerSection(profile.uid, onCompare = onCompare, name = profile.name) },
+        stats = { CareerSection(profile.uid, onCompare = onCompare, name = profile.name, onOpenMatch = onOpenMatch) },
     )
     when (sheet) {
         null -> Unit

@@ -1,5 +1,7 @@
 package com.harsh.desicrics.ui.stats
 
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -88,7 +90,7 @@ fun StatsFilters(filter: StatsFilter, onFilter: (StatsFilter) -> Unit) {
 
 /** A player's career with filters: summary, batting, bowling, fielding, form, zones and badges. */
 @Composable
-fun CareerSection(profileId: String, onCompare: (() -> Unit)? = null, name: String = "") {
+fun CareerSection(profileId: String, onCompare: (() -> Unit)? = null, name: String = "", onOpenMatch: ((String) -> Unit)? = null) {
     val viewModel: CareerViewModel = koinViewModel(key = "career-$profileId") { parametersOf(profileId) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sharing by remember { mutableStateOf(false) }
@@ -99,7 +101,7 @@ fun CareerSection(profileId: String, onCompare: (() -> Unit)? = null, name: Stri
             stats == null && state.failed -> Text(stringResource(Res.string.stats_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
             stats == null -> Unit
             stats.matches == 0 -> Text(stringResource(Res.string.stats_none), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
-            else -> CareerCards(stats)
+            else -> CareerCards(stats, onOpenMatch)
         }
         if (stats != null && stats.matches > 0 && name.isNotBlank()) {
             GhostButton(stringResource(Res.string.stats_share), onClick = { sharing = true }, modifier = Modifier.fillMaxWidth())
@@ -144,16 +146,20 @@ private fun StatsShareCard(name: String, stats: CareerStats) {
 }
 
 @Composable
-fun CareerCards(stats: CareerStats) {
+fun CareerCards(stats: CareerStats, onOpenMatch: ((String) -> Unit)? = null) {
     val colors = DesiTheme.colors
     Text(
         pluralStringResource(Res.plurals.stats_summary, stats.matches, stats.matches, stats.won, mvpText(stats.mvpTenths)),
         style = DesiTheme.type.bodyStrong,
         color = colors.ink,
     )
-    StatCard(Res.string.stats_batting, battingCells(stats.batting))
-    if (stats.bowling.balls > 0) StatCard(Res.string.stats_bowling, bowlingCells(stats.bowling))
-    StatCard(
+    if (stats.form.any { it.batted }) FormChart(stats.form, onOpenMatch)
+    val disciplines = listOf(Res.string.stats_batting, Res.string.stats_bowling, Res.string.stats_fielding)
+    var discipline by rememberSaveable { mutableStateOf(0) }
+    ChoiceChips(disciplines.indices.toList(), discipline, label = { stringResource(disciplines[it]) }, onSelect = { discipline = it })
+    if (discipline == 0) StatCard(Res.string.stats_batting, battingCells(stats.batting))
+    if (discipline == 1) StatCard(Res.string.stats_bowling, bowlingCells(stats.bowling))
+    if (discipline == 2) StatCard(
         Res.string.stats_fielding,
         listOf(
             Res.string.stats_catches to "${stats.fielding.catches}",
@@ -161,7 +167,9 @@ fun CareerCards(stats: CareerStats) {
             Res.string.stats_stumpings to "${stats.fielding.stumpings}",
         ),
     )
-    if (stats.form.any { it.batted }) FormChart(stats.form)
+    var showDefinitions by rememberSaveable { mutableStateOf(false) }
+    GhostButton(stringResource(Res.string.stats_terms), { showDefinitions = !showDefinitions })
+    if (showDefinitions) Text(stringResource(Res.string.stats_definitions), style = DesiTheme.type.caption)
     if (stats.zones.isNotEmpty()) {
         DesiCard(Modifier.fillMaxWidth()) {
             SectionLabel(stringResource(Res.string.stats_zones))
@@ -238,7 +246,7 @@ private fun StatCard(title: StringResource, cells: List<Pair<StringResource, Str
 
 /** Bars of runs per match, oldest on the left; fifties in the brand colour. */
 @Composable
-private fun FormChart(form: List<FormEntry>) {
+private fun FormChart(form: List<FormEntry>, onOpenMatch: ((String) -> Unit)?) {
     val colors = DesiTheme.colors
     val batted = form.filter { it.batted }
     val most = batted.maxOf { it.runs }.coerceAtLeast(1)
@@ -269,7 +277,7 @@ private fun FormChart(form: List<FormEntry>) {
                     color = colors.muted,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).then(if (onOpenMatch == null) Modifier else Modifier.clickable { onOpenMatch(it.matchId) }.padding(vertical = 10.dp)),
                 )
             }
         }

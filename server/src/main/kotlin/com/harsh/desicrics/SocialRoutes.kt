@@ -26,7 +26,7 @@ fun Route.socialRoutes(social: SocialService) {
     get("/feed") { call.respond(social.feed(call.user)) }
     get("/feed/matches") {
         val q = call.request.queryParameters
-        call.respond(social.page(q["status"], q["before"], q["id"]))
+        call.respond(social.page(call.user.uid, q["scope"], q["status"], q["before"], q["id"]))
     }
     get("/search") { call.respond(social.search(call.request.queryParameters["q"].orEmpty())) }
     get("/players/{id}") { call.respond(social.playerPage(call.user, call.parameters["id"].orEmpty())) }

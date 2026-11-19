@@ -1,5 +1,7 @@
 package com.harsh.desicrics.ui.match
 
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,14 +46,15 @@ internal fun InningsOvers(innings: InningsState, showTitle: Boolean) {
         if (innings.overs.isEmpty()) {
             Text(stringResource(Res.string.overs_empty), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
         }
-        innings.overs.asReversed().forEach { OverCard(it) }
+        innings.overs.asReversed().forEach { key(innings.number, it.number) { OverCard(it, it.number == innings.overs.last().number) } }
     }
 }
 
 @Composable
-private fun OverCard(over: OverSummary) {
+private fun OverCard(over: OverSummary, latest: Boolean) {
     val colors = DesiTheme.colors
-    DesiCard(Modifier.fillMaxWidth()) {
+    var expanded by rememberSaveable { mutableStateOf(latest) }
+    DesiCard(Modifier.fillMaxWidth(), onClick = { expanded = !expanded }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(Res.string.overs_over, over.number).uppercase(), style = DesiTheme.type.label, color = colors.muted)
@@ -69,6 +72,8 @@ private fun OverCard(over: OverSummary) {
             }
         }
         OverStrip(over.balls.map { ballFor(it.delivery) })
+        Text(stringResource(if (expanded) Res.string.hide_deliveries else Res.string.show_deliveries), style = DesiTheme.type.caption)
+        if (!expanded) return@DesiCard
         HorizontalDivider(color = colors.line)
         // Newest ball first, like the over list.
         over.balls.asReversed().forEach { ball ->

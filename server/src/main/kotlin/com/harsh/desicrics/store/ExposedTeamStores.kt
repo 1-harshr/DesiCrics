@@ -77,12 +77,10 @@ class ExposedPlayerStore(private val db: Database) : PlayerStore {
 
     override suspend fun search(query: String, limit: Int): List<PlayerSummary> = db.query {
         val text = query.trim().lowercase()
-        val digits = normalisePhone(text)
         val byName = PlayersTable.name.lowerCase() like "%${text.escapeLike()}%"
-        val matches = if (digits.length >= 6) byName or (PlayersTable.phone like "%$digits") else byName
         PlayersTable.join(UsersTable, JoinType.INNER, PlayersTable.userUid, UsersTable.uid)
             .selectAll()
-            .where { PlayersTable.userUid.isNotNull() and UsersTable.deletedAt.isNull() and matches }
+            .where { PlayersTable.userUid.isNotNull() and UsersTable.deletedAt.isNull() and byName }
             .orderBy(PlayersTable.name)
             .limit(limit)
             .map { it.toSummary() }

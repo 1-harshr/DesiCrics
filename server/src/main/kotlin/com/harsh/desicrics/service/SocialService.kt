@@ -37,7 +37,7 @@ class SocialService(
         fun Match.followed() = teamA.teamId in teamIds || teamB.teamId in teamIds || squads[id].orEmpty().any { it in playerIds }
         fun List<Match>.followedFirst() = sortedByDescending { it.followed() }
 
-        val mine = all.filter { it.status != MatchStatus.COMPLETED && (it.scorerUid == user.uid || user.uid in squads[it.id].orEmpty()) }
+        val mine = matches.forPlayer(user.uid, FEED_SIZE).filter { it.status != MatchStatus.COMPLETED }
         return TodayFeed(
             mine = mine,
             live = all.filter { it.status == MatchStatus.IN_PROGRESS && it !in mine }.followedFirst(),
@@ -47,11 +47,12 @@ class SocialService(
         )
     }
 
-    suspend fun page(status: String?, before: String?, id: String?): List<Match> {
+    suspend fun page(uid: String, scope: String?, status: String?, before: String?, id: String?): List<Match> {
         val filter = status?.let { MatchStatus.entries.find { s -> s.name == it } ?: throw ApiException(HttpStatusCode.BadRequest, "Invalid match status") }
         val time = before?.toLongOrNull()
         if ((before != null && time == null) || (time == null) != (id == null)) throw ApiException(HttpStatusCode.BadRequest, "Invalid cursor")
-        return matches.feedPage(filter, time, id.orEmpty())
+        if (scope != null && scope !in listOf("following", "city")) throw ApiException(HttpStatusCode.BadRequest, "Invalid feed scope")
+        return matches.feedPage(filter, time, id.orEmpty(), uid, scope)
     }
 
     suspend fun search(query: String): SearchResults {

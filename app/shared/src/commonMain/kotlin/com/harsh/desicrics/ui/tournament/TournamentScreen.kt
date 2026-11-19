@@ -1,5 +1,6 @@
 package com.harsh.desicrics.ui.tournament
 
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -154,6 +155,7 @@ internal fun TournamentContent(
     val details = state.details
     val space = DesiTheme.space
     val colors = DesiTheme.colors
+    var fixtureTeam by rememberSaveable { mutableStateOf<String?>(null) }
     var tab by rememberSaveable { mutableStateOf(initialTab) }
     DesiScaffold(
         title = details?.tournament?.name.orEmpty(),
@@ -194,10 +196,17 @@ internal fun TournamentContent(
                 }
                 if (state.actionFailed) Text(stringResource(Res.string.tournament_action_failed), style = DesiTheme.type.body, color = colors.event.wicket)
                 val tabs = TournamentTab.entries.filter { it != TournamentTab.TABLE || details.tables.isNotEmpty() }
-                SegmentedControl(tabs, selected = tab.takeIf { it in tabs } ?: TournamentTab.FIXTURES, label = { stringResource(it.label) }, onSelect = { tab = it })
+                SegmentedControl(tabs, selected = tab.takeIf { it in tabs } ?: TournamentTab.FIXTURES, label = { stringResource(it.label) }, onSelect = { fixtureTeam = null; tab = it })
                 when (tab.takeIf { it in tabs } ?: TournamentTab.FIXTURES) {
-                    TournamentTab.FIXTURES -> Fixtures(details, state.isOrganiser, onOpenMatch, onSchedule = { onSheet(TournamentSheet.Schedule(it)) }, onAdd = { onSheet(TournamentSheet.AddFixture) })
-                    TournamentTab.TABLE -> details.tables.forEachIndexed { group, table -> PointsTable(table, if (details.tables.size > 1) group else null) }
+                    TournamentTab.FIXTURES -> {
+                        fixtureTeam?.let { id ->
+                            Text(t.teams.firstOrNull { it.teamId == id }?.name.orEmpty(), style = DesiTheme.type.titleMd)
+                            TextButton(onClick = { fixtureTeam = null; tab = TournamentTab.TABLE }) { Text(stringResource(Res.string.back_to_table)) }
+                        }
+                        val filtered = fixtureTeam?.let { id -> details.copy(fixtures = details.fixtures.filter { it.teamA.teamId == id || it.teamB.teamId == id }) } ?: details
+                        Fixtures(filtered, state.isOrganiser, onOpenMatch, onSchedule = { onSheet(TournamentSheet.Schedule(it)) }, onAdd = { onSheet(TournamentSheet.AddFixture) })
+                    }
+                    TournamentTab.TABLE -> details.tables.forEachIndexed { group, table -> PointsTable(table, if (details.tables.size > 1) group else null) { fixtureTeam = it; tab = TournamentTab.FIXTURES } }
                     TournamentTab.TEAMS -> Teams(state, onSheet, onStart, onReview)
                     TournamentTab.STATS -> {
                         details.playerOfTournament?.let { best ->
@@ -258,7 +267,7 @@ private fun ColumnScope.Fixtures(
 }
 
 @Composable
-private fun PointsTable(table: List<PointsRow>, group: Int?) {
+private fun PointsTable(table: List<PointsRow>, group: Int?, select: (String) -> Unit) {
     val colors = DesiTheme.colors
     DesiCard(Modifier.fillMaxWidth()) {
         if (group != null) SectionLabel(stringResource(Res.string.tournament_group, groupName(group)))
@@ -269,17 +278,17 @@ private fun PointsTable(table: List<PointsRow>, group: Int?) {
         )
         table.forEach { row ->
             val nrr = row.netRunRate
-            TableRow(listOf(row.name, "${row.played}", "${row.won}", "${row.lost}", "${row.points}", (if (nrr >= 0) "+" else "-") + kotlin.math.abs(nrr).format2()))
+            TableRow(listOf(row.name, "${row.played}", "${row.won}", "${row.lost}", "${row.points}", (if (nrr >= 0) "+" else "-") + kotlin.math.abs(nrr).format2())) { select(row.teamId) }
         }
         if (table.isEmpty()) Text(stringResource(Res.string.tournament_no_fixtures), style = DesiTheme.type.body, color = colors.muted)
     }
 }
 
 @Composable
-private fun TableRow(cells: List<String>, header: Boolean = false) {
+private fun TableRow(cells: List<String>, header: Boolean = false, select: (() -> Unit)? = null) {
     val style = if (header) DesiTheme.type.label else DesiTheme.type.data
     val color = if (header) DesiTheme.colors.muted else DesiTheme.colors.ink
-    Row {
+    Row(if (select == null) Modifier else Modifier.clickable(onClick = select).padding(vertical = 6.dp)) {
         Text(cells.first(), style = if (header) style else DesiTheme.type.bodyStrong, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(2.4f))
         cells.drop(1).forEachIndexed { i, cell ->
             Text(cell, style = style, color = color, textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.weight(if (i == cells.size - 2) 1.4f else 0.8f))

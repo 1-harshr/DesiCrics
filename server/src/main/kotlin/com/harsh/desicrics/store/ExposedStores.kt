@@ -1,5 +1,8 @@
 package com.harsh.desicrics.store
 
+import com.harsh.desicrics.model.FollowType
+import com.harsh.desicrics.db.TeamsTable
+import com.harsh.desicrics.db.FollowsTable
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.db.DeliveriesTable
 import com.harsh.desicrics.db.MatchEventsTable
@@ -85,8 +88,22 @@ class ExposedUserStore(private val db: Database) : UserStore {
 
 class ExposedMatchStore(private val db: Database) : MatchStore {
 
-    override suspend fun feedPage(status: MatchStatus?, before: Long?, afterId: String): List<Match> = db.query {
+    override suspend fun feedPage(status: MatchStatus?, before: Long?, afterId: String, uid: String, scope: String?): List<Match> = db.query {
         val query = MatchesTable.selectAll()
+        when (scope) {
+            "following" -> {
+                fun followed(type: FollowType) = FollowsTable.select(FollowsTable.targetId).where { (FollowsTable.uid eq uid) and (FollowsTable.targetType eq type) }
+                val played = MatchPlayersTable.select(MatchPlayersTable.matchId).where { MatchPlayersTable.profileId inSubQuery followed(FollowType.PLAYER) }
+                query.andWhere { (MatchesTable.teamAId inSubQuery followed(FollowType.TEAM)) or (MatchesTable.teamBId inSubQuery followed(FollowType.TEAM)) or (MatchesTable.id inSubQuery played) }
+            }
+            "city" -> {
+                val city = UsersTable.select(UsersTable.city).where { UsersTable.uid eq uid }.singleOrNull()?.get(UsersTable.city)?.trim()?.lowercase().orEmpty()
+                if (city.isBlank()) return@query emptyList()
+                val local = TeamsTable.select(TeamsTable.id).where { TeamsTable.city.lowerCase() eq city }
+                val hosts = UsersTable.select(UsersTable.uid).where { UsersTable.city.lowerCase() eq city }
+                query.andWhere { (MatchesTable.teamAId inSubQuery local) or (MatchesTable.teamBId inSubQuery local) or (MatchesTable.createdBy inSubQuery hosts) }
+            }
+        }
         status?.let { query.andWhere { MatchesTable.status eq it } }
         before?.let { time -> query.andWhere {
             (MatchesTable.createdAt less time) or ((MatchesTable.createdAt eq time) and (MatchesTable.id less afterId))

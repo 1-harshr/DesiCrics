@@ -276,6 +276,7 @@ class MatchService(
         if (details.match.scorerUid != user.uid) {
             throw ApiException(HttpStatusCode.Forbidden, "Only the scorer can change this match")
         }
+        if (details.match.status == MatchStatus.SCHEDULED) throw ApiException(HttpStatusCode.Conflict, "Start the match before scoring")
         return details
     }
 

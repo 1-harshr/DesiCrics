@@ -176,7 +176,7 @@ class NewMatchViewModel(
     }
 
     /** Back to typed-in names, keeping the players as guests. */
-    fun clearTeam(side: TeamSide) = updateSide(side) { SideForm(name = it.name, players = it.players.map { p -> SquadPlayer(p.name) }) }
+    fun clearTeam(side: TeamSide) = updateSide(side) { it.copy(teamId = null, inviteLink = null) }
 
     fun create(onCreated: (matchId: String) -> Unit) {
         val form = _state.value

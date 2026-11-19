@@ -91,6 +91,25 @@ class ApplicationTest {
     }
 
     @Test
+    fun scheduledMatchKeepsItsVenueAndStartsOnce() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev")
+        val created = client.post("/matches") {
+            bearerAuth("test-asha")
+            jsonBody(CreateMatchRequest(squad("A"), squad("B"), 5, pending = true, scheduledAt = 1800000000000L, venue = "Shivaji Park"))
+        }.body<MatchDetails>().match
+        val path = "/matches/${created.id}"
+        val saved = client.get(path) { bearerAuth("test-asha") }.body<MatchDetails>().match
+        assertEquals(MatchStatus.SCHEDULED, saved.status)
+        assertEquals("Shivaji Park", saved.venue)
+        val request = com.harsh.desicrics.api.StartFixtureRequest(squad("A", "One", "Two"), squad("B", "Three", "Four"), TeamSide.B, TossDecision.BAT)
+        suspend fun start(uid: String) = client.post("$path/start") { bearerAuth("test-$uid"); jsonBody(request) }
+        assertEquals(HttpStatusCode.Forbidden, start("dev").status)
+        assertEquals(MatchStatus.IN_PROGRESS, start("asha").body<MatchDetails>().match.status)
+        assertEquals(HttpStatusCode.Conflict, start("asha").status)
+    }
+
+    @Test
     fun scoringRoundTrip() = apiTest { client ->
         client.setUpProfile("asha")
         val created = client.createMatch("asha")

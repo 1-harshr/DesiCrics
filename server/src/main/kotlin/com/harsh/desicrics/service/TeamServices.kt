@@ -168,7 +168,7 @@ class PlayerService(
     suspend fun placeholder(user: FirebasePrincipal, request: AddMemberRequest): PlayerSummary {
         val name = request.placeholderName?.trim()
         val phone = request.placeholderPhone.orEmpty().trim()
-        if (request.validate() != null || name.isNullOrEmpty() || !phone.matches(Regex("[+]?[0-9 ]{10,18}")))
+        if (request.validate() != null || name.isNullOrEmpty() || (!phone.matches(Regex("[+]?[0-9 ]{10,18}")) || phone.count { it.isDigit() } !in 10..15))
             throw ApiException(HttpStatusCode.BadRequest, "Enter a name and phone number")
         val id = withFreshCode { code ->
             val id = "p-" + UUID.randomUUID()

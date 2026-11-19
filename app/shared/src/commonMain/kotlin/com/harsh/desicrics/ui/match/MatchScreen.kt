@@ -1,5 +1,7 @@
 package com.harsh.desicrics.ui.match
 
+import com.harsh.desicrics.ui.text.formatDayAndTime
+import com.harsh.desicrics.ui.text.commentaryText
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -211,6 +213,19 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     var sheet by remember { mutableStateOf<ScoringSheet?>(null) }
     val innings = state.current
 
+    var undoSeq by remember { mutableStateOf<Int?>(null) }
+    val askUndo = { undoSeq = ui.nextSeq }
+    if (undoSeq == ui.nextSeq && ui.canUndo) {
+        val ball = state.innings.flatMap { it.overs }.flatMap { it.balls }.lastOrNull { it.delivery.seq == ui.nextSeq - 1 }
+        val description = ball?.let { "${it.ballNumber} · ${commentaryText(it)}" } ?: stringResource(Res.string.undo_event)
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { undoSeq = null },
+            title = { Text(stringResource(Res.string.scoring_key_undo)) },
+            text = { Text(description) },
+            confirmButton = { TextButton(onClick = { undoSeq = null; actions.onUndo() }) { Text(stringResource(Res.string.scoring_key_undo)) } },
+            dismissButton = { TextButton(onClick = { undoSeq = null }) { Text(stringResource(Res.string.common_cancel)) } },
+        )
+    }
     Scoreboard(state, actions.onBack, onShare = { sheet = ScoringSheet.Share }, onOptions = if (ui.canEdit) ({ sheet = ScoringSheet.MatchOptions }) else null)
     SegmentedControl(
         options = MatchTab.entries,
@@ -224,6 +239,8 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
             .padding(horizontal = DesiTheme.space.screen).padding(bottom = DesiTheme.space.s4),
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
     ) {
+        if (ui.saving || ui.reconciling) Text(stringResource(if (ui.saving) Res.string.score_saving else Res.string.score_checking), style = DesiTheme.type.caption)
+        if (ui.offline) ui.confirmedAt?.let { Text(stringResource(Res.string.score_confirmed, formatDayAndTime(it)), style = DesiTheme.type.caption) }
         if (ui.offline) Text(stringResource(Res.string.match_offline), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
         when (tab) {
             MatchTab.LIVE -> {
@@ -235,7 +252,7 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
                     Text(stringResource(Res.string.match_not_your_match), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
                 }
                 if (state.isComplete && ui.canUndo) {
-                    GhostButton(stringResource(Res.string.match_undo_last_ball), onClick = actions.onUndo, modifier = Modifier.fillMaxWidth())
+                    GhostButton(stringResource(Res.string.match_undo_last_ball), onClick = askUndo, modifier = Modifier.fillMaxWidth())
                 }
             }
             MatchTab.SCORECARD -> {
@@ -251,7 +268,7 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     }
     // The pad only shows with the live view, so the scorecard gets the whole screen.
     if (ui.isScorer && !state.isComplete && tab == MatchTab.LIVE) {
-        ScoringPad(ui, actions, onSheet = { sheet = it })
+        ScoringPad(ui, actions, askUndo, onSheet = { sheet = it })
     }
 
     ScoringSheets(sheet, ui, state, actions, onSheet = { sheet = it }, onClose = { sheet = null })
@@ -517,7 +534,7 @@ private fun ThisOver(innings: InningsState) {
 
 /** Pinned run pad. Undo stays usable while the run keys wait for a batter or bowler to be picked. */
 @Composable
-private fun ScoringPad(ui: MatchUiState, actions: MatchActions, onSheet: (ScoringSheet) -> Unit) {
+private fun ScoringPad(ui: MatchUiState, actions: MatchActions, askUndo: () -> Unit, onSheet: (ScoringSheet) -> Unit) {
     val colors = DesiTheme.colors
     val canScore = ui.canScore
     val keys = listOf(
@@ -544,7 +561,7 @@ private fun ScoringPad(ui: MatchUiState, actions: MatchActions, onSheet: (Scorin
             is VoiceCommand.Runs -> runs(command.runs)
             is VoiceCommand.Extra -> actions.onExtra(command.type, command.runs)
             VoiceCommand.Wicket -> onSheet(ScoringSheet.Wicket)
-            VoiceCommand.Undo -> if (ui.canUndo) actions.onUndo()
+            VoiceCommand.Undo -> if (ui.canUndo) askUndo()
             VoiceCommand.Unknown -> Unit
         }
     }
@@ -575,7 +592,7 @@ private fun ScoringPad(ui: MatchUiState, actions: MatchActions, onSheet: (Scorin
                     "b" -> onSheet(ScoringSheet.Extra(ExtraType.BYE))
                     "lb" -> onSheet(ScoringSheet.Extra(ExtraType.LEG_BYE))
                     "out" -> onSheet(ScoringSheet.Wicket)
-                    "undo" -> actions.onUndo()
+                    "undo" -> askUndo()
                     else -> runs(key.id.toInt())
                 }
             })

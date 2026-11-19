@@ -156,7 +156,14 @@ class ScreenshotTest {
     }
 
     @Test
-    fun newMatch() = shoot("new_match") {
+    fun newMatch() = setupPage("new_match", 0, false)
+    @Test fun teamADark() = setupPage("team_a_dark", 0, true)
+    @Test fun teamB() = setupPage("team_b", 1, false)
+    @Test fun teamBDark() = setupPage("team_b_dark", 1, true)
+    @Test fun matchDetails() = setupPage("match_details", 2, false)
+    @Test fun matchDetailsDark() = setupPage("match_details_dark", 2, true)
+
+    private fun setupPage(name: String, step: Int, dark: Boolean) = shoot(name, dark) {
         NewMatchContent(
             NewMatchFormState(
                 teamA = SideForm("Andheri Strikers", listOf("Rohan", "Aarav", "Kabir").map { SquadPlayer(it, "id-$it") }, teamId = "t1", captain = 0, keeper = 2),
@@ -164,7 +171,7 @@ class ScreenshotTest {
                 overs = 8,
                 rules = MatchRules.Gully,
             ),
-            NewMatchActions({ _, _ -> }, { _, _ -> }, { _, _ -> }, {}, {}, {}),
+            NewMatchActions({ _, _ -> }, { _, _ -> }, { _, _ -> }, {}, {}, {}), initialStep = step,
         )
     }
 

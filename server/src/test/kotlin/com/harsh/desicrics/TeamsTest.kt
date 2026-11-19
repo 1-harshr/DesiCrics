@@ -75,7 +75,7 @@ class TeamsTest {
         val found = client.get("/players/search?q=pat") { bearerAuth("test-asha") }.body<List<PlayerSummary>>()
         assertEquals(listOf("dev"), found.map { it.profileId })
         val byPhone = client.get("/players/search?q=91234 56789") { bearerAuth("test-asha") }.body<List<PlayerSummary>>()
-        assertEquals(listOf("dev"), byPhone.map { it.profileId })
+        assertTrue(byPhone.isEmpty())
 
         client.post("/teams/${team.id}/members") { bearerAuth("test-asha"); jsonBody(AddMemberRequest(profileId = "dev")) }
         val withGuest = client.post("/teams/${team.id}/members") {

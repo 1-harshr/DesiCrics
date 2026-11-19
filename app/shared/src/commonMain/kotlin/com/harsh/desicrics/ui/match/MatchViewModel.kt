@@ -77,6 +77,8 @@ data class MatchUiState(
     val saving: Boolean = false,
     /** The latest refresh failed; the last good scorecard stays on screen. */
     val offline: Boolean = false,
+    val reconciling: Boolean = false,
+    val confirmedAt: Long? = null,
     val error: ScoringError? = null,
     val pendingBall: PendingBall? = null,
     /** Shown to the scorer until dismissed, so someone else can take over. */
@@ -98,13 +100,13 @@ data class MatchUiState(
         }
 
     val canScore: Boolean
-        get() = isScorer && state?.isComplete == false && !saving &&
+        get() = isScorer && state?.isComplete == false && !saving && !reconciling &&
             strikerId != null && (nonStrikerId != null || battingAlone) && bowlerId != null
 
-    val canUndo: Boolean get() = isScorer && (deliveries.isNotEmpty() || events.isNotEmpty()) && !saving
+    val canUndo: Boolean get() = isScorer && (deliveries.isNotEmpty() || events.isNotEmpty()) && !saving && !reconciling
 
     /** The scorer can retire batters, swap ends and so on between balls. */
-    val canEdit: Boolean get() = isScorer && state?.isComplete == false && !saving
+    val canEdit: Boolean get() = isScorer && state?.isComplete == false && !saving && !reconciling
 
     val nextSeq: Int get() = (deliveries.map { it.seq } + events.map { it.seq }).maxOrNull()?.plus(1) ?: 0
 }
@@ -350,6 +352,7 @@ class MatchViewModel(
 
     /** Sends the change and shows the server's scorecard straight away instead of waiting for the next poll. */
     private fun save(write: suspend () -> MatchDetails) {
+        if (_state.value.saving || _state.value.reconciling) return
         _state.update { it.copy(saving = true) }
         viewModelScope.launch {
             try {
@@ -363,8 +366,8 @@ class MatchViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                // Keep the scorer's selection so they can just tap again.
-                _state.update { it.copy(saving = false, error = ScoringError.SaveFailed) }
+                _state.update { it.copy(saving = false, reconciling = true, error = ScoringError.SaveFailed) }
+                refreshes.update { it + 1 }
             }
         }
     }
@@ -386,6 +389,8 @@ class MatchViewModel(
     private fun MatchUiState.withSnapshot(details: MatchDetails) = copy(
         loading = false,
         match = details.match,
+        confirmedAt = nowMillis(),
+        reconciling = false,
         deliveries = details.deliveries,
         events = details.events,
         state = ScoringEngine.compute(details.match, details.deliveries, details.events),
