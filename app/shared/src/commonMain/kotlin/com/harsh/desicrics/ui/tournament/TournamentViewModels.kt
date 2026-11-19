@@ -72,16 +72,23 @@ data class TournamentUiState(
     val actionFailed: Boolean = false,
     /** The caller's saved teams, to enter one. */
     val myTeams: List<TeamSummary> = emptyList(),
+    /** Organisers find other people's teams by name or code. */
+    val teamQuery: String = "",
+    val teamResults: List<TeamSummary> = emptyList(),
     val organiserQuery: String = "",
     val organiserResults: List<PlayerSummary> = emptyList(),
 ) {
     val isOrganiser: Boolean get() = details?.tournament?.isOrganiser(myId) == true
 
-    /** Teams the caller runs that aren't in yet, for registering while registration is open. */
+    /**
+     * Teams that aren't in yet. Organisers can enter any team, so they also get what they searched for;
+     * anyone else can only register a team they run.
+     */
     val registrable: List<TeamSummary>
         get() {
             val entered = details?.tournament?.teams.orEmpty().map { it.teamId }.toSet()
-            return myTeams.filter { it.id !in entered && (isOrganiser || it.myRole == TeamRole.ADMIN) }
+            val candidates = if (isOrganiser) (teamResults + myTeams).distinctBy { it.id } else myTeams.filter { it.myRole == TeamRole.ADMIN }
+            return candidates.filter { it.id !in entered }
         }
 }
 
@@ -94,6 +101,7 @@ class TournamentViewModel(
     private val _state = MutableStateFlow(TournamentUiState(myId = auth.currentUser?.uid))
     val state: StateFlow<TournamentUiState> = _state
     private var searchJob: Job? = null
+    private var teamSearchJob: Job? = null
 
     val link: String = repository.link(tournamentId)
 
@@ -128,6 +136,20 @@ class TournamentViewModel(
         viewModelScope.launch {
             if (attempt { repository.schedule(matchId, at) }.isFailure) _state.update { it.copy(actionFailed = true) }
             refresh()
+        }
+    }
+
+    fun searchTeams(query: String) {
+        _state.update { it.copy(teamQuery = query) }
+        teamSearchJob?.cancel()
+        if (query.trim().length < 2) {
+            _state.update { it.copy(teamResults = emptyList()) }
+            return
+        }
+        teamSearchJob = viewModelScope.launch {
+            delay(300)
+            val results = attempt { teams.searchTeams(query.trim()) }.getOrDefault(emptyList())
+            _state.update { it.copy(teamResults = results) }
         }
     }
 

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -178,6 +180,9 @@ fun <T> ChoiceChips(
 /**
  * A bottom sheet with a title and an optional hint, for quick decisions in a flow (pick a player, how
  * many runs, how out). [content] goes underneath, with room left for the navigation bar.
+ *
+ * A [fullHeight] sheet opens fully expanded and keeps its height, for searching: the keyboard and results
+ * arriving would otherwise make a half-height sheet jump up.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -185,13 +190,20 @@ fun DesiSheet(
     title: String,
     onDismiss: () -> Unit,
     hint: String? = null,
+    fullHeight: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = DesiTheme.colors
-    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = colors.surface, shape = DesiTheme.radius.lg) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = fullHeight),
+        containerColor = colors.surface,
+        shape = DesiTheme.radius.lg,
+    ) {
         Column(
             Modifier
                 .fillMaxWidth()
+                .then(if (fullHeight) Modifier.fillMaxHeight() else Modifier)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = DesiTheme.space.s5)
                 .padding(bottom = DesiTheme.space.s6),

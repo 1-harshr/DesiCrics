@@ -742,6 +742,10 @@
     <string name="tournament_start">Start tournament</string>
     <string name="tournament_start_hint">Fixes the teams and makes the first fixtures.</string>
     <string name="tournament_add_team">Add a team</string>
+    <string name="tournament_team_search">Team name or code</string>
+    <string name="tournament_needs_teams">Needs %1$d confirmed teams to start.</string>
+    <string name="tournament_best_of_three_too_many">Best of three is between two teams. Remove one to start.</string>
+    <string name="tournament_remove">Remove</string>
     <string name="tournament_register_team">Register your team</string>
     <string name="tournament_pending">Waiting for an organiser</string>
     <string name="tournament_confirm">Confirm</string>

@@ -40,6 +40,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,7 +55,10 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -133,6 +138,7 @@ fun TournamentScreen(
     val close = {
         sheet = null
         viewModel.clearError()
+        viewModel.searchTeams("")
     }
 
     TournamentContent(
@@ -149,15 +155,30 @@ fun TournamentScreen(
     )
     when (val current = sheet) {
         null -> Unit
-        TournamentSheet.EnterTeam -> DesiSheet(stringResource(Res.string.tournament_add_team), close) {
-            if (state.registrable.isEmpty()) EmptyState(DesiIcons.Shield, stringResource(Res.string.new_match_no_teams))
+        TournamentSheet.EnterTeam -> DesiSheet(stringResource(Res.string.tournament_add_team), close, fullHeight = state.isOrganiser) {
+            if (state.isOrganiser) {
+                val focus = remember { FocusRequester() }
+                LaunchedEffect(Unit) { focus.requestFocus() }
+                DesiTextField(
+                    value = state.teamQuery,
+                    onValueChange = { viewModel.searchTeams(it.take(60)) },
+                    label = stringResource(Res.string.tournament_team_search),
+                    modifier = Modifier.focusRequester(focus),
+                    leadingIcon = DesiIcons.Search,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Search),
+                )
+            }
+            if (state.registrable.isEmpty() && !state.isOrganiser) EmptyState(DesiIcons.Shield, stringResource(Res.string.new_match_no_teams))
             state.registrable.forEach { team -> TeamRow(team, onClick = { viewModel.enterTeam(team.id); close() }) }
         }
-        TournamentSheet.AddOrganiser -> DesiSheet(stringResource(Res.string.tournament_add_organiser), close) {
+        TournamentSheet.AddOrganiser -> DesiSheet(stringResource(Res.string.tournament_add_organiser), close, fullHeight = true) {
+            val focus = remember { FocusRequester() }
+            LaunchedEffect(Unit) { focus.requestFocus() }
             DesiTextField(
                 value = state.organiserQuery,
                 onValueChange = viewModel::searchOrganiser,
                 label = stringResource(Res.string.team_add_search),
+                modifier = Modifier.focusRequester(focus),
                 keyboardOptions = KeyboardOptions.Default,
             )
             state.organiserResults.forEach { player -> PlayerLine(player, onClick = { viewModel.addOrganiser(player.profileId); close() }) }
@@ -408,7 +429,8 @@ private fun ColumnScope.Teams(
     onReview: (String, Boolean) -> Unit,
 ) {
     val t = state.details?.tournament ?: return
-    val canEnter = !t.started && (state.isOrganiser || t.registrationOpen) && state.registrable.isNotEmpty()
+    // Organisers can always search for a team to add; others need a team of their own to register.
+    val canEnter = !t.started && !t.full && (state.isOrganiser || (t.registrationOpen && state.registrable.isNotEmpty()))
     if (canEnter) {
         val action = if (state.isOrganiser) Res.string.tournament_add_team else Res.string.tournament_register_team
         TonalButton(stringResource(action), onClick = { onSheet(TournamentSheet.EnterTeam) }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
@@ -420,8 +442,20 @@ private fun ColumnScope.Teams(
     if (state.isOrganiser) {
         GhostButton(stringResource(Res.string.tournament_add_organiser), onClick = { onSheet(TournamentSheet.AddOrganiser) }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Whistle)
         if (!t.started) {
-            PrimaryButton(stringResource(Res.string.tournament_start), onClick = onStart, loading = state.saving, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Play)
-            Text(stringResource(Res.string.tournament_start_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+            PrimaryButton(
+                stringResource(Res.string.tournament_start),
+                onClick = onStart,
+                enabled = t.canStart,
+                loading = state.saving,
+                modifier = Modifier.fillMaxWidth(),
+                leadingIcon = DesiIcons.Play,
+            )
+            val hint = when {
+                t.canStart -> stringResource(Res.string.tournament_start_hint)
+                t.format == TournamentFormat.BEST_OF_THREE && t.teams.size > 2 -> stringResource(Res.string.tournament_best_of_three_too_many)
+                else -> stringResource(Res.string.tournament_needs_teams, t.teamsNeeded)
+            }
+            Text(hint, style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         }
     }
 }
@@ -440,6 +474,11 @@ private fun EntryRow(team: TournamentTeam, canReview: Boolean, onReview: (String
                 }
                 TextButton(onClick = { onReview(team.teamId, true) }) {
                     Text(stringResource(Res.string.tournament_confirm), style = DesiTheme.type.button, color = DesiTheme.colors.brand)
+                }
+            } else if (canReview) {
+                // Before the start, organisers can take out a team they confirmed.
+                TextButton(onClick = { onReview(team.teamId, false) }) {
+                    Text(stringResource(Res.string.tournament_remove), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
                 }
             } else if (pending) {
                 Tag(stringResource(Res.string.tournament_pending_short), tone = TagTone.WARN, icon = DesiIcons.Clock)

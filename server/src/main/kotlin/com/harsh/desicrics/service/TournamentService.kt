@@ -108,6 +108,7 @@ class TournamentService(
     suspend fun enterTeam(user: FirebasePrincipal, tournamentId: String, teamId: String): TournamentDetails {
         val tournament = tournament(tournamentId)
         if (tournament.started) throw ApiException(HttpStatusCode.Conflict, "The tournament has started; its teams are fixed")
+        if (tournament.full) throw ApiException(HttpStatusCode.Conflict, "Best of three is between two teams, and both are in")
         val team = teams.get(teamId) ?: throw ApiException(HttpStatusCode.NotFound, "Team not found")
         val status = when {
             tournament.isOrganiser(user.uid) -> EntryStatus.CONFIRMED
@@ -140,12 +141,7 @@ class TournamentService(
     suspend fun start(user: FirebasePrincipal, tournamentId: String): TournamentDetails {
         val tournament = requireOrganiser(user, tournamentId)
         val confirmed = tournament.confirmedTeams.sortedBy { it.seed }.mapIndexed { i, team -> team.copy(seed = i + 1) }
-        val enough = when (tournament.format) {
-            TournamentFormat.BEST_OF_THREE -> confirmed.size == 2
-            TournamentFormat.GROUPS_KNOCKOUT -> confirmed.size >= maxOf(tournament.format.minTeams, tournament.groups * 2)
-            else -> confirmed.size >= tournament.format.minTeams
-        }
-        if (!enough) throw ApiException(HttpStatusCode.Conflict, TournamentError.TOO_FEW_TEAMS.message)
+        if (!tournament.canStart) throw ApiException(HttpStatusCode.Conflict, TournamentError.TOO_FEW_TEAMS.message)
         val placed = if (tournament.format == TournamentFormat.GROUPS_KNOCKOUT) TournamentEngine.assignGroups(confirmed, tournament.groups) else confirmed
         if (!tournaments.markStarted(tournamentId, placed)) throw ApiException(HttpStatusCode.Conflict, "The tournament has already started")
         val started = tournament.copy(teams = placed, started = true)

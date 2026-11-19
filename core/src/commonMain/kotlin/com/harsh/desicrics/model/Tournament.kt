@@ -79,6 +79,19 @@ data class Tournament(
 ) {
     val confirmedTeams: List<TournamentTeam> get() = teams.filter { it.status == EntryStatus.CONFIRMED }
 
+    /** The fewest confirmed teams it can start with. Best of three takes exactly two. */
+    val teamsNeeded: Int
+        get() = when (format) {
+            TournamentFormat.GROUPS_KNOCKOUT -> maxOf(format.minTeams, groups * 2)
+            else -> format.minTeams
+        }
+
+    val canStart: Boolean
+        get() = confirmedTeams.size.let { if (format == TournamentFormat.BEST_OF_THREE) it == 2 else it >= teamsNeeded }
+
+    /** Best of three is between exactly two teams, so it takes no more once two are in. */
+    val full: Boolean get() = format == TournamentFormat.BEST_OF_THREE && teams.size >= 2
+
     fun isOrganiser(uid: String?): Boolean = organisers.any { it.uid == uid }
 }
 
