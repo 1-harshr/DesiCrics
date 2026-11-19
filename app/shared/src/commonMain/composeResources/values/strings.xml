@@ -627,6 +627,7 @@
     <string name="new_match_use_team">Use a saved team</string>
     <string name="new_match_pick_team">Pick a team</string>
     <string name="new_match_no_teams">You're not in any teams yet. Make one from your profile.</string>
+    <string name="new_match_team_taken">Your team is already on the other side. Find the team you're playing.</string>
     <string name="new_match_squad_title">Squad for %1$s</string>
     <string name="new_match_squad_hint">Tick who's playing. Last match's squad is ticked for you.</string>
     <string name="new_match_squad_captain">Captain</string>

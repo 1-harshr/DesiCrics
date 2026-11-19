@@ -33,11 +33,15 @@ import com.harsh.desicrics.ui.teams.TeamRow
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.stringResource
 
-/** The caller's saved teams; null while they load, or if loading [failed]. */
+/**
+ * The caller's saved teams; null while they load, or if loading [failed]. [othersTaken] when the caller
+ * has teams but they're all on the other side already.
+ */
 @Composable
 internal fun TeamPickerSheet(
     teams: List<TeamSummary>?,
     failed: Boolean,
+    othersTaken: Boolean,
     onRetry: () -> Unit,
     search: suspend (String) -> List<TeamSummary>,
     onPick: (TeamSummary) -> Unit,
@@ -58,7 +62,16 @@ internal fun TeamPickerSheet(
             searching && searchFailed -> ErrorBanner(stringResource(Res.string.teams_load_failed))
             !searching && failed -> ErrorBanner(stringResource(Res.string.teams_load_failed), action = stringResource(Res.string.feed_retry), onAction = onRetry)
             results == null -> BallSpinner()
-            results.isEmpty() -> EmptyState(DesiIcons.Shield, stringResource(Res.string.new_match_no_teams))
+            results.isEmpty() -> EmptyState(
+                DesiIcons.Shield,
+                stringResource(
+                    when {
+                        searching -> Res.string.teams_no_match
+                        othersTaken -> Res.string.new_match_team_taken
+                        else -> Res.string.new_match_no_teams
+                    },
+                ),
+            )
             else -> results.forEach { TeamRow(it, onClick = { onPick(it) }) }
         }
     }

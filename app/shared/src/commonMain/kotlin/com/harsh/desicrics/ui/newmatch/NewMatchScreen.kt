@@ -175,6 +175,7 @@ fun NewMatchScreen(
         TeamPickerSheet(
             teams = state.myTeams?.let { state.pickable(side, it) },
             failed = state.myTeamsFailed,
+            othersTaken = !state.myTeams.isNullOrEmpty(),
             onRetry = viewModel::loadMyTeams,
             search = { q -> state.pickable(side, viewModel.findTeams(q)) },
             onPick = { team ->
