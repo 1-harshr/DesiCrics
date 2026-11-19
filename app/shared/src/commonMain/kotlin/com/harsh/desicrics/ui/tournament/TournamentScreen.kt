@@ -125,6 +125,7 @@ fun TournamentScreen(
     onOpenPlayer: (String) -> Unit,
     onBack: () -> Unit,
     onLeaderboard: () -> Unit = {},
+    onOpenTeam: (String) -> Unit = {},
     viewModel: TournamentViewModel = koinViewModel { parametersOf(tournamentId) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -152,6 +153,7 @@ fun TournamentScreen(
         onStart = viewModel::start,
         onReview = viewModel::review,
         onLeaderboard = onLeaderboard,
+        onOpenTeam = onOpenTeam,
         onRetry = viewModel::refresh,
     )
     when (val current = sheet) {
@@ -202,6 +204,7 @@ internal fun TournamentContent(
     onStart: () -> Unit,
     onReview: (teamId: String, confirm: Boolean) -> Unit,
     onLeaderboard: () -> Unit = {},
+    onOpenTeam: (String) -> Unit = {},
     initialTab: TournamentTab = TournamentTab.FIXTURES,
     onRetry: () -> Unit = {},
 ) {
@@ -280,7 +283,7 @@ internal fun TournamentContent(
                 TournamentTab.TABLE -> details.tables.forEachIndexed { group, table ->
                     PointsTable(table, if (details.tables.size > 1) group else null, t.advance) { fixtureTeam = it; tab = TournamentTab.FIXTURES }
                 }
-                TournamentTab.TEAMS -> Teams(state, onSheet, onStart, onReview)
+                TournamentTab.TEAMS -> Teams(state, onSheet, onStart, onReview, onOpenTeam)
                 TournamentTab.STATS -> {
                     details.playerOfTournament?.let { best -> PlayerOfTournament(best, onOpenPlayer) }
                     Stats(details.keyStats, onOpenPlayer)
@@ -428,6 +431,7 @@ private fun ColumnScope.Teams(
     onSheet: (TournamentSheet) -> Unit,
     onStart: () -> Unit,
     onReview: (String, Boolean) -> Unit,
+    onOpenTeam: (String) -> Unit,
 ) {
     val t = state.details?.tournament ?: return
     // Organisers can always search for a team to add; others need a team of their own to register.
@@ -438,7 +442,7 @@ private fun ColumnScope.Teams(
     }
     if (t.teams.isEmpty()) EmptyState(DesiIcons.Shield, stringResource(Res.string.tournament_not_started))
     else ListCard {
-        t.teams.forEachIndexed { index, team -> EntryRow(team, state.isOrganiser && !t.started, onReview, divider = index > 0) }
+        t.teams.forEachIndexed { index, team -> EntryRow(team, state.isOrganiser && !t.started, onReview, divider = index > 0, onClick = { onOpenTeam(team.teamId) }) }
     }
     if (state.isOrganiser) {
         GhostButton(stringResource(Res.string.tournament_add_organiser), onClick = { onSheet(TournamentSheet.AddOrganiser) }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Whistle)
@@ -462,13 +466,14 @@ private fun ColumnScope.Teams(
 }
 
 @Composable
-private fun EntryRow(team: TournamentTeam, canReview: Boolean, onReview: (String, Boolean) -> Unit, divider: Boolean) {
+private fun EntryRow(team: TournamentTeam, canReview: Boolean, onReview: (String, Boolean) -> Unit, divider: Boolean, onClick: () -> Unit) {
     val pending = team.status == EntryStatus.PENDING
     ListRow(
         title = team.name,
         subtitle = team.group?.let { stringResource(Res.string.tournament_group, groupName(it)) },
         leading = { Avatar(team.name, size = 40) },
-        trailing = {
+        // Nothing to show on the right leaves room for the chevron that says the row opens the team.
+        trailing = if (!canReview && !pending) null else ({
             if (canReview && pending) {
                 TextButton(onClick = { onReview(team.teamId, false) }) {
                     Text(stringResource(Res.string.tournament_decline), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
@@ -484,8 +489,9 @@ private fun EntryRow(team: TournamentTeam, canReview: Boolean, onReview: (String
             } else if (pending) {
                 Tag(stringResource(Res.string.tournament_pending_short), tone = TagTone.WARN, icon = DesiIcons.Clock)
             }
-        },
+        }),
         divider = divider,
+        onClick = onClick,
     )
 }
 

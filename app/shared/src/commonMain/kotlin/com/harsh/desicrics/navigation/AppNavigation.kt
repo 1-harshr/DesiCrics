@@ -243,6 +243,7 @@ fun AppNavigation(
                     onOpenMatch = { backStack.add(MatchRoute(it)) },
                     onOpenPlayer = { backStack.add(PlayerRoute(it)) },
                     onLeaderboard = { backStack.add(LeaderboardRoute(route.tournamentId)) },
+                    onOpenTeam = { backStack.add(TeamRoute(it)) },
                     onBack = back,
                 )
             }
