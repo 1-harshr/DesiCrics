@@ -30,6 +30,7 @@ import com.harsh.desicrics.designsystem.resources.ic_edit
 import com.harsh.desicrics.designsystem.resources.ic_settings
 import com.harsh.desicrics.designsystem.resources.ic_qr_code_2
 import com.harsh.desicrics.designsystem.resources.ic_person_add
+import com.harsh.desicrics.designsystem.resources.ic_person_remove
 import com.harsh.desicrics.designsystem.resources.ic_history
 import com.harsh.desicrics.designsystem.resources.ic_trending_up
 import com.harsh.desicrics.designsystem.resources.ic_stadium
@@ -106,6 +107,7 @@ object DesiIcons {
     val Settings: DrawableResource = Res.drawable.ic_settings
     val QrCode: DrawableResource = Res.drawable.ic_qr_code_2
     val PersonAdd: DrawableResource = Res.drawable.ic_person_add
+    val PersonRemove: DrawableResource = Res.drawable.ic_person_remove
     val GroupAdd: DrawableResource = Res.drawable.ic_group_add
     val History: DrawableResource = Res.drawable.ic_history
     val Trend: DrawableResource = Res.drawable.ic_trending_up

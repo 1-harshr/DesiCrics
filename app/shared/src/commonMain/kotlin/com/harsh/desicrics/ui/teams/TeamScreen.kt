@@ -105,6 +105,7 @@ private sealed interface TeamSheet {
     data object Invite : TeamSheet
     data object Rename : TeamSheet
     data class Member(val member: TeamMember) : TeamSheet
+    data class ConfirmRemove(val member: TeamMember) : TeamSheet
 }
 
 @Composable
@@ -203,10 +204,21 @@ fun TeamScreen(
                         })
                     }
                     add(SheetOption(stringResource(Res.string.team_remove), stringResource(Res.string.team_remove_hint)) {
-                        viewModel.remove(member.player.profileId); close()
+                        sheet = TeamSheet.ConfirmRemove(member)
                     })
                 },
                 onDismiss = close,
+            )
+        }
+        is TeamSheet.ConfirmRemove -> DesiSheet(
+            stringResource(Res.string.team_confirm_remove, current.member.player.name, team.name),
+            close,
+            stringResource(Res.string.team_remove_hint),
+        ) {
+            GhostButton(
+                stringResource(Res.string.team_remove),
+                { viewModel.remove(current.member.player.profileId); close() },
+                leadingIcon = DesiIcons.PersonRemove,
             )
         }
     }
