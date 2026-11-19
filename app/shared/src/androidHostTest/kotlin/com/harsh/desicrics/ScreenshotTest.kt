@@ -307,7 +307,13 @@ class ScreenshotTest {
     @Test
     fun teamsList() = shoot("teams_list") {
         TeamsContent(
-            TeamsUiState(loading = false, teams = listOf(TeamSummary("t1", "Andheri Strikers", "Mumbai", 14, TeamRole.ADMIN), TeamSummary("t2", "Powai XI", "", 9), TeamSummary("t3", "Bandra Blasters", "Mumbai", 11))),
+            TeamsUiState(
+                loading = false,
+                teams = listOf(TeamSummary("t1", "Andheri Strikers", "Mumbai", 14, TeamRole.ADMIN), TeamSummary("t2", "Powai XI", "", 9)),
+                browsed = listOf(TeamSummary("t1", "Andheri Strikers", "Mumbai", 14), TeamSummary("t3", "Bandra Blasters", "Mumbai", 11), TeamSummary("t4", "Juhu Jets", "Mumbai", 12)),
+                browsing = false,
+                browsedAll = true,
+            ),
             {}, {}, {}, {},
         )
     }

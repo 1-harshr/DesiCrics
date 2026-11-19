@@ -40,12 +40,32 @@ data class TeamsUiState(
     val saving: Boolean = false,
     val joinFailed: Boolean = false,
     val actionFailed: Boolean = false,
-)
+    /** Filters both lists, by name or code. */
+    val query: String = "",
+    /** Every team (or those matching [query]) as the server pages them, the caller's own included. */
+    val browsed: List<TeamSummary> = emptyList(),
+    val browsing: Boolean = true,
+    /** The server has no more pages. */
+    val browsedAll: Boolean = false,
+    val browseFailed: Boolean = false,
+) {
+    /** The caller's teams that match the search. */
+    val mine: List<TeamSummary>
+        get() = query.trim().takeIf { it.isNotEmpty() }?.let { q -> teams.filter { it.name.contains(q, ignoreCase = true) || it.code == q } } ?: teams
+
+    /** Everyone else's, which the caller can open to follow or ask to join. */
+    val others: List<TeamSummary>
+        get() {
+            val ids = teams.map { it.id }.toSet()
+            return browsed.filter { it.id !in ids }
+        }
+}
 
 class TeamsViewModel(private val repository: TeamRepository) : ViewModel() {
 
     private val _state = MutableStateFlow(TeamsUiState())
     val state: StateFlow<TeamsUiState> = _state
+    private var browseJob: Job? = null
 
     init {
         refresh()
@@ -56,6 +76,39 @@ class TeamsViewModel(private val repository: TeamRepository) : ViewModel() {
             attempt { repository.myTeams() }.fold(
                 onSuccess = { teams -> _state.update { it.copy(loading = false, teams = teams, loadFailed = false) } },
                 onFailure = { _state.update { it.copy(loading = false, loadFailed = true) } },
+            )
+        }
+        browse(reset = true)
+    }
+
+    /** Searches as the user types, waiting briefly so each keystroke doesn't hit the server. */
+    fun search(query: String) {
+        _state.update { it.copy(query = query) }
+        browse(reset = true, wait = true)
+    }
+
+    /** The next page, when the list scrolls to its end. */
+    fun loadMore() {
+        val s = _state.value
+        if (s.browsing || s.browsedAll || s.browseFailed) return
+        browse(reset = false)
+    }
+
+    fun retryBrowse() = browse(reset = _state.value.browsed.isEmpty())
+
+    private fun browse(reset: Boolean, wait: Boolean = false) {
+        if (reset) browseJob?.cancel()
+        _state.update { it.copy(browsing = true, browseFailed = false) }
+        browseJob = viewModelScope.launch {
+            if (wait) delay(300)
+            val offset = if (reset) 0 else _state.value.browsed.size
+            attempt { repository.browse(_state.value.query, offset) }.fold(
+                onSuccess = { page ->
+                    _state.update {
+                        it.copy(browsed = if (reset) page else it.browsed + page, browsing = false, browsedAll = page.isEmpty())
+                    }
+                },
+                onFailure = { _state.update { it.copy(browsing = false, browseFailed = true) } },
             )
         }
     }

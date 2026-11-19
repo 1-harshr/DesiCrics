@@ -45,6 +45,9 @@ internal suspend fun <T> withFreshCode(save: suspend (code: String) -> T?): T {
 /** How many recent matches team insights look at. */
 const val INSIGHT_MATCHES = 50
 
+/** Teams per page when browsing them. */
+const val TEAM_PAGE = 30
+
 class TeamService(
     private val teams: TeamStore,
     private val players: PlayerStore,
@@ -56,6 +59,10 @@ class TeamService(
         { _, _, _, _, _ -> },
 ) {
     suspend fun mine(user: FirebasePrincipal): List<TeamSummary> = teams.forPlayer(user.uid)
+
+    /** Every team, or those matching [query] by name or code, a page of [TEAM_PAGE] at a time. */
+    suspend fun browse(query: String, offset: Long): List<TeamSummary> =
+        teams.search(query.trim().take(60), TEAM_PAGE, offset.coerceAtLeast(0))
 
     suspend fun create(user: FirebasePrincipal, request: TeamRequest): SavedTeam {
         request.validate()?.let { throw ApiException(HttpStatusCode.BadRequest, it.message) }

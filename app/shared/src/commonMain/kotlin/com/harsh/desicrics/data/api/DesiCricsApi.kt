@@ -146,6 +146,10 @@ class DesiCricsApi(
 
     suspend fun myTeams(): List<TeamSummary> = call { get("$baseUrl/teams/mine", it) }.body()
 
+    /** Every team, or those matching [query] by name or code, a page at a time from [offset]. */
+    suspend fun browseTeams(query: String, offset: Int): List<TeamSummary> =
+        call { get("$baseUrl/teams") { it(); parameter("q", query); parameter("offset", offset) } }.body()
+
     suspend fun createTeam(request: TeamRequest): SavedTeam = call { post("$baseUrl/teams") { it(); json(request) } }.body()
 
     suspend fun team(teamId: String): SavedTeam = call { get("$baseUrl/teams/$teamId", it) }.body()

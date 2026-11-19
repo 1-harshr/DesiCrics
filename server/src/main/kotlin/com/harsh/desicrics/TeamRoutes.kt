@@ -24,6 +24,10 @@ import io.ktor.server.routing.route
 fun Route.teamRoutes(teams: TeamService) {
     route("/teams") {
         get("/mine") { call.respond(teams.mine(call.user)) }
+        get {
+            val query = call.request.queryParameters["q"].orEmpty()
+            call.respond(teams.browse(query, call.request.queryParameters["offset"]?.toLongOrNull() ?: 0))
+        }
         post { call.respond(HttpStatusCode.Created, teams.create(call.user, call.receive<TeamRequest>())) }
         post("/join/{code}") { call.respond(teams.join(call.user, call.param("code"))) }
         route("/{id}") {

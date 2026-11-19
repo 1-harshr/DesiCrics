@@ -16,6 +16,7 @@ import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
+import com.harsh.desicrics.service.TEAM_PAGE
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
@@ -66,6 +67,23 @@ class TeamsTest {
         val newCode = client.post("/teams/${team.id}/join-code") { bearerAuth("test-asha") }.body<SavedTeam>().joinCode
         assertTrue(newCode != code)
         assertEquals(HttpStatusCode.NotFound, client.post("/teams/join/$code") { bearerAuth("test-dev") }.status)
+    }
+
+    @Test
+    fun everyTeamIsListedAPageAtATimeAndSearchable() = apiTest { client ->
+        client.setUpProfile("asha")
+        val names = (1..TEAM_PAGE + 2).map { "Team %02d".format(it) }
+        names.forEach { client.createTeam("asha", it) }
+        val other = client.createTeam("asha", "Powai XI")
+
+        suspend fun page(query: String = "", offset: Int = 0) =
+            client.get("/teams?q=$query&offset=$offset") { bearerAuth("test-dev") }.body<List<TeamSummary>>()
+        val first = page()
+        val second = page(offset = first.size)
+        assertEquals(TEAM_PAGE, first.size)
+        assertEquals(listOf("Powai XI") + names, (first + second).map { it.name })
+        assertEquals(listOf("Powai XI"), page("powai").map { it.name })
+        assertEquals(listOf("Powai XI"), page(other.code).map { it.name })
     }
 
     @Test

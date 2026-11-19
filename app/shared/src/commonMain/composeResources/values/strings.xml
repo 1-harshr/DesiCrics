@@ -1009,6 +1009,9 @@
     <string name="player_eyebrow">Player</string>
     <string name="teams_empty_title">No teams yet</string>
     <string name="teams_yours">Your teams</string>
+    <string name="teams_others">Other teams</string>
+    <string name="teams_search">Search teams by name or code</string>
+    <string name="teams_no_match">No teams match that.</string>
     <string name="tournaments_empty_title">No tournaments yet</string>
     <string name="tournaments_yours">Your tournaments</string>
     <string name="tournaments_create_body">Fixtures, points table and stats, all in one place.</string>

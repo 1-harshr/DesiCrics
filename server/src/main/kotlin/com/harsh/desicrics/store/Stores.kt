@@ -165,8 +165,8 @@ interface TeamStore {
 
     suspend fun setLogo(teamId: String, url: String?)
 
-    /** Teams whose name contains [query]. */
-    suspend fun search(query: String, limit: Int): List<TeamSummary>
+    /** Teams whose name contains [query], or with that code; every team for a blank one. By name, a page at a time. */
+    suspend fun search(query: String, limit: Int, offset: Long = 0): List<TeamSummary>
 
     /** Teams [profileId] belongs to, for removing them when the account is deleted. */
     suspend fun teamIdsOf(profileId: String): List<String>

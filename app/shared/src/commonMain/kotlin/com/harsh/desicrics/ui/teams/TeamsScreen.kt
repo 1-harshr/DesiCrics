@@ -16,6 +16,7 @@ import org.jetbrains.compose.resources.painterResource
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -38,8 +40,10 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.designsystem.component.Avatar
+import com.harsh.desicrics.designsystem.component.BallSpinner
 import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.component.DesiScaffold
 import com.harsh.desicrics.designsystem.component.DesiSheet
@@ -65,7 +69,17 @@ fun TeamsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sheet by rememberSaveable { mutableStateOf(if (joinCode != null) JOIN else null) }
-    TeamsContent(state, onOpenTeam, onCreate = { sheet = CREATE }, onJoin = { sheet = JOIN }, onBack = onBack, onRetry = viewModel::refresh)
+    TeamsContent(
+        state,
+        onOpenTeam,
+        onCreate = { sheet = CREATE },
+        onJoin = { sheet = JOIN },
+        onBack = onBack,
+        onRetry = viewModel::refresh,
+        onSearch = viewModel::search,
+        onLoadMore = viewModel::loadMore,
+        onRetryBrowse = viewModel::retryBrowse,
+    )
     val close = {
         sheet = null
         viewModel.clearErrors()
@@ -100,8 +114,14 @@ fun TeamsContent(
     onJoin: () -> Unit,
     onBack: () -> Unit,
     onRetry: () -> Unit = {},
+    onSearch: (String) -> Unit = {},
+    onLoadMore: () -> Unit = {},
+    onRetryBrowse: () -> Unit = {},
 ) {
     val space = DesiTheme.space
+    val searching = state.query.isNotBlank()
+    val mine = state.mine
+    val others = state.others
     DesiScaffold(title = stringResource(Res.string.teams_title), onBack = onBack) { padding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(padding),
@@ -114,15 +134,45 @@ fun TeamsContent(
                     ActionTile(DesiIcons.QrCode, stringResource(Res.string.teams_join), onJoin, Modifier.weight(1f))
                 }
             }
+            item {
+                DesiTextField(
+                    value = state.query,
+                    onValueChange = { onSearch(it.take(60)) },
+                    label = stringResource(Res.string.teams_search),
+                    leadingIcon = DesiIcons.Search,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Search),
+                )
+            }
             if (state.loadFailed) {
                 item { ErrorState(stringResource(Res.string.error_teams_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
             }
-            if (!state.loading && state.teams.isEmpty() && !state.loadFailed) {
+            if (!searching && !state.loading && state.teams.isEmpty() && !state.loadFailed) {
                 item { EmptyState(DesiIcons.Shield, stringResource(Res.string.teams_empty_title), body = stringResource(Res.string.teams_empty)) }
             }
-            if (state.teams.isNotEmpty()) {
+            if (mine.isNotEmpty()) {
                 item { SectionHeader(stringResource(Res.string.teams_yours), icon = DesiIcons.Shield, modifier = Modifier.padding(top = space.s2)) }
-                item { TeamList(state.teams, onOpenTeam) }
+                item { TeamList(mine, onOpenTeam) }
+            }
+            if (others.isNotEmpty()) {
+                item { SectionHeader(stringResource(Res.string.teams_others), icon = DesiIcons.Teams, modifier = Modifier.padding(top = space.s2)) }
+                item { TeamList(others, onOpenTeam) }
+            }
+            // Asks for the next page when the list scrolls down to here.
+            if (!state.browsedAll && !state.browseFailed && state.browsed.isNotEmpty()) {
+                item(key = "more") {
+                    LaunchedEffect(state.browsed.size, state.query) { onLoadMore() }
+                }
+            }
+            when {
+                state.browseFailed -> item {
+                    ErrorState(stringResource(Res.string.error_teams_title), stringResource(Res.string.error_connection_body), onRetry = onRetryBrowse, compact = true)
+                }
+                state.browsing -> item {
+                    Box(Modifier.fillMaxWidth().padding(vertical = space.s4), contentAlignment = Alignment.Center) { BallSpinner(size = 28.dp) }
+                }
+                searching && mine.isEmpty() && others.isEmpty() -> item {
+                    EmptyState(DesiIcons.Search, stringResource(Res.string.teams_no_match))
+                }
             }
         }
     }

@@ -23,6 +23,8 @@ class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfi
 
     suspend fun myTeams(): List<TeamSummary> = api.myTeams()
 
+    suspend fun browse(query: String, offset: Int): List<TeamSummary> = api.browseTeams(query.trim(), offset)
+
     suspend fun create(name: String, city: String, lineup: List<com.harsh.desicrics.api.SquadPlayer> = emptyList()): SavedTeam =
         api.createTeam(TeamRequest(name.trim(), city.trim(), lineup)).also { analytics.log(AnalyticsEvents.TEAM_CREATED, emptyMap()) }
 

@@ -18,6 +18,7 @@ import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.model.UserProfile
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.count
 import org.jetbrains.exposed.v1.core.eq
@@ -355,11 +356,13 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
         if (e.isUniqueViolation()) false else throw e
     }
 
-    override suspend fun search(query: String, limit: Int): List<TeamSummary> = db.query {
+    override suspend fun search(query: String, limit: Int, offset: Long): List<TeamSummary> = db.query {
         val pattern = "%${query.trim().lowercase().escapeLike()}%"
         val byCode = com.harsh.desicrics.service.publicCodeIn(query)?.let { TeamsTable.code eq it }
         val byName = TeamsTable.name.lowerCase() like pattern
-        val rows = TeamsTable.selectAll().where { if (byCode != null) byName or byCode else byName }.orderBy(TeamsTable.name).limit(limit).toList()
+        // The id breaks ties between teams of the same name, so pages don't overlap.
+        val rows = TeamsTable.selectAll().where { if (byCode != null) byName or byCode else byName }
+            .orderBy(TeamsTable.name to SortOrder.ASC, TeamsTable.id to SortOrder.ASC).limit(limit).offset(offset).toList()
         val count = TeamMembersTable.playerId.count()
         val sizes = TeamMembersTable.select(TeamMembersTable.teamId, count)
             .where { TeamMembersTable.teamId inList rows.map { it[TeamsTable.id] } }
