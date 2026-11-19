@@ -91,11 +91,14 @@ fun CommunityScreen(
             when (state.tab) {
                 CommunityTab.LOOKING_FOR -> {
                     PrimaryButton(stringResource(Res.string.looking_for_post), onClick = { sheet = CommunitySheet.Post }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth())
-                    if (!state.loading && state.posts.isEmpty()) Text(stringResource(Res.string.looking_for_empty), style = DesiTheme.type.body, color = colors.muted)
-                    state.posts.forEach { post ->
+                    // Your own posts are listed below, with their replies.
+                    val others = state.posts.filter { it.author.profileId != myId }
+                    if (!state.loading && state.city.isNotBlank() && others.isEmpty()) {
+                        Text(stringResource(Res.string.looking_for_empty), style = DesiTheme.type.body, color = colors.muted)
+                    }
+                    others.forEach { post ->
                         PostCard(post) {
                             when {
-                                post.author.profileId == myId -> Unit
                                 post.id in state.answered -> Text(stringResource(Res.string.looking_for_responded), style = DesiTheme.type.caption, color = colors.brand)
                                 else -> TextButton(onClick = { sheet = CommunitySheet.Respond(post) }) {
                                     Text(stringResource(Res.string.looking_for_respond), style = DesiTheme.type.button, color = colors.brand)
@@ -129,7 +132,7 @@ fun CommunityScreen(
                     )
                     Text(stringResource(Res.string.rankings_hint), style = DesiTheme.type.caption, color = colors.muted)
                     val empty = if (state.rankPlayers) state.playerRankings.isEmpty() else state.teamRankings.isEmpty()
-                    if (!state.loading && empty) Text(stringResource(Res.string.rankings_empty), style = DesiTheme.type.body, color = colors.muted)
+                    if (!state.loading && state.city.isNotBlank() && empty) Text(stringResource(Res.string.rankings_empty), style = DesiTheme.type.body, color = colors.muted)
                     if (state.rankPlayers) {
                         state.playerRankings.forEachIndexed { i, row ->
                             RankRow(i + 1, "${row.score}") { PlayerLine(row.player, onClick = { onOpenPlayer(row.player.profileId) }) }
@@ -143,7 +146,7 @@ fun CommunityScreen(
                 CommunityTab.DIRECTORY -> {
                     ChoiceChips(DirectoryKind.entries, selected = state.directoryKind, label = { stringResource(it.label) }, onSelect = viewModel::setDirectoryKind)
                     PrimaryButton(stringResource(Res.string.directory_add), onClick = { sheet = CommunitySheet.AddEntry }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth())
-                    if (!state.loading && state.directory.isEmpty()) Text(stringResource(Res.string.directory_empty), style = DesiTheme.type.body, color = colors.muted)
+                    if (!state.loading && state.city.isNotBlank() && state.directory.isEmpty()) Text(stringResource(Res.string.directory_empty), style = DesiTheme.type.body, color = colors.muted)
                     state.directory.forEach { entry ->
                         DesiCard(Modifier.fillMaxWidth()) {
                             Row(verticalAlignment = Alignment.CenterVertically) {

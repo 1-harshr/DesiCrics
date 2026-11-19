@@ -203,7 +203,7 @@ internal fun overlayPage(matchId: String): String = """
           if (!r.ok) return;
           const s = await r.json();
           text("team", s.battingTeam); text("score", s.score); text("overs", s.overs + " ov"); text("detail", s.detail);
-          text("batters", [s.striker ? s.striker + "*" : null, s.nonStriker].filter(Boolean).join("   "));
+          text("batters", [s.striker ? s.striker + "*" : null, s.nonStriker].filter(Boolean).join("  ·  "));
           const bowler = document.getElementById("bowler");
           bowler.textContent = s.bowler ? s.bowler + "   " : "";
           (s.thisOver || []).forEach(b => { const e = document.createElement("span"); e.className = "ball"; e.textContent = b; bowler.appendChild(e); });
