@@ -1,5 +1,8 @@
 package com.harsh.desicrics
 
+import com.harsh.desicrics.model.LeaderboardRow
+import com.harsh.desicrics.ui.stats.LeaderboardUiState
+import com.harsh.desicrics.ui.stats.LeaderboardContent
 import com.harsh.desicrics.ui.match.ScoringError
 
 import com.harsh.desicrics.ui.teams.Insights
@@ -106,8 +109,9 @@ class ScreenshotTest {
     @After
     fun tearDown() = stopKoin()
 
+    // Reduced motion keeps looping animations (the live dot) still, so the screen settles and can be captured.
     private fun shoot(name: String, dark: Boolean = false, content: @Composable () -> Unit) =
-        captureRoboImage("screenshots/$name.png") { DesiTheme(darkTheme = dark) { content() } }
+        captureRoboImage("screenshots/$name.png") { DesiTheme(darkTheme = dark, reduceMotion = true) { content() } }
 
     private val strikers = Team("Andheri Strikers", listOf("Rohan", "Aarav", "Kabir", "Ishaan", "Dev").mapIndexed { i, n -> Player("a$i", n, "pa$i") }, teamId = "t1")
     private val royals = Team("Powai XI", listOf("Esha", "Farhan", "Gaurav", "Hari").mapIndexed { i, n -> Player("b$i", n, "pb$i") }, teamId = "t2")
@@ -307,5 +311,19 @@ class ScreenshotTest {
     @Test
     fun errorScoring() = shoot("error_scoring") {
         MatchContent(match(balls).copy(offline = true, confirmedAt = 0, error = ScoringError.SaveFailed), actions)
+    }
+
+    @Test
+    fun leaderboard() = shoot("leaderboard") {
+        val names = listOf("Aarav Shah", "Rohan Iyer", "Kabir Mehta", "Ishaan Rao", "Dev Patel", "Farhan Ali")
+        LeaderboardContent(
+            LeaderboardUiState(loading = false, rows = names.mapIndexed { i, n -> LeaderboardRow(PlayerSummary("p$i", n), 412 - i * 47, 12 - i) }),
+            forTournament = false, onUpdate = {}, onOpenPlayer = {}, onBack = {},
+        )
+    }
+
+    @Test
+    fun leaderboardEmptyDark() = shoot("leaderboard_empty_dark", dark = true) {
+        LeaderboardContent(LeaderboardUiState(loading = false), forTournament = false, onUpdate = {}, onOpenPlayer = {}, onBack = {})
     }
 }

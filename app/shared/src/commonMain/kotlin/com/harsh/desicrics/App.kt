@@ -1,4 +1,5 @@
 package com.harsh.desicrics
+import com.harsh.desicrics.ui.system.rememberReduceMotion
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.component.ErrorState
 
@@ -43,7 +44,7 @@ import org.koin.compose.viewmodel.koinViewModel
  */
 @Composable
 fun App(link: String? = null, onLinkHandled: () -> Unit = {}) {
-    DesiTheme {
+    DesiTheme(reduceMotion = rememberReduceMotion()) {
         Surface(Modifier.fillMaxSize(), color = DesiTheme.colors.bg) {
             val session = koinViewModel<SessionViewModel>()
             val state by session.state.collectAsStateWithLifecycle()

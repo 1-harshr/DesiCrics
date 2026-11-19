@@ -221,7 +221,7 @@ A white ball with a turf-green seam, moving across a pitch strip, on `brand` gre
 | `motion.score` | 300ms | emphasized decelerate | Score counting up, new ball chip sliding in |
 
 - Every scoring tap gets haptic feedback: light for runs, heavy for a wicket.
-- When the system "remove animations" setting is on, change values instantly.
+- When the system "remove animations" setting is on, change values instantly. The app passes it to `DesiTheme(reduceMotion = …)`; components read `DesiTheme.reduceMotion`, and looping animations (the live dot) stand still. Screenshot tests turn it on so screens settle.
 
 ## Inside pages
 

@@ -12,6 +12,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 
 private val LocalDesiColors = staticCompositionLocalOf { LightDesiColors }
+private val LocalReduceMotion = staticCompositionLocalOf { false }
 private val LocalDesiTypography = staticCompositionLocalOf<DesiTypography> {
     error("DesiTypography is only available inside DesiTheme { }")
 }
@@ -19,13 +20,14 @@ private val LocalDesiTypography = staticCompositionLocalOf<DesiTypography> {
 /**
  * Wraps [MaterialTheme] so stock Material components pick up Crease colours and type, and exposes the
  * extra tokens through [DesiTheme.colors], [DesiTheme.type], [DesiTheme.space], [DesiTheme.radius] and
- * [DesiTheme.size].
+ * [DesiTheme.size]. [reduceMotion] is the system's "remove animations" setting: looping animations
+ * (the live dot's pulse) stand still when it's on.
  */
 @Composable
-fun DesiTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun DesiTheme(darkTheme: Boolean = isSystemInDarkTheme(), reduceMotion: Boolean = false, content: @Composable () -> Unit) {
     val colors = if (darkTheme) DarkDesiColors else LightDesiColors
     val type = desiTypography()
-    CompositionLocalProvider(LocalDesiColors provides colors, LocalDesiTypography provides type) {
+    CompositionLocalProvider(LocalDesiColors provides colors, LocalDesiTypography provides type, LocalReduceMotion provides reduceMotion) {
         MaterialTheme(
             colorScheme = colors.toMaterial(),
             typography = type.toMaterial(),
@@ -50,6 +52,8 @@ object DesiTheme {
     val radius: DesiRadius get() = DesiRadius
     val size: DesiSize get() = DesiSize
     val motion: DesiMotion get() = DesiMotion
+    val reduceMotion: Boolean
+        @Composable @ReadOnlyComposable get() = LocalReduceMotion.current
 }
 
 private fun DesiColors.toMaterial() = if (isDark) {

@@ -37,3 +37,11 @@ dependencies {
     testImplementation(libs.ktor.clientContentNegotiation)
     testImplementation(libs.ktor.clientWebsockets)
 }
+
+// Fills the local database with a demo season. `--args="--for <uid>"` puts your own account in it.
+tasks.register<JavaExec>("seedDemo") {
+    group = "application"
+    description = "Seeds the database with demo teams, players, matches and tournaments"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "com.harsh.desicrics.seed.DemoSeedKt"
+}

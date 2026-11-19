@@ -829,7 +829,6 @@
     <string name="metric_mvp">MVP</string>
     <string name="metric_sixes">Sixes</string>
     <string name="metric_catches">Catches</string>
-    <string name="leaderboard_empty">Nobody here has stats yet. For My city, set your city on your profile.</string>
     <plurals name="leaderboard_matches">
         <item quantity="one">%1$d match</item>
         <item quantity="other">%1$d matches</item>
@@ -1033,4 +1032,13 @@
     <string name="feed_status_upcoming">Upcoming</string>
     <string name="feed_status_results">Results</string>
     <string name="feed_empty_body">Try another filter, or follow teams and players to see their games here.</string>
+    <string name="leaderboard_season">Season</string>
+    <string name="leaderboard_title_runs">Most runs</string>
+    <string name="leaderboard_title_wickets">Most wickets</string>
+    <string name="leaderboard_title_mvp">Most MVP points</string>
+    <string name="leaderboard_title_sixes">Most sixes</string>
+    <string name="leaderboard_title_catches">Most catches</string>
+    <string name="leaderboard_empty_title">No one on the board yet</string>
+    <string name="leaderboard_empty_friends">Follow players, or play matches picked from your teams, and they'll show up here.</string>
+    <string name="leaderboard_empty_city">Set your city on your profile to see who's leading near you.</string>
 </resources>

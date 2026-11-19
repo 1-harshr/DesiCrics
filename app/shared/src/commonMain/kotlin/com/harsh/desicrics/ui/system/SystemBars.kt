@@ -5,3 +5,7 @@ import androidx.compose.runtime.Composable
 /** Switches the status bar to light icons while this is composed, for screens with a dark header. */
 @Composable
 expect fun LightStatusBarIcons()
+
+/** True when the system's "remove animations" setting is on. */
+@Composable
+expect fun rememberReduceMotion(): Boolean

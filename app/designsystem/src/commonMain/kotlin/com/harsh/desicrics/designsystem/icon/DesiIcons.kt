@@ -2,6 +2,8 @@ package com.harsh.desicrics.designsystem.icon
 
 import com.harsh.desicrics.designsystem.resources.Res
 import com.harsh.desicrics.designsystem.resources.ic_add
+import com.harsh.desicrics.designsystem.resources.ic_expand_more
+import com.harsh.desicrics.designsystem.resources.ic_north_east
 import com.harsh.desicrics.designsystem.resources.ic_search_off
 import com.harsh.desicrics.designsystem.resources.ic_refresh
 import com.harsh.desicrics.designsystem.resources.ic_error
@@ -118,6 +120,9 @@ object DesiIcons {
     val Support: DrawableResource = Res.drawable.ic_support_agent
     val Delete: DrawableResource = Res.drawable.ic_delete
     val Badge: DrawableResource = Res.drawable.ic_badge
+    /** A ball sailing over the rope: sixes. */
+    val Six: DrawableResource = Res.drawable.ic_north_east
+    val ExpandMore: DrawableResource = Res.drawable.ic_expand_more
 
     // Errors: connection trouble, something went wrong, nothing found, and try again.
     val CloudOff: DrawableResource = Res.drawable.ic_cloud_off

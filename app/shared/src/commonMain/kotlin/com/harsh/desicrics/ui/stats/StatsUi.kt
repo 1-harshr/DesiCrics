@@ -1,4 +1,11 @@
 package com.harsh.desicrics.ui.stats
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
+import org.jetbrains.compose.resources.DrawableResource
+import com.harsh.desicrics.model.LeaderboardRow
+import com.harsh.desicrics.designsystem.component.heroBackground
+import com.harsh.desicrics.designsystem.component.ChoiceSheet
+import com.harsh.desicrics.designsystem.component.FilterRow
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.component.ErrorState
 
@@ -391,63 +398,102 @@ fun LeaderboardScreen(
     viewModel: LeaderboardViewModel = koinViewModel(key = "leaderboard-$tournamentId") { parametersOf(tournamentId) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    LeaderboardContent(state, tournamentId != null, viewModel::update, onOpenPlayer, onBack, viewModel::retry)
+}
+
+/**
+ * The leaderboard without its ViewModel: who (friends or city) and which figure on two lines, the season as a
+ * pill by the heading, then the top three on a podium and everyone else in a ranked list.
+ */
+@Composable
+fun LeaderboardContent(
+    state: LeaderboardUiState,
+    forTournament: Boolean,
+    onUpdate: ((LeaderboardUiState) -> LeaderboardUiState) -> Unit,
+    onOpenPlayer: (String) -> Unit,
+    onBack: () -> Unit,
+    onRetry: () -> Unit = {},
+) {
     val space = DesiTheme.space
+    var pickingSeason by rememberSaveable { mutableStateOf(false) }
     val year = thisYear()
+    val seasons = listOf<Int?>(null, year, year - 1, year - 2)
     val allTime = stringResource(Res.string.stats_season_all)
+    if (pickingSeason) {
+        ChoiceSheet(
+            stringResource(Res.string.leaderboard_season),
+            seasons.map { it?.toString() ?: allTime },
+            onSelect = { index -> onUpdate { it.copy(season = seasons[index]) }; pickingSeason = false },
+            onDismiss = { pickingSeason = false },
+        )
+    }
     DesiScaffold(
-        title = stringResource(if (tournamentId != null) Res.string.tournament_leaderboard else Res.string.leaderboards_title),
+        title = stringResource(if (forTournament) Res.string.tournament_leaderboard else Res.string.leaderboards_title),
         onBack = onBack,
     ) { padding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(horizontal = space.screen, vertical = space.s4),
+            contentPadding = PaddingValues(horizontal = space.screen, vertical = space.s2),
             verticalArrangement = Arrangement.spacedBy(space.s3),
         ) {
-            if (tournamentId == null) {
+            if (!forTournament) {
                 item {
-                    ChoiceChips(
+                    SegmentedControl(
                         listOf(LeaderboardScope.FRIENDS, LeaderboardScope.CITY),
                         selected = state.scope,
                         label = { stringResource(if (it == LeaderboardScope.CITY) Res.string.leaderboard_city else Res.string.leaderboard_friends) },
-                        onSelect = { scope -> viewModel.update { it.copy(scope = scope) } },
+                        onSelect = { scope -> onUpdate { it.copy(scope = scope) } },
                     )
-                }
-                item {
-                    ChoiceChips(listOf<Int?>(null, year, year - 1), selected = state.season, label = { it?.toString() ?: allTime }, onSelect = { season ->
-                        viewModel.update { it.copy(season = season) }
-                    })
                 }
             }
             item {
-                ChoiceChips(LeaderboardMetric.entries, selected = state.metric, label = { stringResource(it.label) }, onSelect = { metric ->
-                    viewModel.update { it.copy(metric = metric) }
-                })
+                FilterRow(
+                    LeaderboardMetric.entries,
+                    state.metric,
+                    label = { stringResource(it.label) },
+                    onSelect = { metric -> onUpdate { it.copy(metric = metric) } },
+                    icon = { it.icon },
+                )
             }
-            if (state.failed) item { ErrorBanner(stringResource(Res.string.stats_load_failed)) }
-            else if (!state.loading && state.rows.isEmpty()) item { EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.leaderboard_empty)) }
-            if (state.rows.isNotEmpty()) {
-                item {
-                    ListCard {
-                        state.rows.forEachIndexed { index, row ->
-                            ListRow(
-                                title = row.player.name,
-                                subtitle = pluralStringResource(Res.plurals.leaderboard_matches, row.matches, row.matches),
-                                leading = {
-                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                                        RankBadge(index + 1, size = 28.dp)
-                                        PhotoAvatar(row.player.name, row.player.photoUrl, size = 40)
-                                    }
-                                },
-                                trailing = {
-                                    Text(
-                                        if (state.metric == LeaderboardMetric.MVP) mvpText(row.value) else "${row.value}",
-                                        style = DesiTheme.type.scoreMd,
-                                        color = if (index == 0) DesiTheme.colors.brand else DesiTheme.colors.ink,
-                                    )
-                                },
-                                divider = index > 0,
-                                onClick = { onOpenPlayer(row.player.profileId) },
-                            )
+            item {
+                Row(Modifier.padding(top = space.s2), verticalAlignment = Alignment.CenterVertically) {
+                    SectionHeader(stringResource(state.metric.title), Modifier.weight(1f), icon = state.metric.icon)
+                    if (!forTournament) SeasonPill(state.season?.toString() ?: allTime) { pickingSeason = true }
+                }
+            }
+            val value: (LeaderboardRow) -> String = { if (state.metric == LeaderboardMetric.MVP) mvpText(it.value) else "${it.value}" }
+            when {
+                state.failed -> item { ErrorState(stringResource(Res.string.error_stats_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
+                state.loading && state.rows.isEmpty() -> item {
+                    Box(Modifier.fillMaxWidth().padding(space.s8), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = DesiTheme.colors.brand) }
+                }
+                state.rows.isEmpty() -> item {
+                    EmptyState(
+                        DesiIcons.Leaderboard,
+                        stringResource(Res.string.leaderboard_empty_title),
+                        body = stringResource(if (state.scope == LeaderboardScope.CITY && !forTournament) Res.string.leaderboard_empty_city else Res.string.leaderboard_empty_friends),
+                    )
+                }
+                else -> {
+                    item { Podium(state.rows.take(3), value, onOpenPlayer) }
+                    val rest = state.rows.drop(3)
+                    if (rest.isNotEmpty()) item {
+                        ListCard {
+                            rest.forEachIndexed { index, row ->
+                                ListRow(
+                                    title = row.player.name,
+                                    subtitle = pluralStringResource(Res.plurals.leaderboard_matches, row.matches, row.matches),
+                                    leading = {
+                                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                                            RankBadge(index + 4, size = 28.dp)
+                                            PhotoAvatar(row.player.name, row.player.photoUrl, size = 40)
+                                        }
+                                    },
+                                    trailing = { Text(value(row), style = DesiTheme.type.scoreMd, color = DesiTheme.colors.ink) },
+                                    divider = index > 0,
+                                    onClick = { onOpenPlayer(row.player.profileId) },
+                                )
+                            }
                         }
                     }
                 }
@@ -455,6 +501,89 @@ fun LeaderboardScreen(
         }
     }
 }
+
+/** The season, as a small pill that opens a picker. */
+@Composable
+private fun SeasonPill(text: String, onClick: () -> Unit) {
+    val colors = DesiTheme.colors
+    Row(
+        Modifier.clip(DesiTheme.radius.full).background(colors.surface).border(1.dp, colors.line, DesiTheme.radius.full)
+            .clickable(role = Role.Button, onClick = onClick).padding(start = DesiTheme.space.s3, end = DesiTheme.space.s2, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Icon(painterResource(DesiIcons.Calendar), null, tint = colors.muted, modifier = Modifier.size(16.dp))
+        Text(text, style = DesiTheme.type.caption.copy(fontWeight = FontWeight.SemiBold), color = colors.ink, modifier = Modifier.padding(start = 4.dp))
+        Icon(painterResource(DesiIcons.ExpandMore), null, tint = colors.muted, modifier = Modifier.size(18.dp))
+    }
+}
+
+/** The top three side by side, the leader raised in the middle on the green, second and third either side. */
+@Composable
+private fun Podium(top: List<LeaderboardRow>, value: (LeaderboardRow) -> String, onOpenPlayer: (String) -> Unit) {
+    val colors = DesiTheme.colors
+    val space = DesiTheme.space
+    // Visual order is 2nd, 1st, 3rd; empty places keep their slot so the leader stays centred.
+    val order = listOf(1, 0, 2)
+    Row(
+        Modifier.fillMaxWidth().clip(DesiTheme.radius.lg).heroBackground().padding(horizontal = space.s2, vertical = space.s5),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        order.forEach { place ->
+            val row = top.getOrNull(place)
+            Column(
+                Modifier.weight(1f).clip(DesiTheme.radius.md)
+                    .then(if (row != null) Modifier.clickable(role = Role.Button) { onOpenPlayer(row.player.profileId) } else Modifier)
+                    .padding(vertical = space.s2, horizontal = space.s1)
+                    .padding(bottom = if (place == 0) space.s4 else 0.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(space.s1),
+            ) {
+                if (row == null) return@Column
+                val size = if (place == 0) 72 else 56
+                Box(contentAlignment = Alignment.BottomCenter) {
+                    Box(Modifier.padding(bottom = 10.dp).clip(DesiTheme.radius.full).border(3.dp, if (place == 0) colors.event.extra else colors.onBrandStrong.copy(alpha = 0.85f), DesiTheme.radius.full).padding(3.dp)) {
+                        PhotoAvatar(row.player.name, row.player.photoUrl, size = size)
+                    }
+                    Box(
+                        Modifier.size(24.dp).clip(DesiTheme.radius.full).background(if (place == 0) colors.event.extra else colors.onBrandStrong),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text("${place + 1}", style = DesiTheme.type.caption.copy(fontWeight = FontWeight.Bold), color = colors.brandStrong)
+                    }
+                }
+                Text(
+                    row.player.name,
+                    style = DesiTheme.type.bodyStrong,
+                    color = colors.onBrandStrong,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(value(row), style = if (place == 0) DesiTheme.type.scoreLg else DesiTheme.type.scoreMd, color = colors.onBrandStrong)
+            }
+        }
+    }
+}
+
+private val LeaderboardMetric.icon: DrawableResource
+    get() = when (this) {
+        LeaderboardMetric.RUNS -> DesiIcons.Bat
+        LeaderboardMetric.WICKETS -> DesiIcons.Ball
+        LeaderboardMetric.MVP -> DesiIcons.Star
+        LeaderboardMetric.SIXES -> DesiIcons.Six
+        LeaderboardMetric.CATCHES -> DesiIcons.Glove
+    }
+
+/** The list heading for each figure: "Most runs". */
+private val LeaderboardMetric.title: StringResource
+    get() = when (this) {
+        LeaderboardMetric.RUNS -> Res.string.leaderboard_title_runs
+        LeaderboardMetric.WICKETS -> Res.string.leaderboard_title_wickets
+        LeaderboardMetric.MVP -> Res.string.leaderboard_title_mvp
+        LeaderboardMetric.SIXES -> Res.string.leaderboard_title_sixes
+        LeaderboardMetric.CATCHES -> Res.string.leaderboard_title_catches
+    }
 
 private val FormatFilter.label: StringResource
     get() = when (this) {

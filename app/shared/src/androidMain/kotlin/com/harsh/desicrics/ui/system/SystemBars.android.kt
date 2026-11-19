@@ -1,6 +1,9 @@
 package com.harsh.desicrics.ui.system
 
 import android.app.Activity
+import android.provider.Settings
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalView
@@ -18,5 +21,13 @@ actual fun LightStatusBarIcons() {
         controller.isAppearanceLightStatusBars = false
         // Back to the theme's default (dark icons on the light theme) when the screen leaves.
         onDispose { controller.isAppearanceLightStatusBars = !darkTheme }
+    }
+}
+
+@Composable
+actual fun rememberReduceMotion(): Boolean {
+    val context = LocalContext.current
+    return remember(context) {
+        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
     }
 }

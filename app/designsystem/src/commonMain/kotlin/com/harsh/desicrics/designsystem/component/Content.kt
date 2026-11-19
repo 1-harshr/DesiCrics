@@ -71,10 +71,16 @@ fun DesiCard(
     )
 }
 
-/** The sign for "happening now": a red dot with a soft ring that pulses out from it. */
+/** The sign for "happening now": a red dot with a soft ring that pulses out from it (still when motion is reduced). */
 @Composable
 fun LiveDot(modifier: Modifier = Modifier, size: Dp = 8.dp) {
     val color = DesiTheme.colors.event.wicket
+    if (DesiTheme.reduceMotion) {
+        Box(modifier.size(size * 2), contentAlignment = Alignment.Center) {
+            Box(Modifier.size(size).clip(DesiTheme.radius.full).background(color))
+        }
+        return
+    }
     val pulse = rememberInfiniteTransition(label = "live")
     val ring by pulse.animateFloat(
         initialValue = 0f,
