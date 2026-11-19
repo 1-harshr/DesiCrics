@@ -1,5 +1,11 @@
 package com.harsh.desicrics
 
+import com.harsh.desicrics.ui.teams.Insights
+import com.harsh.desicrics.model.WinRecord
+import com.harsh.desicrics.model.TeamInsights
+import com.harsh.desicrics.model.PhaseStat
+import com.harsh.desicrics.model.Performer
+import com.harsh.desicrics.model.InningsPhase
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -164,6 +170,23 @@ class ScreenshotTest {
             ),
             {}, {}, {}, {}, {}, {}, {},
         )
+    }
+
+    @Test
+    fun teamInsights() = shoot("team_insights") {
+        Column(Modifier.background(DesiTheme.colors.bg).padding(16.dp)) {
+            Insights(
+                TeamInsights(
+                    teamId = "t1", played = 14, won = 9, lost = 4, tied = 1,
+                    battingFirst = WinRecord(8, 6), chasing = WinRecord(6, 3), tossWon = WinRecord(7, 5), averageFirstInnings = 87,
+                    batting = listOf(PhaseStat(InningsPhase.START, 312, 224, 11), PhaseStat(InningsPhase.MIDDLE, 241, 168, 14), PhaseStat(InningsPhase.FINISH, 398, 230, 27)),
+                    bowling = listOf(PhaseStat(InningsPhase.START, 280, 236, 15), PhaseStat(InningsPhase.MIDDLE, 230, 170, 12), PhaseStat(InningsPhase.FINISH, 371, 216, 31)),
+                    howOut = mapOf(DismissalKind.CAUGHT to 28, DismissalKind.BOWLED to 14, DismissalKind.RUN_OUT to 7, DismissalKind.LBW to 3),
+                    topRunScorers = listOf(Performer("Rohan Iyer", "me", 412, 14), Performer("Aarav Shah", "p2", 288, 13), Performer("Kabir", null, 190, 11)),
+                    topWicketTakers = listOf(Performer("Aarav Shah", "p2", 21, 13), Performer("Dev", null, 12, 9)),
+                ),
+            )
+        }
     }
 
     @Test

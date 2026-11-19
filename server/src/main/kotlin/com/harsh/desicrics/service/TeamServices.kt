@@ -1,5 +1,7 @@
 package com.harsh.desicrics.service
 
+import com.harsh.desicrics.model.TeamInsights
+import com.harsh.desicrics.stats.TeamInsightsEngine
 import com.harsh.desicrics.api.AddMemberRequest
 import com.harsh.desicrics.api.ClaimRequest
 import com.harsh.desicrics.api.SupportRequest
@@ -32,6 +34,9 @@ internal suspend fun <T> withFreshCode(save: suspend (code: String) -> T?): T {
 }
 
 /** Saved teams: who's in them, who runs them, and how people join. */
+/** How many recent matches team insights look at. */
+const val INSIGHT_MATCHES = 50
+
 class TeamService(
     private val teams: TeamStore,
     private val players: PlayerStore,
@@ -130,6 +135,15 @@ class TeamService(
             lost = played.count { it.result!!.winner == sideOf(it).other },
             tied = played.count { it.result!!.isTie },
         )
+    }
+
+    /**
+     * The organiser view of a team's last [INSIGHT_MATCHES] completed matches, for its admins. Free for
+     * now: when the organiser plan has a price, this is where it's checked.
+     */
+    suspend fun insights(user: FirebasePrincipal, teamId: String): TeamInsights {
+        requireAdmin(user, teamId)
+        return TeamInsightsEngine.compute(teamId, matches.completedForTeam(teamId, INSIGHT_MATCHES))
     }
 
     private suspend fun requireProfile(user: FirebasePrincipal) {

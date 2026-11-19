@@ -1,5 +1,6 @@
 package com.harsh.desicrics.data
 
+import com.harsh.desicrics.model.TeamInsights
 import com.harsh.desicrics.api.AddMemberRequest
 import com.harsh.desicrics.api.ClaimRequest
 import com.harsh.desicrics.api.SupportCategory
@@ -43,6 +44,8 @@ class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfi
         api.joinTeam(code.trim().uppercase()).also { analytics.log(AnalyticsEvents.TEAM_JOINED, emptyMap()) }
 
     suspend fun headToHead(teamId: String, otherId: String): HeadToHead = api.headToHead(teamId, otherId)
+
+    suspend fun insights(teamId: String): TeamInsights = api.teamInsights(teamId)
 
     suspend fun search(query: String): List<PlayerSummary> = api.searchPlayers(query)
 

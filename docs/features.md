@@ -24,6 +24,7 @@ Every feature area, what we build, and the phase it lands in. See [roadmap.md](r
 | Looking for | Post a need (opponent, player, ground, umpire, scorer) with a city and date; others respond. | 6 |
 | Rankings | City-scoped team and player rankings, weighted by opposition strength ([how](#rankings)). | 6 |
 | Directory | Grounds, umpires and scorers by city, added by players. | 6 |
+| Team insights | For team admins: win record batting first, chasing and after the toss, run rate and wickets by phase, dismissal mix, top performers. Free until an organiser plan is priced. | 6 |
 | Stream overlay | Score overlay feed for OBS / Larix livestreams. No video hosting. | 6 |
 
 ## MVP points

@@ -35,6 +35,7 @@ fun Route.teamRoutes(teams: TeamService) {
             }
             delete("/members/{profileId}") { call.respond(teams.removeMember(call.user, call.param("id"), call.param("profileId"))) }
             post("/join-code") { call.respond(teams.newJoinCode(call.user, call.param("id"))) }
+            get("/insights") { call.respond(teams.insights(call.user, call.param("id"))) }
             get("/head-to-head/{otherId}") { call.respond(teams.headToHead(call.param("id"), call.param("otherId"))) }
         }
     }

@@ -14,8 +14,10 @@ import com.harsh.desicrics.model.LookingForKind
 import com.harsh.desicrics.model.LookingForPost
 import com.harsh.desicrics.model.OverlayScore
 import com.harsh.desicrics.model.SavedTeam
+import com.harsh.desicrics.model.TeamInsights
 import com.harsh.desicrics.model.TeamRanking
 import com.harsh.desicrics.model.Wicket
+import com.harsh.desicrics.model.WinRecord
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
@@ -113,6 +115,25 @@ class CommunityTest {
         assertEquals(listOf("Andheri", "Bandra", "Colaba"), ranked.map { it.team.name })
         assertTrue(ranked.first().rating > 1000 && ranked.last().rating < 1000)
         assertEquals(2, ranked.first().played)
+    }
+
+    @Test
+    fun teamInsightsForAdmins() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev", name = "Dev")
+        val (strikers, royals) = listOf("Strikers", "Royals").map { client.post("/teams") { bearerAuth("test-asha"); jsonBody(TeamRequest(it, "Pune")) }.body<SavedTeam>() }
+        client.win(strikers, royals)
+        client.win(royals, strikers)
+        client.win(strikers, royals)
+        // The organiser view is for a team's admins.
+        assertEquals(HttpStatusCode.Forbidden, client.get("/teams/${strikers.id}/insights") { bearerAuth("test-dev") }.status)
+        val insights = client.get("/teams/${strikers.id}/insights") { bearerAuth("test-asha") }.body<TeamInsights>()
+        assertEquals(3, insights.played)
+        assertEquals(2, insights.won)
+        assertEquals(WinRecord(2, 2), insights.battingFirst)
+        assertEquals(WinRecord(1, 0), insights.chasing)
+        assertEquals(mapOf(DismissalKind.BOWLED to 3), insights.howOut)
+        assertEquals(8, insights.topRunScorers.single().value)
     }
 
     @Test

@@ -907,4 +907,26 @@
     <string name="directory_remove">Remove</string>
     <string name="match_share_overlay">Stream overlay link</string>
     <string name="match_share_overlay_hint">A live score bar for OBS or Larix: add it as a browser source.</string>
+    <string name="insights_title">Insights</string>
+    <string name="insights_empty">Insights appear once the team has a completed match scored in the app.</string>
+    <string name="insights_batting_first">Batting first: won %1$d of %2$d</string>
+    <string name="insights_chasing">Chasing: won %1$d of %2$d</string>
+    <string name="insights_toss">After winning the toss: won %1$d of %2$d</string>
+    <string name="insights_average_first">Average first-innings score: %1$d</string>
+    <string name="insights_phases">Through the innings</string>
+    <string name="insights_scored">Scored</string>
+    <string name="insights_conceded">Conceded</string>
+    <string name="insights_phase_start">Start</string>
+    <string name="insights_phase_middle">Middle</string>
+    <string name="insights_phase_finish">Finish</string>
+    <string name="insights_rpo">%1$s rpo</string>
+    <plurals name="insights_wickets">
+        <item quantity="one">%1$d wicket</item>
+        <item quantity="other">%1$d wickets</item>
+    </plurals>
+    <string name="insights_phases_hint">Each innings split into thirds of its overs. Runs per over, and wickets in total.</string>
+    <string name="insights_how_out">How the team gets out</string>
+    <string name="insights_share">%1$s %2$d%</string>
+    <string name="insights_top_runs">Most runs</string>
+    <string name="insights_top_wickets">Most wickets</string>
 </resources>

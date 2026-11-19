@@ -1,5 +1,14 @@
 package com.harsh.desicrics.ui.teams
 
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.StringResource
+import com.harsh.desicrics.util.format2
+import com.harsh.desicrics.ui.match.label
+import com.harsh.desicrics.model.WinRecord
+import com.harsh.desicrics.model.TeamInsights
+import com.harsh.desicrics.model.PhaseStat
+import com.harsh.desicrics.model.Performer
+import com.harsh.desicrics.model.InningsPhase
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -227,6 +236,7 @@ fun TeamContent(
                         )
                     }
                 }
+                if (state.isAdmin) state.insights?.let { Insights(it) }
                 if (state.otherTeams.isNotEmpty()) {
                     RecordAgainst(state.otherTeams, state.headToHead?.let { h2h -> state.otherTeams.firstOrNull { it.id == h2h.opponentId } }, state, onCompare)
                 }
@@ -247,6 +257,92 @@ private fun memberSubtitle(member: TeamMember): String? {
     }
     return parts.joinToString(" · ").ifEmpty { null }
 }
+
+/** The organiser view: how the team wins, where it scores and concedes, how it gets out, who stands out. */
+@Composable
+internal fun Insights(insights: TeamInsights) {
+    val colors = DesiTheme.colors
+    val space = DesiTheme.space
+    Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
+        SectionLabel(stringResource(Res.string.insights_title))
+        if (insights.played == 0) {
+            Text(stringResource(Res.string.insights_empty), style = DesiTheme.type.body, color = colors.muted)
+            return@Column
+        }
+        DesiCard(Modifier.fillMaxWidth()) {
+            Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
+                Text(stringResource(Res.string.team_record, insights.played, insights.won, insights.lost, insights.tied), style = DesiTheme.type.data, color = colors.ink)
+                InsightLine(Res.string.insights_batting_first, insights.battingFirst)
+                InsightLine(Res.string.insights_chasing, insights.chasing)
+                InsightLine(Res.string.insights_toss, insights.tossWon)
+                insights.averageFirstInnings?.let {
+                    Text(stringResource(Res.string.insights_average_first, it), style = DesiTheme.type.body, color = colors.ink)
+                }
+            }
+        }
+        Text(stringResource(Res.string.insights_phases), style = DesiTheme.type.bodyStrong, color = colors.ink)
+        DesiCard(Modifier.fillMaxWidth()) {
+            Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
+                Row {
+                    Text("", Modifier.weight(1f))
+                    Text(stringResource(Res.string.insights_scored), Modifier.weight(1f), style = DesiTheme.type.caption, color = colors.muted)
+                    Text(stringResource(Res.string.insights_conceded), Modifier.weight(1f), style = DesiTheme.type.caption, color = colors.muted)
+                }
+                insights.batting.zip(insights.bowling).forEach { (bat, bowl) ->
+                    Row {
+                        Text(stringResource(bat.phase.label), Modifier.weight(1f), style = DesiTheme.type.body, color = colors.ink)
+                        PhaseCell(bat, Modifier.weight(1f))
+                        PhaseCell(bowl, Modifier.weight(1f))
+                    }
+                }
+                Text(stringResource(Res.string.insights_phases_hint), style = DesiTheme.type.caption, color = colors.muted)
+            }
+        }
+        if (insights.howOut.isNotEmpty()) {
+            val total = insights.howOut.values.sum()
+            Text(stringResource(Res.string.insights_how_out), style = DesiTheme.type.bodyStrong, color = colors.ink)
+            Text(
+                insights.howOut.entries.take(4).map { (kind, count) -> stringResource(Res.string.insights_share, stringResource(kind.label), count * 100 / total) }.joinToString(" · "),
+                style = DesiTheme.type.body,
+                color = colors.ink,
+            )
+        }
+        Performers(Res.string.insights_top_runs, insights.topRunScorers)
+        Performers(Res.string.insights_top_wickets, insights.topWicketTakers)
+    }
+}
+
+@Composable
+private fun InsightLine(label: StringResource, record: WinRecord) {
+    if (record.played == 0) return
+    Text(stringResource(label, record.won, record.played), style = DesiTheme.type.body, color = DesiTheme.colors.ink)
+}
+
+@Composable
+private fun PhaseCell(stat: PhaseStat, modifier: Modifier) {
+    Column(modifier) {
+        if (stat.balls == 0) {
+            Text("–", style = DesiTheme.type.data, color = DesiTheme.colors.muted)
+            return@Column
+        }
+        Text(stringResource(Res.string.insights_rpo, stat.runRate.format2()), style = DesiTheme.type.data, color = DesiTheme.colors.ink)
+        Text(pluralStringResource(Res.plurals.insights_wickets, stat.wickets, stat.wickets), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+    }
+}
+
+@Composable
+private fun Performers(title: StringResource, people: List<Performer>) {
+    if (people.isEmpty()) return
+    Text(stringResource(title), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
+    Text(people.joinToString(" · ") { "${it.name} ${it.value}" }, style = DesiTheme.type.body, color = DesiTheme.colors.ink)
+}
+
+private val InningsPhase.label: StringResource
+    get() = when (this) {
+        InningsPhase.START -> Res.string.insights_phase_start
+        InningsPhase.MIDDLE -> Res.string.insights_phase_middle
+        InningsPhase.FINISH -> Res.string.insights_phase_finish
+    }
 
 /** Pick another of the caller's teams to see how this one has done against it. */
 @Composable

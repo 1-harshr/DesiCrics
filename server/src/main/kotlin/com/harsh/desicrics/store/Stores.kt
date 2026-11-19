@@ -62,6 +62,9 @@ interface MatchStore {
     /** Match rows (without rosters) where saved teams [teamId] and [otherId] played each other. */
     suspend fun between(teamId: String, otherId: String): List<Match>
 
+    /** Newest first: up to [limit] completed matches saved team [teamId] played, with their balls. */
+    suspend fun completedForTeam(teamId: String, limit: Int): List<MatchDetails>
+
     /** Profile IDs who played for [teamId] in its latest match. */
     suspend fun lastSquad(teamId: String): List<String>
 

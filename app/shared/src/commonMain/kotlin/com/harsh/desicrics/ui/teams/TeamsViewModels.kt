@@ -1,5 +1,6 @@
 package com.harsh.desicrics.ui.teams
 
+import com.harsh.desicrics.model.TeamInsights
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.data.AuthRepository
@@ -93,6 +94,8 @@ data class TeamUiState(
     /** The caller's other teams, to compare records against. */
     val otherTeams: List<TeamSummary> = emptyList(),
     val headToHead: HeadToHead? = null,
+    /** The organiser view, loaded for admins only. */
+    val insights: TeamInsights? = null,
     /** Null until known. */
     val following: Boolean? = null,
 ) {
@@ -120,6 +123,9 @@ class TeamViewModel(
                 onSuccess = { team -> show(team) },
                 onFailure = { _state.update { it.copy(loading = false, loadFailed = true) } },
             )
+            if (_state.value.isAdmin) {
+                attempt { repository.insights(teamId) }.getOrNull()?.let { insights -> _state.update { it.copy(insights = insights) } }
+            }
             attempt { repository.myTeams() }.getOrNull()?.let { teams ->
                 _state.update { it.copy(otherTeams = teams.filter { team -> team.id != teamId }) }
             }

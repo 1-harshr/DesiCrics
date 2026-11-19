@@ -182,6 +182,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 
 ### Level 3 · Delight
 - ✅ Livestream score overlay (OBS / Larix)
-- ⬜ Paid insights or organiser plan (needs a pricing decision)
+- ✅ Organiser insights for team admins: results batting first, chasing and after the toss, scoring by phase, how the team gets out, top performers
+- ⬜ Charging for them as an organiser plan (needs a pricing decision and Play billing; until then they're free)
 
 **Exit:** at least 20% of weekend matches in a pilot city are arranged through "Looking for".

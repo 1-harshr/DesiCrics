@@ -69,6 +69,10 @@ Built after Phase 5 in the same stretch, because it needed no decisions from out
 | How is "opposition strength" measured for rankings? | Elo for saved teams (it's simple, and well understood by players). A player's MVP points are scaled by the rating of the side they came against ([features.md](../features.md#rankings)). |
 | Store the ratings, or compute them? | Compute them on request. Local cricket is small enough per city, and a stored rating would need rewriting on every undo. Worth revisiting if the query gets slow. |
 | Who keeps the directory honest? | Anyone signed in can add an entry; only whoever added it can remove it. Moderation waits until there's abuse to moderate. |
+| What can be built of "paid insights" without a price? | The insights themselves, which are what an organiser would pay for: how the team does batting first, chasing and after winning the toss, its run rate and wickets in each third of the innings (scored and conceded), how its batters get out, and its top run scorers and wicket takers. They're computed from the team's last 50 completed matches. |
+| Who sees them? | The team's admins. They show a team's weaknesses, so they aren't public. |
+| And the paywall? | Not built. A price and Play billing are business decisions, and a paywall around a guessed price would just have to be redone. The check goes in `TeamService.insights`, which is the only way to get them. |
+| What do "phases" mean in a 6-over game? | Thirds of the scheduled overs, rounded up so the start and finish are never shorter than the middle: 10 overs is 1–4, 5–6, 7–10. Powerplay rules vary too much locally to define phases. |
 | What does a streamer need from the overlay? | A URL to paste into OBS or Larix as a browser source: a transparent score bar at `/overlay/{matchId}` that polls `/m/{matchId}/overlay.json` every 2 seconds. Polling, not the WebSocket, so it survives a flaky stream PC. It's public, like the match page. |
 
 ## Checking
@@ -85,5 +89,5 @@ Built after Phase 5 in the same stretch, because it needed no decisions from out
 - **Hosting** (Cloud Run vs Fly.io). It blocks the staging deploy and the move from the `images` table to object storage.
 - **The public domain** and its `assetlinks.json`, for verified App Links.
 - **A Firebase service account** on the server, for push.
-- **Paid insights or an organiser plan** (Phase 6). It needs a pricing decision.
+- **Charging for insights as an organiser plan** (Phase 6). The insights are built and free; the price and Play billing are your call.
 - Nothing deferred within Phases 0–6 beyond the items above, which need decisions or credentials.

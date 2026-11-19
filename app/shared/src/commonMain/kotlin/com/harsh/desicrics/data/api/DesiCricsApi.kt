@@ -1,5 +1,6 @@
 package com.harsh.desicrics.data.api
 
+import com.harsh.desicrics.model.TeamInsights
 import com.harsh.desicrics.api.AddMemberRequest
 import com.harsh.desicrics.api.AddOrganiserRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
@@ -155,6 +156,9 @@ class DesiCricsApi(
     suspend fun newJoinCode(teamId: String): SavedTeam = call { post("$baseUrl/teams/$teamId/join-code", it) }.body()
 
     suspend fun joinTeam(code: String): SavedTeam = call { post("$baseUrl/teams/join/$code", it) }.body()
+
+    suspend fun teamInsights(teamId: String): TeamInsights =
+        call { get("$baseUrl/teams/$teamId/insights", it) }.body()
 
     suspend fun headToHead(teamId: String, otherId: String): HeadToHead =
         call { get("$baseUrl/teams/$teamId/head-to-head/$otherId", it) }.body()
