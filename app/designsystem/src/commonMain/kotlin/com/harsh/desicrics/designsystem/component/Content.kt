@@ -6,8 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Column
@@ -87,8 +85,7 @@ fun MatchCard(
     val live = teams.any { it.batting }
     Column(
         modifier.fillMaxWidth().clip(DesiTheme.radius.md)
-            .background(if (live) colors.brandSoft else colors.surface)
-            .drawBehind { if (live) drawRect(colors.brand, size = Size(4.dp.toPx(), size.height)) }
+            .background(colors.surface)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(DesiTheme.space.s4),
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
@@ -100,11 +97,21 @@ fun MatchCard(
         BoxWithConstraints(Modifier.fillMaxWidth()) {
             if (maxWidth < 260.dp * LocalDensity.current.fontScale) {
                 Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-                    teams.forEach { TeamScore(it, showPending = live) }
+                    teams.forEach { team ->
+                        Column {
+                            TeamName(team)
+                            TeamScore(team, showPending = live)
+                        }
+                    }
                 }
             } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
-                    teams.forEach { TeamScore(it, showPending = live, modifier = Modifier.weight(1f), nameLines = 2) }
+                Column {
+                    Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
+                        teams.forEach { TeamName(it, Modifier.weight(1f)) }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
+                        teams.forEach { TeamScore(it, live, Modifier.weight(1f)) }
+                    }
                 }
             }
         }
@@ -116,10 +123,14 @@ fun MatchCard(
 }
 
 @Composable
-private fun TeamScore(team: TeamLine, showPending: Boolean, modifier: Modifier = Modifier, nameLines: Int = 1) {
+private fun TeamName(team: TeamLine, modifier: Modifier = Modifier) {
+    Text(team.name, modifier = modifier, style = DesiTheme.type.bodyLg, fontWeight = FontWeight.Bold, color = DesiTheme.colors.ink)
+}
+
+@Composable
+private fun TeamScore(team: TeamLine, showPending: Boolean, modifier: Modifier = Modifier) {
     val colors = DesiTheme.colors
     Column(modifier) {
-        Text(team.name, style = DesiTheme.type.bodyLg, fontWeight = FontWeight.Bold, color = colors.ink, minLines = nameLines)
         if (team.score != null) {
             Text(team.score, style = DesiTheme.type.scoreLg, color = colors.ink)
             val detail = listOfNotNull(

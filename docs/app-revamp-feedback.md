@@ -150,7 +150,7 @@ Powai XI need 26 off 16 balls
 ```
 
 - Give each team half the width. Use bold Figtree for **both team names** in the primary text colour. Place each score directly underneath in larger Barlow Condensed numerals, with smaller overs below. Keep the team order steady when the innings changes. Move the Batting marker to the side at the crease.
-- Give live cards a subtle green surface and a stronger green leading edge in both themes. Keep the visible LIVE dot and label so colour is an additional cue. Reserve the solid green fill for the primary Start a match action. Use a neutral surface for upcoming and completed games.
+- Use the same neutral surface for all match cards. The small LIVE dot and label carry the status colour. Keep the strongest fill on Start a match.
 - Write one useful footer for each state. A scheduled card gives the start time, such as “Sunday, 3:30 pm”. During a chase, show the equation. After play, show the result, such as “Andheri Strikers won by 4 runs”. Before a team bats, show “Yet to bat” in its score slot. Avoid showing 0/0 for an innings that has never started.
 - Let long names wrap and align the scores below the taller name. On narrow screens or with large text, stack the team blocks when both names and scores cannot fit comfortably. Tapping anywhere opens that match. TalkBack should read each team together with its score and overs.
 - Review live, scheduled, and final cards **together** on Home, in light and dark mode. A reader should be able to point to the live game, name both teams, and tell who is batting without opening a card. Include two long club names and a team still waiting to bat in the review.
