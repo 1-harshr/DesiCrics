@@ -17,6 +17,8 @@ data class ServerConfig(
      * them at /.well-known/assetlinks.json so join and match links open the app without asking.
      */
     val androidCertFingerprints: List<String> = emptyList(),
+    /** How long one second of an online auction's clock lasts. Only tests change it. */
+    val auctionSecondMillis: Long = 1000,
 ) {
     companion object {
         fun fromEnv(env: Map<String, String> = System.getenv()) = ServerConfig(

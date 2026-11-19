@@ -3,6 +3,7 @@ import com.harsh.desicrics.model.AbandonReason
 import com.harsh.desicrics.model.MatchEnding
 
 import com.harsh.desicrics.DatabaseConfig
+import com.harsh.desicrics.model.AuctionStatus
 import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.DismissalKind
@@ -232,6 +233,40 @@ object TournamentTeamsTable : Table("tournament_teams") {
     val groupNo = integer("group_no").nullable()
     val status = enumerationByName("status", 10, EntryStatus::class)
     override val primaryKey = PrimaryKey(tournamentId, teamId)
+}
+
+object AuctionsTable : Table("auctions") {
+    val id = varchar("id", 36)
+    val tournamentId = reference("tournament_id", TournamentsTable.id, onDelete = ReferenceOption.CASCADE)
+    /** JSON AuctionSettings. */
+    val settings = text("settings")
+    val status = enumerationByName("status", 10, AuctionStatus::class)
+    val createdBy = varchar("created_by", 128)
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(id)
+}
+
+object AuctionPlayersTable : Table("auction_players") {
+    val auctionId = reference("auction_id", AuctionsTable.id, onDelete = ReferenceOption.CASCADE)
+    val playerId = reference("player_id", PlayersTable.id)
+    val basePrice = integer("base_price")
+    val category = varchar("category", 30).nullable()
+    val requested = bool("requested")
+    val retainedBy = varchar("retained_by", 36).nullable()
+    val retainedPrice = integer("retained_price").nullable()
+    val addedAt = long("added_at")
+    override val primaryKey = PrimaryKey(auctionId, playerId)
+}
+
+object AuctionEventsTable : Table("auction_events") {
+    val auctionId = reference("auction_id", AuctionsTable.id, onDelete = ReferenceOption.CASCADE)
+    val seq = integer("seq")
+    val type = varchar("type", 20)
+    /** JSON AuctionEvent. */
+    val data = text("data")
+    val createdBy = varchar("created_by", 128).nullable()
+    val createdAt = long("created_at")
+    override val primaryKey = PrimaryKey(auctionId, seq)
 }
 
 object ImagesTable : Table("images") {

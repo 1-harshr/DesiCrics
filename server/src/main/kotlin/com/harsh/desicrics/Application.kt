@@ -6,11 +6,13 @@ import com.harsh.desicrics.auth.TokenVerifier
 import com.harsh.desicrics.db.DatabaseFactory
 import com.harsh.desicrics.service.ApiException
 import com.harsh.desicrics.live.FcmPushSender
+import com.harsh.desicrics.live.LiveAuctions
 import com.harsh.desicrics.live.LiveMatches
 import com.harsh.desicrics.live.LoggingPushSender
 import com.harsh.desicrics.live.Notifier
 import com.harsh.desicrics.live.PushSender
 import com.harsh.desicrics.service.AccountService
+import com.harsh.desicrics.service.AuctionService
 import com.harsh.desicrics.service.CommunityService
 import com.harsh.desicrics.service.ImageService
 import com.harsh.desicrics.service.MatchService
@@ -21,6 +23,7 @@ import com.harsh.desicrics.service.StatsService
 import com.harsh.desicrics.service.TournamentService
 import com.harsh.desicrics.service.TeamService
 import com.harsh.desicrics.service.ProfileService
+import com.harsh.desicrics.store.ExposedAuctionStore
 import com.harsh.desicrics.store.ExposedCommunityStore
 import com.harsh.desicrics.store.ExposedImageStore
 import com.harsh.desicrics.store.ExposedMatchStore
@@ -98,6 +101,12 @@ fun Application.module(
     val playerService = PlayerService(players, users)
     val account = AccountService(players, teamStore, ExposedSupportStore(database))
     launch { matches.backfillInningsScores() }
+    val liveAuctions = LiveAuctions()
+    val auctions = AuctionService(
+        ExposedAuctionStore(database), ExposedTournamentStore(database), teamStore, players, users, liveAuctions,
+        scope = this, secondMillis = config.auctionSecondMillis,
+    )
+    launch { auctions.resumeClocks() }
 
     install(CallLogging)
     install(WebSockets) {
@@ -138,6 +147,7 @@ fun Application.module(
             imageUploadRoutes(images)
             communityRoutes(community)
             statsRoutes(StatsService(statsStore, players, users, teamStore, socialStore))
+            auctionRoutes(auctions, liveAuctions)
         }
     }
 }

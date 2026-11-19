@@ -257,3 +257,49 @@ enum class AuctionError(val message: String) {
     NOTHING_TO_UNDO("There's nothing to undo"),
     NOT_SOLD("That player wasn't sold in the auction"),
 }
+
+/** One auction per tournament. */
+@Serializable
+data class Auction(
+    val id: String,
+    val tournamentId: String,
+    val tournamentName: String = "",
+    val settings: AuctionSettings,
+    val createdBy: String,
+    val createdAt: Long = 0,
+)
+
+/** A team in the auction: one of the tournament's confirmed teams. Its admins are its owners, who bid online. */
+@Serializable
+data class AuctionTeam(
+    val teamId: String,
+    val name: String,
+    val logoUrl: String? = null,
+    val ownerIds: List<String> = emptyList(),
+)
+
+/**
+ * An auction as the app shows it, and what its live feed sends on every change. It's the same for everyone
+ * watching, so the caller's own part (organiser, or owner of a team) comes from [organiserIds] and
+ * [AuctionTeam.ownerIds].
+ */
+@Serializable
+data class AuctionDetails(
+    val auction: Auction,
+    val teams: List<AuctionTeam>,
+    val organiserIds: List<String>,
+    /** The pool, requests included, in the order they were added. */
+    val players: List<AuctionPlayer>,
+    val state: AuctionState,
+    /** The event that made this change, e.g. a sale for the sold moment; null before any. */
+    val latest: AuctionEvent? = null,
+    /** Online: when the clock runs out on the player up, in the server's time. */
+    val lotEndsAt: Long? = null,
+    /** The server's clock when this was sent, so the app can count down without trusting the phone's clock. */
+    val serverTime: Long = 0,
+) {
+    fun player(profileId: String): AuctionPlayer? = players.firstOrNull { it.profileId == profileId }
+    fun isOrganiser(uid: String?): Boolean = uid in organiserIds
+    /** Teams [uid] can bid for in online mode. */
+    fun teamsOwnedBy(uid: String?): List<AuctionTeam> = teams.filter { uid in it.ownerIds }
+}

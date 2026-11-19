@@ -1,6 +1,8 @@
 package com.harsh.desicrics.store
 
 import com.harsh.desicrics.api.SupportRequest
+import com.harsh.desicrics.db.AuctionEventsTable
+import com.harsh.desicrics.db.AuctionPlayersTable
 import com.harsh.desicrics.db.MatchPlayersTable
 import com.harsh.desicrics.db.PlayerMatchLinesTable
 import com.harsh.desicrics.db.PlayersTable
@@ -137,8 +139,26 @@ class ExposedPlayerStore(private val db: Database) : PlayerStore {
         MatchPlayersTable.update({ MatchPlayersTable.profileId eq placeholderId }) { it[profileId] = userId }
         // Their stats come too. A user and their own placeholder in one match can't happen: squads pick each person once.
         PlayerMatchLinesTable.update({ PlayerMatchLinesTable.profileId eq placeholderId }) { it[profileId] = userId }
+        mergeAuctions(placeholderId, userId)
         PlayersTable.deleteWhere { PlayersTable.id eq placeholder[PlayersTable.id] }
         true
+    }
+
+    /** Auction pools and logs follow the player too; a user already in the same pool keeps their own entry. */
+    private fun JdbcTransaction.mergeAuctions(placeholderId: String, userId: String) {
+        val userAuctions = AuctionPlayersTable.select(AuctionPlayersTable.auctionId)
+            .where { AuctionPlayersTable.playerId eq userId }
+            .map { it[AuctionPlayersTable.auctionId] }.toSet()
+        for (auction in AuctionPlayersTable.select(AuctionPlayersTable.auctionId).where { AuctionPlayersTable.playerId eq placeholderId }.map { it[AuctionPlayersTable.auctionId] }) {
+            val mine = (AuctionPlayersTable.auctionId eq auction) and (AuctionPlayersTable.playerId eq placeholderId)
+            if (auction in userAuctions) AuctionPlayersTable.deleteWhere { mine } else AuctionPlayersTable.update({ mine }) { it[playerId] = userId }
+        }
+        // Events are JSON; placeholder IDs ("p-" + a UUID) can't appear by accident.
+        for (row in AuctionEventsTable.selectAll().where { AuctionEventsTable.data like "%$placeholderId%" }.toList()) {
+            AuctionEventsTable.update({ (AuctionEventsTable.auctionId eq row[AuctionEventsTable.auctionId]) and (AuctionEventsTable.seq eq row[AuctionEventsTable.seq]) }) {
+                it[data] = row[AuctionEventsTable.data].replace(placeholderId, userId)
+            }
+        }
     }
 
     override suspend fun anonymise(uid: String, at: Long) {

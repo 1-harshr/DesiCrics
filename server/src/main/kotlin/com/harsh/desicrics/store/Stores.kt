@@ -2,6 +2,9 @@ package com.harsh.desicrics.store
 
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.SupportRequest
+import com.harsh.desicrics.model.AuctionEvent
+import com.harsh.desicrics.model.AuctionSettings
+import com.harsh.desicrics.model.AuctionStatus
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DirectoryEntry
 import com.harsh.desicrics.model.DirectoryKind
@@ -267,4 +270,37 @@ interface CommunityStore {
 
     /** Saved teams based in [city] (any case). */
     suspend fun teamIdsInCity(city: String): List<String>
+}
+
+/** Player auctions: one per tournament, its pool, and its append-only event log. Rows come back raw; the service attaches people. */
+interface AuctionStore {
+    data class AuctionRow(
+        val id: String, val tournamentId: String, val tournamentName: String, val settings: AuctionSettings,
+        val status: AuctionStatus, val createdBy: String, val createdAt: Long,
+    )
+    data class PlayerRow(
+        val profileId: String, val basePrice: Int, val category: String?, val requested: Boolean,
+        val retainedBy: String?, val retainedPrice: Int?, val addedAt: Long,
+    )
+
+    /** False if the tournament already has an auction. */
+    suspend fun create(auction: AuctionRow): Boolean
+    suspend fun get(auctionId: String): AuctionRow?
+    suspend fun idForTournament(tournamentId: String): String?
+    suspend fun updateSettings(auctionId: String, settings: AuctionSettings)
+    /** Auctions in any of [statuses], e.g. live ones whose clock needs restarting. */
+    suspend fun idsWithStatus(statuses: Collection<AuctionStatus>): List<String>
+
+    /** The pool, oldest first. */
+    suspend fun players(auctionId: String): List<PlayerRow>
+    /** False if they're already in the pool. */
+    suspend fun addPlayer(auctionId: String, player: PlayerRow): Boolean
+    suspend fun updatePlayer(auctionId: String, player: PlayerRow)
+    /** False if they weren't in the pool. */
+    suspend fun removePlayer(auctionId: String, profileId: String): Boolean
+
+    /** In order. */
+    suspend fun events(auctionId: String): List<AuctionEvent>
+    /** Appends [event] and sets the auction's [status] in one transaction. False if [AuctionEvent.seq] is taken. */
+    suspend fun addEvent(auctionId: String, event: AuctionEvent, status: AuctionStatus, by: String?, at: Long): Boolean
 }
