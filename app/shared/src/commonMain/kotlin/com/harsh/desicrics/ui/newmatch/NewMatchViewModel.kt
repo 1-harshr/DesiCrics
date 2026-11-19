@@ -155,6 +155,11 @@ class NewMatchViewModel(
         }
     }
 
+    /** Reopens the squad picker for the saved team already on [side]. */
+    fun changeSquad(side: TeamSide) {
+        _state.value.side(side).teamId?.let { pickTeam(side, it) }
+    }
+
     fun closeSquad() = _state.update { it.copy(squadTeam = null, squadSide = null) }
 
     /** Uses the picked members as [side]'s squad, under the saved team's name. */

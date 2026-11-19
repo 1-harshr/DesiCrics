@@ -160,6 +160,7 @@ fun NewMatchScreen(
                 pickingFor = side
             },
             onClearTeam = viewModel::clearTeam,
+            onChangeSquad = viewModel::changeSquad,
         ),
     )
     pickingFor?.let { side ->
@@ -203,6 +204,7 @@ class NewMatchActions(
     val onBack: () -> Unit,
     val onUseTeam: (TeamSide) -> Unit = {},
     val onClearTeam: (TeamSide) -> Unit = {},
+    val onChangeSquad: (TeamSide) -> Unit = {},
     val onSaveTeam: (TeamSide) -> Unit = {},
     val onLinkPlayer: (TeamSide, com.harsh.desicrics.model.PlayerSummary) -> Unit = { _, _ -> },
     val searchPlayers: suspend (String) -> List<com.harsh.desicrics.model.PlayerSummary> = { emptyList() },
@@ -337,7 +339,7 @@ private fun TeamStep(side: TeamSide, state: NewMatchFormState, actions: NewMatch
                 ActionTile(DesiIcons.Search, stringResource(Res.string.setup_find), { actions.onUseTeam(side) }, Modifier.weight(1f))
                 if (form.name.isNotBlank()) ActionTile(DesiIcons.Shield, stringResource(Res.string.setup_save), { if (!state.saving) actions.onSaveTeam(side) }, Modifier.weight(1f))
             } else {
-                ActionTile(DesiIcons.Teams, stringResource(Res.string.new_match_squad_change), { actions.onUseTeam(side) }, Modifier.weight(1f))
+                ActionTile(DesiIcons.Teams, stringResource(Res.string.new_match_squad_change), { actions.onChangeSquad(side) }, Modifier.weight(1f))
                 ActionTile(DesiIcons.Close, stringResource(Res.string.new_match_squad_clear), { actions.onClearTeam(side) }, Modifier.weight(1f))
             }
             form.inviteLink?.let { link -> ActionTile(DesiIcons.Share, stringResource(Res.string.team_invite_share), { share(link) }, Modifier.weight(1f)) }
