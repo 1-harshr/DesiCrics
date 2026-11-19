@@ -1,10 +1,11 @@
 package com.harsh.desicrics.ui.stats
+import com.harsh.desicrics.designsystem.component.PickerSheet
+import com.harsh.desicrics.designsystem.component.PickerPill
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.CircularProgressIndicator
 import org.jetbrains.compose.resources.DrawableResource
 import com.harsh.desicrics.model.LeaderboardRow
 import com.harsh.desicrics.designsystem.component.heroBackground
-import com.harsh.desicrics.designsystem.component.ChoiceSheet
 import com.harsh.desicrics.designsystem.component.FilterRow
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.component.ErrorState
@@ -109,23 +110,52 @@ fun mvpText(tenths: Int): String = "${tenths / 10}.${kotlin.math.abs(tenths % 10
 @OptIn(ExperimentalTime::class)
 private fun thisYear(): Int = Instant.fromEpochMilliseconds(nowMillis()).toLocalDateTime(TimeZone.currentSystemDefault()).year
 
-/** Season and match-length chips. Seasons offered: all time, this year and the last two. */
+/** Season and match length as two picker pills. Seasons offered: all time, this year and the last two. */
 @Composable
 fun StatsFilters(filter: StatsFilter, onFilter: (StatsFilter) -> Unit) {
     val year = thisYear()
+    val seasons = listOf<Int?>(null, year, year - 1, year - 2)
     val all = stringResource(Res.string.stats_season_all)
-    ChoiceChips(listOf<Int?>(null, year, year - 1, year - 2), selected = filter.season, label = { it?.toString() ?: all }, onSelect = { onFilter(filter.copy(season = it)) })
-    ChoiceChips(FormatFilter.entries, selected = filter.format, label = { stringResource(it.label) }, onSelect = { onFilter(filter.copy(format = it)) })
+    val seasonLabels = seasons.map { it?.toString() ?: all }
+    val formatLabels = FormatFilter.entries.map { stringResource(it.label) }
+    var picking by rememberSaveable { mutableStateOf<String?>(null) }
+    Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        PickerPill(seasonLabels[seasons.indexOf(filter.season).coerceAtLeast(0)], { picking = "season" }, icon = DesiIcons.Calendar)
+        PickerPill(formatLabels[filter.format.ordinal], { picking = "format" }, icon = DesiIcons.Clock)
+    }
+    when (picking) {
+        "season" -> PickerSheet(
+            stringResource(Res.string.leaderboard_season),
+            seasonLabels,
+            selected = seasons.indexOf(filter.season),
+            onSelect = { onFilter(filter.copy(season = seasons[it])); picking = null },
+            onDismiss = { picking = null },
+        )
+        "format" -> PickerSheet(
+            stringResource(Res.string.stats_match_length),
+            formatLabels,
+            selected = filter.format.ordinal,
+            onSelect = { onFilter(filter.copy(format = FormatFilter.entries[it])); picking = null },
+            onDismiss = { picking = null },
+        )
+    }
 }
 
 /** A player's career with filters: summary, batting, bowling, fielding, form, zones and badges. */
 @Composable
-fun CareerSection(profileId: String, onCompare: (() -> Unit)? = null, name: String = "", onOpenMatch: ((String) -> Unit)? = null) {
+fun CareerSection(
+    profileId: String,
+    onCompare: (() -> Unit)? = null,
+    name: String = "",
+    onOpenMatch: ((String) -> Unit)? = null,
+    /** False where a tab already says Stats. */
+    heading: Boolean = true,
+) {
     val viewModel: CareerViewModel = koinViewModel(key = "career-$profileId") { parametersOf(profileId) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sharing by remember { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
-        SectionHeader(stringResource(Res.string.profile_tab_stats), icon = DesiIcons.Leaderboard)
+        if (heading) SectionHeader(stringResource(Res.string.profile_tab_stats), icon = DesiIcons.Leaderboard)
         StatsFilters(state.filter, viewModel::setFilter)
         val stats = state.stats
         when {
@@ -420,9 +450,10 @@ fun LeaderboardContent(
     val seasons = listOf<Int?>(null, year, year - 1, year - 2)
     val allTime = stringResource(Res.string.stats_season_all)
     if (pickingSeason) {
-        ChoiceSheet(
+        PickerSheet(
             stringResource(Res.string.leaderboard_season),
             seasons.map { it?.toString() ?: allTime },
+            selected = seasons.indexOf(state.season),
             onSelect = { index -> onUpdate { it.copy(season = seasons[index]) }; pickingSeason = false },
             onDismiss = { pickingSeason = false },
         )
@@ -458,7 +489,7 @@ fun LeaderboardContent(
             item {
                 Row(Modifier.padding(top = space.s2), verticalAlignment = Alignment.CenterVertically) {
                     SectionHeader(stringResource(state.metric.title), Modifier.weight(1f), icon = state.metric.icon)
-                    if (!forTournament) SeasonPill(state.season?.toString() ?: allTime) { pickingSeason = true }
+                    if (!forTournament) PickerPill(state.season?.toString() ?: allTime, { pickingSeason = true }, icon = DesiIcons.Calendar)
                 }
             }
             val value: (LeaderboardRow) -> String = { if (state.metric == LeaderboardMetric.MVP) mvpText(it.value) else "${it.value}" }
@@ -499,22 +530,6 @@ fun LeaderboardContent(
                 }
             }
         }
-    }
-}
-
-/** The season, as a small pill that opens a picker. */
-@Composable
-private fun SeasonPill(text: String, onClick: () -> Unit) {
-    val colors = DesiTheme.colors
-    Row(
-        Modifier.clip(DesiTheme.radius.full).background(colors.surface).border(1.dp, colors.line, DesiTheme.radius.full)
-            .clickable(role = Role.Button, onClick = onClick).padding(start = DesiTheme.space.s3, end = DesiTheme.space.s2, top = 6.dp, bottom = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-    ) {
-        Icon(painterResource(DesiIcons.Calendar), null, tint = colors.muted, modifier = Modifier.size(16.dp))
-        Text(text, style = DesiTheme.type.caption.copy(fontWeight = FontWeight.SemiBold), color = colors.ink, modifier = Modifier.padding(start = 4.dp))
-        Icon(painterResource(DesiIcons.ExpandMore), null, tint = colors.muted, modifier = Modifier.size(18.dp))
     }
 }
 

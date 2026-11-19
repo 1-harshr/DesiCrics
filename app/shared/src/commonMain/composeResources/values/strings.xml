@@ -1041,4 +1041,5 @@
     <string name="leaderboard_empty_title">No one on the board yet</string>
     <string name="leaderboard_empty_friends">Follow players, or play matches picked from your teams, and they'll show up here.</string>
     <string name="leaderboard_empty_city">Set your city on your profile to see who's leading near you.</string>
+    <string name="stats_match_length">Match length</string>
 </resources>

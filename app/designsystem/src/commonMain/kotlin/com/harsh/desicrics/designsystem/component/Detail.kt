@@ -510,3 +510,49 @@ fun <T> FilterRow(
         }
     }
 }
+
+/**
+ * The current value of a setting as a small pill with a ▾, for filters that don't need to be on screen
+ * all the time (season, match length). Tapping opens a [PickerSheet].
+ */
+@Composable
+fun PickerPill(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, icon: DrawableResource? = null) {
+    val colors = DesiTheme.colors
+    Row(
+        modifier
+            .heightIn(min = 36.dp)
+            .clip(DesiTheme.radius.full)
+            .background(colors.surface)
+            .border(1.dp, colors.line, DesiTheme.radius.full)
+            .clickable(role = Role.DropdownList, onClick = onClick)
+            .padding(start = DesiTheme.space.s3, end = DesiTheme.space.s2),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        if (icon != null) Icon(painterResource(icon), null, tint = colors.muted, modifier = Modifier.size(16.dp))
+        Text(text, style = DesiTheme.type.caption.copy(fontWeight = FontWeight.SemiBold), color = colors.ink, maxLines = 1)
+        Icon(painterResource(DesiIcons.ExpandMore), null, tint = colors.muted, modifier = Modifier.size(18.dp))
+    }
+}
+
+/** A bottom sheet listing the choices for a [PickerPill], with a tick by the current one. */
+@Composable
+fun PickerSheet(title: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit, onDismiss: () -> Unit) {
+    val colors = DesiTheme.colors
+    DesiSheet(title, onDismiss) {
+        ListCard {
+            options.forEachIndexed { index, option ->
+                val isSelected = index == selected
+                ListRow(
+                    title = option,
+                    titleColor = if (isSelected) colors.brand else colors.ink,
+                    trailing = {
+                        if (isSelected) Icon(painterResource(DesiIcons.CheckCircle), null, tint = colors.brand, modifier = Modifier.size(DesiTheme.size.iconSmall))
+                    },
+                    divider = index > 0,
+                    onClick = { onSelect(index) },
+                )
+            }
+        }
+    }
+}

@@ -485,7 +485,7 @@ private class DemoSeed(private val database: Database, private val forUids: List
             roll < 0.065 -> ball.copy(
                 extra = if (rng.nextDouble() < 0.7) ExtraType.LEG_BYE else ExtraType.BYE, extraRuns = rng.weighted(1 to 8.0, 2 to 1.0, 4 to 1.0),
             )
-            rng.nextDouble() < (0.055 - 0.04 * edge + 0.03 * death).coerceIn(0.015, 0.14) -> ball.copy(wicket = wicket(innings, striker, nonStriker, bowler))
+            rng.nextDouble() < (0.08 - 0.07 * edge + 0.03 * death).coerceIn(0.03, 0.18) -> ball.copy(wicket = wicket(innings, striker, nonStriker, bowler))
             else -> {
                 val runs = rng.weighted(
                     0 to 0.36 - 0.12 * edge - 0.08 * death, 1 to 0.33, 2 to 0.09, 3 to 0.012,
@@ -590,8 +590,8 @@ private class DemoSeed(private val database: Database, private val forUids: List
         val match = details.match
         val result = match.result?.let { result ->
             result.winner?.let { side ->
-                val unit = if (result.marginUnit == MarginUnit.WICKETS) "wkts" else "runs"
-                "${match.team(side).name} won by ${result.margin} $unit"
+                val unit = if (result.marginUnit == MarginUnit.WICKETS) "wkt" else "run"
+                "${match.team(side).name} won by ${result.margin} $unit${if (result.margin == 1) "" else "s"}"
             } ?: "Tied"
         } ?: "in progress"
         println("  $label: ${match.scoreSummary} - $result")

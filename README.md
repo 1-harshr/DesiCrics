@@ -44,6 +44,12 @@ Flyway owns the schema. On startup the server applies any pending migrations fro
 
 To wipe local data: `docker compose down -v`.
 
+To fill it with a demo season of Pune club cricket (teams, players, a finished league, a knockout cup with a
+live semi-final, friendlies, fixtures to come, "looking for" posts and a directory):
+`./gradlew :server:seedDemo --args="--for <your uid>"`. The `--for` part is optional; it puts your signed-in
+account in Kothrud Kings and has you follow a few teams and players. Every ball goes through `MatchService`,
+so stats, tables and rankings are real. It runs once per database.
+
 ### Firebase setup
 
 Firebase config files are gitignored (this is a public repo), so each developer adds their own.

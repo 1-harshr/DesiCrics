@@ -284,6 +284,7 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `EmptyState` | `Detail.kt` | Icon tile, title, body and an optional action, on a card |
 | `ErrorState` | `Feedback.kt` | When content couldn't load: an amber mark (cloud for connection trouble, a crossed-out search for something that doesn't exist), a title, a body and Try again, plus an optional way out. Full screen, or `compact` on a card inside a section |
 | `ErrorBanner` | `Feedback.kt` | A problem that doesn't replace the page (a failed save, a refused action): icon, optional title, message and an optional action. Red by default; `warning` makes it amber for states that aren't failures, like being offline |
+| `PickerPill` / `PickerSheet` | `Detail.kt` | A setting's current value as a small pill with ▾ (season, match length) that opens a sheet listing the choices with a tick by the current one. Use it for filters that don't need all their options on screen |
 | `FilterRow` | `Detail.kt` | Filters on one sideways-scrolling line, each with an optional icon; the selected one filled in `ink`. Use it so a list's filters never wrap onto several rows |
 | `DesiNavigationBar` | `Navigation.kt` | Bottom tabs: outlined icons, filled and green on a soft pill when selected |
 
