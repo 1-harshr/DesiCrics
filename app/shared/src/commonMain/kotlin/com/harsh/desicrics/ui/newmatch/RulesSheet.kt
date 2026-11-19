@@ -32,7 +32,36 @@ internal enum class RulesPreset(val rules: MatchRules?, val label: StringResourc
     CUSTOM(null, Res.string.rules_preset_custom, Res.string.rules_preset_custom_hint);
 
     companion object {
-        fun matching(rules: MatchRules): RulesPreset = entries.firstOrNull { it.rules == rules } ?: CUSTOM
+        /** Whether a wide or no-ball gives a run is asked on its own, so it doesn't make the rules custom. */
+        fun matching(rules: MatchRules): RulesPreset =
+            entries.firstOrNull { it.rules?.withExtraRunsOf(rules) == rules } ?: CUSTOM
+    }
+}
+
+/** These rules with [other]'s answers to whether a wide and a no-ball give a run. */
+internal fun MatchRules.withExtraRunsOf(other: MatchRules): MatchRules =
+    copy(widePenalty = other.widePenalty, noBallPenalty = other.noBallPenalty)
+
+/**
+ * Whether a wide and a no-ball give a run, asked outright when setting up: local matches differ, and it
+ * changes every extra scored. Yes keeps a run the rules sheet set (two counts too); no makes it 0.
+ */
+@Composable
+internal fun ExtraRunQuestions(rules: MatchRules, onChange: (MatchRules) -> Unit) {
+    fun answer(penalty: Int, yes: Boolean) = if (!yes) 0 else penalty.coerceAtLeast(1)
+    ExtraRunQuestion(Res.string.rules_wide_gives_run, rules.widePenalty > 0) { onChange(rules.copy(widePenalty = answer(rules.widePenalty, it))) }
+    ExtraRunQuestion(Res.string.rules_no_ball_gives_run, rules.noBallPenalty > 0) { onChange(rules.copy(noBallPenalty = answer(rules.noBallPenalty, it))) }
+}
+
+@Composable
+private fun ExtraRunQuestion(question: StringResource, givesRun: Boolean, onAnswer: (Boolean) -> Unit) {
+    Rule(question, hint = null) {
+        SegmentedControl(
+            options = listOf(true, false),
+            selected = givesRun,
+            label = { stringResource(if (it) Res.string.rules_yes else Res.string.rules_no) },
+            onSelect = onAnswer,
+        )
     }
 }
 

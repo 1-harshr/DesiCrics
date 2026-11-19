@@ -465,6 +465,10 @@
     <string name="rules_wide">Wides</string>
     <string name="rules_no_ball">No-balls</string>
     <string name="rules_penalty">Runs it gives</string>
+    <string name="rules_wide_gives_run">Does a wide give a run?</string>
+    <string name="rules_no_ball_gives_run">Does a no-ball give a run?</string>
+    <string name="rules_yes">Yes</string>
+    <string name="rules_no">No</string>
     <string name="rules_rebowled">Bowled again</string>
     <string name="rules_counts_as_ball">Counts as a ball</string>
     <string name="rules_free_hit">Free hit after a no-ball</string>

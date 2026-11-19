@@ -57,6 +57,7 @@ import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.TournamentFormat
 import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.ui.newmatch.ExtraRunQuestions
 import com.harsh.desicrics.ui.newmatch.RulesPreset
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -160,6 +161,9 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
     var groups by rememberSaveable { mutableStateOf(2) }
     var advance by rememberSaveable { mutableStateOf(2) }
     var preset by rememberSaveable { mutableStateOf(RulesPreset.RELAXED) }
+    var wideRun by rememberSaveable { mutableStateOf(true) }
+    var noBallRun by rememberSaveable { mutableStateOf(true) }
+    val rules = preset.rules!!.let { it.copy(widePenalty = if (wideRun) it.widePenalty else 0, noBallPenalty = if (noBallRun) it.noBallPenalty else 0) }
     var registration by rememberSaveable { mutableStateOf(false) }
     val advanceOptions = when (format) {
         TournamentFormat.ROUND_ROBIN -> listOf(0, 2, 4)
@@ -212,6 +216,10 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
         SectionHeader(stringResource(Res.string.new_match_section_rules), icon = DesiIcons.Whistle)
         ChoiceChips(RulesPreset.entries.filter { it.rules != null }, selected = preset, label = { stringResource(it.label) }, onSelect = { preset = it })
         Text(stringResource(preset.hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        ExtraRunQuestions(rules, onChange = {
+            wideRun = it.widePenalty > 0
+            noBallRun = it.noBallPenalty > 0
+        })
         SectionHeader(stringResource(Res.string.tournament_registration), icon = DesiIcons.PersonAdd)
         Text(stringResource(Res.string.tournament_registration_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         SegmentedControl(
@@ -230,7 +238,7 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
                         city = city.trim(),
                         format = format,
                         oversPerInnings = overs,
-                        rules = preset.rules!!,
+                        rules = rules,
                         groups = if (format == TournamentFormat.GROUPS_KNOCKOUT) groups else 1,
                         advance = if (advanceOptions.isEmpty()) 0 else advance,
                         registrationOpen = registration,

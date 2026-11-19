@@ -533,9 +533,10 @@ private fun RulesSection(state: NewMatchFormState, actions: NewMatchActions) {
             options = RulesPreset.entries.filter { it != RulesPreset.CUSTOM || preset == RulesPreset.CUSTOM },
             selected = preset,
             label = { stringResource(it.label) },
-            onSelect = { picked -> picked.rules?.let { rules -> actions.onUpdate { it.copy(rules = rules) } } },
+            onSelect = { picked -> picked.rules?.let { rules -> actions.onUpdate { it.copy(rules = rules.withExtraRunsOf(it.rules)) } } },
         )
         Text(stringResource(preset.hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        ExtraRunQuestions(state.rules, onChange = { rules -> actions.onUpdate { it.copy(rules = rules) } })
         GhostButton(stringResource(Res.string.new_match_rules_customise), onClick = { customising = true }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Settings)
     }
     if (customising) {
