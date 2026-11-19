@@ -187,3 +187,48 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ⬜ Charging for them as an organiser plan (needs a pricing decision and Play billing; until then they're free)
 
 **Exit:** at least 20% of weekend matches in a pilot city are arranged through "Looking for".
+
+---
+
+## Phase 7 · Show it off
+
+**Goal:** what happens in a match leaves the app looking good, and a league can be run from its auction to its final. Spec: [phase-7.md](phase-7.md).
+
+### Level 1 · Playable
+- ⬜ 7.1 Wagon wheel on by default, with the field tapped before the runs
+- ⬜ 7.2 Share studio: transparent Strava-style overlays (batting, bowling, result, season) plus Classic, Broadcast and Minimal templates
+- ⬜ 7.3 Posters: fixtures, bracket, result, scorecard, points table, squad, player of the match, tournament announcement, each with 2–4 templates
+- ⬜ 7.4 Player auction: Hall mode (one device on a big screen) and Online mode (owners bid from their own phones)
+
+### Level 2 · Complete
+- ⬜ Auction: retained players, bid steps, categories, an unsold round, a summary for each team
+- ⬜ Posters: fixture lists split into pages, 1:1 post format
+
+### Level 3 · Delight
+- ⬜ Sold! and Team after auction posters
+- ⬜ Where catches were taken, and a finer wagon wheel
+
+**Exit:** an 8-team league holds its auction in the app, shares its fixtures poster, and its players post overlays of their innings.
+
+---
+
+## Phase 8 · Themes that feel like cricket
+
+**Goal:** the app looks and feels like cricket, and players pick the look that matches the cricket they play. Spec: [phase-8.md](phase-8.md).
+
+### Level 1 · Playable
+- ⬜ Explore four directions (Red Ball, Floodlights, Gully, Scoreboard) on three screens, in light and dark
+- ⬜ Theme infrastructure: `DesiThemeSpec` with shape, surface and motif tokens; Crease ported as Classic
+- ⬜ The first picked theme, and a theme picker in settings
+
+### Level 2 · Complete
+- ⬜ The other picked themes
+- ⬜ A theme picker in the share studio
+- ⬜ Screenshot and contrast tests in every theme
+
+### Level 3 · Delight
+- ⬜ Team colours as the accent on team pages and cards
+- ⬜ Tournament themes for pages, posters and the overlay
+- ⬜ Theme-specific wicket and boundary celebrations
+
+**Exit:** a player switches between at least three themes, light and dark, and every main screen passes the contrast test in each.
