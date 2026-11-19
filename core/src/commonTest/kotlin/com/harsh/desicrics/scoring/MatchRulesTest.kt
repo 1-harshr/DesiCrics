@@ -14,6 +14,7 @@ import com.harsh.desicrics.model.Team
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.model.Wicket
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -275,7 +276,29 @@ class MatchRulesTest {
 
     @Test
     fun presetsAreValid() {
-        listOf(MatchRules(), MatchRules.Standard, MatchRules.Club, MatchRules.Gully).forEach { assertTrue(it.isValid()) }
+        listOf(MatchRules(), MatchRules.Relaxed, MatchRules.Standard, MatchRules.Club, MatchRules.Gully).forEach { assertTrue(it.isValid()) }
         assertFalse(MatchRules(widePenalty = 3).isValid())
+    }
+
+    @Test
+    fun presetsTrackTheWagonWheel() {
+        listOf(MatchRules.Relaxed, MatchRules.Standard, MatchRules.Club, MatchRules.Gully).forEach { assertTrue(it.wagonWheel) }
+        assertEquals(MatchRules(), MatchRules.Relaxed.copy(wagonWheel = false))
+    }
+
+    @Test
+    fun storedRulesKeepTheirWagonWheel() {
+        // Rules are stored without their defaults: a match saved with it off, or before rules existed, stays off.
+        assertFalse(Json.decodeFromString<MatchRules>(Json.encodeToString(MatchRules())).wagonWheel)
+        assertFalse(Json.decodeFromString<MatchRules>("{}").wagonWheel)
+        assertTrue(Json.decodeFromString<MatchRules>(Json.encodeToString(MatchRules.Relaxed)).wagonWheel)
+    }
+
+    @Test
+    fun zonesOnlyGoWithRunsOffTheBat() {
+        match = match(MatchRules.Relaxed)
+        assertNull(error(delivery("a1", "a2", runs = 3).copy(zone = FieldZone.MID_WICKET)))
+        assertEquals(DeliveryError.ZONE_WITHOUT_RUNS, error(delivery("a1", "a2").copy(zone = FieldZone.COVER)))
+        assertEquals(DeliveryError.ZONE_WITHOUT_RUNS, error(delivery("a1", "a2", extra = ExtraType.WIDE, extraRuns = 2).copy(zone = FieldZone.COVER)))
     }
 }

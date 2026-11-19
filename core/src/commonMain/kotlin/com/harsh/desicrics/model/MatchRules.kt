@@ -40,7 +40,11 @@ data class MatchRules(
     /** The ball after a no-ball is a free hit: the batter can't be out in any way a no-ball rules out. */
     val freeHitMode: RuleMode = RuleMode.OFF,
 
-    /** Ask where each scoring shot went, for the wagon wheel. Off by default: it's an extra tap per ball. */
+    /**
+     * Ask where each scoring shot went, for the wagon wheel. New matches get it on through the presets; the
+     * bare default stays off because rules are stored without their defaults, so matches saved before it
+     * was turned on keep reading as off.
+     */
     val wagonWheel: Boolean = false,
     /** Fielding-restriction overs at the start of each innings, shown on the scoreboard. 0 for none. */
     val powerplayOvers: Int = 0,
@@ -70,6 +74,9 @@ data class MatchRules(
         val RETIRE_AT = 5..200
         val PENALTY = 0..2
 
+        /** The original, most lenient behaviour, with the wagon wheel on: where new matches start. */
+        val Relaxed = MatchRules(wagonWheel = true)
+
         /** The laws plus the usual limited-overs playing conditions, all enforced. */
         val Standard = MatchRules(
             retiredReturn = RetiredReturn.AFTER_WICKET,
@@ -77,6 +84,7 @@ data class MatchRules(
             bowlerOverLimitMode = RuleMode.ENFORCE,
             consecutiveOversMode = RuleMode.ENFORCE,
             freeHitMode = RuleMode.ENFORCE,
+            wagonWheel = true,
             powerplayOvers = 6,
         )
 
@@ -93,6 +101,7 @@ data class MatchRules(
             lastManStands = true,
             retiredReturn = RetiredReturn.AT_END,
             retiredReturnMode = RuleMode.ENFORCE,
+            wagonWheel = true,
         )
     }
 }

@@ -25,7 +25,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /** Starting points for a match's rules. [CUSTOM] is whatever the scorer changed from one of them. */
 internal enum class RulesPreset(val rules: MatchRules?, val label: StringResource, val hint: StringResource) {
-    RELAXED(MatchRules(), Res.string.rules_preset_relaxed, Res.string.rules_preset_relaxed_hint),
+    RELAXED(MatchRules.Relaxed, Res.string.rules_preset_relaxed, Res.string.rules_preset_relaxed_hint),
     GULLY(MatchRules.Gully, Res.string.rules_preset_gully, Res.string.rules_preset_gully_hint),
     CLUB(MatchRules.Club, Res.string.rules_preset_club, Res.string.rules_preset_club_hint),
     STANDARD(MatchRules.Standard, Res.string.rules_preset_standard, Res.string.rules_preset_standard_hint),
