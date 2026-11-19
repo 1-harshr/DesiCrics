@@ -103,13 +103,18 @@ data class PadKey(val id: String, val label: String, val style: PadKeyStyle = Pa
 /**
  * The 4-column scoring keypad. Keys are 64dp tall, as the thumb-zone rule asks. A key works when both
  * [enabled] and its own [PadKey.enabled] are true, so Undo can stay live while the run keys wait.
+ * With [onBlockedKey], a key that's off only for its own reason still answers a tap, so the screen can
+ * point at what's holding it back.
  */
 @Composable
-fun RunPad(keys: List<PadKey>, onKey: (PadKey) -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true) {
+fun RunPad(keys: List<PadKey>, onKey: (PadKey) -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true, onBlockedKey: ((PadKey) -> Unit)? = null) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
         keys.chunked(PAD_COLUMNS).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
-                row.forEach { key -> PadKeyButton(key, enabled && key.enabled, { onKey(key) }, Modifier.weight(1f)) }
+                row.forEach { key ->
+                    val blocked = enabled && !key.enabled && onBlockedKey != null
+                    PadKeyButton(key, enabled && key.enabled, { if (blocked) onBlockedKey!!(key) else onKey(key) }, Modifier.weight(1f), tappable = blocked)
+                }
                 repeat(PAD_COLUMNS - row.size) { Box(Modifier.weight(1f)) }
             }
         }
@@ -119,7 +124,7 @@ fun RunPad(keys: List<PadKey>, onKey: (PadKey) -> Unit, modifier: Modifier = Mod
 private const val PAD_COLUMNS = 4
 
 @Composable
-private fun PadKeyButton(key: PadKey, enabled: Boolean, onClick: () -> Unit, modifier: Modifier) {
+private fun PadKeyButton(key: PadKey, enabled: Boolean, onClick: () -> Unit, modifier: Modifier, tappable: Boolean = false) {
     val colors = DesiTheme.colors
     val event = colors.event
     val isWicket = key.style == PadKeyStyle.Wicket
@@ -141,7 +146,7 @@ private fun PadKeyButton(key: PadKey, enabled: Boolean, onClick: () -> Unit, mod
             .clip(DesiTheme.radius.lg)
             .background(if (isWicket && enabled) event.wicket else colors.surface)
             .border(1.dp, if (isWicket && enabled) event.wicket else colors.line, DesiTheme.radius.lg)
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(enabled = enabled || tappable, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(key.label, style = style, color = if (enabled) text else colors.muted, textAlign = TextAlign.Center)
