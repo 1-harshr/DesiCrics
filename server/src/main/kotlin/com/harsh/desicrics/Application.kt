@@ -92,7 +92,7 @@ fun Application.module(
     // After the projector, so a finished fixture's stats are in before the next round is made.
     matches.listen(tournaments)
     launch { projector.backfill() }
-    val teams = TeamService(teamStore, players, matchStore, users)
+    val teams = TeamService(teamStore, players, matchStore, users, notify = notifier::teamNotice)
     val community = CommunityService(ExposedCommunityStore(database), players, teamStore, users, matchStore, statsStore)
     val images = ImageService(ExposedImageStore(database), users, teamStore, teams)
     val playerService = PlayerService(players, users)

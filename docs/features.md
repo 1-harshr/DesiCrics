@@ -10,7 +10,7 @@ Every feature area, what we build, and the phase it lands in. See [roadmap.md](r
 | Toss | One sheet before the first ball: winner and decision. | 1 |
 | Scoring | Thumb-zone run pad, contextual wicket sheet, server-validated undo, substitutes, revise target, end innings, end a match early (no result, concession, walkover, called off). Wagon wheel optional. | 1 |
 | Match detail | Scorecard, commentary, squads, overs, info. Updates live. | 1 / 3 |
-| Teams | Create team, add members by search, phone number or QR code, team admins, invite links that work through WhatsApp. | 2 |
+| Teams | Create team, add members by search, phone number or QR code, team admins, invite links that work through WhatsApp. Players who find a team by name ask to join; its admins are notified and accept or decline on the team page. | 2 |
 | Profile tabs | Matches / Teams / Stats on the player's profile. | 2 |
 | Settings and support | Edit profile, support form with attachments, sign out, account deletion. | 2 |
 | Today feed | My live match pinned first, then followed matches, then nearby. | 3 |

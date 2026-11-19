@@ -43,6 +43,15 @@ class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfi
 
     suspend fun uploadLogo(teamId: String, jpeg: ByteArray): SavedTeam = api.uploadTeamLogo(teamId, jpeg)
 
+    /** For a team found by name: its admins are asked, and the caller joins once one accepts. */
+    suspend fun requestToJoin(teamId: String): SavedTeam = api.requestToJoin(teamId)
+
+    suspend fun cancelJoinRequest(teamId: String): SavedTeam = api.cancelJoinRequest(teamId)
+
+    suspend fun acceptJoinRequest(teamId: String, profileId: String): SavedTeam = api.acceptJoinRequest(teamId, profileId)
+
+    suspend fun declineJoinRequest(teamId: String, profileId: String): SavedTeam = api.declineJoinRequest(teamId, profileId)
+
     suspend fun join(code: String): SavedTeam =
         api.joinTeam(code.trim().uppercase()).also { analytics.log(AnalyticsEvents.TEAM_JOINED, emptyMap()) }
 

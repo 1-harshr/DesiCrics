@@ -1108,8 +1108,15 @@
     <string name="onboarding_claim_done">Done. %1$s's matches and stats are yours now.</string>
     <string name="onboarding_claim_code_hint">Got a claim code from your captain instead?</string>
     <string name="onboarding_team_title">Join your team</string>
-    <string name="onboarding_team_subtitle">Enter the code your team admin shared, or start a team of your own.</string>
-    <string name="onboarding_team_or">or</string>
+    <string name="onboarding_team_subtitle">Find your team by name and ask to join, or start one of your own.</string>
+    <string name="onboarding_team_search">Your team's name</string>
+    <string name="onboarding_team_ask">Ask to join</string>
+    <string name="onboarding_team_requested">Requested</string>
+    <string name="onboarding_team_none">No team called "%1$s" yet.</string>
+    <string name="onboarding_team_create">Create "%1$s"</string>
+    <string name="onboarding_team_create_hint">A new team, with you as its admin</string>
+    <string name="onboarding_team_requested_hint">We've asked the team's admins. You'll get a notification when you're in.</string>
+    <string name="onboarding_team_have_code">Have a team code?</string>
     <string name="onboarding_team_done">You're in %1$s. Add more teams any time from Teams.</string>
     <string name="onboarding_follow_title">Follow cricket near you</string>
     <string name="onboarding_follow_subtitle">The top teams and players in %1$s. You'll hear when they play, win or hit a milestone.</string>
@@ -1122,4 +1129,13 @@
     <string name="onboarding_notify_result">Results, fifties, hundreds and five-fors</string>
     <string name="onboarding_notify_allow">Turn on notifications</string>
     <string name="onboarding_notify_later">Not now</string>
+
+    <!-- Join requests -->
+    <string name="team_ask_to_join">Ask to join</string>
+    <string name="team_requested">Requested</string>
+    <string name="team_join_requests">Asking to join</string>
+    <string name="team_join_accept">Accept</string>
+    <string name="team_join_decline">Decline</string>
+    <string name="notification_join_request">%1$s wants to join %2$s</string>
+    <string name="notification_join_accepted">You're in %1$s</string>
 </resources>

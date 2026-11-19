@@ -22,8 +22,8 @@ import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
 /**
- * Match updates from the server. In the background Android shows them itself; in the foreground this
- * shows them. Tapping one opens the match through the same link handling as a shared /m/ link.
+ * Match and team updates from the server. In the background Android shows them itself; in the foreground
+ * this shows them. Tapping one opens its match or team through the same link handling as a shared /m/ link.
  */
 class PushService : FirebaseMessagingService() {
 
@@ -52,7 +52,7 @@ class PushService : FirebaseMessagingService() {
             .setContentTitle(message.notification?.title ?: getString(R.string.app_name))
             .setContentText(body)
             .setAutoCancel(true)
-            .setContentIntent(openMatch(message.data["matchId"], body.hashCode()))
+            .setContentIntent(openLink(linkFor(message.data), body.hashCode()))
             .build()
         post(null, body.hashCode(), notification)
     }
@@ -69,18 +69,22 @@ class PushService : FirebaseMessagingService() {
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             // Each update renews this; a match abandoned without a result stops showing after a while.
             .setTimeoutAfter(LIVE_TIMEOUT_MS)
-            .setContentIntent(openMatch(matchId, matchId.hashCode()))
+            .setContentIntent(openLink("/m/$matchId", matchId.hashCode()))
             .build()
         post(matchId, LIVE_ID, notification)
     }
 
 
 
-    /** Opens the match through the same link handling as a shared /m/ link. */
-    private fun openMatch(matchId: String?, requestCode: Int): PendingIntent {
+    /** Team news ("wants to join", "you're in") opens the team; everything else opens its match. */
+    private fun linkFor(data: Map<String, String>): String? =
+        data["teamId"]?.let { "/team/$it" } ?: data["matchId"]?.let { "/m/$it" }
+
+    /** Opens [path] through the same link handling as a shared /m/ link. */
+    private fun openLink(path: String?, requestCode: Int): PendingIntent {
         val open = Intent(this, MainActivity::class.java).apply {
             action = Intent.ACTION_VIEW
-            if (matchId != null) data = Uri.parse("${BuildConfig.PUBLIC_URL.trimEnd('/')}/m/$matchId")
+            if (path != null) data = Uri.parse(BuildConfig.PUBLIC_URL.trimEnd('/') + path)
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         return PendingIntent.getActivity(this, requestCode, open, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)

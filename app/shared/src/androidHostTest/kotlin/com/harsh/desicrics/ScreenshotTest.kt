@@ -209,8 +209,24 @@ class ScreenshotTest {
                         TeamMember(PlayerSummary("p3", "Kabir", isPlaceholder = true), TeamRole.MEMBER, claimCode = "K7M2QX"),
                     ),
                     joinCode = "AB3XY9",
+                    joinRequests = listOf(PlayerSummary("p4", "Ishaan Rao", "Mumbai")),
                 ),
                 otherTeams = listOf(TeamSummary("t2", "Powai XI", "", 9)),
+            ),
+            {}, {}, {}, {}, {}, {}, {},
+        )
+    }
+
+    @Test
+    fun teamAsOutsider() = shoot("team_outsider") {
+        TeamContent(
+            TeamUiState(
+                myId = "me", loading = false, following = false,
+                team = SavedTeam(
+                    "t1", "Andheri Strikers", "Mumbai", "p2",
+                    listOf(TeamMember(PlayerSummary("p2", "Aarav Shah", role = PlayerRole.BOWLER), TeamRole.ADMIN)),
+                    requested = true,
+                ),
             ),
             {}, {}, {}, {}, {}, {}, {},
         )
@@ -280,6 +296,7 @@ class ScreenshotTest {
                     Notification("1", NotificationKind.MILESTONE_RUNS, "m", "Strikers vs Royals", "Aarav", 50, createdAt = 0),
                     Notification("2", NotificationKind.MATCH_RESULT, "m", "Strikers vs Royals", detail = "Strikers won by 12 runs", createdAt = 0, read = true),
                     Notification("3", NotificationKind.FIXTURE_RESCHEDULED, "m", "Juhu Kings vs Powai XI", detail = "1800000000000", createdAt = 0),
+                    Notification("4", NotificationKind.TEAM_JOIN_REQUEST, "", "Andheri Strikers", "Ishaan Rao", createdAt = 0, teamId = "t1"),
                 ),
             ),
             {}, {},

@@ -10,6 +10,8 @@ import com.harsh.desicrics.api.SupportRequest
 import com.harsh.desicrics.api.TeamRequest
 import com.harsh.desicrics.model.HeadToHead
 import com.harsh.desicrics.model.Match
+import com.harsh.desicrics.model.Notification
+import com.harsh.desicrics.model.NotificationKind
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
@@ -64,6 +66,63 @@ class TeamsTest {
         val newCode = client.post("/teams/${team.id}/join-code") { bearerAuth("test-asha") }.body<SavedTeam>().joinCode
         assertTrue(newCode != code)
         assertEquals(HttpStatusCode.NotFound, client.post("/teams/join/$code") { bearerAuth("test-dev") }.status)
+    }
+
+    @Test
+    fun playersAskToJoinAndAdminsDecide() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev", name = "Dev")
+        client.setUpProfile("kabir", name = "Kabir")
+        val team = client.createTeam("asha")
+        val requests = "/teams/${team.id}/join-requests"
+
+        // Asking twice is harmless, and the asker only sees that they're waiting.
+        client.post(requests) { bearerAuth("test-dev") }
+        val waiting = client.post(requests) { bearerAuth("test-dev") }.body<SavedTeam>()
+        assertTrue(waiting.requested)
+        assertTrue(waiting.joinRequests.isEmpty())
+        assertNull(waiting.roleOf("dev"))
+        client.post(requests) { bearerAuth("test-kabir") }
+
+        // The admin sees who's asking, oldest first, and an inbox entry for each, pointing at the team.
+        assertEquals(listOf("dev", "kabir"), client.team("asha", team.id).joinRequests.map { it.profileId })
+        val inbox = client.get("/notifications") { bearerAuth("test-asha") }.body<List<Notification>>()
+        assertEquals(listOf(NotificationKind.TEAM_JOIN_REQUEST), inbox.map { it.kind }.distinct())
+        assertEquals(setOf("Dev", "Kabir"), inbox.map { it.playerName }.toSet())
+        assertEquals(team.id, inbox.first().teamId)
+
+        // Only admins decide.
+        assertEquals(HttpStatusCode.Forbidden, client.post("$requests/kabir") { bearerAuth("test-dev") }.status)
+
+        val accepted = client.post("$requests/dev") { bearerAuth("test-asha") }.body<SavedTeam>()
+        assertEquals(TeamRole.MEMBER, accepted.roleOf("dev"))
+        assertEquals(listOf("kabir"), accepted.joinRequests.map { it.profileId })
+        val devInbox = client.get("/notifications") { bearerAuth("test-dev") }.body<List<Notification>>()
+        assertEquals(listOf(NotificationKind.TEAM_JOIN_ACCEPTED), devInbox.map { it.kind })
+        assertEquals(HttpStatusCode.NotFound, client.post("$requests/dev") { bearerAuth("test-asha") }.status)
+
+        // Declining is quiet, and they can ask again.
+        val declined = client.delete("$requests/kabir") { bearerAuth("test-asha") }.body<SavedTeam>()
+        assertTrue(declined.joinRequests.isEmpty())
+        assertNull(declined.roleOf("kabir"))
+        assertTrue(client.get("/notifications") { bearerAuth("test-kabir") }.body<List<Notification>>().isEmpty())
+        assertFalse(client.team("kabir", team.id).requested)
+
+        // Asking, then joining with the code, clears the request.
+        client.post(requests) { bearerAuth("test-kabir") }
+        client.post("/teams/join/${team.joinCode}") { bearerAuth("test-kabir") }
+        assertTrue(client.team("asha", team.id).joinRequests.isEmpty())
+    }
+
+    @Test
+    fun aPlayerCanTakeBackTheirRequest() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev", name = "Dev")
+        val team = client.createTeam("asha")
+        client.post("/teams/${team.id}/join-requests") { bearerAuth("test-dev") }
+        val cancelled = client.delete("/teams/${team.id}/join-requests") { bearerAuth("test-dev") }.body<SavedTeam>()
+        assertFalse(cancelled.requested)
+        assertTrue(client.team("asha", team.id).joinRequests.isEmpty())
     }
 
     @Test

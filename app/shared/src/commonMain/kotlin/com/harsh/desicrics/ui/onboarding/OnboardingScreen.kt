@@ -58,6 +58,7 @@ import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.IconTile
 import com.harsh.desicrics.designsystem.component.ListCard
 import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.PillButton
 import com.harsh.desicrics.designsystem.component.PlayerCard
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.SectionHeader
@@ -68,6 +69,7 @@ import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.PlayerSummary
+import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.profile.AboutSection
@@ -80,6 +82,7 @@ import com.harsh.desicrics.ui.system.rememberImagePicker
 import com.harsh.desicrics.ui.system.rememberNotificationPermission
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -127,6 +130,8 @@ fun OnboardingScreen(uid: String, joinCode: String?, onJoinedFromLink: () -> Uni
             onClaimCode = viewModel::claimByCode,
             onJoin = { code -> viewModel.join(code) { if (code == joinCode) onJoinedFromLink() } },
             onCreateTeam = { name -> viewModel.createTeam(name, form.city) },
+            onSearchTeams = viewModel::searchTeams,
+            onToggleRequest = viewModel::toggleJoinRequest,
             onToggleFollow = viewModel::toggleFollow,
         ),
     )
@@ -142,6 +147,8 @@ class OnboardingActions(
     val onClaimCode: (code: String) -> Unit = {},
     val onJoin: (code: String) -> Unit = {},
     val onCreateTeam: (name: String) -> Unit = {},
+    val onSearchTeams: (query: String) -> Unit = {},
+    val onToggleRequest: (teamId: String) -> Unit = {},
     val onToggleFollow: (Suggestion) -> Unit = {},
 )
 
@@ -274,7 +281,7 @@ private fun ClaimStep(state: OnboardingUiState, actions: OnboardingActions) {
                 title = player.name,
                 subtitle = player.city.ifBlank { null },
                 leading = { PhotoAvatar(player.name, player.photoUrl) },
-                trailing = { Pill(stringResource(Res.string.profile_claimable_action), selected = false, enabled = !state.working) { actions.onClaim(player.profileId) } },
+                trailing = { PillButton(stringResource(Res.string.profile_claimable_action), { actions.onClaim(player.profileId) }, enabled = !state.working) },
                 divider = i > 0,
             )
         }
@@ -299,7 +306,10 @@ private fun ClaimStep(state: OnboardingUiState, actions: OnboardingActions) {
     }
 }
 
-/** Join with a code (filled in when the app was opened from a team link), or start a team. */
+/**
+ * Find the team by name and ask to join, or create it if it isn't there. A code still works, behind a
+ * link, and is filled in and showing when the app was opened from a team link.
+ */
 @Composable
 private fun TeamStep(state: OnboardingUiState, actions: OnboardingActions, joinCode: String?) {
     val teamName = state.teamName
@@ -307,8 +317,63 @@ private fun TeamStep(state: OnboardingUiState, actions: OnboardingActions, joinC
         DoneCard(stringResource(Res.string.onboarding_team_done, teamName))
         return
     }
+    val query = state.teamQuery.trim()
+    DesiTextField(
+        value = state.teamQuery,
+        onValueChange = { actions.onSearchTeams(it.take(60)) },
+        label = stringResource(Res.string.onboarding_team_search),
+        leadingIcon = DesiIcons.Search,
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Search),
+    )
+    if (state.requestFailed || state.createFailed) ErrorBanner(stringResource(Res.string.teams_action_failed))
+    if (query.length >= 2) {
+        val results = state.teamResults.orEmpty()
+        val noMatch = state.teamResults != null && results.isEmpty()
+        ListCard {
+            results.forEachIndexed { i, team ->
+                val asked = team.id in state.requestedTeams
+                ListRow(
+                    title = team.name,
+                    subtitle = listOf(team.city, pluralStringResource(Res.plurals.teams_member_count, team.memberCount, team.memberCount))
+                        .filter { it.isNotBlank() }.joinToString(" · "),
+                    leading = { PhotoAvatar(team.name, team.logoUrl) },
+                    trailing = {
+                        PillButton(
+                            stringResource(if (asked) Res.string.onboarding_team_requested else Res.string.onboarding_team_ask),
+                            { actions.onToggleRequest(team.id) },
+                            selected = asked,
+                            enabled = !state.working,
+                        )
+                    },
+                    divider = i > 0,
+                )
+            }
+            if (noMatch) {
+                ListRow(stringResource(Res.string.onboarding_team_none, query), leading = { IconTile(DesiIcons.SearchOff) })
+            }
+            ListRow(
+                title = stringResource(Res.string.onboarding_team_create, query),
+                subtitle = stringResource(Res.string.onboarding_team_create_hint),
+                leading = { IconTile(DesiIcons.GroupAdd) },
+                divider = results.isNotEmpty() || noMatch,
+                onClick = if (state.working) null else ({ actions.onCreateTeam(query) }),
+            )
+        }
+    }
+    if (state.requestedTeams.isNotEmpty()) {
+        Text(stringResource(Res.string.onboarding_team_requested_hint), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+    }
+    CodeEntry(state, actions, joinCode)
+}
+
+@Composable
+private fun CodeEntry(state: OnboardingUiState, actions: OnboardingActions, joinCode: String?) {
+    var open by rememberSaveable { mutableStateOf(joinCode != null) }
     var code by rememberSaveable { mutableStateOf(joinCode.orEmpty()) }
-    var name by rememberSaveable { mutableStateOf("") }
+    if (!open) {
+        GhostButton(stringResource(Res.string.onboarding_team_have_code), onClick = { open = true }, leadingIcon = DesiIcons.QrCode, modifier = Modifier.fillMaxWidth())
+        return
+    }
     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
         DesiTextField(
             value = code,
@@ -325,34 +390,6 @@ private fun TeamStep(state: OnboardingUiState, actions: OnboardingActions, joinC
             enabled = code.length >= 6 && !state.working,
             modifier = Modifier.fillMaxWidth(),
         )
-    }
-    OrDivider()
-    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-        DesiTextField(
-            value = name,
-            onValueChange = { name = it.take(60) },
-            label = stringResource(Res.string.teams_name),
-            leadingIcon = DesiIcons.Teams,
-            error = stringResource(Res.string.teams_action_failed).takeIf { state.createFailed },
-            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
-        )
-        TonalButton(
-            stringResource(Res.string.teams_create_action),
-            onClick = { actions.onCreateTeam(name) },
-            leadingIcon = DesiIcons.GroupAdd,
-            enabled = name.isNotBlank() && !state.working,
-            modifier = Modifier.fillMaxWidth(),
-        )
-    }
-}
-
-@Composable
-private fun OrDivider() {
-    val colors = DesiTheme.colors
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-        HorizontalDivider(Modifier.weight(1f), color = colors.line)
-        Text(stringResource(Res.string.onboarding_team_or), style = DesiTheme.type.caption, color = colors.muted)
-        HorizontalDivider(Modifier.weight(1f), color = colors.line)
     }
 }
 
@@ -381,9 +418,7 @@ private fun FollowGroup(title: StringResource, icon: org.jetbrains.compose.resou
                     subtitle = item.subtitle.ifBlank { null },
                     leading = { PhotoAvatar(item.name, item.photoUrl) },
                     trailing = {
-                        Pill(stringResource(if (item.following) Res.string.following else Res.string.follow), selected = item.following) {
-                            actions.onToggleFollow(item)
-                        }
+                        PillButton(stringResource(if (item.following) Res.string.following else Res.string.follow), { actions.onToggleFollow(item) }, selected = item.following)
                     },
                     divider = i > 0,
                 )
@@ -410,23 +445,6 @@ private fun DoneCard(text: String) {
     }
 }
 
-/** A small outlined action at the end of a row; filled once [selected]. */
-@Composable
-private fun Pill(text: String, selected: Boolean, enabled: Boolean = true, onClick: () -> Unit) {
-    val colors = DesiTheme.colors
-    Text(
-        text,
-        style = DesiTheme.type.label,
-        color = if (selected) colors.onBrand else colors.brand,
-        modifier = Modifier
-            .clip(DesiTheme.radius.full)
-            .background(if (selected) colors.brand else colors.surface)
-            .border(1.dp, colors.brand, DesiTheme.radius.full)
-            .clickable(enabled = enabled, onClick = onClick)
-            .padding(horizontal = DesiTheme.space.s4, vertical = DesiTheme.space.s2),
-    )
-}
-
 /**
  * Pinned under the step, above the keyboard. Required steps only go forward; optional ones offer Skip
  * until something is done there. The last step's button finishes.
@@ -439,7 +457,7 @@ private fun BottomBar(form: ProfileFormState, state: OnboardingUiState, isLast: 
         OnboardingStep.ABOUT, OnboardingStep.GAME -> true
         OnboardingStep.PHOTO -> form.photoUrl != null
         OnboardingStep.CLAIM -> state.claimed != null
-        OnboardingStep.TEAM -> state.teamName != null
+        OnboardingStep.TEAM -> state.teamName != null || state.requestedTeams.isNotEmpty()
         OnboardingStep.FOLLOW -> state.suggestions.orEmpty().any { it.following }
         OnboardingStep.NOTIFY -> true
     }
@@ -521,6 +539,9 @@ internal val PreviewOnboardingState = OnboardingUiState(
         Suggestion(FollowType.PLAYER, "p3", "Kabir Mehta", "Mumbai", null),
     ),
     suggestionsCity = "Mumbai",
+    teamQuery = "Andheri",
+    teamResults = listOf(TeamSummary("t1", "Andheri Strikers", "Mumbai", 14), TeamSummary("t2", "Andheri Royals", "Mumbai", 9)),
+    requestedTeams = setOf("t1"),
 )
 
 @Composable

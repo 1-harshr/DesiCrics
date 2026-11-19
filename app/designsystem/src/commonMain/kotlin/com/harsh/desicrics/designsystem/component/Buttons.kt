@@ -1,6 +1,10 @@
 package com.harsh.desicrics.designsystem.component
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +18,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.icon.DesiIcons
@@ -137,6 +143,26 @@ fun GhostButton(
         }
         Text(text, style = DesiTheme.type.button)
     }
+}
+
+/**
+ * A small rounded action at the end of a list row: Follow, Ask to join, Accept. Outlined in brand green,
+ * filled once [selected] (Following, Requested).
+ */
+@Composable
+fun PillButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier, selected: Boolean = false, enabled: Boolean = true) {
+    val colors = DesiTheme.colors
+    Text(
+        text,
+        style = DesiTheme.type.label,
+        color = if (selected) colors.onBrand else colors.brand,
+        modifier = modifier
+            .clip(DesiTheme.radius.full)
+            .background(if (selected) colors.brand else colors.surface)
+            .border(1.dp, colors.brand, DesiTheme.radius.full)
+            .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+            .padding(horizontal = DesiTheme.space.s4, vertical = DesiTheme.space.s2),
+    )
 }
 
 private val ButtonPadding = PaddingValues(horizontal = 20.dp, vertical = 14.dp)

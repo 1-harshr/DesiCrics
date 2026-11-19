@@ -158,6 +158,16 @@ class DesiCricsApi(
 
     suspend fun joinTeam(code: String): SavedTeam = call { post("$baseUrl/teams/join/$code", it) }.body()
 
+    suspend fun requestToJoin(teamId: String): SavedTeam = call { post("$baseUrl/teams/$teamId/join-requests", it) }.body()
+
+    suspend fun cancelJoinRequest(teamId: String): SavedTeam = call { delete("$baseUrl/teams/$teamId/join-requests", it) }.body()
+
+    suspend fun acceptJoinRequest(teamId: String, profileId: String): SavedTeam =
+        call { post("$baseUrl/teams/$teamId/join-requests/$profileId", it) }.body()
+
+    suspend fun declineJoinRequest(teamId: String, profileId: String): SavedTeam =
+        call { delete("$baseUrl/teams/$teamId/join-requests/$profileId", it) }.body()
+
     suspend fun teamInsights(teamId: String): TeamInsights =
         call { get("$baseUrl/teams/$teamId/insights", it) }.body()
 

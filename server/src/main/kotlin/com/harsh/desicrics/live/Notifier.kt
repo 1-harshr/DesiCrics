@@ -119,6 +119,27 @@ class Notifier(
         )
     }
 
+    /**
+     * Team news for [uids]: someone asking to join (to the admins) or being let in (to them). Tapping it
+     * opens the team.
+     */
+    suspend fun teamNotice(uids: Set<String>, kind: NotificationKind, teamId: String, teamName: String, playerName: String) {
+        if (uids.isEmpty()) return
+        val at = clock()
+        social.addNotifications(
+            uids.associateWith { Notification(UUID.randomUUID().toString(), kind, matchId = "", matchTitle = teamName, playerName = playerName, createdAt = at, teamId = teamId) },
+        )
+        val tokens = social.pushTokens(uids).values.flatten()
+        if (tokens.isEmpty()) return
+        val message = when (kind) {
+            NotificationKind.TEAM_JOIN_ACCEPTED -> "You're in $teamName"
+            else -> "$playerName wants to join $teamName"
+        }
+        runCatching { push.send(tokens, "DesiCrics", message, mapOf("teamId" to teamId)) }
+            .onSuccess { gone -> social.deletePushTokens(gone) }
+            .onFailure { log.warn("Push failed", it) }
+    }
+
     private suspend fun followersOf(match: Match): Set<String> {
         val teams = listOfNotNull(match.teamA.teamId, match.teamB.teamId)
         val players = (match.teamA.players + match.teamB.players).mapNotNull { it.profileId }

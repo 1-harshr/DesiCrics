@@ -171,6 +171,15 @@ class TeamViewModel(
 
     fun newJoinCode() = act { repository.newJoinCode(teamId) }
 
+    /** For someone outside the team: asks its admins, or takes the request back. */
+    fun toggleJoinRequest() = act {
+        if (_state.value.team?.requested == true) repository.cancelJoinRequest(teamId) else repository.requestToJoin(teamId)
+    }
+
+    fun acceptJoinRequest(profileId: String) = act { repository.acceptJoinRequest(teamId, profileId) }
+
+    fun declineJoinRequest(profileId: String) = act { repository.declineJoinRequest(teamId, profileId) }
+
     fun uploadLogo(jpeg: ByteArray) = act { repository.uploadLogo(teamId, jpeg) }
 
     /** Calls [onLeft] once the caller is out of the team. */

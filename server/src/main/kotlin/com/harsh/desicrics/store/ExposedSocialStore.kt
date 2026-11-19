@@ -68,6 +68,7 @@ class ExposedSocialStore(private val db: Database) : SocialStore {
                 this[NotificationsTable.detail] = n.detail?.take(200)
                 this[NotificationsTable.createdAt] = n.createdAt
                 this[NotificationsTable.readAt] = null
+                this[NotificationsTable.teamId] = n.teamId
             }
         }
     }
@@ -87,6 +88,7 @@ class ExposedSocialStore(private val db: Database) : SocialStore {
                     detail = it[NotificationsTable.detail],
                     createdAt = it[NotificationsTable.createdAt],
                     read = it[NotificationsTable.readAt] != null,
+                    teamId = it[NotificationsTable.teamId],
                 )
             }
     }

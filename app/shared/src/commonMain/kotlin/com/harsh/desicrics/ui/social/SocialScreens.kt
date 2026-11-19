@@ -149,14 +149,21 @@ internal fun PlayerLine(player: PlayerSummary, onClick: () -> Unit) {
 fun NotificationsScreen(
     onOpenMatch: (String) -> Unit,
     onBack: () -> Unit,
+    onOpenTeam: (String) -> Unit = {},
     viewModel: NotificationsViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    NotificationsContent(state, onOpenMatch, onBack, onRetry = viewModel::retry)
+    NotificationsContent(state, onOpenMatch, onBack, onRetry = viewModel::retry, onOpenTeam = onOpenTeam)
 }
 
 @Composable
-fun NotificationsContent(state: NotificationsUiState, onOpenMatch: (String) -> Unit, onBack: () -> Unit, onRetry: () -> Unit = {}) {
+fun NotificationsContent(
+    state: NotificationsUiState,
+    onOpenMatch: (String) -> Unit,
+    onBack: () -> Unit,
+    onRetry: () -> Unit = {},
+    onOpenTeam: (String) -> Unit = {},
+) {
     val space = DesiTheme.space
     DesiScaffold(title = stringResource(Res.string.notifications_title), onBack = onBack) { padding ->
         when {
@@ -171,7 +178,10 @@ fun NotificationsContent(state: NotificationsUiState, onOpenMatch: (String) -> U
                 } else if (state.notifications.isEmpty()) {
                     item { EmptyState(DesiIcons.Notifications, stringResource(Res.string.notifications_empty_title), body = stringResource(Res.string.notifications_empty)) }
                 }
-                items(state.notifications, key = { it.id }) { NotificationRow(it, onClick = { onOpenMatch(it.matchId) }) }
+                items(state.notifications, key = { it.id }) { n ->
+                    // Team news points at a team; everything else at a match.
+                    NotificationRow(n, onClick = { n.teamId?.let(onOpenTeam) ?: onOpenMatch(n.matchId) })
+                }
             }
         }
     }
@@ -197,6 +207,8 @@ private fun NotificationRow(notification: Notification, onClick: () -> Unit) {
             NotificationKind.MILESTONE_RUNS -> DesiIcons.Bat to colors.event.four
             NotificationKind.MILESTONE_WICKETS -> DesiIcons.Ball to colors.event.six
             NotificationKind.FIXTURE_RESCHEDULED -> DesiIcons.Calendar to colors.event.extra
+            NotificationKind.TEAM_JOIN_REQUEST -> DesiIcons.PersonAdd to colors.brand
+            NotificationKind.TEAM_JOIN_ACCEPTED -> DesiIcons.Teams to colors.brand
         }
         IconTile(icon, tint = tint, container = tint.copy(alpha = 0.12f))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -217,6 +229,8 @@ fun notificationText(n: Notification): String = when (n.kind) {
     NotificationKind.FIXTURE_RESCHEDULED -> n.detail?.toLongOrNull()
         ?.let { stringResource(Res.string.notification_rescheduled, n.matchTitle, formatDayAndTime(it)) }
         ?: stringResource(Res.string.notification_rescheduled_unset, n.matchTitle)
+    NotificationKind.TEAM_JOIN_REQUEST -> stringResource(Res.string.notification_join_request, n.playerName.orEmpty(), n.matchTitle)
+    NotificationKind.TEAM_JOIN_ACCEPTED -> stringResource(Res.string.notification_join_accepted, n.matchTitle)
 }
 
 @Composable

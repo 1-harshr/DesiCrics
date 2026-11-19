@@ -247,7 +247,7 @@ fun AppNavigation(
                 )
             }
             entry<NotificationsRoute> {
-                NotificationsScreen(onOpenMatch = { backStack.add(MatchRoute(it)) }, onBack = back)
+                NotificationsScreen(onOpenMatch = { backStack.add(MatchRoute(it)) }, onBack = back, onOpenTeam = { backStack.add(TeamRoute(it)) })
             }
             entry<PlayerRoute> { route ->
                 PlayerScreen(
@@ -320,6 +320,8 @@ internal fun routeFor(path: String): NavKey? {
         "join" -> JoinTeamRoute(value)
         "m" -> MatchRoute(value)
         "t" -> TournamentRoute(value)
+        // Only from the app's own notifications: the server has no public team page.
+        "team" -> TeamRoute(value)
         else -> null
     }
 }

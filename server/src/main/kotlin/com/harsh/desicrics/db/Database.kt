@@ -84,6 +84,13 @@ object TeamMembersTable : Table("team_members") {
     override val primaryKey = PrimaryKey(teamId, playerId)
 }
 
+object TeamJoinRequestsTable : Table("team_join_requests") {
+    val teamId = reference("team_id", TeamsTable.id, onDelete = ReferenceOption.CASCADE)
+    val playerId = reference("player_id", PlayersTable.id)
+    val requestedAt = long("requested_at")
+    override val primaryKey = PrimaryKey(teamId, playerId)
+}
+
 object SupportRequestsTable : Table("support_requests") {
     val id = varchar("id", 36)
     val uid = varchar("uid", 128)
@@ -262,6 +269,7 @@ object NotificationsTable : Table("notifications") {
     val detail = varchar("detail", 200).nullable()
     val createdAt = long("created_at")
     val readAt = long("read_at").nullable()
+    val teamId = varchar("team_id", 36).nullable()
     override val primaryKey = PrimaryKey(id)
 }
 

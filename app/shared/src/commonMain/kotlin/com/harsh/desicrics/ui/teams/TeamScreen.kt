@@ -54,6 +54,7 @@ import com.harsh.desicrics.designsystem.component.HeroScaffold
 import com.harsh.desicrics.designsystem.component.HeroStats
 import com.harsh.desicrics.designsystem.component.IconTile
 import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.PillButton
 import com.harsh.desicrics.designsystem.component.ListRow
 import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.StatGrid
@@ -132,6 +133,9 @@ fun TeamScreen(
             if (canManage) sheet = TeamSheet.Member(member) else if (!member.player.isPlaceholder) onOpenPlayer(member.player.profileId)
         },
         onFollow = viewModel::toggleFollow,
+        onToggleJoinRequest = viewModel::toggleJoinRequest,
+        onAcceptRequest = viewModel::acceptJoinRequest,
+        onDeclineRequest = viewModel::declineJoinRequest,
         onChangeLogo = pickLogo,
         onCompare = viewModel::compareWith,
         onLeave = { viewModel.leave(onBack) },
@@ -212,6 +216,9 @@ fun TeamContent(
     onCompare: (String) -> Unit,
     onLeave: () -> Unit,
     onFollow: () -> Unit = {},
+    onToggleJoinRequest: () -> Unit = {},
+    onAcceptRequest: (profileId: String) -> Unit = {},
+    onDeclineRequest: (profileId: String) -> Unit = {},
     onChangeLogo: () -> Unit = {},
     onRetry: () -> Unit = {},
 ) {
@@ -282,19 +289,34 @@ fun TeamContent(
                         HeroButton(stringResource(Res.string.team_invite_short), onInvite, Modifier.weight(1f), icon = DesiIcons.QrCode, filled = false)
                     }
                 }
-                state.following?.takeIf { state.myRole == null }?.let { following ->
-                    HeroButton(
-                        stringResource(if (following) Res.string.following else Res.string.follow),
-                        onFollow,
-                        Modifier.fillMaxWidth(),
-                        icon = if (following) DesiIcons.CheckCircle else DesiIcons.Add,
-                        filled = !following,
-                    )
+                // Someone outside the team can ask to join it, and follow it either way.
+                if (state.myRole == null) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                        HeroButton(
+                            stringResource(if (team.requested) Res.string.team_requested else Res.string.team_ask_to_join),
+                            onToggleJoinRequest,
+                            Modifier.weight(1f),
+                            icon = if (team.requested) DesiIcons.Clock else DesiIcons.PersonAdd,
+                            filled = !team.requested,
+                        )
+                        state.following?.let { following ->
+                            HeroButton(
+                                stringResource(if (following) Res.string.following else Res.string.follow),
+                                onFollow,
+                                Modifier.weight(1f),
+                                icon = if (following) DesiIcons.CheckCircle else DesiIcons.Add,
+                                filled = false,
+                            )
+                        }
+                    }
                 }
             },
         ) {
             if (state.actionFailed) {
                 ErrorBanner(stringResource(Res.string.teams_action_failed))
+            }
+            if (team.joinRequests.isNotEmpty()) {
+                JoinRequests(team.joinRequests, enabled = !state.saving, onAccept = onAcceptRequest, onDecline = onDeclineRequest)
             }
             Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
                 SectionHeader(stringResource(Res.string.team_members), icon = DesiIcons.Teams)
@@ -561,6 +583,30 @@ private fun InviteSheet(team: SavedTeam, link: String?, onShare: (String) -> Uni
         PrimaryButton(stringResource(Res.string.team_invite_share), onClick = { onShare(inviteText) }, modifier = Modifier.fillMaxWidth())
         GhostButton(stringResource(Res.string.team_invite_new_code), onClick = onNewCode, modifier = Modifier.fillMaxWidth())
         Text(stringResource(Res.string.team_invite_new_code_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+    }
+}
+
+/** For admins: players who found the team and asked to join, oldest first. */
+@Composable
+private fun JoinRequests(players: List<PlayerSummary>, enabled: Boolean, onAccept: (String) -> Unit, onDecline: (String) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+        SectionHeader(stringResource(Res.string.team_join_requests), icon = DesiIcons.PersonAdd)
+        ListCard {
+            players.forEachIndexed { index, player ->
+                ListRow(
+                    title = player.name,
+                    subtitle = player.city.ifBlank { null },
+                    leading = { PhotoAvatar(player.name, player.photoUrl, size = 44) },
+                    trailing = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+                            PillButton(stringResource(Res.string.team_join_decline), { onDecline(player.profileId) }, enabled = enabled)
+                            PillButton(stringResource(Res.string.team_join_accept), { onAccept(player.profileId) }, selected = true, enabled = enabled)
+                        }
+                    },
+                    divider = index > 0,
+                )
+            }
+        }
     }
 }
 

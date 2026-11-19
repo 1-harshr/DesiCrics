@@ -7,6 +7,9 @@ import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.PlayerSummary
+import com.harsh.desicrics.model.TeamSummary
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +39,14 @@ data class OnboardingUiState(
     val teamFailed: Boolean = false,
     /** Creating a team failed, usually for want of a connection. */
     val createFailed: Boolean = false,
+    /** What the player typed to find their team, and the teams it matches; null until searched. */
+    val teamQuery: String = "",
+    val teamResults: List<TeamSummary>? = null,
+    val searchingTeams: Boolean = false,
+    /** Teams asked to join here, waiting for an admin. */
+    val requestedTeams: Set<String> = emptySet(),
+    /** Asking to join failed, usually for want of a connection. */
+    val requestFailed: Boolean = false,
     /** Teams and players in the player's city; null until loaded for [suggestionsCity]. */
     val suggestions: List<Suggestion>? = null,
     val suggestionsCity: String? = null,
@@ -121,6 +132,33 @@ class OnboardingViewModel(
         _state.update { it.copy(claimed = player, claimFailed = false) }
     }
 
+    private var searchJob: Job? = null
+
+    /** Searches as the player types, waiting briefly so each keystroke doesn't hit the server. */
+    fun searchTeams(query: String) {
+        _state.update { it.copy(teamQuery = query) }
+        searchJob?.cancel()
+        if (query.trim().length < MIN_QUERY) {
+            _state.update { it.copy(teamResults = null, searchingTeams = false) }
+            return
+        }
+        searchJob = viewModelScope.launch {
+            _state.update { it.copy(searchingTeams = true) }
+            delay(SEARCH_DELAY_MS)
+            val results = runCatching { teams.searchTeams(query.trim()) }.getOrDefault(emptyList())
+            _state.update { it.copy(teamResults = results, searchingTeams = false) }
+        }
+    }
+
+    /** Asks the team's admins, or takes the request back if it's already been made. */
+    fun toggleJoinRequest(teamId: String) {
+        val asked = teamId in _state.value.requestedTeams
+        work(onFailure = { it.copy(requestFailed = true) }) {
+            if (asked) teams.cancelJoinRequest(teamId) else teams.requestToJoin(teamId)
+            _state.update { it.copy(requestedTeams = if (asked) it.requestedTeams - teamId else it.requestedTeams + teamId) }
+        }
+    }
+
     fun join(code: String, onJoined: () -> Unit = {}) = work(onFailure = { it.copy(teamFailed = true) }) {
         val team = teams.join(code)
         _state.update { it.copy(teamName = team.name) }
@@ -153,7 +191,7 @@ class OnboardingViewModel(
 
     private fun work(onFailure: (OnboardingUiState) -> OnboardingUiState, block: suspend () -> Unit) {
         if (_state.value.working) return
-        _state.update { it.copy(working = true, claimFailed = false, teamFailed = false, createFailed = false) }
+        _state.update { it.copy(working = true, claimFailed = false, teamFailed = false, createFailed = false, requestFailed = false) }
         viewModelScope.launch {
             try {
                 block()
@@ -169,5 +207,7 @@ class OnboardingViewModel(
 
     private companion object {
         const val SUGGESTIONS = 4
+        const val MIN_QUERY = 2
+        const val SEARCH_DELAY_MS = 300L
     }
 }

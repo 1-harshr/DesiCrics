@@ -21,6 +21,10 @@ enum class NotificationKind {
     MILESTONE_WICKETS,
     /** A fixture's start time changed; [Notification.detail] is the new time in epoch milliseconds, or empty if unset. */
     FIXTURE_RESCHEDULED,
+    /** [Notification.playerName] asked to join the team [Notification.teamId]; sent to its admins. */
+    TEAM_JOIN_REQUEST,
+    /** An admin let the user into the team [Notification.teamId]. */
+    TEAM_JOIN_ACCEPTED,
 }
 
 /**
@@ -31,14 +35,16 @@ enum class NotificationKind {
 data class Notification(
     val id: String,
     val kind: NotificationKind,
+    /** Empty for team news, which has [teamId] instead. */
     val matchId: String,
-    /** "Strikers vs Royals". */
+    /** "Strikers vs Royals", or the team's name for team news. */
     val matchTitle: String,
     val playerName: String? = null,
     val value: Int? = null,
     val detail: String? = null,
     val createdAt: Long,
     val read: Boolean = false,
+    val teamId: String? = null,
 )
 
 /** The home screen: the caller's own live match first, then live, upcoming and recent, followed ones first. */

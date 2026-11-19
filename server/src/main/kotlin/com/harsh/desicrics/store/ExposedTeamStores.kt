@@ -5,6 +5,7 @@ import com.harsh.desicrics.db.MatchPlayersTable
 import com.harsh.desicrics.db.PlayerMatchLinesTable
 import com.harsh.desicrics.db.PlayersTable
 import com.harsh.desicrics.db.SupportRequestsTable
+import com.harsh.desicrics.db.TeamJoinRequestsTable
 import com.harsh.desicrics.db.TeamMembersTable
 import com.harsh.desicrics.db.TeamsTable
 import com.harsh.desicrics.db.UsersTable
@@ -156,6 +157,7 @@ class ExposedPlayerStore(private val db: Database) : PlayerStore {
                 it[claimCode] = null
             }
             TeamMembersTable.deleteWhere { TeamMembersTable.playerId eq uid }
+            TeamJoinRequestsTable.deleteWhere { TeamJoinRequestsTable.playerId eq uid }
         }
     }
 
@@ -310,6 +312,36 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
 
     override suspend fun byJoinCode(code: String): String? = db.query {
         TeamsTable.select(TeamsTable.id).where { TeamsTable.joinCode eq code.uppercase() }.singleOrNull()?.get(TeamsTable.id)
+    }
+
+    override suspend fun addJoinRequest(teamId: String, profileId: String, at: Long): Boolean = try {
+        db.query {
+            TeamJoinRequestsTable.insert {
+                it[this.teamId] = teamId
+                it[playerId] = profileId
+                it[requestedAt] = at
+            }
+        }
+        true
+    } catch (e: Exception) {
+        if (e.isUniqueViolation()) false else throw e
+    }
+
+    override suspend fun joinRequests(teamId: String): List<String> = db.query {
+        TeamJoinRequestsTable.select(TeamJoinRequestsTable.playerId)
+            .where { TeamJoinRequestsTable.teamId eq teamId }
+            .orderBy(TeamJoinRequestsTable.requestedAt)
+            .map { it[TeamJoinRequestsTable.playerId] }
+    }
+
+    override suspend fun hasJoinRequest(teamId: String, profileId: String): Boolean = db.query {
+        TeamJoinRequestsTable.selectAll()
+            .where { (TeamJoinRequestsTable.teamId eq teamId) and (TeamJoinRequestsTable.playerId eq profileId) }
+            .any()
+    }
+
+    override suspend fun deleteJoinRequest(teamId: String, profileId: String): Boolean = db.query {
+        TeamJoinRequestsTable.deleteWhere { (TeamJoinRequestsTable.teamId eq teamId) and (TeamJoinRequestsTable.playerId eq profileId) } > 0
     }
 
     override suspend fun setJoinCode(teamId: String, code: String): Boolean = try {

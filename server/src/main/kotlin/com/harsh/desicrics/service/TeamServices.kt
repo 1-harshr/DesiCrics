@@ -9,6 +9,7 @@ import com.harsh.desicrics.api.TeamRequest
 import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.model.HeadToHead
 import com.harsh.desicrics.model.MatchStatus
+import com.harsh.desicrics.model.NotificationKind
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
@@ -43,6 +44,9 @@ class TeamService(
     private val matches: MatchStore,
     private val users: UserStore,
     private val clock: () -> Long = System::currentTimeMillis,
+    /** Tells [uids] about a join request or acceptance; see [com.harsh.desicrics.live.Notifier.teamNotice]. */
+    private val notify: suspend (uids: Set<String>, kind: NotificationKind, teamId: String, teamName: String, playerName: String) -> Unit =
+        { _, _, _, _, _ -> },
 ) {
     suspend fun mine(user: FirebasePrincipal): List<TeamSummary> = teams.forPlayer(user.uid)
 
@@ -57,12 +61,26 @@ class TeamService(
         return get(user, id)
     }
 
-    /** Admins see the join code and placeholders' claim codes; everyone else doesn't. */
+    /**
+     * Admins see the join code, placeholders' claim codes and who's asking to join; everyone else doesn't.
+     * Someone outside the team sees whether they've asked.
+     */
     suspend fun get(user: FirebasePrincipal, teamId: String): SavedTeam {
         val team = teams.get(teamId) ?: throw ApiException(HttpStatusCode.NotFound, "Team not found")
         val lastSquad = matches.lastSquad(teamId)
-        return if (team.roleOf(user.uid) == TeamRole.ADMIN) team.copy(lastSquad = lastSquad)
-        else team.copy(joinCode = null, members = team.members.map { it.copy(claimCode = null) }, lastSquad = lastSquad)
+        return when (team.roleOf(user.uid)) {
+            TeamRole.ADMIN -> {
+                val asking = teams.joinRequests(teamId)
+                val summaries = players.summaries(asking)
+                team.copy(lastSquad = lastSquad, joinRequests = asking.mapNotNull { summaries[it] })
+            }
+            else -> team.copy(
+                joinCode = null,
+                members = team.members.map { it.copy(claimCode = null) },
+                lastSquad = lastSquad,
+                requested = team.roleOf(user.uid) == null && teams.hasJoinRequest(teamId, user.uid),
+            )
+        }
     }
 
     suspend fun update(user: FirebasePrincipal, teamId: String, request: TeamRequest): SavedTeam {
@@ -120,6 +138,44 @@ class TeamService(
         requireProfile(user)
         val teamId = teams.byJoinCode(code.trim()) ?: throw ApiException(HttpStatusCode.NotFound, "That team code is wrong")
         teams.addMember(teamId, user.uid, TeamRole.MEMBER, clock())
+        teams.deleteJoinRequest(teamId, user.uid)
+        return get(user, teamId)
+    }
+
+    /**
+     * For a player who found the team by name but has no code: the admins are told and decide. Asking
+     * twice, or as a member, is harmless.
+     */
+    suspend fun requestToJoin(user: FirebasePrincipal, teamId: String): SavedTeam {
+        requireProfile(user)
+        val team = teams.get(teamId) ?: throw ApiException(HttpStatusCode.NotFound, "Team not found")
+        if (team.roleOf(user.uid) == null && teams.addJoinRequest(teamId, user.uid, clock())) {
+            val name = players.summaries(listOf(user.uid))[user.uid]?.name.orEmpty()
+            val admins = team.members.filter { it.role == TeamRole.ADMIN }.map { it.player.profileId }.toSet()
+            notify(admins, NotificationKind.TEAM_JOIN_REQUEST, teamId, team.name, name)
+        }
+        return get(user, teamId)
+    }
+
+    suspend fun cancelJoinRequest(user: FirebasePrincipal, teamId: String): SavedTeam {
+        teams.deleteJoinRequest(teamId, user.uid)
+        return get(user, teamId)
+    }
+
+    /** An admin lets [profileId] in, and they're told. */
+    suspend fun acceptJoinRequest(user: FirebasePrincipal, teamId: String, profileId: String): SavedTeam {
+        val team = requireAdmin(user, teamId)
+        if (!teams.deleteJoinRequest(teamId, profileId)) throw ApiException(HttpStatusCode.NotFound, "They're not asking to join")
+        teams.addMember(teamId, profileId, TeamRole.MEMBER, clock())
+        val name = players.summaries(listOf(profileId))[profileId]?.name.orEmpty()
+        notify(setOf(profileId), NotificationKind.TEAM_JOIN_ACCEPTED, teamId, team.name, name)
+        return get(user, teamId)
+    }
+
+    /** Quietly: the player isn't told, and can ask again. */
+    suspend fun declineJoinRequest(user: FirebasePrincipal, teamId: String, profileId: String): SavedTeam {
+        requireAdmin(user, teamId)
+        teams.deleteJoinRequest(teamId, profileId)
         return get(user, teamId)
     }
 

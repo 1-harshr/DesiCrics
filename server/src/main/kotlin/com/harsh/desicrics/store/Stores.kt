@@ -170,6 +170,17 @@ interface TeamStore {
 
     /** Teams [profileId] belongs to, for removing them when the account is deleted. */
     suspend fun teamIdsOf(profileId: String): List<String>
+
+    /** False if they'd already asked. */
+    suspend fun addJoinRequest(teamId: String, profileId: String, at: Long): Boolean
+
+    /** Who's asking to join, oldest first. */
+    suspend fun joinRequests(teamId: String): List<String>
+
+    suspend fun hasJoinRequest(teamId: String, profileId: String): Boolean
+
+    /** False if there was no such request. */
+    suspend fun deleteJoinRequest(teamId: String, profileId: String): Boolean
 }
 
 interface SupportStore {

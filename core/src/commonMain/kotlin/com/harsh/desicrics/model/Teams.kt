@@ -41,6 +41,10 @@ data class SavedTeam(
     /** Profile IDs who played the team's last match, to start the next one with the same squad. */
     val lastSquad: List<String> = emptyList(),
     val logoUrl: String? = null,
+    /** Players asking to join, oldest first. Only sent to admins. */
+    val joinRequests: List<PlayerSummary> = emptyList(),
+    /** The caller has asked to join and is waiting for an admin. */
+    val requested: Boolean = false,
 ) {
     fun roleOf(profileId: String?): TeamRole? = members.firstOrNull { it.player.profileId == profileId }?.role
 }
