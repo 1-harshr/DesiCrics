@@ -140,7 +140,7 @@ internal fun FeedScreen(onOpen: (String) -> Unit, community: () -> Unit, ranking
                 item {
                     Box(Modifier.fillMaxWidth().padding(vertical = space.s2), contentAlignment = Alignment.Center) {
                         when {
-                            model.loading && model.rows.isEmpty() -> CircularProgressIndicator(color = DesiTheme.colors.brand)
+                            model.loading && model.rows.isEmpty() -> BallSpinner()
                             model.loading -> Unit
                             model.failed && model.rows.isEmpty() -> ErrorState(stringResource(Res.string.error_feed_title), stringResource(Res.string.error_connection_body), onRetry = { model.load(model.filter) }, compact = true)
                             model.failed -> Unit

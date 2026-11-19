@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -57,7 +56,7 @@ fun PrimaryButton(
         ),
     ) {
         if (loading) {
-            CircularProgressIndicator(Modifier.size(20.dp), color = colors.onBrand, strokeWidth = 2.dp)
+            BallSpinner(size = 20.dp, color = colors.onBrand, seamColor = colors.brand)
         } else {
             if (leadingIcon != null) {
                 Icon(painterResource(leadingIcon), contentDescription = null, modifier = Modifier.size(DesiTheme.size.iconSmall))
@@ -102,7 +101,7 @@ fun TonalButton(
         ),
     ) {
         if (loading) {
-            CircularProgressIndicator(Modifier.size(20.dp), color = colors.brand, strokeWidth = 2.dp)
+            BallSpinner(size = 20.dp)
             return@Button
         }
         if (leadingIcon != null) {

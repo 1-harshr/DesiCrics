@@ -1,8 +1,8 @@
 package com.harsh.desicrics.ui.stats
+import com.harsh.desicrics.designsystem.component.BallSpinner
 import com.harsh.desicrics.designsystem.component.PickerSheet
 import com.harsh.desicrics.designsystem.component.PickerPill
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.CircularProgressIndicator
 import org.jetbrains.compose.resources.DrawableResource
 import com.harsh.desicrics.model.LeaderboardRow
 import com.harsh.desicrics.designsystem.component.heroBackground
@@ -496,7 +496,7 @@ fun LeaderboardContent(
             when {
                 state.failed -> item { ErrorState(stringResource(Res.string.error_stats_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
                 state.loading && state.rows.isEmpty() -> item {
-                    Box(Modifier.fillMaxWidth().padding(space.s8), contentAlignment = Alignment.Center) { CircularProgressIndicator(color = DesiTheme.colors.brand) }
+                    Box(Modifier.fillMaxWidth().padding(space.s8), contentAlignment = Alignment.Center) { BallSpinner() }
                 }
                 state.rows.isEmpty() -> item {
                     EmptyState(

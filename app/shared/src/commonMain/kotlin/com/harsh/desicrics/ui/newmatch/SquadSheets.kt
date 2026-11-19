@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.newmatch
+import com.harsh.desicrics.designsystem.component.BallSpinner
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.component.EmptyState
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,7 +48,7 @@ internal fun TeamPickerSheet(teams: List<TeamSummary>?, search: suspend (String)
         val results = if (query.trim().length >= 2) hits else teams
         when {
             failed -> ErrorBanner(stringResource(Res.string.teams_load_failed))
-            results == null -> CircularProgressIndicator(color = DesiTheme.colors.brand)
+            results == null -> BallSpinner()
             results.isEmpty() -> EmptyState(DesiIcons.Shield, stringResource(Res.string.new_match_no_teams))
             else -> results.forEach { TeamRow(it, onClick = { onPick(it) }) }
         }

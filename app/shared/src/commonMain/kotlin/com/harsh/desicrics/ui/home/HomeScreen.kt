@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.home
+import com.harsh.desicrics.designsystem.component.BallSpinner
 import com.harsh.desicrics.designsystem.component.LocalNavBarClearance
 import com.harsh.desicrics.ui.text.dayLabel
 import com.harsh.desicrics.designsystem.component.EmptyState
@@ -32,7 +33,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -186,7 +186,7 @@ fun HomeContent(
         when {
             state.loading -> item {
                 Box(Modifier.fillMaxWidth().padding(space.s8), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = DesiTheme.colors.brand)
+                    BallSpinner()
                 }
             }
             feed.mine.isEmpty() && !state.loadFailed -> item { EmptyMatches() }

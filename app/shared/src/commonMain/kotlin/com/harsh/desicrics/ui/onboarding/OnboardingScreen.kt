@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
+import com.harsh.desicrics.designsystem.component.BallSpinner
 import com.harsh.desicrics.designsystem.component.BrandHeader
 import com.harsh.desicrics.designsystem.component.BrandStatusBar
 import com.harsh.desicrics.designsystem.component.DesiCard
@@ -398,7 +398,7 @@ private fun FollowStep(state: OnboardingUiState, actions: OnboardingActions) {
     val suggestions = state.suggestions
     if (suggestions == null) {
         Box(Modifier.fillMaxWidth().padding(DesiTheme.space.s8), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(Modifier.size(28.dp), color = DesiTheme.colors.brand, strokeWidth = 3.dp)
+            BallSpinner(size = 28.dp)
         }
         return
     }
