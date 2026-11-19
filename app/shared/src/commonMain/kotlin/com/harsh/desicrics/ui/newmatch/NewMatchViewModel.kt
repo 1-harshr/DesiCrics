@@ -72,6 +72,9 @@ data class NewMatchFormState(
     fun side(side: TeamSide) = if (side == TeamSide.A) teamA else teamB
     fun name(side: TeamSide) = side(side).name
     fun players(side: TeamSide) = side(side).players
+
+    /** [teams] that can go on [side]: a saved team can't play itself, so the other side's is left out. */
+    fun pickable(side: TeamSide, teams: List<TeamSummary>) = side(side.other).teamId.let { taken -> teams.filter { it.id != taken } }
 }
 
 class NewMatchViewModel(

@@ -5,6 +5,9 @@ import com.harsh.desicrics.navigation.JoinTeamRoute
 import com.harsh.desicrics.navigation.MatchRoute
 import com.harsh.desicrics.navigation.TournamentRoute
 import com.harsh.desicrics.navigation.routeFor
+import com.harsh.desicrics.model.TeamSide
+import com.harsh.desicrics.model.TeamSummary
+import com.harsh.desicrics.ui.newmatch.NewMatchFormState
 import com.harsh.desicrics.ui.newmatch.SideForm
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -28,5 +31,15 @@ class SharedLogicAndroidHostTest {
         assertEquals("D", withoutA.players[withoutA.captain!!].name)
         assertEquals("B", withoutA.players[withoutA.keeper!!].name)
         assertNull(side.without(3).captain)
+    }
+
+    @Test
+    fun aSavedTeamIsntOfferedToBothSides() {
+        val teams = listOf(TeamSummary("t1", "Andheri Strikers", "Mumbai", 11), TeamSummary("t2", "Powai XI", "Mumbai", 9))
+        val form = NewMatchFormState(teamA = SideForm("Andheri Strikers", teamId = "t1"))
+        assertEquals(listOf("t2"), form.pickable(TeamSide.B, teams).map { it.id })
+        assertEquals(listOf("t1", "t2"), form.pickable(TeamSide.A, teams).map { it.id })
+        val other = NewMatchFormState(teamB = SideForm("Powai XI", teamId = "t2"))
+        assertEquals(listOf("t1"), other.pickable(TeamSide.A, teams).map { it.id })
     }
 }
