@@ -91,12 +91,14 @@ data class PointsRow(
     val won: Int = 0,
     val lost: Int = 0,
     val tied: Int = 0,
+    /** Abandoned: a point each, like a tie. */
+    val noResult: Int = 0,
     val runsFor: Int = 0,
     val ballsFaced: Int = 0,
     val runsAgainst: Int = 0,
     val ballsBowled: Int = 0,
 ) {
-    val points: Int get() = won * 2 + tied
+    val points: Int get() = won * 2 + tied + noResult
 
     /** Net run rate: runs per over scored minus runs per over conceded. */
     val netRunRate: Double

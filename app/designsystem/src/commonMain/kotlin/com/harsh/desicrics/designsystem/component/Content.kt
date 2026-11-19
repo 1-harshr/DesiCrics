@@ -1,4 +1,5 @@
 package com.harsh.desicrics.designsystem.component
+import org.jetbrains.compose.resources.DrawableResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.getValue
@@ -111,9 +112,12 @@ fun LiveBadge(modifier: Modifier = Modifier) {
 @Immutable
 data class TeamLine(val name: String, val score: String? = null, val overs: String? = null, val batting: Boolean = false, val won: Boolean? = null)
 
-/** How a finished match ended, shown as a highlighted strip at the foot of a [MatchCard]. */
+/**
+ * How a finished match ended, shown as a strip at the foot of a [MatchCard]: green with a trophy when someone
+ * won, neutral when nobody did (a tie or no result). [icon] replaces the default mark, e.g. rain.
+ */
 @Immutable
-data class CardResult(val text: String, val tied: Boolean = false)
+data class CardResult(val text: String, val neutral: Boolean = false, val icon: DrawableResource? = null)
 
 /**
  * A match in a feed. [status] is the top-left slot ([LiveBadge] or a date label), [meta] the top-right
@@ -176,14 +180,14 @@ fun MatchCard(
 @Composable
 private fun ResultStrip(result: CardResult) {
     val colors = DesiTheme.colors
-    val content = if (result.tied) colors.ink else colors.brand
+    val content = if (result.neutral) colors.ink else colors.brand
     Row(
-        Modifier.fillMaxWidth().background(if (result.tied) colors.sunk else colors.brandSoft)
+        Modifier.fillMaxWidth().background(if (result.neutral) colors.sunk else colors.brandSoft)
             .padding(horizontal = DesiTheme.space.s4, vertical = DesiTheme.space.s3),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
     ) {
-        Icon(painterResource(if (result.tied) DesiIcons.Swap else DesiIcons.TrophyFilled), null, tint = content, modifier = Modifier.size(DesiTheme.size.iconSmall))
+        Icon(painterResource(result.icon ?: if (result.neutral) DesiIcons.Swap else DesiIcons.TrophyFilled), null, tint = content, modifier = Modifier.size(DesiTheme.size.iconSmall))
         Text(result.text, style = DesiTheme.type.bodyStrong, color = content)
     }
 }

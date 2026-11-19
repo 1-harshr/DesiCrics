@@ -118,6 +118,7 @@ object TournamentEngine {
     /**
      * A group's table from its completed league fixtures, best first: points, then net run rate, then wins.
      * An all-out side counts as having batted its full overs, as in the playing conditions NRR comes from.
+     * Only matches played to a finish count towards NRR; abandoned, conceded and walked-over ones don't.
      */
     fun pointsTable(tournament: Tournament, fixtures: List<Match>, group: Int): List<PointsRow> {
         val members = tournament.confirmedTeams.filter { (it.group ?: 0) == group }
@@ -133,7 +134,13 @@ object TournamentEngine {
                 val bowling = match.innings.firstOrNull { it.battingSide != mySide }
                 fun faced(score: InningsScore?) =
                     score?.let { if (it.allOut) it.maxBalls ?: (match.oversPerInnings * 6) else it.legalBalls } ?: 0
-                rows[id] = row.copy(
+                val forNrr = result.ending == null
+                rows[id] = if (!forNrr) row.copy(
+                    played = row.played + 1,
+                    won = row.won + if (result.winner == mySide) 1 else 0,
+                    lost = row.lost + if (result.winner == mySide.other) 1 else 0,
+                    noResult = row.noResult + if (result.isNoResult) 1 else 0,
+                ) else row.copy(
                     played = row.played + 1,
                     won = row.won + if (result.winner == mySide) 1 else 0,
                     lost = row.lost + if (result.winner == mySide.other) 1 else 0,
@@ -230,7 +237,7 @@ object TournamentEngine {
     private fun lossCounts(tournament: Tournament, fixtures: List<Match>): Map<String, Int> =
         fixtures.filter { it.status == MatchStatus.COMPLETED }.mapNotNull { loser(tournament, it)?.teamId }.groupingBy { it }.eachCount()
 
-    /** Who goes through: the winner, or on a tie the higher seed. */
+    /** Who goes through: the winner, or on a tie or no result the higher seed. */
     fun winner(tournament: Tournament, match: Match): TournamentTeam {
         val teams = tournament.confirmedTeams.associateBy { it.teamId }
         val a = teams.getValue(match.teamA.teamId!!)

@@ -1,4 +1,7 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.model.AbandonReason
+import com.harsh.desicrics.model.MatchEnding
+import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -328,6 +331,28 @@ class MatchViewModel(
 
     /** Ends the current innings; in the chase that concedes the match. */
     fun declare() = recordEvent { seq, innings -> MatchEvent.Declare(seq, innings) }
+
+    /** Stops the match during play: abandoned for [reason], or conceded so [winner] wins. Undo reopens it. */
+    fun endMatch(ending: MatchEnding, winner: TeamSide?, reason: AbandonReason?) =
+        recordEvent { seq, innings -> MatchEvent.EndMatch(seq, innings, ending, winner, reason) }
+
+    /** A walkover or call-off for a fixture that never starts. Only whoever could start it may do this. */
+    fun endBeforeStart(ending: MatchEnding, winner: TeamSide?, reason: AbandonReason?) {
+        val setup = _state.value.fixture ?: return
+        if (!setup.canStart || setup.starting) return
+        _state.update { it.copy(fixture = setup.copy(starting = true, failed = false)) }
+        viewModelScope.launch {
+            try {
+                val details = tournaments.endBeforeStart(matchId, EndBeforeStartRequest(ending, winner, reason))
+                _state.update { it.withSnapshot(details).copy(fixture = null) }
+                refreshes.update { it + 1 }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(fixture = setup.copy(starting = false, failed = true)) }
+            }
+        }
+    }
 
     /** Rain: new overs for this innings (both, in the first), and in the chase a new target. */
     fun reviseTarget(overs: Int, target: Int?) = recordEvent { seq, innings -> MatchEvent.ReviseTarget(seq, innings, overs, target) }

@@ -58,6 +58,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ Retired hurt (can return) / retired out, swap ends, change bowler mid-over, add latecomers and substitutes mid-match
 - ✅ Per-match rules with presets, each off / warn / enforce: last man stands, retired batters' return, retire at a score, overs per bowler, back-to-back overs, wide and no-ball runs and re-bowling, free hits
 - ✅ Revise target (rain) and declare: the scorer enters the new overs and, for the chase, the target; results are judged against par
+- ✅ End a match early: no result (rain, bad light, ground, other) or a concession during play; a walkover or call-off before the start, recorded by the organiser. Undo reopens it. In a league a no-result is a point each and ended matches stay out of NRR; in a knockout the higher seed goes through
 - ✅ Scorecard and over-by-over tabs
 - ✅ Auto-generated commentary text (per ball, on the Overs tab)
 

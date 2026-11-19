@@ -17,6 +17,7 @@ fun interface Analytics {
 object AnalyticsEvents {
     const val MATCH_CREATED = "match_created"
     const val FIXTURE_STARTED = "fixture_started"
+    const val MATCH_ENDED_EARLY = "match_ended_early"
     const val TEAM_CREATED = "team_created"
     const val TEAM_JOINED = "team_joined"
     const val TOURNAMENT_CREATED = "tournament_created"

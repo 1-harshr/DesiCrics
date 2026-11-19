@@ -1,5 +1,9 @@
 package com.harsh.desicrics
 
+import androidx.compose.foundation.layout.Arrangement
+import com.harsh.desicrics.model.MatchResult
+import com.harsh.desicrics.model.AbandonReason
+import com.harsh.desicrics.model.MatchEnding
 import com.harsh.desicrics.model.LeaderboardRow
 import com.harsh.desicrics.ui.stats.LeaderboardUiState
 import com.harsh.desicrics.ui.stats.LeaderboardContent
@@ -325,5 +329,27 @@ class ScreenshotTest {
     @Test
     fun leaderboardEmptyDark() = shoot("leaderboard_empty_dark", dark = true) {
         LeaderboardContent(LeaderboardUiState(loading = false), forTournament = false, onUpdate = {}, onOpenPlayer = {}, onBack = {})
+    }
+
+    @Test
+    fun endedMatches() = shoot("ended_matches") {
+        val base = Match("e", "me", 0, strikers, royals, 5, TeamSide.A, TossDecision.BAT, status = MatchStatus.COMPLETED)
+        Column(Modifier.background(DesiTheme.colors.bg).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            listOf(
+                base.copy(id = "rain", innings = listOf(InningsScore(TeamSide.A, 38, 2, 22)), result = MatchResult(null, ending = MatchEnding.ABANDONED, reason = AbandonReason.RAIN)),
+                base.copy(id = "walk", result = MatchResult(TeamSide.B, ending = MatchEnding.WALKOVER)),
+                base.copy(id = "gave", innings = listOf(InningsScore(TeamSide.A, 91, 3, 30), InningsScore(TeamSide.B, 12, 6, 14)), result = MatchResult(TeamSide.A, ending = MatchEnding.CONCEDED)),
+            ).forEach { com.harsh.desicrics.ui.home.HomeMatchCard(it, isMine = false, onClick = {}) }
+        }
+    }
+
+    @Test
+    fun walkover() = shoot("walkover") {
+        Column(Modifier.background(DesiTheme.colors.bg)) {
+            com.harsh.desicrics.ui.match.EndedBeforePlay(
+                Match("w", "me", 0, strikers, royals, 5, TeamSide.A, TossDecision.BAT, status = MatchStatus.COMPLETED),
+                MatchResult(TeamSide.B, ending = MatchEnding.WALKOVER), canUndo = true, onUndo = {}, onBack = {},
+            )
+        }
     }
 }

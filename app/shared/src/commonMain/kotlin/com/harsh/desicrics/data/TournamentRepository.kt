@@ -1,4 +1,5 @@
 package com.harsh.desicrics.data
+import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.CustomFixtureRequest
@@ -32,6 +33,9 @@ class TournamentRepository(private val api: DesiCricsApi, private val config: Ap
 
     suspend fun startFixture(matchId: String, request: StartFixtureRequest): MatchDetails =
         api.startFixture(matchId, request).also { analytics.log(AnalyticsEvents.FIXTURE_STARTED, emptyMap()) }
+
+    suspend fun endBeforeStart(matchId: String, request: EndBeforeStartRequest): MatchDetails =
+        api.endBeforeStart(matchId, request).also { analytics.log(AnalyticsEvents.MATCH_ENDED_EARLY, mapOf("ending" to request.ending.name.lowercase())) }
 
     /** The public page anyone can open. */
     fun link(id: String): String = "${config.publicUrl.trimEnd('/')}/t/$id"

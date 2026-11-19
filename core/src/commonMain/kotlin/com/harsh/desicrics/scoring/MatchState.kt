@@ -1,4 +1,5 @@
 package com.harsh.desicrics.scoring
+import com.harsh.desicrics.model.endingLine
 
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
@@ -19,8 +20,13 @@ data class MatchState(
 ) {
     val current: InningsState get() = innings.last()
 
+    /** "Strikers 145/6 (20.0) · Royals 98/3 (12.4)", with how it ended when it stopped early. */
     val scoreSummary: String
-        get() = innings.joinToString(" · ") { "${it.battingTeam.name} ${it.scoreText} (${it.oversText})" }
+        get() {
+            val ending = result?.let { match.endingLine(it) }
+            val played = innings.filter { ending == null || it.legalBalls > 0 || it.runs > 0 }
+            return (played.map { "${it.battingTeam.name} ${it.scoreText} (${it.oversText})" } + listOfNotNull(ending)).joinToString(" · ")
+        }
 }
 
 data class InningsState(

@@ -8,7 +8,7 @@ Every feature area, what we build, and the phase it lands in. See [roadmap.md](r
 | Profile | Name, photo, gender, city, player role, batting style, bowling style. Onboarding asks only for name, role and styles. | 0 |
 | Create match | Three-step wizard: teams → squads → rules. Defaults to T20 with a tennis ball. Rules cover match type, overs, ball type, pitch type, venue, start time, officials and power plays. Playing conditions (last man stands, retired batters returning, retire at a score, overs per bowler, back-to-back overs, wide and no-ball runs and re-bowling, free hits) start from a preset (Relaxed, Gully, Club, Standard) and can each be off, warn or enforce. | 1 |
 | Toss | One sheet before the first ball: winner and decision. | 1 |
-| Scoring | Thumb-zone run pad, contextual wicket sheet, server-validated undo, substitutes, revise target, end innings. Wagon wheel optional. | 1 |
+| Scoring | Thumb-zone run pad, contextual wicket sheet, server-validated undo, substitutes, revise target, end innings, end a match early (no result, concession, walkover, called off). Wagon wheel optional. | 1 |
 | Match detail | Scorecard, commentary, squads, overs, info. Updates live. | 1 / 3 |
 | Teams | Create team, add members by search, phone number or QR code, team admins, invite links that work through WhatsApp. | 2 |
 | Profile tabs | Matches / Teams / Stats on the player's profile. | 2 |

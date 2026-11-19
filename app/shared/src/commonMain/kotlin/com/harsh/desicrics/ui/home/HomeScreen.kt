@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.home
+import com.harsh.desicrics.ui.match.resultIcon
 import com.harsh.desicrics.ui.text.resultText
 import com.harsh.desicrics.designsystem.component.CardResult
 import com.harsh.desicrics.designsystem.component.ErrorBanner
@@ -361,7 +362,7 @@ internal fun HomeMatchCard(match: Match, isMine: Boolean, onClick: () -> Unit) {
         },
         meta = if (isMine) stringResource(Res.string.home_meta_scoring, overs) else overs,
         footer = matchStatusText(match),
-        result = match.result?.let { CardResult(resultText(match, it), tied = it.winner == null) },
+        result = match.result?.let { CardResult(resultText(match, it), neutral = it.winner == null, icon = resultIcon(it)) },
         onClick = onClick,
     )
 }

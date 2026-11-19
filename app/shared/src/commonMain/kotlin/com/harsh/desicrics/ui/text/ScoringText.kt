@@ -1,4 +1,7 @@
 package com.harsh.desicrics.ui.text
+import com.harsh.desicrics.ui.match.label
+import com.harsh.desicrics.model.AbandonReason
+import com.harsh.desicrics.model.MatchEnding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,9 +31,20 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** "Strikers won by 24 runs" or "Match tied". */
+/** "Strikers won by 24 runs", "Match tied", "No result · Rain", "Royals won by walkover". */
 @Composable
 fun resultText(match: Match, result: MatchResult): String {
+    when (result.ending) {
+        MatchEnding.ABANDONED -> return result.reason?.takeIf { it != AbandonReason.OTHER }
+            ?.let { stringResource(Res.string.match_result_no_result_reason, stringResource(it.label)) }
+            ?: stringResource(Res.string.match_result_no_result)
+        MatchEnding.CONCEDED -> {
+            val winner = result.winner!!
+            return stringResource(Res.string.match_result_conceded, match.team(winner).name, match.team(winner.other).name)
+        }
+        MatchEnding.WALKOVER -> return stringResource(Res.string.match_result_walkover, match.team(result.winner!!).name)
+        null -> Unit
+    }
     val winner = result.winner ?: return stringResource(Res.string.match_result_tie)
     val plural = when (result.marginUnit) {
         MarginUnit.WICKETS -> Res.plurals.match_result_won_by_wickets
@@ -136,6 +150,7 @@ val FieldZone.label: StringResource
 val DeliveryError.label: StringResource
     get() = when (this) {
         DeliveryError.MATCH_OVER -> Res.string.scoring_error_match_over
+        DeliveryError.END_INVALID -> Res.string.scoring_error_end_invalid
         DeliveryError.STALE -> Res.string.scoring_error_stale
         DeliveryError.WRONG_INNINGS -> Res.string.scoring_error_wrong_innings
         DeliveryError.SAME_BATTER -> Res.string.scoring_error_same_batter

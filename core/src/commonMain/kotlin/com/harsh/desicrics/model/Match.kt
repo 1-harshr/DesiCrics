@@ -79,14 +79,22 @@ enum class MatchStatus {
     COMPLETED,
 }
 
-/** How a completed match ended. [winner] is null for a tie. */
+/**
+ * How a completed match ended. [ending] is null when it was played out: then [winner] is null only for a
+ * tie. Otherwise it stopped early: abandoned (no winner, [reason] says why), conceded, or a walkover.
+ */
 @Serializable
 data class MatchResult(
     val winner: TeamSide?,
     val margin: Int = 0,
     val marginUnit: MarginUnit? = null,
+    val ending: MatchEnding? = null,
+    val reason: AbandonReason? = null,
 ) {
-    val isTie: Boolean get() = winner == null
+    val isTie: Boolean get() = winner == null && ending == null
+
+    /** Abandoned: nobody won, and it wasn't a tie. */
+    val isNoResult: Boolean get() = ending == MatchEnding.ABANDONED
 
     companion object {
         val Tie = MatchResult(winner = null)
@@ -95,6 +103,40 @@ data class MatchResult(
 
 @Serializable
 enum class MarginUnit { RUNS, WICKETS }
+
+/** A match that stopped before its innings were finished. */
+@Serializable
+enum class MatchEnding {
+    /** Called off with no result: rain, light, the ground, anything. Before or during play. */
+    ABANDONED,
+    /** One team gave up during play; the other wins. */
+    CONCEDED,
+    /** One team didn't turn up, so the other wins without a ball bowled. */
+    WALKOVER,
+}
+
+/** Why a match was abandoned. [displayName] is English, for server text; the app words it itself. */
+@Serializable
+enum class AbandonReason(val displayName: String) {
+    RAIN("rain"),
+    BAD_LIGHT("bad light"),
+    GROUND("ground unavailable"),
+    OTHER("abandoned"),
+}
+
+/**
+ * English line for a match that stopped early ("No result (rain)", "Royals won by walkover"), or null if it
+ * was played out. For server text: the stored summary, notifications and the public page.
+ */
+fun Match.endingLine(result: MatchResult): String? {
+    val winner = result.winner?.let { team(it).name }
+    return when (result.ending) {
+        null -> null
+        MatchEnding.ABANDONED -> "No result" + (result.reason?.takeIf { it != AbandonReason.OTHER }?.let { " (${it.displayName})" } ?: "")
+        MatchEnding.CONCEDED -> "$winner won, ${team(result.winner!!.other).name} conceded"
+        MatchEnding.WALKOVER -> "$winner won by walkover"
+    }
+}
 
 /** One innings' total, kept on the match row so feeds can show "142/6 (16.4)" per team. */
 @Serializable

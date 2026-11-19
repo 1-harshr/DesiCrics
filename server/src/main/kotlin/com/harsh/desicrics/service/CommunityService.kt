@@ -1,4 +1,5 @@
 package com.harsh.desicrics.service
+import com.harsh.desicrics.model.endingLine
 
 import com.harsh.desicrics.api.DirectoryRequest
 import com.harsh.desicrics.api.LookingForRequest
@@ -165,6 +166,7 @@ class CommunityService(
 
     private fun resultLine(match: Match): String {
         val result = match.result ?: return ""
+        match.endingLine(result)?.let { return it }
         val winner = result.winner ?: return "Match tied"
         val unit = if (result.marginUnit == MarginUnit.WICKETS) "wicket" else "run"
         return "${match.team(winner).name} won by ${result.margin} $unit${if (result.margin == 1) "" else "s"}"

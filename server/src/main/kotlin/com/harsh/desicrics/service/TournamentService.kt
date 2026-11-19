@@ -1,4 +1,5 @@
 package com.harsh.desicrics.service
+import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.api.AddOrganiserRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
@@ -182,6 +183,15 @@ class TournamentService(
         if (tournamentId != null) requireOrganiser(user, tournamentId)
         else if (match.createdBy != user.uid) throw ApiException(HttpStatusCode.Forbidden, "Only the organiser can start this match")
         return matches.startFixture(user, matchId, request)
+    }
+
+    /** A walkover or call-off for a fixture that never started; same people as [startFixture]. */
+    suspend fun endBeforeStart(user: FirebasePrincipal, matchId: String, request: EndBeforeStartRequest): MatchDetails {
+        val match = matches.details(matchId).match
+        val tournamentId = match.fixture?.tournamentId
+        if (tournamentId != null) requireOrganiser(user, tournamentId)
+        else if (match.createdBy != user.uid) throw ApiException(HttpStatusCode.Forbidden, "Only the organiser can end this match")
+        return matches.endBeforeStart(user, matchId, request)
     }
 
     /** When a fixture finishes, makes the next round if that completed one. */

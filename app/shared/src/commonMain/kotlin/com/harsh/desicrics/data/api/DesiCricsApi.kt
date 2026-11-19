@@ -1,4 +1,5 @@
 package com.harsh.desicrics.data.api
+import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.model.TeamInsights
 import com.harsh.desicrics.api.AddMemberRequest
@@ -257,6 +258,10 @@ class DesiCricsApi(
 
     suspend fun startFixture(matchId: String, request: StartFixtureRequest): MatchDetails =
         call { post("$baseUrl/matches/$matchId/start") { it(); json(request) } }.body()
+
+    /** A walkover or call-off for a match that never starts. */
+    suspend fun endBeforeStart(matchId: String, request: EndBeforeStartRequest): MatchDetails =
+        call { post("$baseUrl/matches/$matchId/end") { it(); json(request) } }.body()
 
     // Stats.
 

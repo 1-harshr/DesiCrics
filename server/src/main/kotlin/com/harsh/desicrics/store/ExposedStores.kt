@@ -303,6 +303,12 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[toBattingSide] = (event as? MatchEvent.Penalty)?.toBattingSide ?: false
                 it[overs] = (event as? MatchEvent.ReviseTarget)?.overs
                 it[target] = (event as? MatchEvent.ReviseTarget)?.target
+                (event as? MatchEvent.EndMatch)?.let { end ->
+                    it[ending] = end.ending
+                    it[winner] = end.winner
+                    it[reason] = end.reason
+                    it[beforeStart] = end.beforeStart
+                }
                 it[createdAt] = event.timestamp
             }
             updateScore(match)
@@ -349,6 +355,10 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             DECLARE -> MatchEvent.Declare(seq, innings, at)
             REVISE_TARGET ->
                 MatchEvent.ReviseTarget(seq, innings, checkNotNull(this[MatchEventsTable.overs]), this[MatchEventsTable.target], at)
+            END_MATCH -> MatchEvent.EndMatch(
+                seq, innings, checkNotNull(this[MatchEventsTable.ending]), this[MatchEventsTable.winner],
+                this[MatchEventsTable.reason], this[MatchEventsTable.beforeStart], at,
+            )
             else -> error("Unknown match event type ${this[MatchEventsTable.type]}")
         }
     }
@@ -400,6 +410,10 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             .map { it[MatchesTable.id] }
     }
 
+    override suspend fun setScorer(matchId: String, uid: String) {
+        db.query { MatchesTable.update({ MatchesTable.id eq matchId }) { it[scorerUid] = uid } }
+    }
+
     override suspend fun updateScore(match: Match) {
         db.query { updateScore(match) }
     }
@@ -448,6 +462,8 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                     winner = this[MatchesTable.resultWinner],
                     margin = this[MatchesTable.resultMargin] ?: 0,
                     marginUnit = this[MatchesTable.resultMarginUnit],
+                    ending = this[MatchesTable.resultEnding],
+                    reason = this[MatchesTable.resultReason],
                 )
             },
         )
@@ -478,6 +494,8 @@ private fun UpdateBuilder<*>.setResult(match: Match) {
     this[MatchesTable.resultWinner] = match.result?.winner
     this[MatchesTable.resultMargin] = match.result?.margin
     this[MatchesTable.resultMarginUnit] = match.result?.marginUnit
+    this[MatchesTable.resultEnding] = match.result?.ending
+    this[MatchesTable.resultReason] = match.result?.reason
     this[MatchesTable.inningsScores] = Json.encodeToString(match.innings)
 }
 
@@ -487,6 +505,7 @@ private const val REPLACE_BOWLER = "replace_bowler"
 private const val PENALTY = "penalty"
 private const val DECLARE = "declare"
 private const val REVISE_TARGET = "revise_target"
+private const val END_MATCH = "end_match"
 
 private val MatchEvent.typeName: String
     get() = when (this) {
@@ -496,6 +515,7 @@ private val MatchEvent.typeName: String
         is MatchEvent.Penalty -> PENALTY
         is MatchEvent.Declare -> DECLARE
         is MatchEvent.ReviseTarget -> REVISE_TARGET
+        is MatchEvent.EndMatch -> END_MATCH
     }
 
 /** SQLSTATE 23505 means a unique or primary-key violation in both H2 and Postgres. */

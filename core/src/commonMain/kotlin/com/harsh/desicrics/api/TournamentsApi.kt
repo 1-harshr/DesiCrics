@@ -1,4 +1,6 @@
 package com.harsh.desicrics.api
+import com.harsh.desicrics.model.AbandonReason
+import com.harsh.desicrics.model.MatchEnding
 
 import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.OrganiserRole
@@ -79,6 +81,17 @@ data class StartFixtureRequest(
     val teamB: SquadRequest,
     val tossWinner: TeamSide,
     val tossDecision: TossDecision,
+)
+
+/**
+ * Ends a scheduled match that never starts: [MatchEnding.WALKOVER] to [winner] when the other side didn't turn
+ * up, or [MatchEnding.ABANDONED] for [reason] when it's called off.
+ */
+@Serializable
+data class EndBeforeStartRequest(
+    val ending: MatchEnding,
+    val winner: TeamSide? = null,
+    val reason: AbandonReason? = null,
 )
 
 enum class TournamentError(val message: String) {

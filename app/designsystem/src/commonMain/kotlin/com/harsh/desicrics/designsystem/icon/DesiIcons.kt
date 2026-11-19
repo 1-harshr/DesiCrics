@@ -2,6 +2,10 @@ package com.harsh.desicrics.designsystem.icon
 
 import com.harsh.desicrics.designsystem.resources.Res
 import com.harsh.desicrics.designsystem.resources.ic_add
+import com.harsh.desicrics.designsystem.resources.ic_event_busy
+import com.harsh.desicrics.designsystem.resources.ic_flag
+import com.harsh.desicrics.designsystem.resources.ic_nights_stay
+import com.harsh.desicrics.designsystem.resources.ic_rainy
 import com.harsh.desicrics.designsystem.resources.ic_expand_more
 import com.harsh.desicrics.designsystem.resources.ic_north_east
 import com.harsh.desicrics.designsystem.resources.ic_search_off
@@ -123,6 +127,12 @@ object DesiIcons {
     /** A ball sailing over the rope: sixes. */
     val Six: DrawableResource = Res.drawable.ic_north_east
     val ExpandMore: DrawableResource = Res.drawable.ic_expand_more
+
+    // Ending a match early: why it stopped, a team giving up, and a fixture called off.
+    val Rain: DrawableResource = Res.drawable.ic_rainy
+    val BadLight: DrawableResource = Res.drawable.ic_nights_stay
+    val Flag: DrawableResource = Res.drawable.ic_flag
+    val CalledOff: DrawableResource = Res.drawable.ic_event_busy
 
     // Errors: connection trouble, something went wrong, nothing found, and try again.
     val CloudOff: DrawableResource = Res.drawable.ic_cloud_off

@@ -1,4 +1,6 @@
 package com.harsh.desicrics.db
+import com.harsh.desicrics.model.AbandonReason
+import com.harsh.desicrics.model.MatchEnding
 
 import com.harsh.desicrics.DatabaseConfig
 import com.harsh.desicrics.model.BattingStyle
@@ -106,6 +108,8 @@ object MatchesTable : Table("matches") {
     val resultWinner = enumerationByName("result_winner", 1, TeamSide::class).nullable()
     val resultMargin = integer("result_margin").nullable()
     val resultMarginUnit = enumerationByName("result_margin_unit", 10, MarginUnit::class).nullable()
+    val resultEnding = enumerationByName("result_ending", 12, MatchEnding::class).nullable()
+    val resultReason = enumerationByName("result_reason", 12, AbandonReason::class).nullable()
     /** JSON list of InningsScore. */
     val inningsScores = text("innings_scores")
     /** JSON MatchRules. */
@@ -169,6 +173,10 @@ object MatchEventsTable : Table("match_events") {
     val toBattingSide = bool("to_batting_side")
     val overs = integer("overs").nullable()
     val target = integer("target").nullable()
+    val ending = enumerationByName("ending", 12, MatchEnding::class).nullable()
+    val winner = enumerationByName("winner", 1, TeamSide::class).nullable()
+    val reason = enumerationByName("reason", 12, AbandonReason::class).nullable()
+    val beforeStart = bool("before_start").default(false)
     val createdAt = long("created_at")
     override val primaryKey = PrimaryKey(matchId, seq)
 }

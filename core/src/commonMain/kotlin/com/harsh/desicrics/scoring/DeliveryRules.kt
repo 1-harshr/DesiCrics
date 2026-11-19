@@ -1,6 +1,7 @@
 package com.harsh.desicrics.scoring
 
 import com.harsh.desicrics.model.Delivery
+import com.harsh.desicrics.model.MatchEnding
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.InningsScore
 import com.harsh.desicrics.model.Match
@@ -95,6 +96,17 @@ fun MatchState.rejectionReason(delivery: Delivery, nextSeq: Int): String? = vali
 /** Why [event] can't be recorded next, or null if it can. */
 fun MatchState.validate(event: MatchEvent, nextSeq: Int): DeliveryError? {
     val innings = current
+    // A fixture without squads reads as two empty innings, all out, so it looks finished; before the start
+    // the only questions are whether anything has been played and whether it already has an ending.
+    if (event is MatchEvent.EndMatch && event.beforeStart) {
+        val played = this.innings.any { it.legalBalls > 0 || it.runs > 0 || it.batters.isNotEmpty() }
+        return when {
+            event.seq != nextSeq -> DeliveryError.STALE
+            result?.ending != null -> DeliveryError.MATCH_OVER
+            played -> DeliveryError.END_INVALID
+            else -> endError(event)
+        }
+    }
     return when {
         isComplete -> DeliveryError.MATCH_OVER
         event.seq != nextSeq -> DeliveryError.STALE
@@ -107,6 +119,8 @@ fun MatchState.validate(event: MatchEvent, nextSeq: Int): DeliveryError? {
             is MatchEvent.ReplaceBowler -> DeliveryError.NO_BOWLER_TO_REPLACE.takeIf { innings.bowlerId == null }
             is MatchEvent.Penalty -> DeliveryError.PENALTY_OUT_OF_RANGE.takeIf { event.runs !in 1..10 }
             is MatchEvent.Declare -> null
+            // Before-start endings were handled above, so this one is during play.
+            is MatchEvent.EndMatch -> if (event.beforeStart) DeliveryError.END_INVALID else endError(event)
             is MatchEvent.ReviseTarget -> when {
                 event.overs !in 1..match.oversPerInnings || event.overs * 6 < innings.legalBalls -> DeliveryError.REVISED_OVERS_INVALID
                 // The first innings has no target to revise; the chase must have one.
@@ -120,6 +134,19 @@ fun MatchState.validate(event: MatchEvent, nextSeq: Int): DeliveryError? {
 
 /** English message for API error responses. */
 fun MatchState.rejectionReason(event: MatchEvent, nextSeq: Int): String? = validate(event, nextSeq)?.message
+
+/**
+ * Before a ball is bowled a match can be a walkover or called off; once play has started it can be abandoned or
+ * conceded. A walkover or concession needs a winner, an abandonment can't have one.
+ */
+private fun endError(event: MatchEvent.EndMatch): DeliveryError? {
+    val allowed = if (event.beforeStart) setOf(MatchEnding.WALKOVER, MatchEnding.ABANDONED) else setOf(MatchEnding.CONCEDED, MatchEnding.ABANDONED)
+    return when {
+        event.ending !in allowed -> DeliveryError.END_INVALID
+        (event.ending == MatchEnding.ABANDONED) != (event.winner == null) -> DeliveryError.END_INVALID
+        else -> null
+    }
+}
 
 private fun extrasError(delivery: Delivery, rules: MatchRules): DeliveryError? {
     val extra = delivery.extra
@@ -155,6 +182,7 @@ private fun wicketError(delivery: Delivery, bowling: Set<String>): DeliveryError
 
 enum class DeliveryError(val message: String) {
     MATCH_OVER("This match is already over"),
+    END_INVALID("That isn't a way this match can end"),
     STALE("The scorecard changed. Refresh and try again"),
     WRONG_INNINGS("That ball is for the wrong innings"),
     SAME_BATTER("Striker and non-striker must be different players"),
@@ -206,7 +234,8 @@ fun Match.withScore(state: MatchState): Match = copy(
         else -> MatchStatus.IN_PROGRESS
     },
     result = state.result,
-    innings = state.innings.map {
+    // An innings that never got going when the match was called off has no score to show.
+    innings = state.innings.filter { state.result?.ending == null || it.legalBalls > 0 || it.runs > 0 }.map {
         InningsScore(it.battingSide, it.runs, it.wickets, it.legalBalls, it.target, it.maxBalls, allOut = it.wickets >= it.allOutWickets)
     },
 )

@@ -27,7 +27,7 @@ object Rankings {
         val ratings = mutableMapOf<String, Double>()
         val played = mutableMapOf<String, Int>()
         val rated = matches
-            .filter { it.status == MatchStatus.COMPLETED && it.result != null && it.teamA.teamId != null && it.teamB.teamId != null }
+            .filter { it.status == MatchStatus.COMPLETED && it.result != null && !it.result.isNoResult && it.teamA.teamId != null && it.teamB.teamId != null }
             .sortedBy { it.createdAt }
         for (match in rated) {
             val a = match.teamA.teamId!!

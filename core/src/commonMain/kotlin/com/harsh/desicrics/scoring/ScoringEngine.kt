@@ -38,8 +38,11 @@ object ScoringEngine {
         val first = computeInnings(
             match, 1, match.battingFirst, inningsItems(1), target = null, penaltyRuns = penaltiesFor(1), revision = revisionFor(1),
         )
+        // An ending recorded by the scorer or organiser stops the match wherever it had got to.
+        val end = events.filterIsInstance<MatchEvent.EndMatch>().lastOrNull()
+        val ended = end?.let { MatchResult(it.winner, ending = it.ending, reason = it.reason) }
         if (!first.isComplete) {
-            return MatchState(match, listOf(first), isComplete = false, result = null)
+            return MatchState(match, listOf(first), isComplete = ended != null, result = ended)
         }
         val chaseRevision = revisionFor(2)
         val second = computeInnings(
@@ -51,8 +54,10 @@ object ScoringEngine {
         return MatchState(
             match = match,
             innings = listOf(first, second),
-            isComplete = second.isComplete,
-            result = if (second.isComplete) result(first, second) else null,
+            isComplete = second.isComplete || ended != null,
+            // An ending only gets recorded before the innings finish, so it wins over the score; that also
+            // covers a fixture without squads, whose empty innings read as all out.
+            result = ended ?: if (second.isComplete) result(first, second) else null,
         )
     }
 
@@ -114,6 +119,7 @@ object ScoringEngine {
                     is MatchEvent.Declare -> declared = true
                     // Applied up front through revision, since a first-innings one shortens the chase too.
                     is MatchEvent.ReviseTarget -> Unit
+                    is MatchEvent.EndMatch -> Unit
                 }
                 continue
             }

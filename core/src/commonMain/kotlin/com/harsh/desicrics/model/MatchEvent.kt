@@ -71,6 +71,23 @@ sealed interface MatchEvent {
         override val timestamp: Long = 0,
     ) : MatchEvent
 
+    /**
+     * The match stops here, finished or not. [winner] is the side that wins a concession or walkover, null when
+     * abandoned. [beforeStart] marks an ending recorded on a fixture that never started (a walkover, or called
+     * off), so undoing it puts the fixture back on the schedule.
+     */
+    @Serializable
+    @SerialName("end_match")
+    data class EndMatch(
+        override val seq: Int,
+        override val innings: Int,
+        val ending: MatchEnding,
+        val winner: TeamSide? = null,
+        val reason: AbandonReason? = null,
+        val beforeStart: Boolean = false,
+        override val timestamp: Long = 0,
+    ) : MatchEvent
+
     /** The bowler can't finish the over (injury, say); the scorer picks who bowls the rest of it. */
     @Serializable
     @SerialName("replace_bowler")

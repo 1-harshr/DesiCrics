@@ -1,5 +1,14 @@
 package com.harsh.desicrics
 
+import io.ktor.http.contentType
+import io.ktor.http.ContentType
+import io.ktor.client.request.setBody
+import io.ktor.client.request.delete
+import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.MatchResult
+import com.harsh.desicrics.model.AbandonReason
+import com.harsh.desicrics.model.MatchEnding
+import com.harsh.desicrics.api.EndBeforeStartRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.EnterTeamRequest
 import com.harsh.desicrics.api.MatchDetails
@@ -168,5 +177,78 @@ class TournamentsTest {
         val inbox = client.get("/notifications") { bearerAuth("test-dev") }.body<List<Notification>>()
         assertEquals(listOf(NotificationKind.FIXTURE_RESCHEDULED), inbox.map { it.kind })
         assertNotNull(inbox.single().detail)
+    }
+
+    @Test
+    fun aNoShowIsAWalkoverAndUndoPutsTheFixtureBack() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("ravi", name = "Ravi", phone = "+91 98765 00000")
+        val teams = (1..4).map { client.team("asha", "Team $it") }
+        val cup = client.tournament("asha", CreateTournamentRequest("Final Day", format = TournamentFormat.KNOCKOUT, oversPerInnings = 1))
+        teams.forEach { client.enter("asha", cup.tournament.id, it.id) }
+        val semis = client.post("/tournaments/${cup.tournament.id}/start") { bearerAuth("test-asha") }.body<TournamentDetails>().fixtures
+        // Team 1 doesn't turn up for its semi against Team 4.
+        val final = semis[0]
+        val walkover = EndBeforeStartRequest(MatchEnding.WALKOVER, winner = TeamSide.B)
+
+        // Only an organiser can hand out a walkover.
+        assertEquals(HttpStatusCode.Forbidden, client.post("/matches/${final.id}/end") { bearerAuth("test-ravi"); jsonBody(walkover) }.status)
+        // A walkover needs the team that turned up.
+        assertEquals(
+            HttpStatusCode.BadRequest,
+            client.post("/matches/${final.id}/end") { bearerAuth("test-asha"); jsonBody(EndBeforeStartRequest(MatchEnding.WALKOVER)) }.status,
+        )
+
+        val ended = client.post("/matches/${final.id}/end") { bearerAuth("test-asha"); jsonBody(walkover) }.body<MatchDetails>().match
+        assertEquals(MatchStatus.COMPLETED, ended.status)
+        assertEquals(MatchResult(TeamSide.B, ending = MatchEnding.WALKOVER), ended.result)
+        assertTrue(ended.innings.isEmpty())
+        assertEquals("Team 4 won by walkover", ended.scoreSummary)
+
+        // Recorded by mistake: undo puts it back on the schedule, waiting for its toss.
+        val reopened = client.delete("/matches/${final.id}/last") { bearerAuth("test-asha") }.body<MatchDetails>().match
+        assertEquals(MatchStatus.SCHEDULED, reopened.status)
+        assertNull(reopened.result)
+
+        // Given again, the walkover sends Team 4 to the final.
+        client.post("/matches/${final.id}/end") { bearerAuth("test-asha"); jsonBody(walkover) }
+        client.playFixture(semis[1], aWins = true)
+        val decider = client.details(cup.tournament.id).fixtures.single { it.fixture!!.stage == Stage.FINAL }
+        assertEquals("Team 2" to "Team 4", decider.teamA.name to decider.teamB.name)
+    }
+
+    @Test
+    fun rainDuringALeagueMatchIsAPointEach() = apiTest { client ->
+        client.setUpProfile("asha")
+        val teams = (1..4).map { client.team("asha", "Team $it") }
+        val league = client.tournament("asha", CreateTournamentRequest("Monsoon League", format = TournamentFormat.ROUND_ROBIN, oversPerInnings = 2))
+        teams.forEach { client.enter("asha", league.tournament.id, it.id) }
+        val fixture = client.post("/tournaments/${league.tournament.id}/start") { bearerAuth("test-asha") }.body<TournamentDetails>().fixtures.first()
+        val squad = { side: TeamSide ->
+            val team = fixture.team(side)
+            SquadRequest(team.name, listOf(SquadPlayer("${team.name} 1"), SquadPlayer("${team.name} 2")), teamId = team.teamId)
+        }
+        val started = client.post("/matches/${fixture.id}/start") {
+            bearerAuth("test-asha")
+            jsonBody(StartFixtureRequest(squad(TeamSide.A), squad(TeamSide.B), TeamSide.A, TossDecision.BAT))
+        }.body<MatchDetails>().match
+        val (a1, a2) = started.teamA.players
+        client.record("asha", started.id, Delivery(0, 1, a1.id, a2.id, started.teamB.players[0].id, runsOffBat = 4))
+
+        val rain: MatchEvent = MatchEvent.EndMatch(1, 1, MatchEnding.ABANDONED, reason = AbandonReason.RAIN)
+        val after = client.post("/matches/${started.id}/events") {
+            bearerAuth("test-asha")
+            contentType(ContentType.Application.Json)
+            setBody(rain)
+        }.body<MatchDetails>()
+        assertEquals(MatchStatus.COMPLETED, after.match.status)
+        assertTrue(after.match.result!!.isNoResult)
+        assertTrue(after.match.scoreSummary.endsWith("No result (rain)"))
+        // Nothing more can be scored once it's over.
+        assertEquals(HttpStatusCode.Conflict, client.record("asha", started.id, Delivery(2, 1, a1.id, a2.id, started.teamB.players[0].id)).status)
+
+        val table = client.details(league.tournament.id).tables.single()
+        val rained = table.filter { it.teamId == fixture.teamA.teamId || it.teamId == fixture.teamB.teamId }
+        assertTrue(rained.all { it.points == 1 && it.played == 1 && it.noResult == 1 && it.ballsFaced == 0 })
     }
 }

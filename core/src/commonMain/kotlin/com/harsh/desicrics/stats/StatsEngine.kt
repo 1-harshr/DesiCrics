@@ -67,8 +67,11 @@ object StatsEngine {
         val match = details.match
         if (match.status != MatchStatus.COMPLETED) return emptyList()
         val state = ScoringEngine.compute(match, details.deliveries, details.events)
+        // A match called off or walked over before a ball was bowled has nothing to add to anyone's career.
+        if (details.deliveries.isEmpty()) return emptyList()
         val mvp = MvpPoints.forMatch(state)
-        val best = mvp.maxByOrNull { it.value }?.key
+        // No player of the match when it didn't finish.
+        val best = mvp.maxByOrNull { it.value }?.key.takeIf { match.result?.ending == null }
         val lines = mutableListOf<PlayerMatchLine>()
         for (side in listOf(match.teamA, match.teamB)) {
             val opponent = if (side === match.teamA) match.teamB else match.teamA

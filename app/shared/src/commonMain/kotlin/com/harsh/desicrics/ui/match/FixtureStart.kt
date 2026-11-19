@@ -1,4 +1,7 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import com.harsh.desicrics.model.AbandonReason
+import com.harsh.desicrics.model.MatchEnding
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import androidx.compose.foundation.layout.Arrangement
@@ -45,7 +48,10 @@ internal fun FixturePending(
     setup: FixtureSetup?,
     onStart: (SquadRequest, SquadRequest, TeamSide, TossDecision) -> Unit,
     onBack: () -> Unit,
+    onEnd: (ending: MatchEnding, winner: TeamSide?, reason: AbandonReason?) -> Unit = { _, _, _ -> },
 ) {
+    var ending by remember { mutableStateOf(false) }
+    if (ending) EndMatchSheet(match, beforeStart = true, onEnd = { e, w, r -> ending = false; onEnd(e, w, r) }, onDismiss = { ending = false })
     val space = DesiTheme.space
     val colors = DesiTheme.colors
     var squads by remember { mutableStateOf(if (match.fixture == null) TeamSide.entries.associateWith { side ->
@@ -106,6 +112,12 @@ internal fun FixturePending(
                 loading = setup.starting,
                 modifier = Modifier.fillMaxWidth(),
             )
+        }
+        // No-shows and wash-outs happen: the organiser records them here instead of leaving the fixture hanging.
+        DesiCard(Modifier.fillMaxWidth()) {
+            SectionLabel(stringResource(Res.string.end_didnt_happen))
+            Text(stringResource(Res.string.end_didnt_happen_hint), style = DesiTheme.type.caption, color = colors.muted)
+            GhostButton(stringResource(Res.string.end_title_before), onClick = { ending = true }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Flag)
         }
     }
 

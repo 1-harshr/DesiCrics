@@ -1,4 +1,5 @@
 package com.harsh.desicrics.service
+import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.api.AddPlayerRequest
 import com.harsh.desicrics.api.CreateMatchRequest
@@ -197,15 +198,37 @@ class MatchService(
         return next.also { announce(details, it) }
     }
 
+    /**
+     * Ends a fixture that never started: a walkover, or called off. Whoever may start the fixture may do this
+     * (checked by the caller), and they become its scorer so they can undo it.
+     */
+    suspend fun endBeforeStart(user: FirebasePrincipal, matchId: String, request: EndBeforeStartRequest): MatchDetails {
+        val before = details(matchId)
+        if (before.match.status != MatchStatus.SCHEDULED) throw ApiException(HttpStatusCode.Conflict, "That match has already started")
+        val event = MatchEvent.EndMatch(before.nextSeq, 1, request.ending, request.winner, request.reason, beforeStart = true)
+        val owned = before.copy(match = before.match.copy(scorerUid = user.uid))
+        owned.state().rejectionReason(event, owned.nextSeq)?.let { throw ApiException(HttpStatusCode.BadRequest, it) }
+        val saved = event.stamped(clock())
+        val next = owned.copy(events = owned.events + saved).rescored()
+        matches.setScorer(matchId, user.uid)
+        if (!matches.addEvent(next.match, saved)) throw ApiException(HttpStatusCode.Conflict, "That was already recorded. Refresh and try again")
+        return next.also { announce(before, it) }
+    }
+
     /** Removes the latest ball or event, whichever came last. */
     suspend fun undoLast(user: FirebasePrincipal, matchId: String): MatchDetails {
         val details = scorersMatch(user, matchId)
         val lastSeq = details.nextSeq - 1
         if (lastSeq < 0) throw ApiException(HttpStatusCode.Conflict, "Nothing to undo")
-        val next = details.copy(
+        val undone = details.copy(
             deliveries = details.deliveries.filter { it.seq != lastSeq },
             events = details.events.filter { it.seq != lastSeq },
         ).rescored()
+        // Undoing a walkover or call-off puts the fixture back on the schedule, still waiting for its toss.
+        val reopened = details.events.any { it.seq == lastSeq && it is MatchEvent.EndMatch && it.beforeStart }
+        val next = if (reopened) {
+            undone.copy(match = undone.match.copy(status = MatchStatus.SCHEDULED, result = null, innings = emptyList(), scoreSummary = ""))
+        } else undone
         if (!matches.removeEntry(next.match, lastSeq)) {
             throw ApiException(HttpStatusCode.Conflict, "That was already undone. Refresh and try again")
         }
@@ -269,6 +292,7 @@ class MatchService(
         is MatchEvent.Penalty -> copy(timestamp = at)
         is MatchEvent.Declare -> copy(timestamp = at)
         is MatchEvent.ReviseTarget -> copy(timestamp = at)
+        is MatchEvent.EndMatch -> copy(timestamp = at)
     }
 
     private suspend fun scorersMatch(user: FirebasePrincipal, matchId: String): MatchDetails {

@@ -1,5 +1,7 @@
 package com.harsh.desicrics.tournament
 
+import com.harsh.desicrics.model.MatchEnding
+import com.harsh.desicrics.model.AbandonReason
 import com.harsh.desicrics.model.FixtureInfo
 import com.harsh.desicrics.model.InningsScore
 import com.harsh.desicrics.model.MarginUnit
@@ -201,5 +203,40 @@ class TournamentEngineTest {
         val custom = tournament(TournamentFormat.CUSTOM, teams = 3)
         assertTrue(TournamentEngine.firstRound(custom).isEmpty())
         assertNull(TournamentEngine.champion(custom, emptyList()))
+    }
+
+    @Test
+    fun anAbandonedLeagueFixtureIsAPointEachAndLeavesNetRunRateAlone() {
+        val league = tournament(TournamentFormat.ROUND_ROBIN, teams = 2)
+        val planned = TournamentEngine.firstRound(league).single()
+        val abandoned = play(planned) { _, _ -> null }.copy(
+            result = MatchResult(null, ending = MatchEnding.ABANDONED, reason = AbandonReason.RAIN),
+        )
+        val table = TournamentEngine.pointsTable(league, listOf(abandoned), 0)
+        assertTrue(table.all { it.points == 1 && it.played == 1 && it.noResult == 1 && it.tied == 0 })
+        assertTrue(table.all { it.ballsFaced == 0 && it.netRunRate == 0.0 })
+    }
+
+    @Test
+    fun aWalkoverIsAWinWithoutRuns() {
+        val league = tournament(TournamentFormat.ROUND_ROBIN, teams = 2)
+        val planned = TournamentEngine.firstRound(league).single()
+        val walkover = play(planned) { a, _ -> a }.copy(
+            result = MatchResult(TeamSide.A, ending = MatchEnding.WALKOVER),
+            innings = emptyList(),
+        )
+        val table = TournamentEngine.pointsTable(league, listOf(walkover), 0)
+        assertEquals(planned.teamA, table.first().teamId)
+        assertEquals(2, table.first().points)
+        assertEquals(1, table.last().lost)
+    }
+
+    @Test
+    fun anAbandonedKnockoutSendsTheHigherSeedThrough() {
+        val cup = tournament(TournamentFormat.KNOCKOUT, teams = 2)
+        val final = play(TournamentEngine.firstRound(cup).single()) { _, _ -> null }.copy(
+            result = MatchResult(null, ending = MatchEnding.ABANDONED, reason = AbandonReason.BAD_LIGHT),
+        )
+        assertEquals("t1", TournamentEngine.winner(cup, final).teamId)
     }
 }

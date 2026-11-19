@@ -1,4 +1,5 @@
 package com.harsh.desicrics
+import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.api.AddOrganiserRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
@@ -42,5 +43,9 @@ fun Route.tournamentRoutes(tournaments: TournamentService) {
     }
     post("/matches/{id}/start") {
         call.respond(tournaments.startFixture(call.user, call.parameters["id"].orEmpty(), call.receive<StartFixtureRequest>()))
+    }
+    // A walkover or call-off for a match that never starts. During play the scorer records an end_match event.
+    post("/matches/{id}/end") {
+        call.respond(tournaments.endBeforeStart(call.user, call.parameters["id"].orEmpty(), call.receive<EndBeforeStartRequest>()))
     }
 }

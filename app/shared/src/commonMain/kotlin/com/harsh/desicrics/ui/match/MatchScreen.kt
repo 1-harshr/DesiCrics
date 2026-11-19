@@ -1,4 +1,7 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.model.MatchEvent
+import com.harsh.desicrics.model.AbandonReason
+import com.harsh.desicrics.model.MatchEnding
 import com.harsh.desicrics.designsystem.component.ErrorState
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 
@@ -121,6 +124,9 @@ fun MatchScreen(
             onUndo = viewModel::undo,
             onDismissError = viewModel::dismissError,
             onRetry = viewModel::retry,
+            onEndMatch = { ending, winner, reason, beforeStart ->
+                if (beforeStart) viewModel.endBeforeStart(ending, winner, reason) else viewModel.endMatch(ending, winner, reason)
+            },
             onRetire = viewModel::retire,
             onSwapEnds = viewModel::swapEnds,
             onReplaceBowler = viewModel::replaceBowler,
@@ -159,6 +165,8 @@ class MatchActions(
     val onShareLink: () -> Unit = {},
     val onShareOverlay: () -> Unit = {},
     val onStartFixture: (SquadRequest, SquadRequest, TeamSide, TossDecision) -> Unit = { _, _, _, _ -> },
+    /** Stops the match early: during play, or ([MatchEvent.EndMatch.beforeStart]) a fixture that never starts. */
+    val onEndMatch: (ending: MatchEnding, winner: TeamSide?, reason: AbandonReason?, beforeStart: Boolean) -> Unit = { _, _, _, _ -> },
     val onRetry: () -> Unit = {},
 )
 
@@ -181,6 +189,7 @@ private sealed interface ScoringSheet {
     data class BatterOptions(val player: Player) : ScoringSheet
     data object BowlerOptions : ScoringSheet
     data object MatchOptions : ScoringSheet
+    data object EndMatch : ScoringSheet
     data object Penalty : ScoringSheet
     data object ReviseTarget : ScoringSheet
     /** Where a scoring shot went, for the wagon wheel. */
@@ -202,7 +211,11 @@ fun MatchContent(ui: MatchUiState, actions: MatchActions) {
         when {
             ui.loading -> FullScreenLoading()
             ui.notFound || state == null -> MatchMissing(ui.notFound, actions)
-            state.match.status == MatchStatus.SCHEDULED -> FixturePending(state.match, ui.fixture, actions.onStartFixture, actions.onBack)
+            state.match.status == MatchStatus.SCHEDULED ->
+                FixturePending(state.match, ui.fixture, actions.onStartFixture, actions.onBack, onEnd = { ending, winner, reason -> actions.onEndMatch(ending, winner, reason, true) })
+            // A walkover or call-off: no ball was bowled, so there's no scorecard to show.
+            ui.events.any { it is MatchEvent.EndMatch && it.beforeStart } && state.result != null ->
+                EndedBeforePlay(state.match, state.result!!, ui.canUndo, onUndo = actions.onUndo, onBack = actions.onBack)
             else -> Scoring(ui, state, actions)
         }
     }
@@ -259,7 +272,14 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
                     Text(stringResource(Res.string.match_not_your_match), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
                 }
                 if (state.isComplete && ui.canUndo) {
-                    GhostButton(stringResource(Res.string.match_undo_last_ball), onClick = askUndo, modifier = Modifier.fillMaxWidth())
+                    // Undo after an early ending reopens the match rather than taking back a ball.
+                    val endedEarly = state.result?.ending != null
+                    GhostButton(
+                        stringResource(if (endedEarly) Res.string.end_reopen else Res.string.match_undo_last_ball),
+                        onClick = if (endedEarly) actions.onUndo else askUndo,
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = DesiIcons.History,
+                    )
                 }
             }
             MatchTab.SCORECARD -> {
@@ -713,6 +733,9 @@ private fun ScoringSheets(
                 SheetOption(stringResource(Res.string.match_revise), stringResource(Res.string.match_revise_hint)) {
                     onSheet(ScoringSheet.ReviseTarget)
                 },
+                SheetOption(stringResource(Res.string.end_title), stringResource(Res.string.end_option_hint)) {
+                    onSheet(ScoringSheet.EndMatch)
+                },
                 SheetOption(
                     stringResource(Res.string.match_declare),
                     stringResource(if (innings.number == 1) Res.string.match_declare_hint else Res.string.match_declare_chase_hint),
@@ -721,6 +744,15 @@ private fun ScoringSheets(
                     onClose()
                 },
             ),
+            onDismiss = onClose,
+        )
+        ScoringSheet.EndMatch -> EndMatchSheet(
+            match = state.match,
+            beforeStart = false,
+            onEnd = { ending, winner, reason ->
+                actions.onEndMatch(ending, winner, reason, false)
+                onClose()
+            },
             onDismiss = onClose,
         )
         ScoringSheet.Penalty -> PenaltySheet(

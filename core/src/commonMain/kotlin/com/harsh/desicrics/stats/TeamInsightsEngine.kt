@@ -3,6 +3,7 @@ package com.harsh.desicrics.stats
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.InningsPhase
+import com.harsh.desicrics.model.MatchEnding
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.Performer
 import com.harsh.desicrics.model.PhaseStat
@@ -53,6 +54,8 @@ object TeamInsightsEngine {
                 else -> continue
             }
             val result = match.result ?: continue
+            // Insights are about how the team plays, so only matches with cricket in them and a winner or a tie.
+            if (result.isNoResult || result.ending == MatchEnding.WALKOVER) continue
             val state = ScoringEngine.compute(match, details.deliveries, details.events)
             val win = result.winner == side
             when (result.winner) {

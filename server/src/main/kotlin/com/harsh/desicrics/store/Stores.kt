@@ -51,6 +51,9 @@ interface MatchStore {
 
     suspend fun setSchedule(matchId: String, scheduledAt: Long?)
 
+    /** Makes [uid] the match's scorer, e.g. the organiser who records a walkover. */
+    suspend fun setScorer(matchId: String, uid: String)
+
     /** Profile IDs who played in each of [matchIds]. */
     suspend fun profileIds(matchIds: Collection<String>): Map<String, Set<String>>
 
