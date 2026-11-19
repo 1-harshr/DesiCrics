@@ -357,8 +357,8 @@ class MatchViewModel(
     /** Rain: new overs for this innings (both, in the first), and in the chase a new target. */
     fun reviseTarget(overs: Int, target: Int?) = recordEvent { seq, innings -> MatchEvent.ReviseTarget(seq, innings, overs, target) }
 
-    /** Clears the bowler mid-over (an injury, say) so the scorer can pick who finishes it. */
-    fun replaceBowler() = recordEvent { seq, innings -> MatchEvent.ReplaceBowler(seq, innings) }
+    /** [playerId] finishes the over in place of the current bowler (an injury, say). */
+    fun replaceBowler(playerId: String) = recordEvent { seq, innings -> MatchEvent.ReplaceBowler(seq, innings, playerId) }
 
     /** A latecomer or substitute joins [side]; they show up in the player pickers straight away. */
     fun addPlayer(side: TeamSide, name: String) {

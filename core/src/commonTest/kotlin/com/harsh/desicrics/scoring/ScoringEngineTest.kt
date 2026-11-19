@@ -251,12 +251,49 @@ class ScoringEngineTest {
     }
 
     @Test
+    fun undoingTheBallThatEndsAnOverKeepsTheBowler() {
+        repeat(6) { ball("a1", "a2", "b1") }
+        repeat(6) { ball("a2", "a1", "b2") }
+        deliveries.removeLast()
+        val innings = state().current
+        assertEquals("1.5", innings.oversText)
+        assertEquals("b2", innings.bowlerId)
+    }
+
+    @Test
+    fun undoingTheBallThatEndsAnOverKeepsTheReplacementBowler() {
+        repeat(6) { ball("a1", "a2", "b1") }
+        repeat(5) { ball("a2", "a1", "b2") }
+        // Changed after the fifth ball, and the same bowler picked again to finish the over.
+        event { MatchEvent.ReplaceBowler(it, 1, bowlerId = "b2") }
+        assertEquals("b2", state().current.bowlerId)
+        ball("a2", "a1", "b2")
+        assertNull(state().current.bowlerId)
+
+        deliveries.removeLast()
+        val innings = state().current
+        assertEquals("1.5", innings.oversText)
+        assertEquals("b2", innings.bowlerId)
+    }
+
+    @Test
+    fun undoingTheBallAfterABowlerChangeKeepsTheNewBowler() {
+        repeat(2) { ball("a1", "a2", "b1") }
+        event { MatchEvent.ReplaceBowler(it, 1, bowlerId = "b3") }
+        ball("a1", "a2", "b3")
+        deliveries.removeLast()
+        assertEquals("b3", state().current.bowlerId)
+    }
+
+    @Test
     fun eventsAreChecked() {
         ball("a1", "a2", "b1")
         val state = state()
         assertEquals(DeliveryError.BATTER_NOT_AT_CREASE, state.validate(MatchEvent.Retire(1, 1, "a3", out = false), nextSeq = 1))
         assertEquals(DeliveryError.STALE, state.validate(MatchEvent.SwapEnds(5, 1), nextSeq = 1))
         assertNull(state.validate(MatchEvent.ReplaceBowler(1, 1), nextSeq = 1))
+        assertNull(state.validate(MatchEvent.ReplaceBowler(1, 1, bowlerId = "b2"), nextSeq = 1))
+        assertEquals(DeliveryError.BOWLER_NOT_IN_TEAM, state.validate(MatchEvent.ReplaceBowler(1, 1, bowlerId = "a3"), nextSeq = 1))
     }
 
     @Test

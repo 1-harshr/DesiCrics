@@ -116,7 +116,11 @@ fun MatchState.validate(event: MatchEvent, nextSeq: Int): DeliveryError? {
                 DeliveryError.BATTER_NOT_AT_CREASE.takeIf { event.playerId != innings.strikerId && event.playerId != innings.nonStrikerId }
             is MatchEvent.SwapEnds ->
                 DeliveryError.BATTERS_MISSING.takeIf { innings.strikerId == null || innings.nonStrikerId == null }
-            is MatchEvent.ReplaceBowler -> DeliveryError.NO_BOWLER_TO_REPLACE.takeIf { innings.bowlerId == null }
+            is MatchEvent.ReplaceBowler -> when {
+                innings.bowlerId == null -> DeliveryError.NO_BOWLER_TO_REPLACE
+                event.bowlerId != null && innings.bowlingTeam.players.none { it.id == event.bowlerId } -> DeliveryError.BOWLER_NOT_IN_TEAM
+                else -> null
+            }
             is MatchEvent.Penalty -> DeliveryError.PENALTY_OUT_OF_RANGE.takeIf { event.runs !in 1..10 }
             is MatchEvent.Declare -> null
             // Before-start endings were handled above, so this one is during play.

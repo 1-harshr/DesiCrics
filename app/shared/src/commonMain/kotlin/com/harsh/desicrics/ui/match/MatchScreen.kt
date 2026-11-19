@@ -160,7 +160,8 @@ class MatchActions(
     val onDismissError: () -> Unit,
     val onRetire: (playerId: String, out: Boolean) -> Unit,
     val onSwapEnds: () -> Unit,
-    val onReplaceBowler: () -> Unit,
+    /** Someone else finishes the over. */
+    val onReplaceBowler: (playerId: String) -> Unit,
     val onAddPlayer: (TeamSide, name: String) -> Unit,
     val onPenalty: (toBattingSide: Boolean, runs: Int) -> Unit,
     val onDeclare: () -> Unit,
@@ -193,6 +194,8 @@ private sealed interface ScoringSheet {
     data object Wicket : ScoringSheet
     data class BatterOptions(val player: Player) : ScoringSheet
     data object BowlerOptions : ScoringSheet
+    /** Who finishes the over in place of the current bowler. */
+    data object ReplaceBowler : ScoringSheet
     data object MatchOptions : ScoringSheet
     data object EndMatch : ScoringSheet
     data object Penalty : ScoringSheet
@@ -828,20 +831,24 @@ private fun ScoringSheets(
                 onAddPlayer = { actions.onAddPlayer(innings.battingSide, it) },
             )
         }
-        ScoringSheet.Bowler -> {
+        ScoringSheet.Bowler, ScoringSheet.ReplaceBowler -> {
             // Bowlers an enforced rule rules out are hidden; a warned rule just shows why next to their name.
             val breaks = innings.bowlingTeam.players.associate { it.id to state.bowlerRuleBreak(it.id) }
             val bowledLast = stringResource(Res.string.scoring_bowled_last_over)
             val allBowled = stringResource(Res.string.scoring_over_limit_reached)
             PlayerSheet(
                 title = stringResource(Res.string.scoring_pick_bowler),
-                players = innings.bowlingTeam.players.filter { breaks[it.id]?.mode != RuleMode.ENFORCE },
+                // Someone else finishes an over the bowler can't.
+                players = innings.bowlingTeam.players.filter {
+                    breaks[it.id]?.mode != RuleMode.ENFORCE && (sheet != ScoringSheet.ReplaceBowler || it.id != ui.bowlerId)
+                },
                 notes = buildMap {
                     innings.previousOverBowlerId?.let { put(it, bowledLast) }
                     breaks.forEach { (id, rule) -> if (rule?.error == DeliveryError.BOWLER_OVER_LIMIT) put(id, allBowled) }
                 },
                 onPick = {
-                    actions.onSelectBowler(it.id)
+                    // A replacement is recorded with the pick, so the change and the new bowler undo together.
+                    if (sheet == ScoringSheet.ReplaceBowler) actions.onReplaceBowler(it.id) else actions.onSelectBowler(it.id)
                     onClose()
                 },
                 onDismiss = onClose,
@@ -956,8 +963,7 @@ private fun ScoringSheets(
             title = innings.bowlingTeam.players.firstOrNull { it.id == ui.bowlerId }?.name.orEmpty(),
             options = listOf(
                 SheetOption(stringResource(Res.string.scoring_change_bowler), stringResource(Res.string.scoring_change_bowler_hint)) {
-                    actions.onReplaceBowler()
-                    onClose()
+                    onSheet(ScoringSheet.ReplaceBowler)
                 },
             ),
             onDismiss = onClose,

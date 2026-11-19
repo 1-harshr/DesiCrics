@@ -88,12 +88,17 @@ sealed interface MatchEvent {
         override val timestamp: Long = 0,
     ) : MatchEvent
 
-    /** The bowler can't finish the over (injury, say); the scorer picks who bowls the rest of it. */
+    /**
+     * The bowler can't finish the over (injury, say) and [bowlerId] bowls the rest of it. Recorded with the
+     * new bowler, so undoing the ball after it still knows who was bowling. Null on events from before then,
+     * which leave the scorer to pick.
+     */
     @Serializable
     @SerialName("replace_bowler")
     data class ReplaceBowler(
         override val seq: Int,
         override val innings: Int,
+        val bowlerId: String? = null,
         override val timestamp: Long = 0,
     ) : MatchEvent
 }

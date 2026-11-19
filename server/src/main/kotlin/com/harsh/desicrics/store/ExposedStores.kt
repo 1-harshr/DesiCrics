@@ -309,7 +309,11 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[seq] = event.seq
                 it[innings] = event.innings
                 it[type] = event.typeName
-                it[playerId] = (event as? MatchEvent.Retire)?.playerId
+                it[playerId] = when (event) {
+                    is MatchEvent.Retire -> event.playerId
+                    is MatchEvent.ReplaceBowler -> event.bowlerId
+                    else -> null
+                }
                 it[isOut] = (event as? MatchEvent.Retire)?.out ?: false
                 it[runs] = (event as? MatchEvent.Penalty)?.runs ?: 0
                 it[toBattingSide] = (event as? MatchEvent.Penalty)?.toBattingSide ?: false
@@ -362,7 +366,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
         return when (this[MatchEventsTable.type]) {
             RETIRE -> MatchEvent.Retire(seq, innings, checkNotNull(this[MatchEventsTable.playerId]), this[MatchEventsTable.isOut], at)
             SWAP_ENDS -> MatchEvent.SwapEnds(seq, innings, at)
-            REPLACE_BOWLER -> MatchEvent.ReplaceBowler(seq, innings, at)
+            REPLACE_BOWLER -> MatchEvent.ReplaceBowler(seq, innings, this[MatchEventsTable.playerId], at)
             PENALTY -> MatchEvent.Penalty(seq, innings, this[MatchEventsTable.toBattingSide], this[MatchEventsTable.runs], at)
             DECLARE -> MatchEvent.Declare(seq, innings, at)
             REVISE_TARGET ->

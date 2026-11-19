@@ -25,6 +25,7 @@ import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.model.UserProfile
 import com.harsh.desicrics.model.Wicket
+import com.harsh.desicrics.scoring.ScoringEngine
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -211,6 +212,29 @@ class ApplicationTest {
         val undone = client.delete("/matches/${match.id}/last") { bearerAuth("test-asha") }.body<MatchDetails>()
         assertTrue(undone.events.isEmpty())
         assertEquals(1, undone.deliveries.size)
+    }
+
+    @Test
+    fun undoingTheBallAfterABowlerChangeKeepsTheNewBowler() = apiTest { client ->
+        client.setUpProfile("asha")
+        val match = client.createMatch("asha").match
+        val (a1, a2) = match.teamA.players
+        val (b1, b2) = match.teamB.players
+        val dot = Delivery(0, innings = 1, strikerId = a1.id, nonStrikerId = a2.id, bowlerId = b1.id)
+        repeat(5) { assertEquals(HttpStatusCode.OK, client.record("asha", match.id, dot.copy(seq = it)).status) }
+
+        // b2 finishes the over; the last ball is taken back, and b2 is still the one bowling, even on a fresh load.
+        val change: MatchEvent = MatchEvent.ReplaceBowler(seq = 5, innings = 1, bowlerId = b2.id)
+        client.post("/matches/${match.id}/events") {
+            bearerAuth("test-asha")
+            contentType(ContentType.Application.Json)
+            setBody(change)
+        }
+        client.record("asha", match.id, dot.copy(seq = 6, bowlerId = b2.id))
+        client.delete("/matches/${match.id}/last") { bearerAuth("test-asha") }
+        val reloaded = client.get("/matches/${match.id}") { bearerAuth("test-asha") }.body<MatchDetails>()
+        assertEquals(b2.id, (reloaded.events.single() as MatchEvent.ReplaceBowler).bowlerId)
+        assertEquals(b2.id, ScoringEngine.compute(reloaded.match, reloaded.deliveries, reloaded.events).current.bowlerId)
     }
 
     @Test

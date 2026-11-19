@@ -112,8 +112,8 @@ object ScoringEngine {
                         if (nonStriker == item.playerId) nonStriker = null
                     }
                     is MatchEvent.SwapEnds -> striker = nonStriker.also { nonStriker = striker }
-                    // The over carries on; the scorer picks who bowls the rest of it.
-                    is MatchEvent.ReplaceBowler -> bowler = null
+                    // The over carries on with the new bowler.
+                    is MatchEvent.ReplaceBowler -> bowler = item.bowlerId
                     // Counted up front through penaltyRuns, since some belong to the other innings.
                     is MatchEvent.Penalty -> Unit
                     is MatchEvent.Declare -> declared = true
