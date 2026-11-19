@@ -140,6 +140,22 @@ class ScreenshotTest {
     }
 
     @Test
+    fun matchCardsDark() = shoot("match_cards_dark", dark = true) {
+        val live = match(balls).match!!.copy(
+            status = MatchStatus.IN_PROGRESS,
+            teamA = strikers.copy(name = "Andheri Community Cricket Club"),
+        )
+        Column(Modifier.background(DesiTheme.colors.bg).padding(DesiTheme.space.s4),
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(DesiTheme.space.s3)) {
+            listOf(live, live.copy(status = MatchStatus.SCHEDULED, innings = emptyList()),
+                live.copy(status = MatchStatus.COMPLETED, result = com.harsh.desicrics.model.MatchResult(
+                    TeamSide.A, 2, com.harsh.desicrics.model.MarginUnit.RUNS),
+                    innings = listOf(InningsScore(TeamSide.A, 52, 2, 30), InningsScore(TeamSide.B, 50, 4, 30))),
+            ).forEach { com.harsh.desicrics.ui.home.HomeMatchCard(it, isMine = false, onClick = {}) }
+        }
+    }
+
+    @Test
     fun newMatch() = shoot("new_match") {
         NewMatchContent(
             NewMatchFormState(

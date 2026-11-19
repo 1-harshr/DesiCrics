@@ -352,11 +352,7 @@ internal fun HomeMatchCard(match: Match, isMine: Boolean, onClick: () -> Unit) {
             name = match.team(side).name,
             score = innings?.let { "${it.runs}/${it.wickets}" },
             overs = innings?.let { formatOvers(it.legalBalls) },
-            // Highlight the side batting now, or the winner once it's over.
-            batting = when (val result = match.result) {
-                null -> side == current
-                else -> result.winner == null || result.winner == side
-            },
+            batting = match.status == MatchStatus.IN_PROGRESS && side == current,
         )
     }
     val overs = oversText(match.oversPerInnings)
@@ -365,6 +361,7 @@ internal fun HomeMatchCard(match: Match, isMine: Boolean, onClick: () -> Unit) {
         status = {
             when {
                 match.status == MatchStatus.COMPLETED -> StatusLabel(stringResource(Res.string.home_status_result))
+                match.status == MatchStatus.SCHEDULED -> StatusLabel(stringResource(Res.string.home_section_upcoming))
                 match.innings.isEmpty() -> StatusLabel(stringResource(Res.string.home_status_not_started))
                 else -> LiveBadge()
             }

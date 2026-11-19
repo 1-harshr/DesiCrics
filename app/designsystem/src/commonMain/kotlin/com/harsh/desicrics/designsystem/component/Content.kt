@@ -5,6 +5,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -24,6 +29,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.resources.Res
+import com.harsh.desicrics.designsystem.resources.ds_batting
+import com.harsh.desicrics.designsystem.resources.ds_innings_overs
+import com.harsh.desicrics.designsystem.resources.ds_yet_to_bat
 import com.harsh.desicrics.designsystem.resources.ds_live
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import org.jetbrains.compose.resources.painterResource
@@ -76,35 +84,52 @@ fun MatchCard(
     onClick: (() -> Unit)? = null,
 ) {
     val colors = DesiTheme.colors
-    DesiCard(modifier, onClick) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    val live = teams.any { it.batting }
+    Column(
+        modifier.fillMaxWidth().clip(DesiTheme.radius.md)
+            .background(if (live) colors.brandSoft else colors.surface)
+            .drawBehind { if (live) drawRect(colors.brand, size = Size(4.dp.toPx(), size.height)) }
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(DesiTheme.space.s4),
+        verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f)) { status() }
-            if (meta != null) Text(meta, style = DesiTheme.type.caption, color = colors.muted, maxLines = 1)
+            if (meta != null) Text(meta, style = DesiTheme.type.caption, color = colors.muted)
         }
-        teams.forEach { team ->
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-                Text(
-                    team.name,
-                    style = DesiTheme.type.bodyStrong,
-                    color = if (team.batting) colors.ink else colors.muted,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f),
-                )
-                if (team.score != null) {
-                    Text(team.score, style = DesiTheme.type.scoreMd, color = if (team.batting) colors.ink else colors.muted)
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            if (maxWidth < 260.dp * LocalDensity.current.fontScale) {
+                Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+                    teams.forEach { TeamScore(it, showPending = live) }
                 }
-                if (team.overs != null) {
-                    Text(
-                        team.overs,
-                        style = DesiTheme.type.data,
-                        color = colors.muted,
-                        modifier = Modifier.padding(start = DesiTheme.space.s1, bottom = 2.dp),
-                    )
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
+                    teams.forEach { TeamScore(it, showPending = live, modifier = Modifier.weight(1f), nameLines = 2) }
                 }
             }
         }
-        if (footer != null) Text(footer, style = DesiTheme.type.body, color = colors.ink)
+        if (footer != null) {
+            androidx.compose.material3.HorizontalDivider(color = colors.line)
+            Text(footer, style = DesiTheme.type.body, color = colors.ink)
+        }
+    }
+}
+
+@Composable
+private fun TeamScore(team: TeamLine, showPending: Boolean, modifier: Modifier = Modifier, nameLines: Int = 1) {
+    val colors = DesiTheme.colors
+    Column(modifier) {
+        Text(team.name, style = DesiTheme.type.bodyLg, fontWeight = FontWeight.Bold, color = colors.ink, minLines = nameLines)
+        if (team.score != null) {
+            Text(team.score, style = DesiTheme.type.scoreLg, color = colors.ink)
+            val detail = listOfNotNull(
+                team.overs?.let { stringResource(Res.string.ds_innings_overs, it) },
+                if (team.batting) stringResource(Res.string.ds_batting) else null,
+            ).joinToString(" · ")
+            if (detail.isNotEmpty()) Text(detail, style = DesiTheme.type.caption, color = colors.muted)
+        } else if (showPending) {
+            Text(stringResource(Res.string.ds_yet_to_bat), style = DesiTheme.type.caption, color = colors.muted)
+        }
     }
 }
 
