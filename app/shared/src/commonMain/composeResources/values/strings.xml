@@ -1027,4 +1027,10 @@
     <string name="match_offline_title">Can't reach the server</string>
     <string name="scoring_error_save_title">That ball didn't save</string>
     <string name="scoring_error_rejected_title">Can't record that</string>
+    <string name="feed_everyone">Everyone</string>
+    <string name="feed_status_all">All</string>
+    <string name="feed_status_live">Live</string>
+    <string name="feed_status_upcoming">Upcoming</string>
+    <string name="feed_status_results">Results</string>
+    <string name="feed_empty_body">Try another filter, or follow teams and players to see their games here.</string>
 </resources>

@@ -253,7 +253,7 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `BallChip` / `OverStrip` | `Scoring.kt` | One delivery as a 32dp circle coloured by event token; a row of them for the current over |
 | `ScoreHeader` | `Scoring.kt` | Label, score (`score.xl`), overs (`data`) and an optional target / run-rate line |
 | `RunPad` | `Scoring.kt` | 4-column grid of 64dp keys; the caller defines the keys and what they do |
-| `MatchCard` | `Content.kt` | A match in a feed: status slot (e.g. `LiveBadge`), meta, team lines, footer |
+| `MatchCard` | `Content.kt` | A match in a feed: status slot (e.g. `LiveBadge`), meta, both teams side by side, and a footer line. A finished match passes a `CardResult`: the winner gets a trophy, the loser's name and score dim, and the result sits in a green strip across the foot of the card (neutral for a tie) |
 | `LiveBadge` | `Content.kt` | Red dot plus LIVE |
 | `PlayerRow` / `Avatar` | `Content.kt` | Avatar (photo slot, initial or person icon), name, secondary line |
 | `DesiCard` / `SectionLabel` | `Content.kt` | Flat bordered surface; uppercase section label |
@@ -284,6 +284,7 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `EmptyState` | `Detail.kt` | Icon tile, title, body and an optional action, on a card |
 | `ErrorState` | `Feedback.kt` | When content couldn't load: an amber mark (cloud for connection trouble, a crossed-out search for something that doesn't exist), a title, a body and Try again, plus an optional way out. Full screen, or `compact` on a card inside a section |
 | `ErrorBanner` | `Feedback.kt` | A problem that doesn't replace the page (a failed save, a refused action): icon, optional title, message and an optional action. Red by default; `warning` makes it amber for states that aren't failures, like being offline |
+| `FilterRow` | `Detail.kt` | Filters on one sideways-scrolling line, each with an optional icon; the selected one filled in `ink`. Use it so a list's filters never wrap onto several rows |
 | `DesiNavigationBar` | `Navigation.kt` | Bottom tabs: outlined icons, filled and green on a soft pill when selected |
 
 Illustrations live in `DesiIllustrations` (drawn with `Image`, not tinted). `BallMark` is the app icon's ball and speed lines, used in the sign-in header.

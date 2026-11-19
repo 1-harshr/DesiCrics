@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.home
+import com.harsh.desicrics.ui.text.resultText
+import com.harsh.desicrics.designsystem.component.CardResult
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import androidx.compose.foundation.Image
@@ -343,6 +345,7 @@ internal fun HomeMatchCard(match: Match, isMine: Boolean, onClick: () -> Unit) {
             score = innings?.let { "${it.runs}/${it.wickets}" },
             overs = innings?.let { formatOvers(it.legalBalls) },
             batting = match.status == MatchStatus.IN_PROGRESS && side == current,
+            won = match.result?.winner?.let { it == side },
         )
     }
     val overs = oversText(match.oversPerInnings)
@@ -358,6 +361,7 @@ internal fun HomeMatchCard(match: Match, isMine: Boolean, onClick: () -> Unit) {
         },
         meta = if (isMine) stringResource(Res.string.home_meta_scoring, overs) else overs,
         footer = matchStatusText(match),
+        result = match.result?.let { CardResult(resultText(match, it), tied = it.winner == null) },
         onClick = onClick,
     )
 }

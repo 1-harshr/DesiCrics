@@ -1,4 +1,11 @@
 package com.harsh.desicrics.designsystem.component
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.foundation.text.InlineTextContent
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -65,12 +72,18 @@ fun LiveBadge(modifier: Modifier = Modifier) {
     }
 }
 
+/** One side of a [MatchCard]. [won] is true for the winner and false for the loser once there's a result; null before then or for a tie. */
 @Immutable
-data class TeamLine(val name: String, val score: String? = null, val overs: String? = null, val batting: Boolean = false)
+data class TeamLine(val name: String, val score: String? = null, val overs: String? = null, val batting: Boolean = false, val won: Boolean? = null)
+
+/** How a finished match ended, shown as a highlighted strip at the foot of a [MatchCard]. */
+@Immutable
+data class CardResult(val text: String, val tied: Boolean = false)
 
 /**
  * A match in a feed. [status] is the top-left slot ([LiveBadge] or a date label), [meta] the top-right
- * text (format and venue), and [footer] a line such as "Strikers need 27 off 20 balls".
+ * text (format and venue), and [footer] a line such as "Strikers need 27 off 20 balls". A finished match
+ * passes [result] instead: the winner gets a trophy, the loser is dimmed, and the result sits in a green strip.
  */
 @Composable
 fun MatchCard(
@@ -79,6 +92,7 @@ fun MatchCard(
     status: @Composable () -> Unit = {},
     meta: String? = null,
     footer: String? = null,
+    result: CardResult? = null,
     onClick: (() -> Unit)? = null,
 ) {
     val colors = DesiTheme.colors
@@ -86,10 +100,9 @@ fun MatchCard(
     Column(
         modifier.fillMaxWidth().clip(DesiTheme.radius.md)
             .background(colors.surface)
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(DesiTheme.space.s4),
-        verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     ) {
+    Column(Modifier.padding(DesiTheme.space.s4), verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.weight(1f)) { status() }
             if (meta != null) Text(meta, style = DesiTheme.type.caption, color = colors.muted)
@@ -115,24 +128,65 @@ fun MatchCard(
                 }
             }
         }
-        if (footer != null) {
+        if (footer != null && result == null) {
             androidx.compose.material3.HorizontalDivider(color = colors.line)
             Text(footer, style = DesiTheme.type.body, color = colors.ink)
         }
+    }
+        if (result != null) ResultStrip(result)
+    }
+}
+
+/** The result across the foot of the card: green with a trophy for a win, neutral for a tie. */
+@Composable
+private fun ResultStrip(result: CardResult) {
+    val colors = DesiTheme.colors
+    val content = if (result.tied) colors.ink else colors.brand
+    Row(
+        Modifier.fillMaxWidth().background(if (result.tied) colors.sunk else colors.brandSoft)
+            .padding(horizontal = DesiTheme.space.s4, vertical = DesiTheme.space.s3),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
+    ) {
+        Icon(painterResource(if (result.tied) DesiIcons.Swap else DesiIcons.TrophyFilled), null, tint = content, modifier = Modifier.size(DesiTheme.size.iconSmall))
+        Text(result.text, style = DesiTheme.type.bodyStrong, color = content)
     }
 }
 
 @Composable
 private fun TeamName(team: TeamLine, modifier: Modifier = Modifier) {
-    Text(team.name, modifier = modifier, style = DesiTheme.type.bodyLg, fontWeight = FontWeight.Bold, color = DesiTheme.colors.ink)
+    val colors = DesiTheme.colors
+    // The winner's trophy sits inline after the last word, so it stays with the name however it wraps.
+    val text = buildAnnotatedString {
+        append(team.name)
+        if (team.won == true) {
+            append(" ")
+            appendInlineContent(TROPHY)
+        }
+    }
+    val trophy = mapOf(
+        TROPHY to InlineTextContent(Placeholder(18.sp, 18.sp, PlaceholderVerticalAlign.TextCenter)) {
+            Icon(painterResource(DesiIcons.TrophyFilled), null, tint = colors.event.extra, modifier = Modifier.fillMaxSize())
+        },
+    )
+    Text(
+        text,
+        modifier = modifier,
+        style = DesiTheme.type.bodyLg,
+        fontWeight = FontWeight.Bold,
+        color = if (team.won == false) colors.muted else colors.ink,
+        inlineContent = trophy,
+    )
 }
+
+private const val TROPHY = "trophy"
 
 @Composable
 private fun TeamScore(team: TeamLine, showPending: Boolean, modifier: Modifier = Modifier) {
     val colors = DesiTheme.colors
     Column(modifier) {
         if (team.score != null) {
-            Text(team.score, style = DesiTheme.type.scoreLg, color = colors.ink)
+            Text(team.score, style = DesiTheme.type.scoreLg, color = if (team.won == false) colors.muted else colors.ink)
             val detail = listOfNotNull(
                 team.overs?.let { stringResource(Res.string.ds_innings_overs, it) },
                 if (team.batting) stringResource(Res.string.ds_batting) else null,

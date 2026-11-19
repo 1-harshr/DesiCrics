@@ -470,3 +470,40 @@ fun RankBadge(rank: Int, modifier: Modifier = Modifier, size: Dp = 32.dp) {
         Text("$rank", style = DesiTheme.type.bodyStrong, color = content)
     }
 }
+
+/**
+ * Filters on one line that scrolls sideways, each with an optional icon: All, Live, Upcoming, Results.
+ * The selected one is filled in `ink`, like [ChoiceChips]. Keeps a list's filters to a single row.
+ */
+@Composable
+fun <T> FilterRow(
+    options: List<T>,
+    selected: T,
+    label: @Composable (T) -> String,
+    onSelect: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    icon: (T) -> DrawableResource? = { null },
+) {
+    val colors = DesiTheme.colors
+    androidx.compose.foundation.lazy.LazyRow(modifier, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        items(options.size) { index ->
+            val option = options[index]
+            val isSelected = option == selected
+            val content = if (isSelected) colors.bg else colors.ink
+            Row(
+                Modifier
+                    .heightIn(min = 40.dp)
+                    .clip(DesiTheme.radius.full)
+                    .background(if (isSelected) colors.ink else colors.surface)
+                    .border(1.dp, if (isSelected) colors.ink else colors.line, DesiTheme.radius.full)
+                    .clickable(role = Role.Tab) { onSelect(option) }
+                    .padding(horizontal = DesiTheme.space.s4),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                icon(option)?.let { Icon(painterResource(it), null, tint = content, modifier = Modifier.size(18.dp)) }
+                Text(label(option), style = if (isSelected) DesiTheme.type.bodyStrong else DesiTheme.type.body, color = content, maxLines = 1)
+            }
+        }
+    }
+}
