@@ -104,4 +104,16 @@ class NewMatchViewModelTest {
         vm.saveTeam(TeamSide.A)
         assertEquals(NewMatchError.SaveTeamFailed, vm.awaitState { it.error != null && !it.saving }.error)
     }
+
+    @Test
+    fun aSavedTeamKeepsItsInviteToShare() = runTest {
+        val vm = viewModel { json(Json.encodeToString(SavedTeam.serializer(), strikers.copy(joinCode = "AB3XY9"))) }
+        vm.setTeamName(TeamSide.A, strikers.name)
+        vm.saveTeam(TeamSide.A)
+        val saved = vm.awaitState { it.teamA.teamId != null }.teamA
+        assertEquals("AB3XY9", saved.joinCode)
+        assertEquals("http://test/join/AB3XY9", saved.inviteLink)
+        vm.clearTeam(TeamSide.A)
+        assertNull(vm.state.value.teamA.joinCode)
+    }
 }

@@ -32,6 +32,8 @@ data class SideForm(
     val name: String = "",
     val players: List<SquadPlayer> = emptyList(),
     val teamId: String? = null,
+    /** The saved team's join code and link, for admins to share; null otherwise. */
+    val joinCode: String? = null,
     val inviteLink: String? = null,
     /** Indexes into [players]. */
     val captain: Int? = null,
@@ -125,7 +127,7 @@ class NewMatchViewModel(
         viewModelScope.launch {
             try {
                 val team = teamRepository.create(form.name, "", form.players)
-                updateSide(side) { form.copy(teamId = team.id, inviteLink = team.joinCode?.let(teamRepository::joinLink),
+                updateSide(side) { form.copy(teamId = team.id, joinCode = team.joinCode, inviteLink = team.joinCode?.let(teamRepository::joinLink),
                     players = form.players.map { p ->
                         if (p.profileId != null) p else p.copy(profileId = team.members.firstOrNull { it.player.isPlaceholder && it.player.name == p.name }?.player?.profileId)
                     }) }
@@ -184,6 +186,7 @@ class NewMatchViewModel(
                 name = team.name,
                 players = players.map { SquadPlayer(it.name, it.profileId) },
                 teamId = team.id,
+                joinCode = team.joinCode,
                 inviteLink = team.joinCode?.let(teamRepository::joinLink),
                 captain = players.indexOfFirst { it.profileId == captainId }.takeIf { it >= 0 },
                 keeper = players.indexOfFirst { it.profileId == keeperId }.takeIf { it >= 0 },
@@ -193,7 +196,7 @@ class NewMatchViewModel(
     }
 
     /** Back to typed-in names, keeping the players as guests. */
-    fun clearTeam(side: TeamSide) = updateSide(side) { it.copy(teamId = null, inviteLink = null) }
+    fun clearTeam(side: TeamSide) = updateSide(side) { it.copy(teamId = null, joinCode = null, inviteLink = null) }
 
     fun create(onCreated: (matchId: String) -> Unit) {
         val form = _state.value

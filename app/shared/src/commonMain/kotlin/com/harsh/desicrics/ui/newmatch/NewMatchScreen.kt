@@ -132,6 +132,7 @@ import com.harsh.desicrics.resources.setup_vs
 import com.harsh.desicrics.resources.setup_when_where
 import com.harsh.desicrics.resources.team_add_placeholder_name
 import com.harsh.desicrics.resources.team_invite_share
+import com.harsh.desicrics.resources.team_invite_text
 import com.harsh.desicrics.resources.team_placeholder
 import com.harsh.desicrics.resources.teams_action_failed
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
@@ -381,7 +382,10 @@ private fun TeamStep(side: TeamSide, state: NewMatchFormState, actions: NewMatch
                 ActionTile(DesiIcons.Teams, stringResource(Res.string.new_match_squad_change), { actions.onChangeSquad(side) }, Modifier.weight(1f))
                 ActionTile(DesiIcons.Close, stringResource(Res.string.new_match_squad_clear), { actions.onClearTeam(side) }, Modifier.weight(1f))
             }
-            form.inviteLink?.let { link -> ActionTile(DesiIcons.Share, stringResource(Res.string.team_invite_share), { share(link) }, Modifier.weight(1f)) }
+            if (form.inviteLink != null && form.joinCode != null) {
+                val invite = stringResource(Res.string.team_invite_text, form.name, form.inviteLink, form.joinCode)
+                ActionTile(DesiIcons.Share, stringResource(Res.string.team_invite_share), { share(invite) }, Modifier.weight(1f))
+            }
         }
     }
 
