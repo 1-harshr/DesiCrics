@@ -47,6 +47,21 @@ data class Selection(
     val bowlerId: String? = null,
 )
 
+/**
+ * Keeps the scorer's picks that still apply after a save, e.g. a new striker picked before the other
+ * batter retired. A pick is dropped once the engine fills that slot or the player can't come in, and
+ * the bowler pick after any new ball, so a finished over always asks who bowls next. Undoing [undone]
+ * hands its bowler back when that leaves nobody bowling, as they were picked before it was bowled.
+ */
+internal fun Selection.stillValid(innings: InningsState, ballAdded: Boolean, undone: Delivery? = null): Selection {
+    val canComeIn = innings.canComeIn.map { it.id }.toSet()
+    return Selection(
+        strikerId = strikerId.takeIf { innings.strikerId == null && it in canComeIn },
+        nonStrikerId = nonStrikerId.takeIf { innings.nonStrikerId == null && it in canComeIn },
+        bowlerId = if (innings.bowlerId != null || ballAdded) null else bowlerId ?: undone?.bowlerId,
+    )
+}
+
 /** Why the last action didn't go through. The screen picks the text. */
 sealed interface ScoringError {
     /** The engine rejected the ball before it was sent. */
@@ -357,8 +372,14 @@ class MatchViewModel(
     /** Rain: new overs for this innings (both, in the first), and in the chase a new target. */
     fun reviseTarget(overs: Int, target: Int?) = recordEvent { seq, innings -> MatchEvent.ReviseTarget(seq, innings, overs, target) }
 
-    /** [playerId] finishes the over in place of the current bowler (an injury, say). */
-    fun replaceBowler(playerId: String) = recordEvent { seq, innings -> MatchEvent.ReplaceBowler(seq, innings, playerId) }
+    /**
+     * [playerId] finishes the over in place of the current bowler (an injury, say). A bowler only picked on
+     * this phone, not yet carried by a ball, is just picked again.
+     */
+    fun replaceBowler(playerId: String) {
+        if (_state.value.state?.current?.bowlerId == null) return selectBowler(playerId)
+        recordEvent { seq, innings -> MatchEvent.ReplaceBowler(seq, innings, playerId) }
+    }
 
     /** A latecomer or substitute joins [side]; they show up in the player pickers straight away. */
     fun addPlayer(side: TeamSide, name: String) {
@@ -391,7 +412,8 @@ class MatchViewModel(
                 _state.update { current ->
                     val next = current.withSnapshot(details)
                     val ballAdded = details.deliveries.size > current.deliveries.size
-                    next.copy(selection = next.state?.current?.let { current.selection.stillValid(it, ballAdded) } ?: Selection(), saving = false)
+                    val undone = current.deliveries.lastOrNull().takeIf { details.deliveries.size < current.deliveries.size }
+                    next.copy(selection = next.state?.current?.let { current.selection.stillValid(it, ballAdded, undone) } ?: Selection(), saving = false)
                 }
                 refreshes.update { it + 1 }
             } catch (e: CancellationException) {
@@ -401,20 +423,6 @@ class MatchViewModel(
                 refreshes.update { it + 1 }
             }
         }
-    }
-
-    /**
-     * Keeps the scorer's picks that still apply after a save, e.g. a new striker picked before the other
-     * batter retired. A pick is dropped once the engine fills that slot or the player can't come in, and
-     * the bowler pick after any new ball, so a finished over always asks who bowls next.
-     */
-    private fun Selection.stillValid(innings: InningsState, ballAdded: Boolean): Selection {
-        val canComeIn = innings.canComeIn.map { it.id }.toSet()
-        return Selection(
-            strikerId = strikerId.takeIf { innings.strikerId == null && it in canComeIn },
-            nonStrikerId = nonStrikerId.takeIf { innings.nonStrikerId == null && it in canComeIn },
-            bowlerId = bowlerId.takeIf { innings.bowlerId == null && !ballAdded },
-        )
     }
 
     private fun MatchUiState.withSnapshot(details: MatchDetails) = copy(
