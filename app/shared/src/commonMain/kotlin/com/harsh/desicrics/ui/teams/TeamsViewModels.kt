@@ -230,9 +230,9 @@ class TeamViewModel(
             attempt { repository.myTeams() }.getOrNull()?.let { teams ->
                 _state.update { it.copy(otherTeams = teams.filter { team -> team.id != teamId }) }
             }
-            attempt { social.follows() }.getOrNull()?.let { follows ->
-                _state.update { it.copy(following = follows.any { f -> f.type == FollowType.TEAM && f.targetId == teamId }) }
-            }
+            // If the follows don't load, show Follow anyway rather than no button; following twice is harmless.
+            val follows = attempt { social.follows() }.getOrDefault(emptyList())
+            _state.update { it.copy(following = follows.any { f -> f.type == FollowType.TEAM && f.targetId == teamId }) }
         }
     }
 
