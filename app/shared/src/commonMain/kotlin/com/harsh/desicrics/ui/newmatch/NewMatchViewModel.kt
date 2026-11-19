@@ -23,6 +23,8 @@ import kotlinx.coroutines.launch
 sealed interface NewMatchError {
     data class Invalid(val error: MatchSetupError) : NewMatchError
     data object CreateFailed : NewMatchError
+    data object SaveTeamFailed : NewMatchError
+    data object LoadTeamFailed : NewMatchError
 }
 
 /** One side of the new match: typed-in names, or a squad picked from a saved team. */
@@ -122,7 +124,7 @@ class NewMatchViewModel(
                     }) }
                 _state.update { it.copy(myTeams = null) }
             } catch (e: CancellationException) { throw e }
-            catch (e: Exception) { _state.update { it.copy(error = NewMatchError.CreateFailed) } }
+            catch (e: Exception) { _state.update { it.copy(error = NewMatchError.SaveTeamFailed) } }
             finally { _state.update { it.copy(saving = false) } }
         }
     }
@@ -151,7 +153,7 @@ class NewMatchViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.update { it.copy(error = NewMatchError.CreateFailed) }
+                _state.update { it.copy(error = NewMatchError.LoadTeamFailed) }
                 return@launch
             }
             _state.update { it.copy(squadTeam = team, squadSide = side) }

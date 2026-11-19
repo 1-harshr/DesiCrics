@@ -73,6 +73,8 @@ import com.harsh.desicrics.resources.new_match_add_names
 import com.harsh.desicrics.resources.team_add_added
 import com.harsh.desicrics.resources.new_match_error_captain
 import com.harsh.desicrics.resources.new_match_error_create_failed
+import com.harsh.desicrics.resources.new_match_error_load_team_failed
+import com.harsh.desicrics.resources.new_match_error_save_team_failed
 import com.harsh.desicrics.resources.new_match_error_overs
 import com.harsh.desicrics.resources.new_match_error_player_name_invalid
 import com.harsh.desicrics.resources.new_match_error_player_twice
@@ -577,6 +579,8 @@ private fun StartBar(state: NewMatchFormState, label: StringResource, enabled: B
                 val text = when (error) {
                     is NewMatchError.Invalid -> stringResource(error.error.label)
                     NewMatchError.CreateFailed -> stringResource(Res.string.new_match_error_create_failed)
+                    NewMatchError.SaveTeamFailed -> stringResource(Res.string.new_match_error_save_team_failed)
+                    NewMatchError.LoadTeamFailed -> stringResource(Res.string.new_match_error_load_team_failed)
                 }
                 ErrorBanner(text)
             }

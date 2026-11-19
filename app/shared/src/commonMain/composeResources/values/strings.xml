@@ -240,6 +240,8 @@
     <string name="new_match_error_overs">Overs must be between 1 and 50.</string>
     <string name="new_match_error_rules">Some of the match rules are out of range.</string>
     <string name="new_match_error_create_failed">Couldn't start the match. Check your connection and try again.</string>
+    <string name="new_match_error_save_team_failed">Couldn't save the team. Check your connection and try again.</string>
+    <string name="new_match_error_load_team_failed">Couldn't load that team. Check your connection and try again.</string>
 
     <!-- Scoring screen -->
     <string name="match_title">%1$s vs %2$s</string>

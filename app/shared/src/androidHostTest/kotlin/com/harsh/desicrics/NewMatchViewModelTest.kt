@@ -8,6 +8,7 @@ import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TeamSummary
+import com.harsh.desicrics.ui.newmatch.NewMatchError
 import com.harsh.desicrics.ui.newmatch.NewMatchFormState
 import com.harsh.desicrics.ui.newmatch.NewMatchViewModel
 import io.ktor.client.HttpClient
@@ -92,5 +93,15 @@ class NewMatchViewModelTest {
         val state = vm.awaitState { it.myTeams != null }
         assertFalse(state.myTeamsFailed)
         assertEquals(listOf("t1"), state.myTeams?.map { it.id })
+    }
+
+    @Test
+    fun failuresSayWhatFailed() = runTest {
+        val vm = viewModel { respond("", HttpStatusCode.InternalServerError) }
+        vm.pickTeam(TeamSide.B, "t1")
+        assertEquals(NewMatchError.LoadTeamFailed, vm.awaitState { it.error != null }.error)
+        vm.setTeamName(TeamSide.A, "Andheri Strikers")
+        vm.saveTeam(TeamSide.A)
+        assertEquals(NewMatchError.SaveTeamFailed, vm.awaitState { it.error != null && !it.saving }.error)
     }
 }
