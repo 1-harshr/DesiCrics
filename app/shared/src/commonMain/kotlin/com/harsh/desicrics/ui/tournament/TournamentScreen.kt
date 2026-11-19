@@ -141,6 +141,7 @@ fun TournamentScreen(
         sheet = null
         viewModel.clearError()
         viewModel.searchTeams("")
+        viewModel.searchOrganiser("")
     }
 
     TournamentContent(
