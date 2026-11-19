@@ -1044,6 +1044,7 @@
     <string name="setup_vs">vs</string>
     <string name="setup_mode_search_hint">Find someone on DesiCrics by name or player code, so the match counts in their stats.</string>
     <string name="setup_mode_phone_hint">They get this player and its stats when they sign in with this number.</string>
+    <string name="setup_phone_number">Their mobile number</string>
     <string name="setup_mode_guest_hint">A name only. Their runs and wickets stay on this scorecard. Add several at once with commas: Rohan, Kabir, Arjun.</string>
     <!-- Errors: a title saying what didn't happen, a body saying what to do -->
     <string name="error_connection_body">Check that you're online, then try again. Nothing you've entered is lost.</string>

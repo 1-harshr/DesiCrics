@@ -122,6 +122,7 @@ import com.harsh.desicrics.resources.setup_mode_phone_hint
 import com.harsh.desicrics.resources.setup_mode_search_hint
 import com.harsh.desicrics.resources.setup_now
 import com.harsh.desicrics.resources.setup_phone
+import com.harsh.desicrics.resources.setup_phone_number
 import com.harsh.desicrics.resources.setup_save
 import com.harsh.desicrics.resources.setup_saved_team
 import com.harsh.desicrics.resources.setup_schedule
@@ -130,7 +131,6 @@ import com.harsh.desicrics.resources.setup_venue
 import com.harsh.desicrics.resources.setup_vs
 import com.harsh.desicrics.resources.setup_when_where
 import com.harsh.desicrics.resources.team_add_placeholder_name
-import com.harsh.desicrics.resources.team_add_placeholder_phone
 import com.harsh.desicrics.resources.team_invite_share
 import com.harsh.desicrics.resources.team_placeholder
 import com.harsh.desicrics.resources.teams_action_failed
@@ -536,7 +536,7 @@ private fun LineupPlayerSheet(side: TeamSide, players: List<SquadPlayer>, action
                 },
             ) { p -> if (p.profileId !in linked && !full) actions.onLinkPlayer(side, p) }
         } else {
-            if (mode == 1) DesiTextField(phone, { phone = it }, stringResource(Res.string.team_add_placeholder_phone), leadingIcon = DesiIcons.Phone,
+            if (mode == 1) DesiTextField(phone, { phone = it }, stringResource(Res.string.setup_phone_number), leadingIcon = DesiIcons.Phone,
                 keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone))
             PrimaryButton(
                 if (mode == 2 && guests.size > 1) pluralStringResource(Res.plurals.new_match_add_names, guests.size, guests.size) else stringResource(Res.string.new_match_add_player),
