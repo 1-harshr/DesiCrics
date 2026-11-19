@@ -149,17 +149,34 @@ internal fun OptionsSheet(title: String, options: List<SheetOption>, onDismiss: 
 internal fun ExtraRunsSheet(type: ExtraType, penalty: Int, onPick: (runs: Int) -> Unit, onDismiss: () -> Unit) {
     val (title, hint, options) = when (type) {
         ExtraType.WIDE -> Triple(
-            Res.string.scoring_wide_title, pluralStringResource(Res.plurals.scoring_wide_hint, penalty, penalty), listOf(0, 1, 2, 3, 4),
+            Res.string.scoring_wide_title,
+            if (penalty == 0) stringResource(Res.string.scoring_wide_hint_free) else pluralStringResource(Res.plurals.scoring_wide_hint, penalty, penalty),
+            listOf(0, 1, 2, 3, 4),
         )
         ExtraType.NO_BALL -> Triple(
-            Res.string.scoring_no_ball_title, pluralStringResource(Res.plurals.scoring_no_ball_hint, penalty, penalty), listOf(0, 1, 2, 3, 4, 6),
+            Res.string.scoring_no_ball_title,
+            if (penalty == 0) stringResource(Res.string.scoring_no_ball_hint_free) else pluralStringResource(Res.plurals.scoring_no_ball_hint, penalty, penalty),
+            listOf(0, 1, 2, 3, 4, 6),
         )
         ExtraType.BYE -> Triple(Res.string.scoring_bye_title, stringResource(Res.string.scoring_byes_hint), listOf(1, 2, 3, 4))
         ExtraType.LEG_BYE -> Triple(Res.string.scoring_leg_bye_title, stringResource(Res.string.scoring_byes_hint), listOf(1, 2, 3, 4))
     }
+    // A wide or no-ball always carries its own run, so its keys read "Wd", "Wd+1"… rather than a bare 0.
+    val short = when (type) {
+        ExtraType.WIDE -> stringResource(Res.string.scoring_key_wide)
+        ExtraType.NO_BALL -> stringResource(Res.string.scoring_key_no_ball)
+        ExtraType.BYE, ExtraType.LEG_BYE -> null
+    }
+    val labels = options.map { runs ->
+        when {
+            short == null -> "$runs"
+            runs == 0 -> short
+            else -> stringResource(Res.string.scoring_extra_plus, short, runs)
+        }
+    }
     DesiSheet(stringResource(title), onDismiss, hint) {
         RunPad(
-            keys = options.map { PadKey("$it", "$it") },
+            keys = options.mapIndexed { i, runs -> PadKey("$runs", labels[i]) },
             onKey = { onPick(it.id.toInt()) },
         )
     }

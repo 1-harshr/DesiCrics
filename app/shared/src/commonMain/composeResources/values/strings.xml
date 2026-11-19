@@ -277,6 +277,7 @@
     <!-- Run pad keys and ball labels -->
     <string name="scoring_key_wide">Wd</string>
     <string name="scoring_key_no_ball">Nb</string>
+    <string name="scoring_extra_plus">%1$s+%2$d</string>
     <string name="scoring_key_bye">Bye</string>
     <string name="scoring_key_leg_bye">Lb</string>
     <string name="scoring_key_out">OUT</string>
@@ -295,13 +296,15 @@
     <string name="scoring_no_players">Everyone has batted.</string>
     <string name="scoring_wide_title">Wide</string>
     <plurals name="scoring_wide_hint">
-        <item quantity="one">Runs the batters ran. The wide's %1$d run is added for you.</item>
-        <item quantity="other">Runs the batters ran. The wide's %1$d runs are added for you.</item>
+        <item quantity="one">The wide's %1$d run is always added. Pick any the batters ran on top.</item>
+        <item quantity="other">The wide's %1$d runs are always added. Pick any the batters ran on top.</item>
     </plurals>
+    <string name="scoring_wide_hint_free">Wides give no run in this match. Pick any the batters ran.</string>
     <string name="scoring_no_ball_title">No-ball</string>
+    <string name="scoring_no_ball_hint_free">No-balls give no run in this match. Pick any off the bat.</string>
     <plurals name="scoring_no_ball_hint">
-        <item quantity="one">Runs off the bat. The no-ball's %1$d run is added for you.</item>
-        <item quantity="other">Runs off the bat. The no-ball's %1$d runs are added for you.</item>
+        <item quantity="one">The no-ball's %1$d run is always added. Pick any off the bat on top.</item>
+        <item quantity="other">The no-ball's %1$d runs are always added. Pick any off the bat on top.</item>
     </plurals>
     <string name="scoring_bye_title">Byes</string>
     <string name="scoring_leg_bye_title">Leg byes</string>
