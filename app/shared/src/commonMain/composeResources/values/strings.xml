@@ -172,6 +172,7 @@
     <string name="home_start_title">Start a match</string>
     <string name="home_start_body">Pick the teams, do the toss and score it ball by ball.</string>
     <string name="home_start_action">New match</string>
+    <string name="home_explore">Explore cricket</string>
     <string name="home_section_live">Live now</string>
     <string name="home_section_recent">Recent matches</string>
     <string name="home_empty_title">No matches yet</string>

@@ -50,7 +50,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.designsystem.component.Avatar
 import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.DesiTextField
-import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.LiveBadge
 import com.harsh.desicrics.designsystem.component.MatchCard
@@ -75,6 +74,7 @@ import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.text.matchStatusText
 import com.harsh.desicrics.ui.text.oversText
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -168,23 +168,10 @@ fun HomeContent(
     LazyColumn(
         Modifier.fillMaxSize().background(DesiTheme.colors.bg),
         contentPadding = PaddingValues(start = space.screen, end = space.screen, bottom = space.s8),
-        verticalArrangement = Arrangement.spacedBy(space.s3),
+        verticalArrangement = Arrangement.spacedBy(space.s4),
     ) {
         item { Greeting(playerName, playerPhoto, feed.unreadNotifications, onProfile, onSearch, onNotifications) }
         item { StartMatchCard(onNewMatch) }
-        item {
-            Column(Modifier.padding(bottom = space.s4), verticalArrangement = Arrangement.spacedBy(space.s2)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                    GhostButton(stringResource(Res.string.teams_title), onClick = onTeams, modifier = Modifier.weight(1f))
-                    GhostButton(stringResource(Res.string.home_tournaments), onClick = onTournaments, modifier = Modifier.weight(1f))
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                    GhostButton(stringResource(Res.string.home_leaderboards), onClick = onLeaderboards, modifier = Modifier.weight(1f))
-                    GhostButton(stringResource(Res.string.home_take_over), onClick = onTakeOver, modifier = Modifier.weight(1f))
-                }
-                GhostButton(stringResource(Res.string.home_community), onClick = onCommunity, modifier = Modifier.fillMaxWidth())
-            }
-        }
         if (state.loadFailed) {
             item { Text(stringResource(Res.string.home_error), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
         }
@@ -200,7 +187,38 @@ fun HomeContent(
         feedSection(Res.string.home_section_live, feed.live, currentUid, onOpenMatch, first = feed.mine.isEmpty())
         feedSection(Res.string.home_section_upcoming, feed.upcoming, currentUid, onOpenMatch)
         feedSection(Res.string.home_section_recent, feed.recent, currentUid, onOpenMatch)
+        item {
+            Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+                SectionLabel(stringResource(Res.string.home_explore))
+                Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                    HomeDestination(stringResource(Res.string.teams_title), DesiIcons.Teams, onTeams, Modifier.weight(1f))
+                    HomeDestination(stringResource(Res.string.home_tournaments), DesiIcons.Cricket, onTournaments, Modifier.weight(1f))
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                    HomeDestination(stringResource(Res.string.home_leaderboards), DesiIcons.Ball, onLeaderboards, Modifier.weight(1f))
+                    HomeDestination(stringResource(Res.string.home_community), DesiIcons.Person, onCommunity, Modifier.weight(1f))
+                }
+                HomeDestination(stringResource(Res.string.home_take_over), DesiIcons.Sync, onTakeOver, Modifier.fillMaxWidth())
+            }
+        }
         item { Box(Modifier.windowInsetsPadding(WindowInsets.navigationBars)) }
+    }
+}
+
+@Composable
+private fun HomeDestination(text: String, icon: DrawableResource, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = DesiTheme.colors
+    Row(
+        modifier
+            .clip(DesiTheme.radius.md)
+            .background(colors.surface)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(DesiTheme.space.s4),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
+    ) {
+        Icon(painterResource(icon), contentDescription = null, tint = colors.brand, modifier = Modifier.size(DesiTheme.size.icon))
+        Text(text, style = DesiTheme.type.bodyStrong, color = colors.ink, maxLines = 2)
     }
 }
 
@@ -310,7 +328,8 @@ private fun StartMatchCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
 private fun EmptyMatches() {
     val colors = DesiTheme.colors
     Column(
-        Modifier.fillMaxWidth().padding(vertical = DesiTheme.space.s8, horizontal = DesiTheme.space.s6),
+        Modifier.fillMaxWidth().clip(DesiTheme.radius.lg).background(colors.surface)
+            .padding(vertical = DesiTheme.space.s6, horizontal = DesiTheme.space.s5),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
     ) {

@@ -34,16 +34,16 @@ data class DesiColors(
 )
 
 val LightDesiColors = DesiColors(
-    bg = Color(0xFFF5F7F4),
+    bg = Color(0xFFF7F7F1),
     surface = Color(0xFFFFFFFF),
-    sunk = Color(0xFFECF0EC),
-    ink = Color(0xFF111A15),
-    muted = Color(0xFF56635B),
-    line = Color(0xFFD8DFD9),
-    brand = Color(0xFF0B7A4B),
-    brandSoft = Color(0xFFDDF1E6),
+    sunk = Color(0xFFF0F2E9),
+    ink = Color(0xFF14241B),
+    muted = Color(0xFF596A5E),
+    line = Color(0xFFE1E7DC),
+    brand = Color(0xFF087647),
+    brandSoft = Color(0xFFE2F2E7),
     onBrand = Color(0xFFFFFFFF),
-    brandStrong = Color(0xFF0B7A4B),
+    brandStrong = Color(0xFF064B35),
     onBrandStrong = Color(0xFFFFFFFF),
     event = EventColors(
         four = Color(0xFF2459D6),
@@ -57,14 +57,14 @@ val LightDesiColors = DesiColors(
 )
 
 val DarkDesiColors = DesiColors(
-    bg = Color(0xFF0C110E),
-    surface = Color(0xFF141B17),
-    sunk = Color(0xFF1A231E),
-    ink = Color(0xFFE6EDE8),
-    muted = Color(0xFF95A39A),
-    line = Color(0xFF27322C),
-    brand = Color(0xFF3CC788),
-    brandSoft = Color(0xFF143325),
+    bg = Color(0xFF0D1712),
+    surface = Color(0xFF17241C),
+    sunk = Color(0xFF203027),
+    ink = Color(0xFFF1F5ED),
+    muted = Color(0xFFAABCAE),
+    line = Color(0xFF304337),
+    brand = Color(0xFF68D49A),
+    brandSoft = Color(0xFF1D4932),
     onBrand = Color(0xFF06140D),
     brandStrong = Color(0xFF0E5A3A),
     onBrandStrong = Color(0xFFF2F7F4),

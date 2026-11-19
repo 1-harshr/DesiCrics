@@ -16,16 +16,16 @@ Crease is built around the scoreboard: big condensed numerals, one brand green, 
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `bg` | `#F5F7F4` | `#0C110E` | Screen background |
-| `surface` | `#FFFFFF` | `#141B17` | Cards, sheets |
-| `sunk` | `#ECF0EC` | `#1A231E` | Inputs, table headers, pressed states |
-| `ink` | `#111A15` | `#E6EDE8` | Primary text, scores |
-| `muted` | `#56635B` | `#95A39A` | Secondary text, captions |
-| `line` | `#D8DFD9` | `#27322C` | Dividers, borders |
-| `brand` | `#0B7A4B` | `#3CC788` | Primary actions, selection |
-| `brandSoft` | `#DDF1E6` | `#143325` | Selected backgrounds, callouts |
+| `bg` | `#F7F7F1` | `#0D1712` | Screen background |
+| `surface` | `#FFFFFF` | `#17241C` | Cards, sheets |
+| `sunk` | `#F0F2E9` | `#203027` | Inputs, table headers, pressed states |
+| `ink` | `#14241B` | `#F1F5ED` | Primary text, scores |
+| `muted` | `#596A5E` | `#AABCAE` | Secondary text, captions |
+| `line` | `#E1E7DC` | `#304337` | Dividers, borders |
+| `brand` | `#087647` | `#68D49A` | Primary actions, selection |
+| `brandSoft` | `#E2F2E7` | `#1D4932` | Selected backgrounds, callouts |
 | `onBrand` | `#FFFFFF` | `#06140D` | Text and icons on `brand` |
-| `brandStrong` | `#0B7A4B` | `#0E5A3A` | Full-bleed brand areas (sign-in header); dark in both themes |
+| `brandStrong` | `#064B35` | `#0E5A3A` | Full-bleed brand areas (sign-in header); dark in both themes |
 | `onBrandStrong` | `#FFFFFF` | `#F2F7F4` | Text and art on `brandStrong` |
 | `event.four` | `#2459D6` | `#6D9BFF` | Boundary 4 |
 | `event.six` | `#6D3BD8` | `#A68BFF` | Boundary 6 |
@@ -71,8 +71,8 @@ Sizes in sp. Line heights are fixed so lists keep their rhythm.
 | `score.xl` | Barlow Condensed | 56 / 56 | 700 | tnum | 187/4 on the score header |
 | `score.lg` | Barlow Condensed | 40 / 40 | 700 | tnum | Innings totals on the scorecard |
 | `score.md` | Barlow Condensed | 24 / 28 | 700 | tnum | Match cards, run pad digits |
-| `title.lg` | Barlow Condensed | 32 / 36 | 700 | | Screen titles |
-| `title.md` | Barlow Condensed | 22 / 26 | 600 | | Section and card titles |
+| `title.lg` | Barlow Condensed | 36 / 40 | 700 | | Screen titles |
+| `title.md` | Barlow Condensed | 24 / 28 | 600 | | Section and card titles |
 | `body.lg` | Figtree | 17 / 26 | 400 | | Commentary |
 | `body` | Figtree | 15 / 22 | 400 | | Default text |
 | `body.strong` | Figtree | 15 / 22 | 600 | | Player names, emphasis |
@@ -123,8 +123,8 @@ Rules:
 | Token | Radius | Use |
 |---|---|---|
 | `radius.sm` | 6dp | Chips in tables, small badges |
-| `radius.md` | 12dp | Cards, inputs |
-| `radius.lg` | 20dp | Bottom sheets, run pad keys |
+| `radius.md` | 16dp | Cards, inputs, buttons |
+| `radius.lg` | 28dp | Bottom sheets, hero cards |
 | `radius.full` | 50% | Buttons, ball chips, avatars, pills |
 
 ## Elevation
@@ -236,7 +236,7 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `LiveBadge` | `Content.kt` | Red dot plus LIVE |
 | `PlayerRow` / `Avatar` | `Content.kt` | Avatar (photo slot, initial or person icon), name, secondary line |
 | `DesiCard` / `SectionLabel` | `Content.kt` | Flat bordered surface; uppercase section label |
-| `PrimaryButton` / `TonalButton` / `GhostButton` | `Buttons.kt` | 52dp pills. Primary: brand fill, optional trailing arrow, spinner while loading, faded brand when disabled. Tonal: soft `sunk` fill with a brand-tinted leading icon, for secondary options. Ghost: outline |
+| `PrimaryButton` / `TonalButton` / `GhostButton` | `Buttons.kt` | 52dp rounded buttons. Primary: brand fill, optional trailing arrow, spinner while loading, faded brand when disabled. Tonal: soft `sunk` fill with a brand-tinted leading icon, for secondary options. Ghost: outline |
 | `DesiScaffold` / `FullScreenLoading` | `Structure.kt` | Screen frame with title and back icon; centred spinner |
 | `DesiTextField` | `Structure.kt` | Labelled field with helper / error line and optional password masking |
 | `ChoiceChips` / `ChoiceSheet` | `Structure.kt` | Single-choice chips; bottom sheet of options |

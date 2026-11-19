@@ -29,7 +29,7 @@ import com.harsh.desicrics.designsystem.theme.DesiTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-/** A bordered, flat surface. Cards never get a shadow. */
+/** A quiet surface that lets the content carry the hierarchy. */
 @Composable
 fun DesiCard(
     modifier: Modifier = Modifier,
@@ -41,9 +41,9 @@ fun DesiCard(
         modifier
             .clip(DesiTheme.radius.md)
             .background(colors.surface)
-            .border(1.dp, colors.line, DesiTheme.radius.md)
+            .border(1.dp, colors.line.copy(alpha = 0.7f), DesiTheme.radius.md)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(DesiTheme.space.s4),
+            .padding(DesiTheme.space.s5),
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
         content = content,
     )

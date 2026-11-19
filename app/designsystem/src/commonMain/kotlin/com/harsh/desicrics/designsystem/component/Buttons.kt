@@ -40,7 +40,7 @@ fun PrimaryButton(
         onClick = onClick,
         enabled = enabled && !loading,
         modifier = modifier.heightIn(min = DesiTheme.size.button),
-        shape = DesiTheme.radius.full,
+        shape = DesiTheme.radius.md,
         contentPadding = ButtonPadding,
         colors = ButtonDefaults.buttonColors(
             containerColor = colors.brand,
@@ -81,7 +81,7 @@ fun TonalButton(
         onClick = onClick,
         enabled = enabled && !loading,
         modifier = modifier.heightIn(min = DesiTheme.size.button),
-        shape = DesiTheme.radius.full,
+        shape = DesiTheme.radius.md,
         contentPadding = ButtonPadding,
         colors = ButtonDefaults.buttonColors(
             containerColor = colors.sunk,
@@ -120,7 +120,7 @@ fun GhostButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier.heightIn(min = DesiTheme.size.button),
-        shape = DesiTheme.radius.full,
+        shape = DesiTheme.radius.md,
         contentPadding = ButtonPadding,
         border = BorderStroke(1.5.dp, colors.line),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.ink, disabledContentColor = colors.muted),

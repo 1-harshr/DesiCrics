@@ -27,8 +27,8 @@ object DesiSpacing {
 @Immutable
 object DesiRadius {
     val sm: RoundedCornerShape = RoundedCornerShape(6.dp)
-    val md: RoundedCornerShape = RoundedCornerShape(12.dp)
-    val lg: RoundedCornerShape = RoundedCornerShape(20.dp)
+    val md: RoundedCornerShape = RoundedCornerShape(16.dp)
+    val lg: RoundedCornerShape = RoundedCornerShape(28.dp)
     val full: RoundedCornerShape = CircleShape
 }
 

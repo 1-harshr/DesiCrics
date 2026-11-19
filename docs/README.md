@@ -9,6 +9,7 @@ iOS is out of scope for now.
 | [product.md](product.md) | Problem, goals, non-goals, users, success metrics, risks, open questions |
 | [features.md](features.md) | Every feature area, what we build and in which phase |
 | [design-system.md](design-system.md) | "Crease": colour, fonts, type scale, spacing, layout, components |
+| [app-revamp-feedback.md](app-revamp-feedback.md) | Navigation and feed, three-page match setup, team discovery, player identity, and scheduling brief |
 | [ui-conventions.md](ui-conventions.md) | String resources, design tokens and the UI review checklist |
 | [architecture.md](architecture.md) | Stack, module layout, data model, scoring contract |
 | [deploy.md](deploy.md) | Building the server image, its settings, and deploying to Cloud Run or Fly.io |
