@@ -1,5 +1,26 @@
 package com.harsh.desicrics.ui.stats
 
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.RankBadge
+import com.harsh.desicrics.ui.components.PhotoAvatar
+import com.harsh.desicrics.ui.social.PlayerList
+
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import com.harsh.desicrics.designsystem.component.ActionTile
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.component.SegmentedControl
+import com.harsh.desicrics.designsystem.component.StatGrid
+import com.harsh.desicrics.designsystem.component.StatItem
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import org.jetbrains.compose.resources.painterResource
+
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
@@ -94,19 +115,23 @@ fun CareerSection(profileId: String, onCompare: (() -> Unit)? = null, name: Stri
     val viewModel: CareerViewModel = koinViewModel(key = "career-$profileId") { parametersOf(profileId) }
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sharing by remember { mutableStateOf(false) }
-    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
+        SectionHeader(stringResource(Res.string.profile_tab_stats), icon = DesiIcons.Leaderboard)
         StatsFilters(state.filter, viewModel::setFilter)
         val stats = state.stats
         when {
             stats == null && state.failed -> Text(stringResource(Res.string.stats_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
             stats == null -> Unit
-            stats.matches == 0 -> Text(stringResource(Res.string.stats_none), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+            stats.matches == 0 -> EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.stats_none_title), body = stringResource(Res.string.stats_none))
             else -> CareerCards(stats, onOpenMatch)
         }
-        if (stats != null && stats.matches > 0 && name.isNotBlank()) {
-            GhostButton(stringResource(Res.string.stats_share), onClick = { sharing = true }, modifier = Modifier.fillMaxWidth())
+        val canShare = stats != null && stats.matches > 0 && name.isNotBlank()
+        if (canShare || onCompare != null) {
+            Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+                if (canShare) ActionTile(DesiIcons.Share, stringResource(Res.string.stats_share), { sharing = true }, Modifier.weight(1f))
+                if (onCompare != null) ActionTile(DesiIcons.Swap, stringResource(Res.string.stats_compare), onCompare, Modifier.weight(1f))
+            }
         }
-        if (onCompare != null) GhostButton(stringResource(Res.string.stats_compare), onClick = onCompare, modifier = Modifier.fillMaxWidth())
         if (sharing && stats != null) {
             ShareImageSheet(stringResource(Res.string.stats_share_title), onDismiss = { sharing = false }) { StatsShareCard(name, stats) }
         }
@@ -148,31 +173,43 @@ private fun StatsShareCard(name: String, stats: CareerStats) {
 @Composable
 fun CareerCards(stats: CareerStats, onOpenMatch: ((String) -> Unit)? = null) {
     val colors = DesiTheme.colors
-    Text(
-        pluralStringResource(Res.plurals.stats_summary, stats.matches, stats.matches, stats.won, mvpText(stats.mvpTenths)),
-        style = DesiTheme.type.bodyStrong,
-        color = colors.ink,
+    val space = DesiTheme.space
+    StatGrid(
+        listOf(
+            StatItem("${stats.matches}", stringResource(Res.string.stats_matches)),
+            StatItem("${stats.won}", stringResource(Res.string.team_stat_won)),
+            StatItem(mvpText(stats.mvpTenths), stringResource(Res.string.stats_mvp_points)),
+        ),
     )
     if (stats.form.any { it.batted }) FormChart(stats.form, onOpenMatch)
     val disciplines = listOf(Res.string.stats_batting, Res.string.stats_bowling, Res.string.stats_fielding)
     var discipline by rememberSaveable { mutableStateOf(0) }
-    ChoiceChips(disciplines.indices.toList(), discipline, label = { stringResource(disciplines[it]) }, onSelect = { discipline = it })
-    if (discipline == 0) StatCard(Res.string.stats_batting, battingCells(stats.batting))
-    if (discipline == 1) StatCard(Res.string.stats_bowling, bowlingCells(stats.bowling))
-    if (discipline == 2) StatCard(
-        Res.string.stats_fielding,
-        listOf(
-            Res.string.stats_catches to "${stats.fielding.catches}",
-            Res.string.stats_run_outs to "${stats.fielding.runOuts}",
-            Res.string.stats_stumpings to "${stats.fielding.stumpings}",
-        ),
-    )
+    SegmentedControl(disciplines.indices.toList(), discipline, label = { stringResource(disciplines[it]) }, onSelect = { discipline = it })
+    when (discipline) {
+        0 -> StatGrid(battingCells(stats.batting), featured = 3)
+        1 -> StatGrid(bowlingCells(stats.bowling), featured = 3)
+        else -> StatGrid(
+            listOf(
+                StatItem("${stats.fielding.catches}", stringResource(Res.string.stats_catches)),
+                StatItem("${stats.fielding.runOuts}", stringResource(Res.string.stats_run_outs)),
+                StatItem("${stats.fielding.stumpings}", stringResource(Res.string.stats_stumpings)),
+            ),
+            featured = 3,
+        )
+    }
     var showDefinitions by rememberSaveable { mutableStateOf(false) }
-    GhostButton(stringResource(Res.string.stats_terms), { showDefinitions = !showDefinitions })
-    if (showDefinitions) Text(stringResource(Res.string.stats_definitions), style = DesiTheme.type.caption)
+    Row(
+        Modifier.clip(DesiTheme.radius.full).clickable(role = Role.Button) { showDefinitions = !showDefinitions }.padding(vertical = space.s1),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(space.s2),
+    ) {
+        Icon(painterResource(DesiIcons.Info), null, tint = colors.muted, modifier = Modifier.size(DesiTheme.size.iconSmall))
+        Text(stringResource(Res.string.stats_terms), style = DesiTheme.type.caption.copy(fontWeight = FontWeight.SemiBold), color = colors.muted)
+    }
+    if (showDefinitions) Text(stringResource(Res.string.stats_definitions), style = DesiTheme.type.caption, color = colors.muted)
     if (stats.zones.isNotEmpty()) {
         DesiCard(Modifier.fillMaxWidth()) {
-            SectionLabel(stringResource(Res.string.stats_zones))
+            SectionHeader(stringResource(Res.string.stats_zones), icon = DesiIcons.Stadium)
             WagonWheel(
                 labels = FieldZone.Clockwise.map { stringResource(it.label) },
                 values = FieldZone.Clockwise.map { stats.zones[it] ?: 0 },
@@ -181,67 +218,58 @@ fun CareerCards(stats: CareerStats, onOpenMatch: ((String) -> Unit)? = null) {
         }
     }
     if (stats.badges.isNotEmpty()) {
-        SectionLabel(stringResource(Res.string.stats_badges))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2), verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
-            stats.badges.forEach { badge ->
-                Text(
-                    "🏅 " + stringResource(badge.label),
-                    style = DesiTheme.type.label,
-                    color = colors.brand,
-                    modifier = Modifier.padding(end = DesiTheme.space.s2),
-                )
+        Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+            SectionHeader(stringResource(Res.string.stats_badges), icon = DesiIcons.Medal)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(space.s2), verticalArrangement = Arrangement.spacedBy(space.s2)) {
+                stats.badges.forEach { badge -> BadgeChip(stringResource(badge.label)) }
             }
         }
     }
 }
 
+/** An earned badge: a medal on the brand tint with its name. */
 @Composable
-private fun battingCells(b: BattingStats): List<Pair<StringResource, String>> {
+private fun BadgeChip(label: String) {
+    val colors = DesiTheme.colors
+    Row(
+        Modifier.clip(DesiTheme.radius.md).background(colors.surface).border(1.dp, colors.line.copy(alpha = 0.7f), DesiTheme.radius.md)
+            .padding(start = 6.dp, end = DesiTheme.space.s3, top = 6.dp, bottom = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
+    ) {
+        IconTile(DesiIcons.Medal, size = 32.dp, tint = colors.event.extra, container = colors.event.extra.copy(alpha = 0.14f))
+        Text(label, style = DesiTheme.type.bodyStrong, color = colors.ink)
+    }
+}
+
+@Composable
+private fun battingCells(b: BattingStats): List<StatItem> {
     val dash = stringResource(Res.string.stats_dash)
     return listOf(
-        Res.string.stats_innings to "${b.innings}",
         Res.string.stats_runs to "${b.runs}",
-        Res.string.stats_highest to "${b.highest}${if (b.highestNotOut) "*" else ""}",
         Res.string.stats_average to (b.average?.format2() ?: dash),
         Res.string.stats_strike_rate to b.strikeRate.format2(),
+        Res.string.stats_innings to "${b.innings}",
+        Res.string.stats_highest to "${b.highest}${if (b.highestNotOut) "*" else ""}",
         Res.string.stats_fifties to "${b.fifties}",
         Res.string.stats_hundreds to "${b.hundreds}",
         Res.string.stats_fours to "${b.fours}",
         Res.string.stats_sixes to "${b.sixes}",
-    )
+    ).map { (label, value) -> StatItem(value, stringResource(label)) }
 }
 
 @Composable
-private fun bowlingCells(b: BowlingStats): List<Pair<StringResource, String>> {
+private fun bowlingCells(b: BowlingStats): List<StatItem> {
     val dash = stringResource(Res.string.stats_dash)
     return listOf(
+        Res.string.stats_wickets to "${b.wickets}",
+        Res.string.stats_economy to b.economy.format2(),
+        Res.string.stats_best to "${b.bestWickets}/${b.bestRuns}",
         Res.string.stats_innings to "${b.innings}",
         Res.string.stats_overs to formatOvers(b.balls),
-        Res.string.stats_wickets to "${b.wickets}",
-        Res.string.stats_best to "${b.bestWickets}/${b.bestRuns}",
         Res.string.stats_average to (b.average?.format2() ?: dash),
-        Res.string.stats_economy to b.economy.format2(),
         Res.string.stats_five_wickets to "${b.fiveWickets}",
-    )
-}
-
-/** A titled grid of figures, three to a row. */
-@Composable
-private fun StatCard(title: StringResource, cells: List<Pair<StringResource, String>>) {
-    DesiCard(Modifier.fillMaxWidth()) {
-        SectionLabel(stringResource(title))
-        cells.chunked(3).forEach { row ->
-            Row(Modifier.fillMaxWidth()) {
-                row.forEach { (label, value) ->
-                    Column(Modifier.weight(1f).padding(vertical = DesiTheme.space.s1)) {
-                        Text(value, style = DesiTheme.type.scoreMd, color = DesiTheme.colors.ink)
-                        Text(stringResource(label), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
-                    }
-                }
-                repeat(3 - row.size) { Column(Modifier.weight(1f)) {} }
-            }
-        }
-    }
+    ).map { (label, value) -> StatItem(value, stringResource(label)) }
 }
 
 /** Bars of runs per match, oldest on the left; fifties in the brand colour. */
@@ -252,7 +280,7 @@ private fun FormChart(form: List<FormEntry>, onOpenMatch: ((String) -> Unit)?) {
     val most = batted.maxOf { it.runs }.coerceAtLeast(1)
     val description = stringResource(Res.string.stats_form_description, batted.size)
     DesiCard(Modifier.fillMaxWidth()) {
-        SectionLabel(pluralStringResource(Res.plurals.stats_form, batted.size, batted.size))
+        SectionHeader(pluralStringResource(Res.plurals.stats_form, batted.size, batted.size), icon = DesiIcons.Trend)
         Canvas(Modifier.fillMaxWidth().height(96.dp).semantics { contentDescription = description }) {
             // Ten slots whatever the count, so one match is a slim bar, not a block across the card.
             val slot = size.width / FORM_SLOTS
@@ -300,10 +328,11 @@ fun CompareScreen(profileId: String, name: String, onBack: () -> Unit, viewModel
                     value = state.query,
                     onValueChange = viewModel::search,
                     label = state.other?.name ?: stringResource(Res.string.compare_pick),
+                    leadingIcon = DesiIcons.Search,
                     keyboardOptions = KeyboardOptions.Default,
                 )
             }
-            items(state.results, key = { it.profileId }) { PlayerLine(it, onClick = { viewModel.pick(it) }) }
+            if (state.results.isNotEmpty()) item { PlayerList(state.results) { viewModel.pick(it) } }
             val pair = state.stats
             val other = state.other
             if (other != null) {
@@ -393,16 +422,31 @@ fun LeaderboardScreen(
                 })
             }
             if (state.failed) item { Text(stringResource(Res.string.stats_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
-            else if (!state.loading && state.rows.isEmpty()) item { Text(stringResource(Res.string.leaderboard_empty), style = DesiTheme.type.body, color = DesiTheme.colors.muted) }
-            items(state.rows, key = { it.player.profileId }) { row ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("${state.rows.indexOf(row) + 1}", style = DesiTheme.type.scoreMd, color = DesiTheme.colors.muted, modifier = Modifier.padding(end = space.s3))
-                    Column(Modifier.weight(1f)) {
-                        PlayerLine(row.player, onClick = { onOpenPlayer(row.player.profileId) })
-                    }
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(if (state.metric == LeaderboardMetric.MVP) mvpText(row.value) else "${row.value}", style = DesiTheme.type.scoreMd, color = DesiTheme.colors.ink)
-                        Text(pluralStringResource(Res.plurals.leaderboard_matches, row.matches, row.matches), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+            else if (!state.loading && state.rows.isEmpty()) item { EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.leaderboard_empty)) }
+            if (state.rows.isNotEmpty()) {
+                item {
+                    ListCard {
+                        state.rows.forEachIndexed { index, row ->
+                            ListRow(
+                                title = row.player.name,
+                                subtitle = pluralStringResource(Res.plurals.leaderboard_matches, row.matches, row.matches),
+                                leading = {
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                                        RankBadge(index + 1, size = 28.dp)
+                                        PhotoAvatar(row.player.name, row.player.photoUrl, size = 40)
+                                    }
+                                },
+                                trailing = {
+                                    Text(
+                                        if (state.metric == LeaderboardMetric.MVP) mvpText(row.value) else "${row.value}",
+                                        style = DesiTheme.type.scoreMd,
+                                        color = if (index == 0) DesiTheme.colors.brand else DesiTheme.colors.ink,
+                                    )
+                                },
+                                divider = index > 0,
+                                onClick = { onOpenPlayer(row.player.profileId) },
+                            )
+                        }
                     }
                 }
             }

@@ -967,4 +967,45 @@
     <string name="feed_city">My city</string>
     <string name="feed_stale">Showing the last matches loaded. Refresh failed.</string>
     <string name="feed_new">Show new matches</string>
+
+    <!-- Inside-page redesign -->
+    <string name="team_eyebrow">Team</string>
+    <string name="team_stat_played">Played</string>
+    <string name="team_stat_won">Won</string>
+    <string name="team_stat_lost">Lost</string>
+    <string name="team_stat_tied">Tied</string>
+    <string name="team_invite_short">Invite</string>
+    <string name="team_tag_invited">Invited</string>
+    <string name="insights_average_first_short">Avg 1st innings</string>
+    <string name="player_eyebrow">Player</string>
+    <string name="teams_empty_title">No teams yet</string>
+    <string name="teams_yours">Your teams</string>
+    <string name="tournaments_empty_title">No tournaments yet</string>
+    <string name="tournaments_yours">Your tournaments</string>
+    <string name="tournaments_create_body">Fixtures, points table and stats, all in one place.</string>
+    <string name="stats_matches">Matches</string>
+    <string name="stats_mvp_points">MVP points</string>
+    <string name="stats_none_title">No stats yet</string>
+    <string name="profile_eyebrow">Your profile</string>
+    <string name="profile_section_details">Details</string>
+    <string name="profile_edit_short">Edit</string>
+    <string name="tournament_eyebrow">Tournament</string>
+    <string name="tournament_stat_played">Played</string>
+    <string name="tournament_player_of_tournament_title">Player of the tournament</string>
+    <string name="tournament_pending_short">Pending</string>
+    <string name="table_qualify">Through to the next round</string>
+    <string name="notifications_empty_title">You're all caught up</string>
+    <string name="setup_lineup">Lineup</string>
+    <string name="setup_saved_team">Saved team</string>
+    <string name="setup_captain_tag">C</string>
+    <string name="setup_keeper_tag">WK</string>
+    <string name="setup_add_player_hint">Find them, add by phone, or as a guest</string>
+    <string name="setup_min_players">Add at least 2 players to start.</string>
+    <string name="setup_when_where">When and where</string>
+    <string name="setup_later_hint">Tap to schedule it for later</string>
+    <string name="setup_change_time">Tap to change the time</string>
+    <string name="setup_vs">vs</string>
+    <string name="setup_mode_search_hint">Pick someone on DesiCrics so the match counts in their stats.</string>
+    <string name="setup_mode_phone_hint">They get this player and its stats when they sign in with this number.</string>
+    <string name="setup_mode_guest_hint">A name only. Their runs and wickets stay on this scorecard.</string>
 </resources>

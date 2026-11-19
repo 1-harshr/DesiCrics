@@ -42,6 +42,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.designsystem.component.Avatar
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.HeroButton
+import com.harsh.desicrics.designsystem.component.HeroChip
+import com.harsh.desicrics.designsystem.component.HeroChips
+import com.harsh.desicrics.designsystem.component.HeroIconButton
+import com.harsh.desicrics.designsystem.component.HeroIdentity
+import com.harsh.desicrics.designsystem.component.HeroScaffold
+import com.harsh.desicrics.designsystem.component.HeroStats
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.component.StatGrid
+import com.harsh.desicrics.designsystem.component.StatItem
+import com.harsh.desicrics.designsystem.component.Tag
+import com.harsh.desicrics.designsystem.component.TagTone
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import com.harsh.desicrics.designsystem.component.RankBadge
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.component.DesiScaffold
@@ -194,66 +218,106 @@ fun TeamContent(
     var settings by rememberSaveable { mutableStateOf(false) }
     var confirmLeave by rememberSaveable { mutableStateOf(false) }
     if (settings) DesiSheet(stringResource(Res.string.team_settings), { settings = false }) {
-        if (state.isAdmin) {
-            GhostButton(stringResource(Res.string.team_logo_change), { settings = false; onChangeLogo() })
-            GhostButton(stringResource(Res.string.team_rename), { settings = false; onRename() })
+        ListCard {
+            if (state.isAdmin) {
+                ListRow(stringResource(Res.string.team_logo_change), leading = { IconTile(DesiIcons.Shield) }, onClick = { settings = false; onChangeLogo() })
+                ListRow(stringResource(Res.string.team_rename), leading = { IconTile(DesiIcons.Edit) }, divider = true, onClick = { settings = false; onRename() })
+            }
+            ListRow(
+                stringResource(Res.string.team_leave),
+                leading = { IconTile(DesiIcons.Logout, tint = colors.event.wicket, container = colors.event.wicket.copy(alpha = 0.12f)) },
+                titleColor = colors.event.wicket,
+                divider = state.isAdmin,
+                onClick = { settings = false; confirmLeave = true },
+            )
         }
-        GhostButton(stringResource(Res.string.team_leave), { settings = false; confirmLeave = true })
     }
     if (confirmLeave) DesiSheet(stringResource(Res.string.team_confirm_leave, team?.name.orEmpty()), { confirmLeave = false }) {
-        GhostButton(stringResource(Res.string.team_leave), { confirmLeave = false; onLeave() })
+        GhostButton(stringResource(Res.string.team_leave), { confirmLeave = false; onLeave() }, leadingIcon = DesiIcons.Logout)
     }
-    DesiScaffold(title = team?.name ?: stringResource(Res.string.teams_title), onBack = onBack, actions = {
-        if (state.myRole != null) TextButton(onClick = { settings = true }) { Text(stringResource(Res.string.team_settings)) }
-    }) { padding ->
-        when {
-            team == null && state.loading -> FullScreenLoading(Modifier.padding(padding))
-            team == null -> Text(
+    when {
+        team == null -> DesiScaffold(title = stringResource(Res.string.teams_title), onBack = onBack) { padding ->
+            if (state.loading) FullScreenLoading(Modifier.padding(padding))
+            else Text(
                 stringResource(Res.string.teams_load_failed),
                 style = DesiTheme.type.body,
                 color = colors.event.wicket,
                 modifier = Modifier.padding(padding).padding(space.screen),
             )
-            else -> Column(
-                Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())
-                    .padding(horizontal = space.screen, vertical = space.s4),
-                verticalArrangement = Arrangement.spacedBy(space.s4),
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s4)) {
-                    PhotoAvatar(team.name, team.logoUrl, size = 64)
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(space.s1)) {
-                        if (team.city.isNotBlank()) Text(team.city, style = DesiTheme.type.body, color = colors.muted)
-                    }
-                }
-                state.following?.takeIf { state.myRole == null }?.let { following ->
-                    if (following) GhostButton(stringResource(Res.string.following), onClick = onFollow, modifier = Modifier.fillMaxWidth())
-                    else PrimaryButton(stringResource(Res.string.follow), onClick = onFollow, modifier = Modifier.fillMaxWidth())
-                }
-                if (state.actionFailed) {
-                    Text(stringResource(Res.string.teams_action_failed), style = DesiTheme.type.body, color = colors.event.wicket)
+        }
+        else -> HeroScaffold(
+            title = team.name,
+            onBack = onBack,
+            actions = {
+                if (state.myRole != null) HeroIconButton(DesiIcons.Settings, stringResource(Res.string.team_settings), { settings = true })
+            },
+            hero = {
+                HeroIdentity(
+                    name = team.name,
+                    eyebrow = stringResource(Res.string.team_eyebrow),
+                    avatar = { PhotoAvatar(team.name, team.logoUrl, size = 72) },
+                )
+                HeroChips(
+                    listOf(
+                        HeroChip(team.city, DesiIcons.Location),
+                        HeroChip(pluralStringResource(Res.plurals.teams_member_count, team.members.size, team.members.size), DesiIcons.Teams),
+                        HeroChip(stringResource(Res.string.teams_role_admin).takeIf { state.isAdmin }.orEmpty(), DesiIcons.Verified),
+                    ),
+                )
+                state.insights?.takeIf { it.played > 0 }?.let { record ->
+                    HeroStats(
+                        listOf(
+                            StatItem("${record.played}", stringResource(Res.string.team_stat_played)),
+                            StatItem("${record.won}", stringResource(Res.string.team_stat_won)),
+                            StatItem("${record.lost}", stringResource(Res.string.team_stat_lost)),
+                        ),
+                    )
                 }
                 if (state.isAdmin) {
                     Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                        PrimaryButton(stringResource(Res.string.team_add_player), onClick = onAdd, modifier = Modifier.weight(1f))
-                        TonalButton(stringResource(Res.string.team_invite), onClick = onInvite, modifier = Modifier.weight(1f))
+                        HeroButton(stringResource(Res.string.team_add_player), onAdd, Modifier.weight(1f), icon = DesiIcons.PersonAdd)
+                        HeroButton(stringResource(Res.string.team_invite_short), onInvite, Modifier.weight(1f), icon = DesiIcons.QrCode, filled = false)
                     }
                 }
-                SectionLabel(stringResource(Res.string.team_members))
-                DesiCard(Modifier.fillMaxWidth()) {
-                    team.members.forEach { member ->
+                state.following?.takeIf { state.myRole == null }?.let { following ->
+                    HeroButton(
+                        stringResource(if (following) Res.string.following else Res.string.follow),
+                        onFollow,
+                        Modifier.fillMaxWidth(),
+                        icon = if (following) DesiIcons.CheckCircle else DesiIcons.Add,
+                        filled = !following,
+                    )
+                }
+            },
+        ) {
+            if (state.actionFailed) {
+                Text(stringResource(Res.string.teams_action_failed), style = DesiTheme.type.body, color = colors.event.wicket)
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+                SectionHeader(stringResource(Res.string.team_members), icon = DesiIcons.Teams)
+                ListCard {
+                    team.members.forEachIndexed { index, member ->
                         val canOpen = (state.isAdmin && member.player.profileId != state.myId) || !member.player.isPlaceholder
-                        PlayerRow(
-                            name = member.player.name,
+                        ListRow(
+                            title = member.player.name,
                             subtitle = memberSubtitle(member),
-                            avatar = { PhotoAvatar(member.player.name, member.player.photoUrl) },
+                            leading = { PhotoAvatar(member.player.name, member.player.photoUrl, size = 44) },
+                            trailing = {
+                                when {
+                                    member.role == TeamRole.ADMIN -> Tag(stringResource(Res.string.teams_role_admin), tone = TagTone.BRAND, icon = DesiIcons.Verified)
+                                    member.player.isPlaceholder -> Tag(stringResource(Res.string.team_tag_invited), tone = TagTone.WARN)
+                                }
+                                if (canOpen) Icon(painterResource(DesiIcons.ChevronRight), null, tint = colors.muted, modifier = Modifier.size(DesiTheme.size.iconSmall))
+                            },
+                            divider = index > 0,
                             onClick = if (canOpen) ({ onMember(member) }) else null,
                         )
                     }
                 }
-                if (state.isAdmin) state.insights?.let { Insights(it) }
-                if (state.otherTeams.isNotEmpty()) {
-                    RecordAgainst(state.otherTeams, state.headToHead?.let { h2h -> state.otherTeams.firstOrNull { it.id == h2h.opponentId } }, state, onCompare)
-                }
+            }
+            if (state.isAdmin) state.insights?.let { Insights(it) }
+            if (state.otherTeams.isNotEmpty()) {
+                RecordAgainst(state.otherTeams, state.headToHead?.let { h2h -> state.otherTeams.firstOrNull { it.id == h2h.opponentId } }, state, onCompare)
             }
         }
     }
@@ -262,7 +326,6 @@ fun TeamContent(
 @Composable
 private fun memberSubtitle(member: TeamMember): String? {
     val parts = buildList {
-        if (member.role == TeamRole.ADMIN) add(stringResource(Res.string.teams_role_admin))
         member.player.role?.let { add(stringResource(it.label)) }
         if (member.player.isPlaceholder) add(stringResource(Res.string.team_placeholder))
         member.claimCode?.let { add(stringResource(Res.string.team_claim_code, it)) }
@@ -275,59 +338,82 @@ private fun memberSubtitle(member: TeamMember): String? {
 internal fun Insights(insights: TeamInsights) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
-    Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
-        SectionLabel(stringResource(Res.string.insights_title))
+    Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+        SectionHeader(stringResource(Res.string.insights_title), icon = DesiIcons.Insights)
         if (insights.played == 0) {
-            Text(stringResource(Res.string.insights_empty), style = DesiTheme.type.body, color = colors.muted)
+            EmptyState(DesiIcons.Insights, stringResource(Res.string.insights_empty))
             return@Column
         }
-        DesiCard(Modifier.fillMaxWidth()) {
-            Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
-                Text(stringResource(Res.string.team_record, insights.played, insights.won, insights.lost, insights.tied), style = DesiTheme.type.data, color = colors.ink)
-                InsightLine(Res.string.insights_batting_first, insights.battingFirst)
-                InsightLine(Res.string.insights_chasing, insights.chasing)
-                InsightLine(Res.string.insights_toss, insights.tossWon)
-                insights.averageFirstInnings?.let {
-                    Text(stringResource(Res.string.insights_average_first, it), style = DesiTheme.type.body, color = colors.ink)
-                }
+        StatGrid(
+            listOfNotNull(
+                StatItem("${insights.won}/${insights.played}", stringResource(Res.string.team_stat_won)),
+                insights.averageFirstInnings?.let { StatItem("$it", stringResource(Res.string.insights_average_first_short)) },
+                StatItem("${insights.tied}", stringResource(Res.string.team_stat_tied)),
+            ),
+            featured = 1,
+        )
+        ListCard {
+            listOf(
+                Triple(Res.string.insights_batting_first, insights.battingFirst, DesiIcons.Bat),
+                Triple(Res.string.insights_chasing, insights.chasing, DesiIcons.Target),
+                Triple(Res.string.insights_toss, insights.tossWon, DesiIcons.Swap),
+            ).filter { it.second.played > 0 }.forEachIndexed { index, (label, record, icon) ->
+                ListRow(
+                    stringResource(label, record.won, record.played),
+                    leading = { IconTile(icon, size = 36.dp) },
+                    trailing = { WinShare(record) },
+                    divider = index > 0,
+                )
             }
         }
-        Text(stringResource(Res.string.insights_phases), style = DesiTheme.type.bodyStrong, color = colors.ink)
         DesiCard(Modifier.fillMaxWidth()) {
-            Column(verticalArrangement = Arrangement.spacedBy(space.s2)) {
-                Row {
-                    Text("", Modifier.weight(1f))
-                    Text(stringResource(Res.string.insights_scored), Modifier.weight(1f), style = DesiTheme.type.caption, color = colors.muted)
-                    Text(stringResource(Res.string.insights_conceded), Modifier.weight(1f), style = DesiTheme.type.caption, color = colors.muted)
-                }
-                insights.batting.zip(insights.bowling).forEach { (bat, bowl) ->
-                    Row {
-                        Text(stringResource(bat.phase.label), Modifier.weight(1f), style = DesiTheme.type.body, color = colors.ink)
-                        PhaseCell(bat, Modifier.weight(1f))
-                        PhaseCell(bowl, Modifier.weight(1f))
-                    }
-                }
-                Text(stringResource(Res.string.insights_phases_hint), style = DesiTheme.type.caption, color = colors.muted)
+            Text(stringResource(Res.string.insights_phases), style = DesiTheme.type.bodyStrong, color = colors.ink)
+            Row {
+                Text("", Modifier.weight(1f))
+                Text(stringResource(Res.string.insights_scored), Modifier.weight(1f), style = DesiTheme.type.label, color = colors.muted)
+                Text(stringResource(Res.string.insights_conceded), Modifier.weight(1f), style = DesiTheme.type.label, color = colors.muted)
             }
+            insights.batting.zip(insights.bowling).forEach { (bat, bowl) ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(bat.phase.label), Modifier.weight(1f), style = DesiTheme.type.bodyStrong, color = colors.ink)
+                    PhaseCell(bat, Modifier.weight(1f))
+                    PhaseCell(bowl, Modifier.weight(1f))
+                }
+            }
+            Text(stringResource(Res.string.insights_phases_hint), style = DesiTheme.type.caption, color = colors.muted)
         }
         if (insights.howOut.isNotEmpty()) {
             val total = insights.howOut.values.sum()
-            Text(stringResource(Res.string.insights_how_out), style = DesiTheme.type.bodyStrong, color = colors.ink)
-            Text(
-                insights.howOut.entries.take(4).map { (kind, count) -> stringResource(Res.string.insights_share, stringResource(kind.label), count * 100 / total) }.joinToString(" · "),
-                style = DesiTheme.type.body,
-                color = colors.ink,
-            )
+            DesiCard(Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.insights_how_out), style = DesiTheme.type.bodyStrong, color = colors.ink)
+                insights.howOut.entries.take(4).forEach { (kind, count) -> ShareBar(stringResource(kind.label), count * 100 / total) }
+            }
         }
-        Performers(Res.string.insights_top_runs, insights.topRunScorers)
-        Performers(Res.string.insights_top_wickets, insights.topWicketTakers)
+        Performers(Res.string.insights_top_runs, insights.topRunScorers, DesiIcons.Bat)
+        Performers(Res.string.insights_top_wickets, insights.topWicketTakers, DesiIcons.Ball)
     }
 }
 
+/** "4 of 6" as a percentage pill. */
 @Composable
-private fun InsightLine(label: StringResource, record: WinRecord) {
-    if (record.played == 0) return
-    Text(stringResource(label, record.won, record.played), style = DesiTheme.type.body, color = DesiTheme.colors.ink)
+private fun WinShare(record: WinRecord) {
+    val percent = record.won * 100 / record.played
+    Tag("$percent%", tone = if (percent >= 50) TagTone.BRAND else TagTone.NEUTRAL)
+}
+
+/** A label, its share as a bar, and the percentage. */
+@Composable
+private fun ShareBar(label: String, percent: Int) {
+    val colors = DesiTheme.colors
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1)) {
+        Row {
+            Text(label, style = DesiTheme.type.body, color = colors.ink, modifier = Modifier.weight(1f))
+            Text("$percent%", style = DesiTheme.type.data, color = colors.muted)
+        }
+        Box(Modifier.fillMaxWidth().height(6.dp).clip(DesiTheme.radius.full).background(colors.sunk)) {
+            Box(Modifier.fillMaxWidth(percent / 100f).fillMaxHeight().clip(DesiTheme.radius.full).background(colors.brand))
+        }
+    }
 }
 
 @Composable
@@ -343,10 +429,21 @@ private fun PhaseCell(stat: PhaseStat, modifier: Modifier) {
 }
 
 @Composable
-private fun Performers(title: StringResource, people: List<Performer>) {
+private fun Performers(title: StringResource, people: List<Performer>, icon: DrawableResource) {
     if (people.isEmpty()) return
-    Text(stringResource(title), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
-    Text(people.joinToString(" · ") { "${it.name} ${it.value}" }, style = DesiTheme.type.body, color = DesiTheme.colors.ink)
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        SectionHeader(stringResource(title), icon = icon)
+        ListCard {
+            people.forEachIndexed { index, person ->
+                ListRow(
+                    person.name,
+                    leading = { RankBadge(index + 1) },
+                    trailing = { Text("${person.value}", style = DesiTheme.type.scoreMd, color = DesiTheme.colors.ink) },
+                    divider = index > 0,
+                )
+            }
+        }
+    }
 }
 
 private val InningsPhase.label: StringResource
@@ -359,14 +456,18 @@ private val InningsPhase.label: StringResource
 /** Pick another of the caller's teams to see how this one has done against it. */
 @Composable
 private fun RecordAgainst(others: List<TeamSummary>, selected: TeamSummary?, state: TeamUiState, onCompare: (String) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
-        SectionLabel(stringResource(Res.string.team_record_against))
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+        SectionHeader(stringResource(Res.string.team_record_against), icon = DesiIcons.Swap)
         ChoiceChips(options = others, selected = selected, label = { it.name }, onSelect = { onCompare(it.id) })
         state.headToHead?.let { h2h ->
-            Text(
-                stringResource(Res.string.team_record, h2h.played, h2h.won, h2h.lost, h2h.tied),
-                style = DesiTheme.type.data,
-                color = DesiTheme.colors.ink,
+            StatGrid(
+                listOf(
+                    StatItem("${h2h.played}", stringResource(Res.string.team_stat_played)),
+                    StatItem("${h2h.won}", stringResource(Res.string.team_stat_won)),
+                    StatItem("${h2h.lost}", stringResource(Res.string.team_stat_lost)),
+                    StatItem("${h2h.tied}", stringResource(Res.string.team_stat_tied)),
+                ),
+                columns = 4,
             )
         }
     }

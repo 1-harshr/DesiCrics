@@ -1,5 +1,19 @@
 package com.harsh.desicrics.ui.tournament
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.ui.unit.dp
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.component.Tag
+import com.harsh.desicrics.designsystem.component.TagTone
+import com.harsh.desicrics.designsystem.component.heroBackground
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import org.jetbrains.compose.resources.painterResource
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -77,35 +91,60 @@ fun TournamentsContent(state: TournamentsUiState, onOpen: (String) -> Unit, onCr
             contentPadding = PaddingValues(horizontal = space.screen, vertical = space.s4),
             verticalArrangement = Arrangement.spacedBy(space.s3),
         ) {
-            item { PrimaryButton(stringResource(Res.string.tournaments_create), onClick = onCreate, modifier = Modifier.fillMaxWidth()) }
+            item { CreateTournamentCard(onCreate) }
             if (state.loadFailed) {
                 item { Text(stringResource(Res.string.tournaments_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
             } else if (!state.loading && state.tournaments.isEmpty()) {
-                item { Text(stringResource(Res.string.tournaments_empty), style = DesiTheme.type.body, color = DesiTheme.colors.muted) }
+                item { EmptyState(DesiIcons.Trophy, stringResource(Res.string.tournaments_empty_title), body = stringResource(Res.string.tournaments_empty)) }
             }
-            items(state.tournaments, key = { it.id }) { TournamentRow(it, onClick = { onOpen(it.id) }) }
+            if (state.tournaments.isNotEmpty()) {
+                item { SectionHeader(stringResource(Res.string.tournaments_yours), icon = DesiIcons.Trophy, modifier = Modifier.padding(top = space.s2)) }
+                item {
+                    ListCard {
+                        state.tournaments.forEachIndexed { index, t -> TournamentRow(t, divider = index > 0, onClick = { onOpen(t.id) }) }
+                    }
+                }
+            }
         }
     }
 }
 
+/** The way into running a tournament: a green card like Home's Start a match. */
 @Composable
-private fun TournamentRow(tournament: TournamentSummary, onClick: () -> Unit) {
+private fun CreateTournamentCard(onCreate: () -> Unit) {
     val colors = DesiTheme.colors
-    DesiCard(Modifier.fillMaxWidth().clip(DesiTheme.radius.lg).clickable(role = Role.Button, onClick = onClick)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-            Avatar(tournament.name, size = 44)
-            Column(Modifier.weight(1f)) {
-                Text(tournament.name, style = DesiTheme.type.bodyStrong, color = colors.ink)
-                val details = listOf(
-                    stringResource(tournament.format.label),
-                    pluralStringResource(Res.plurals.tournaments_team_count, tournament.teams, tournament.teams),
-                    tournament.city,
-                )
-                Text(details.filter { it.isNotBlank() }.joinToString(" · "), style = DesiTheme.type.caption, color = colors.muted)
-            }
-            if (tournament.isOrganiser) Text(stringResource(Res.string.tournaments_organiser), style = DesiTheme.type.label, color = colors.brand)
+    val space = DesiTheme.space
+    Row(
+        Modifier.fillMaxWidth().clip(DesiTheme.radius.lg).heroBackground().clickable(role = Role.Button, onClick = onCreate).padding(space.s5),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(space.s4),
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(space.s1)) {
+            Text(stringResource(Res.string.tournaments_create), style = DesiTheme.type.titleMd, color = colors.onBrandStrong)
+            Text(stringResource(Res.string.tournaments_create_body), style = DesiTheme.type.body, color = colors.onBrandStrong.copy(alpha = 0.8f))
         }
+        IconTile(DesiIcons.TrophyFilled, size = 56.dp, tint = colors.brandStrong, container = colors.onBrandStrong)
     }
+}
+
+@Composable
+private fun TournamentRow(tournament: TournamentSummary, divider: Boolean, onClick: () -> Unit) {
+    val details = listOf(
+        stringResource(tournament.format.label),
+        pluralStringResource(Res.plurals.tournaments_team_count, tournament.teams, tournament.teams),
+        tournament.city,
+    )
+    ListRow(
+        title = tournament.name,
+        subtitle = details.filter { it.isNotBlank() }.joinToString(" · "),
+        leading = { IconTile(DesiIcons.Trophy, size = 44.dp) },
+        trailing = {
+            if (tournament.isOrganiser) Tag(stringResource(Res.string.tournaments_organiser), tone = TagTone.BRAND, icon = DesiIcons.Whistle)
+            Icon(painterResource(DesiIcons.ChevronRight), null, tint = DesiTheme.colors.muted, modifier = Modifier.size(DesiTheme.size.iconSmall))
+        },
+        divider = divider,
+        onClick = onClick,
+    )
 }
 
 /** Name, format, overs and how the format's playoffs work; match rules start from a preset. */

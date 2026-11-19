@@ -2,6 +2,41 @@ package com.harsh.desicrics.designsystem.icon
 
 import com.harsh.desicrics.designsystem.resources.Res
 import com.harsh.desicrics.designsystem.resources.ic_add
+import com.harsh.desicrics.designsystem.resources.ic_badge
+import com.harsh.desicrics.designsystem.resources.ic_delete
+import com.harsh.desicrics.designsystem.resources.ic_support_agent
+import com.harsh.desicrics.designsystem.resources.ic_mail
+import com.harsh.desicrics.designsystem.resources.ic_call
+import com.harsh.desicrics.designsystem.resources.ic_chevron_right
+import com.harsh.desicrics.designsystem.resources.ic_emoji_events
+import com.harsh.desicrics.designsystem.resources.ic_emoji_events_filled
+import com.harsh.desicrics.designsystem.resources.ic_leaderboard
+import com.harsh.desicrics.designsystem.resources.ic_calendar_month
+import com.harsh.desicrics.designsystem.resources.ic_schedule
+import com.harsh.desicrics.designsystem.resources.ic_star
+import com.harsh.desicrics.designsystem.resources.ic_edit
+import com.harsh.desicrics.designsystem.resources.ic_settings
+import com.harsh.desicrics.designsystem.resources.ic_qr_code_2
+import com.harsh.desicrics.designsystem.resources.ic_person_add
+import com.harsh.desicrics.designsystem.resources.ic_history
+import com.harsh.desicrics.designsystem.resources.ic_trending_up
+import com.harsh.desicrics.designsystem.resources.ic_stadium
+import com.harsh.desicrics.designsystem.resources.ic_shield
+import com.harsh.desicrics.designsystem.resources.ic_military_tech
+import com.harsh.desicrics.designsystem.resources.ic_info
+import com.harsh.desicrics.designsystem.resources.ic_verified
+import com.harsh.desicrics.designsystem.resources.ic_bolt
+import com.harsh.desicrics.designsystem.resources.ic_sports_score
+import com.harsh.desicrics.designsystem.resources.ic_swap_horiz
+import com.harsh.desicrics.designsystem.resources.ic_insights
+import com.harsh.desicrics.designsystem.resources.ic_home
+import com.harsh.desicrics.designsystem.resources.ic_home_filled
+import com.harsh.desicrics.designsystem.resources.ic_dynamic_feed
+import com.harsh.desicrics.designsystem.resources.ic_dynamic_feed_filled
+import com.harsh.desicrics.designsystem.resources.ic_person_filled
+import com.harsh.desicrics.designsystem.resources.ic_group_add
+import com.harsh.desicrics.designsystem.resources.ic_sports
+import com.harsh.desicrics.designsystem.resources.ic_logout
 import com.harsh.desicrics.designsystem.resources.ic_arrow_back
 import com.harsh.desicrics.designsystem.resources.ic_arrow_forward
 import com.harsh.desicrics.designsystem.resources.ic_check_circle
@@ -49,6 +84,43 @@ object DesiIcons {
     val Share: DrawableResource = Res.drawable.ic_share
     val Teams: DrawableResource = Res.drawable.ic_groups
     val Mic: DrawableResource = Res.drawable.ic_mic
+    val ChevronRight: DrawableResource = Res.drawable.ic_chevron_right
+    val Trophy: DrawableResource = Res.drawable.ic_emoji_events
+    val TrophyFilled: DrawableResource = Res.drawable.ic_emoji_events_filled
+    val Leaderboard: DrawableResource = Res.drawable.ic_leaderboard
+    val Calendar: DrawableResource = Res.drawable.ic_calendar_month
+    val Clock: DrawableResource = Res.drawable.ic_schedule
+    val Star: DrawableResource = Res.drawable.ic_star
+    val Edit: DrawableResource = Res.drawable.ic_edit
+    val Settings: DrawableResource = Res.drawable.ic_settings
+    val QrCode: DrawableResource = Res.drawable.ic_qr_code_2
+    val PersonAdd: DrawableResource = Res.drawable.ic_person_add
+    val GroupAdd: DrawableResource = Res.drawable.ic_group_add
+    val History: DrawableResource = Res.drawable.ic_history
+    val Trend: DrawableResource = Res.drawable.ic_trending_up
+    val Stadium: DrawableResource = Res.drawable.ic_stadium
+    val Shield: DrawableResource = Res.drawable.ic_shield
+    val Medal: DrawableResource = Res.drawable.ic_military_tech
+    val Info: DrawableResource = Res.drawable.ic_info
+    val Verified: DrawableResource = Res.drawable.ic_verified
+    val Bolt: DrawableResource = Res.drawable.ic_bolt
+    val Target: DrawableResource = Res.drawable.ic_sports_score
+    val Swap: DrawableResource = Res.drawable.ic_swap_horiz
+    val Insights: DrawableResource = Res.drawable.ic_insights
+    val Whistle: DrawableResource = Res.drawable.ic_sports
+    val Logout: DrawableResource = Res.drawable.ic_logout
+    val Phone: DrawableResource = Res.drawable.ic_call
+    val Mail: DrawableResource = Res.drawable.ic_mail
+    val Support: DrawableResource = Res.drawable.ic_support_agent
+    val Delete: DrawableResource = Res.drawable.ic_delete
+    val Badge: DrawableResource = Res.drawable.ic_badge
+
+    // Bottom tabs: outlined when idle, filled when selected.
+    val Home: DrawableResource = Res.drawable.ic_home
+    val HomeFilled: DrawableResource = Res.drawable.ic_home_filled
+    val Feed: DrawableResource = Res.drawable.ic_dynamic_feed
+    val FeedFilled: DrawableResource = Res.drawable.ic_dynamic_feed_filled
+    val PersonFilled: DrawableResource = Res.drawable.ic_person_filled
 
     // Playing roles. Ball is Material's sports_baseball (a ball with a seam); Glove is front_hand.
     val Bat: DrawableResource = Res.drawable.ic_cricket_bat

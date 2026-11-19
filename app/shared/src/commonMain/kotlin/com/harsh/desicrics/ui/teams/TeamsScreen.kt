@@ -1,5 +1,17 @@
 package com.harsh.desicrics.ui.teams
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import com.harsh.desicrics.designsystem.component.ActionTile
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.component.Tag
+import com.harsh.desicrics.designsystem.component.TagTone
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import org.jetbrains.compose.resources.painterResource
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -95,37 +107,52 @@ fun TeamsContent(
         ) {
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                    PrimaryButton(stringResource(Res.string.teams_create), onClick = onCreate, modifier = Modifier.weight(1f))
-                    GhostButton(stringResource(Res.string.teams_join), onClick = onJoin, modifier = Modifier.weight(1f))
+                    ActionTile(DesiIcons.GroupAdd, stringResource(Res.string.teams_create), onCreate, Modifier.weight(1f))
+                    ActionTile(DesiIcons.QrCode, stringResource(Res.string.teams_join), onJoin, Modifier.weight(1f))
                 }
             }
             if (state.loadFailed) {
                 item { Text(stringResource(Res.string.teams_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
             }
             if (!state.loading && state.teams.isEmpty() && !state.loadFailed) {
-                item { Text(stringResource(Res.string.teams_empty), style = DesiTheme.type.body, color = DesiTheme.colors.muted) }
+                item { EmptyState(DesiIcons.Shield, stringResource(Res.string.teams_empty_title), body = stringResource(Res.string.teams_empty)) }
             }
-            items(state.teams, key = { it.id }) { TeamRow(it, onClick = { onOpenTeam(it.id) }) }
+            if (state.teams.isNotEmpty()) {
+                item { SectionHeader(stringResource(Res.string.teams_yours), icon = DesiIcons.Shield, modifier = Modifier.padding(top = space.s2)) }
+                item { TeamList(state.teams, onOpenTeam) }
+            }
         }
     }
 }
 
+/** Teams on one card, a row each. */
+@Composable
+internal fun TeamList(teams: List<TeamSummary>, onOpenTeam: (String) -> Unit) {
+    ListCard {
+        teams.forEachIndexed { index, team -> TeamListRow(team, divider = index > 0, onClick = { onOpenTeam(team.id) }) }
+    }
+}
+
+@Composable
+private fun TeamListRow(team: TeamSummary, divider: Boolean, onClick: () -> Unit) {
+    val count = pluralStringResource(Res.plurals.teams_member_count, team.memberCount, team.memberCount)
+    ListRow(
+        title = team.name,
+        subtitle = listOf(team.city, count).filter { it.isNotBlank() }.joinToString(" · "),
+        leading = { PhotoAvatar(team.name, team.logoUrl, size = 44) },
+        trailing = {
+            if (team.myRole == TeamRole.ADMIN) Tag(stringResource(Res.string.teams_role_admin), tone = TagTone.BRAND)
+            Icon(painterResource(DesiIcons.ChevronRight), null, tint = DesiTheme.colors.muted, modifier = Modifier.size(DesiTheme.size.iconSmall))
+        },
+        divider = divider,
+        onClick = onClick,
+    )
+}
+
+/** One team on its own card, for pickers and search results. */
 @Composable
 internal fun TeamRow(team: TeamSummary, onClick: () -> Unit) {
-    val colors = DesiTheme.colors
-    DesiCard(Modifier.fillMaxWidth().clip(DesiTheme.radius.lg).clickable(role = Role.Button, onClick = onClick)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-            PhotoAvatar(team.name, team.logoUrl, size = 44)
-            Column(Modifier.weight(1f)) {
-                Text(team.name, style = DesiTheme.type.bodyStrong, color = colors.ink)
-                val count = pluralStringResource(Res.plurals.teams_member_count, team.memberCount, team.memberCount)
-                Text(listOf(team.city, count).filter { it.isNotBlank() }.joinToString(" · "), style = DesiTheme.type.caption, color = colors.muted)
-            }
-            if (team.myRole == TeamRole.ADMIN) {
-                Text(stringResource(Res.string.teams_role_admin), style = DesiTheme.type.label, color = colors.brand)
-            }
-        }
-    }
+    ListCard { TeamListRow(team, divider = false, onClick = onClick) }
 }
 
 /** Name and city, for a new team or renaming one. */

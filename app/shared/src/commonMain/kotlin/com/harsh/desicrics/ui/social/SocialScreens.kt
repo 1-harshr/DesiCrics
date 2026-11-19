@@ -1,5 +1,17 @@
 package com.harsh.desicrics.ui.social
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +54,15 @@ import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.home.HomeMatchCard
 import com.harsh.desicrics.ui.teams.TeamRow
+import com.harsh.desicrics.ui.teams.TeamList
+import com.harsh.desicrics.ui.text.icon
+import com.harsh.desicrics.designsystem.component.HeroButton
+import com.harsh.desicrics.designsystem.component.HeroChip
+import com.harsh.desicrics.designsystem.component.HeroChips
+import com.harsh.desicrics.designsystem.component.HeroIdentity
+import com.harsh.desicrics.designsystem.component.HeroScaffold
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.ui.text.formatDayAndTime
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.pluralStringResource
@@ -71,25 +92,43 @@ fun SearchScreen(
                     value = state.query,
                     onValueChange = viewModel::search,
                     label = stringResource(Res.string.search_hint),
+                    leadingIcon = DesiIcons.Search,
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Search),
                 )
             }
             val nothing = results.teams.isEmpty() && results.players.isEmpty() && results.matches.isEmpty()
             if (state.query.trim().length >= 2 && !state.searching && nothing) {
-                item { Text(stringResource(Res.string.search_empty), style = DesiTheme.type.body, color = DesiTheme.colors.muted) }
+                item { EmptyState(DesiIcons.Search, stringResource(Res.string.search_empty)) }
             }
             if (results.teams.isNotEmpty()) {
-                item { SectionLabel(stringResource(Res.string.search_section_teams)) }
-                items(results.teams, key = { "t-${it.id}" }) { TeamRow(it, onClick = { onOpenTeam(it.id) }) }
+                item { SectionHeader(stringResource(Res.string.search_section_teams), icon = DesiIcons.Shield) }
+                item { TeamList(results.teams, onOpenTeam) }
             }
             if (results.players.isNotEmpty()) {
-                item { SectionLabel(stringResource(Res.string.search_section_players)) }
-                items(results.players, key = { "p-${it.profileId}" }) { PlayerLine(it, onClick = { onOpenPlayer(it.profileId) }) }
+                item { SectionHeader(stringResource(Res.string.search_section_players), icon = DesiIcons.Person) }
+                item { PlayerList(results.players) { onOpenPlayer(it.profileId) } }
             }
             if (results.matches.isNotEmpty()) {
-                item { SectionLabel(stringResource(Res.string.search_section_matches)) }
+                item { SectionHeader(stringResource(Res.string.search_section_matches), icon = DesiIcons.Cricket) }
                 items(results.matches, key = { "m-${it.id}" }) { HomeMatchCard(it, isMine = false, onClick = { onOpenMatch(it.id) }) }
             }
+        }
+    }
+}
+
+/** Players on one card, a row each: photo, name, role and city. */
+@Composable
+internal fun PlayerList(players: List<PlayerSummary>, trailing: (@Composable RowScope.(PlayerSummary) -> Unit)? = null, onClick: (PlayerSummary) -> Unit) {
+    ListCard {
+        players.forEachIndexed { index, player ->
+            ListRow(
+                title = player.name,
+                subtitle = listOfNotNull(player.role?.let { stringResource(it.label) }, player.city.ifBlank { null }).joinToString(" · ").ifEmpty { null },
+                leading = { PhotoAvatar(player.name, player.photoUrl, size = 44) },
+                trailing = trailing?.let { content -> { content(player) } },
+                divider = index > 0,
+                onClick = { onClick(player) },
+            )
         }
     }
 }
@@ -128,7 +167,7 @@ fun NotificationsContent(state: NotificationsUiState, onOpenMatch: (String) -> U
                 if (state.loadFailed) {
                     item { Text(stringResource(Res.string.notifications_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
                 } else if (state.notifications.isEmpty()) {
-                    item { Text(stringResource(Res.string.notifications_empty), style = DesiTheme.type.body, color = DesiTheme.colors.muted) }
+                    item { EmptyState(DesiIcons.Notifications, stringResource(Res.string.notifications_empty_title), body = stringResource(Res.string.notifications_empty)) }
                 }
                 items(state.notifications, key = { it.id }) { NotificationRow(it, onClick = { onOpenMatch(it.matchId) }) }
             }
@@ -136,19 +175,33 @@ fun NotificationsContent(state: NotificationsUiState, onOpenMatch: (String) -> U
     }
 }
 
-/** A sentence that can wrap, unlike a player row's one-line name, with a dot while unread. */
+/** A sentence that can wrap, with an icon for the kind of news, and a tint and dot while unread. */
 @Composable
 private fun NotificationRow(notification: Notification, onClick: () -> Unit) {
+    val colors = DesiTheme.colors
+    val unread = !notification.read
     Row(
-        Modifier.fillMaxWidth().clip(DesiTheme.radius.md).clickable(role = Role.Button, onClick = onClick).padding(vertical = DesiTheme.space.s3),
-        verticalAlignment = Alignment.CenterVertically,
+        Modifier.fillMaxWidth().clip(DesiTheme.radius.md)
+            .background(if (unread) colors.surface else Color.Transparent)
+            .border(1.dp, if (unread) colors.line.copy(alpha = 0.7f) else Color.Transparent, DesiTheme.radius.md)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(DesiTheme.space.s3),
+        verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(formatDayAndTime(notification.createdAt), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
-            Text(notificationText(notification), style = if (notification.read) DesiTheme.type.body else DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
+        val (icon, tint) = when (notification.kind) {
+            NotificationKind.MATCH_STARTED -> DesiIcons.Bolt to colors.event.wicket
+            NotificationKind.MATCH_RESULT -> DesiIcons.Trophy to colors.brand
+            NotificationKind.MILESTONE_RUNS -> DesiIcons.Bat to colors.event.four
+            NotificationKind.MILESTONE_WICKETS -> DesiIcons.Ball to colors.event.six
+            NotificationKind.FIXTURE_RESCHEDULED -> DesiIcons.Calendar to colors.event.extra
         }
-        if (!notification.read) Text("●", color = DesiTheme.colors.brand, style = DesiTheme.type.label.copy(fontWeight = FontWeight.Bold))
+        IconTile(icon, tint = tint, container = tint.copy(alpha = 0.12f))
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(notificationText(notification), style = if (unread) DesiTheme.type.bodyStrong else DesiTheme.type.body, color = colors.ink)
+            Text(formatDayAndTime(notification.createdAt), style = DesiTheme.type.caption, color = colors.muted)
+        }
+        if (unread) Box(Modifier.padding(top = 6.dp).size(8.dp).clip(DesiTheme.radius.full).background(colors.brand))
     }
 }
 
@@ -191,49 +244,57 @@ fun PlayerContent(
     val page = state.page
     val space = DesiTheme.space
     val colors = DesiTheme.colors
-    DesiScaffold(title = page?.player?.name.orEmpty(), onBack = onBack) { padding ->
-        when {
-            page == null && state.loading -> FullScreenLoading(Modifier.padding(padding))
-            page == null -> Text(
+    if (page == null) {
+        DesiScaffold(title = "", onBack = onBack) { padding ->
+            if (state.loading) FullScreenLoading(Modifier.padding(padding))
+            else Text(
                 stringResource(Res.string.player_load_failed),
                 style = DesiTheme.type.body,
                 color = colors.event.wicket,
                 modifier = Modifier.padding(padding).padding(space.screen),
             )
-            else -> LazyColumn(
-                Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(horizontal = space.screen, vertical = space.s4),
-                verticalArrangement = Arrangement.spacedBy(space.s3),
-            ) {
-                item {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s4)) {
-                        PhotoAvatar(page.player.name, page.player.photoUrl, size = 64)
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(space.s1)) {
-                            Text(page.player.name, style = DesiTheme.type.titleLg, color = colors.ink)
-                            val details = listOfNotNull(
-                                page.player.role?.let { stringResource(it.label) },
-                                page.player.city.ifBlank { null },
-                                pluralStringResource(Res.plurals.player_followers, page.followers, page.followers),
-                            )
-                            Text(details.joinToString(" · "), style = DesiTheme.type.body, color = colors.muted)
-                        }
-                    }
-                }
-                if (!state.isMe && !page.player.isPlaceholder) {
-                    item {
-                        if (page.following) GhostButton(stringResource(Res.string.following), onClick = onFollow, modifier = Modifier.fillMaxWidth())
-                        else PrimaryButton(stringResource(Res.string.follow), onClick = onFollow, modifier = Modifier.fillMaxWidth())
-                    }
-                }
-                item { extra(page) }
-                if (page.teams.isNotEmpty()) {
-                    item { SectionLabel(stringResource(Res.string.player_section_teams)) }
-                    items(page.teams, key = { "t-${it.id}" }) { TeamRow(it, onClick = { onOpenTeam(it.id) }) }
-                }
-                if (page.matches.isNotEmpty()) {
-                    item { SectionLabel(stringResource(Res.string.player_section_matches)) }
-                    items(page.matches, key = { "m-${it.id}" }) { HomeMatchCard(it, isMine = false, onClick = { onOpenMatch(it.id) }) }
-                }
+        }
+        return
+    }
+    HeroScaffold(
+        title = page.player.name,
+        onBack = onBack,
+        hero = {
+            HeroIdentity(
+                name = page.player.name,
+                eyebrow = stringResource(Res.string.player_eyebrow),
+                avatar = { PhotoAvatar(page.player.name, page.player.photoUrl, size = 72) },
+            )
+            HeroChips(
+                listOf(
+                    HeroChip(page.player.role?.let { stringResource(it.label) }.orEmpty(), page.player.role?.icon),
+                    HeroChip(page.player.city, DesiIcons.Location),
+                    HeroChip(pluralStringResource(Res.plurals.player_followers, page.followers, page.followers), DesiIcons.Teams),
+                    HeroChip(stringResource(Res.string.team_placeholder).takeIf { page.player.isPlaceholder }.orEmpty(), DesiIcons.Info),
+                ),
+            )
+            if (!state.isMe && !page.player.isPlaceholder) {
+                HeroButton(
+                    stringResource(if (page.following) Res.string.following else Res.string.follow),
+                    onFollow,
+                    Modifier.fillMaxWidth(),
+                    icon = if (page.following) DesiIcons.CheckCircle else DesiIcons.Add,
+                    filled = !page.following,
+                )
+            }
+        },
+    ) {
+        extra(page)
+        if (page.teams.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+                SectionHeader(stringResource(Res.string.player_section_teams), icon = DesiIcons.Shield)
+                TeamList(page.teams, onOpenTeam)
+            }
+        }
+        if (page.matches.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+                SectionHeader(stringResource(Res.string.player_section_matches), icon = DesiIcons.History)
+                page.matches.forEach { HomeMatchCard(it, isMine = false, onClick = { onOpenMatch(it.id) }) }
             }
         }
     }

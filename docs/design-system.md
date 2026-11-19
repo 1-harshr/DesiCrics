@@ -163,7 +163,7 @@ Download settings (the same for every icon):
 
 - 24dp by default; 20dp inside chips and dense rows; 32dp for empty states.
 - Icon colour follows the text next to it (`ink` or `muted`), or `onBrand` on brand buttons. Never use `event.*` colours on icons except in scoring.
-- Filled icons only for the selected bottom-navigation tab.
+- Filled icons only for the selected bottom-navigation tab, and for a trophy drawn large as a page's mark.
 - Every icon that means something gets a `contentDescription` from string resources; decorative icons pass `null`.
 
 ## Custom assets
@@ -223,7 +223,19 @@ A white ball with a turf-green seam, moving across a pitch strip, on `brand` gre
 - Every scoring tap gets haptic feedback: light for runs, heavy for a wicket.
 - When the system "remove animations" setting is on, change values instantly.
 
-## Components (first set)
+## Inside pages
+
+Pages about one thing (a team, a player, a tournament, your own profile) use `HeroScaffold`: who or what it is in the green hero, with its key facts as chips and, where there are numbers, a stats strip. The page's main action (Follow, Add a player) is a `HeroButton`; settings, share and edit are `HeroIconButton`s in the bar. Below the hero:
+
+- Each block starts with a `SectionHeader` with an icon. Plain uppercase `SectionLabel`s stay for dense spots inside cards and sheets.
+- Lists are `ListCard`s of `ListRow`s, not a card per item. Every row has a leading mark: a photo or initials for people and teams, an `IconTile` for everything else.
+- Numbers are `StatGrid` tiles, with the two or three that matter most featured.
+- Empty lists use `EmptyState` with an icon and a line on what to do next.
+- Destructive rows (Leave team, Delete account) use the `event.wicket` tint on both the icon tile and the title.
+
+List pages (Teams, Tournaments, Notifications, Search, Leaderboards) keep `DesiScaffold` and use the same rows, tiles and empty states.
+
+## Components
 
 All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 
@@ -236,10 +248,10 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `LiveBadge` | `Content.kt` | Red dot plus LIVE |
 | `PlayerRow` / `Avatar` | `Content.kt` | Avatar (photo slot, initial or person icon), name, secondary line |
 | `DesiCard` / `SectionLabel` | `Content.kt` | Flat bordered surface; uppercase section label |
-| `PrimaryButton` / `TonalButton` / `GhostButton` | `Buttons.kt` | 52dp rounded buttons. Primary: brand fill, optional trailing arrow, spinner while loading, faded brand when disabled. Tonal: soft `sunk` fill with a brand-tinted leading icon, for secondary options. Ghost: outline |
+| `PrimaryButton` / `TonalButton` / `GhostButton` | `Buttons.kt` | 52dp rounded buttons, each with an optional leading icon. Primary: brand fill, optional trailing arrow, spinner while loading, faded brand when disabled. Tonal: soft `sunk` fill with a brand-tinted leading icon, for secondary options. Ghost: outline with a brand icon |
 | `DesiScaffold` / `FullScreenLoading` | `Structure.kt` | Screen frame with title and back icon; centred spinner |
 | `DesiTextField` | `Structure.kt` | Labelled field with helper / error line and optional password masking |
-| `ChoiceChips` / `ChoiceSheet` | `Structure.kt` | Single-choice chips; bottom sheet of options |
+| `ChoiceChips` / `ChoiceSheet` | `Structure.kt` | Single-choice chips, the selected one filled in `ink`; bottom sheet of options |
 | `PhoneNumberField` | `PhoneNumberField.kt` | Label above; country pill, divider, then digits in 26sp display type grouped "98765 43210"; tick when complete |
 | `OtpField` | `OtpField.kt` | One-time code in separate boxes; one text field underneath, so paste and SMS autofill work |
 | `SegmentedControl` | `Selection.kt` | 2–4 exclusive options in one pill with a sliding raised thumb (batting hand, pace or spin) |
@@ -250,6 +262,18 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `RemovableChip` | `Forms.kt` | Brand-soft chip with a remove button, for items added to a list (players in a squad) |
 | `DesiSheet` | `Structure.kt` | Bottom sheet with a title and hint, for quick decisions in a flow (pick a player, runs off an extra, how out) |
 | `PlayerCard` | `Selection.kt` | Avatar with initials, name, role line and style tags; the live preview on profile setup |
+| `HeroScaffold` | `Detail.kt` | Frame of an inside page about one thing (team, player, tournament, Me): a green hero with rounded bottom corners, then the content. Back and actions float over the hero as round frosted buttons; once the page scrolls 40dp they sit on a solid green bar with the title |
+| `HeroIdentity` / `HeroChips` / `HeroStats` / `HeroButton` / `HeroIconButton` | `Detail.kt` | What goes in a hero: avatar in a white ring with eyebrow, name and subtitle; frosted fact pills with icons; a frosted strip of 2–4 headline numbers; white (main) or frosted (second) pill actions |
+| `heroBackground()` | `Detail.kt` | The hero's gradient and faint pitch circles, also used for green cards (New tournament, the fixture preview) |
+| `SectionHeader` | `Detail.kt` | Brand icon, bold title and an optional "See all ›" link. Replaces `SectionLabel` on inside pages |
+| `ListCard` / `ListRow` | `Detail.kt` | Grouped list on one surface; rows with a leading avatar or `IconTile`, title, subtitle, trailing content, chevron when tappable and an inset hairline between rows |
+| `IconTile` | `Detail.kt` | An icon on a soft rounded square; the leading mark of rows, tiles and empty states. Pass `event.*` tints for kinds of news |
+| `ActionTile` | `Detail.kt` | Icon over a label on a card, two or three to a row, for shortcuts (New team, Join with a code, Share stats) |
+| `Tag` | `Detail.kt` | Small status pill in brand, neutral, warn or danger tone (Admin, Invited, Pending, C, WK) |
+| `StatGrid` | `Detail.kt` | Figures as equal-height tiles; the first `featured` tiles sit on the brand tint with larger numbers |
+| `RankBadge` | `Detail.kt` | Position in a ranking: first filled, second and third tinted |
+| `EmptyState` | `Detail.kt` | Icon tile, title, body and an optional action, on a card |
+| `DesiNavigationBar` | `Navigation.kt` | Bottom tabs: outlined icons, filled and green on a soft pill when selected |
 
 Illustrations live in `DesiIllustrations` (drawn with `Image`, not tinted). `BallMark` is the app icon's ball and speed lines, used in the sign-in header.
 

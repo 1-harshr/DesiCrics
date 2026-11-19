@@ -34,6 +34,7 @@ fun PrimaryButton(
     enabled: Boolean = true,
     loading: Boolean = false,
     trailingIcon: DrawableResource? = null,
+    leadingIcon: DrawableResource? = null,
 ) {
     val colors = DesiTheme.colors
     Button(
@@ -52,6 +53,10 @@ fun PrimaryButton(
         if (loading) {
             CircularProgressIndicator(Modifier.size(20.dp), color = colors.onBrand, strokeWidth = 2.dp)
         } else {
+            if (leadingIcon != null) {
+                Icon(painterResource(leadingIcon), contentDescription = null, modifier = Modifier.size(DesiTheme.size.iconSmall))
+                Spacer(Modifier.width(DesiTheme.space.s2))
+            }
             Text(text, style = DesiTheme.type.button)
             if (trailingIcon != null) {
                 Spacer(Modifier.width(DesiTheme.space.s2))
@@ -114,6 +119,7 @@ fun GhostButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    leadingIcon: DrawableResource? = null,
 ) {
     val colors = DesiTheme.colors
     OutlinedButton(
@@ -125,6 +131,10 @@ fun GhostButton(
         border = BorderStroke(1.5.dp, colors.line),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.ink, disabledContentColor = colors.muted),
     ) {
+        if (leadingIcon != null) {
+            Icon(painterResource(leadingIcon), contentDescription = null, tint = colors.brand, modifier = Modifier.size(DesiTheme.size.iconSmall))
+            Spacer(Modifier.width(DesiTheme.space.s2))
+        }
         Text(text, style = DesiTheme.type.button)
     }
 }

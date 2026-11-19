@@ -1,5 +1,25 @@
 package com.harsh.desicrics.ui.newmatch
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.harsh.desicrics.designsystem.component.ActionTile
+import com.harsh.desicrics.designsystem.component.Avatar
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.component.Tag
+import com.harsh.desicrics.designsystem.component.TagTone
+import com.harsh.desicrics.designsystem.component.heroBackground
+import org.jetbrains.compose.resources.DrawableResource
+
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -159,91 +179,218 @@ fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions, initialS
                 title = stringResource(if (step == 2) Res.string.setup_details else TeamSide.entries[step].label),
                 subtitle = stringResource(Res.string.setup_step, step + 1),
                 onBack = back,
-            )
+            ) { StepProgress(step) }
             Column(
                 Modifier.padding(horizontal = DesiTheme.space.screen, vertical = DesiTheme.space.s6),
                 verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s8),
             ) {
                 if (step < 2) {
-                    androidx.compose.runtime.key(step) { TeamCard(TeamSide.entries[step], state, actions) }
+                    androidx.compose.runtime.key(step) { TeamStep(TeamSide.entries[step], state, actions) }
                 } else {
-                TeamSide.entries.forEachIndexed { index, side ->
-                    TonalButton(state.name(side) + " · " + pluralStringResource(Res.plurals.new_match_player_count, state.players(side).size, state.players(side).size),
-                        onClick = { step = index }, modifier = Modifier.fillMaxWidth())
-                }
-                DesiTextField(state.venue, { text -> actions.onUpdate { it.copy(venue = text.take(120)) } }, stringResource(Res.string.setup_venue))
-                GhostButton(state.scheduledAt?.let { com.harsh.desicrics.ui.text.formatDayAndTime(it) } ?: stringResource(Res.string.setup_later), { scheduling = true })
-                if (state.scheduledAt != null) GhostButton(stringResource(Res.string.setup_now), { actions.onUpdate { it.copy(scheduledAt = null) } })
-
-                Section(Res.string.new_match_section_overs) {
-                    NumberStepper(
-                        value = state.overs,
-                        onValueChange = { overs -> actions.onUpdate { it.copy(overs = overs) } },
-                        label = stringResource(Res.string.new_match_overs_label),
-                        decreaseLabel = stringResource(Res.string.new_match_overs_fewer),
-                        increaseLabel = stringResource(Res.string.new_match_overs_more),
-                        range = CreateMatchRequest.OVERS,
-                    )
-                    ChoiceChips(
-                        options = QuickOvers,
-                        selected = state.overs.takeIf { it in QuickOvers },
-                        label = { "$it" },
-                        onSelect = { overs -> actions.onUpdate { it.copy(overs = overs) } },
-                    )
-                }
-                RulesSection(state, actions)
+                    Section(Res.string.new_match_section_teams, DesiIcons.Teams) {
+                        FixturePreview(state, onEdit = { step = it })
+                    }
+                    Section(Res.string.setup_when_where, DesiIcons.Stadium) {
+                        DesiTextField(
+                            state.venue,
+                            { text -> actions.onUpdate { it.copy(venue = text.take(120)) } },
+                            stringResource(Res.string.setup_venue),
+                            leadingIcon = DesiIcons.Location,
+                        )
+                        ListCard {
+                            ListRow(
+                                title = state.scheduledAt?.let { com.harsh.desicrics.ui.text.formatDayAndTime(it) } ?: stringResource(Res.string.setup_now),
+                                subtitle = stringResource(if (state.scheduledAt == null) Res.string.setup_later_hint else Res.string.setup_change_time),
+                                leading = { IconTile(if (state.scheduledAt == null) DesiIcons.Bolt else DesiIcons.Calendar) },
+                                trailing = if (state.scheduledAt != null) ({
+                                    androidx.compose.material3.IconButton({ actions.onUpdate { it.copy(scheduledAt = null) } }) {
+                                        Icon(painterResource(DesiIcons.Close), stringResource(Res.string.setup_now), tint = colors.muted)
+                                    }
+                                }) else null,
+                                onClick = { scheduling = true },
+                            )
+                        }
+                    }
+                    Section(Res.string.new_match_section_overs, DesiIcons.Clock) {
+                        NumberStepper(
+                            value = state.overs,
+                            onValueChange = { overs -> actions.onUpdate { it.copy(overs = overs) } },
+                            label = stringResource(Res.string.new_match_overs_label),
+                            decreaseLabel = stringResource(Res.string.new_match_overs_fewer),
+                            increaseLabel = stringResource(Res.string.new_match_overs_more),
+                            range = CreateMatchRequest.OVERS,
+                        )
+                        ChoiceChips(
+                            options = QuickOvers,
+                            selected = state.overs.takeIf { it in QuickOvers },
+                            label = { "$it" },
+                            onSelect = { overs -> actions.onUpdate { it.copy(overs = overs) } },
+                        )
+                    }
+                    RulesSection(state, actions)
                 }
             }
         }
         StartBar(state, if (step < 2) Res.string.setup_continue else if (state.scheduledAt == null) Res.string.setup_now else Res.string.setup_schedule,
-            step == 2 || state.name(TeamSide.entries[step]).isNotBlank()) { if (step < 2) step++ else actions.onStart() }
+            step == 2 || state.name(TeamSide.entries[step]).isNotBlank(),
+            if (step < 2) DesiIcons.Forward else if (state.scheduledAt == null) DesiIcons.Bolt else DesiIcons.Calendar,
+        ) { if (step < 2) step++ else actions.onStart() }
     }
 }
 
+/** Three bars under the header title: done and current steps filled. */
 @Composable
-private fun TeamCard(side: TeamSide, state: NewMatchFormState, actions: NewMatchActions) {
+private fun StepProgress(step: Int) {
     val colors = DesiTheme.colors
+    Row(Modifier.fillMaxWidth().padding(top = DesiTheme.space.s2), horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        repeat(3) { i ->
+            Box(
+                Modifier.weight(1f).height(4.dp).clip(DesiTheme.radius.full)
+                    .background(colors.onBrandStrong.copy(alpha = if (i <= step) 1f else 0.25f)),
+            )
+        }
+    }
+}
+
+/** One side: the team (typed, found or saved), then its lineup as a roster with an add row at the end. */
+@Composable
+private fun TeamStep(side: TeamSide, state: NewMatchFormState, actions: NewMatchActions) {
+    val colors = DesiTheme.colors
+    val space = DesiTheme.space
     val form = state.side(side)
     val players = form.players
     val invalid = (state.error as? NewMatchError.Invalid)?.error
     var adding by rememberSaveable(side) { mutableStateOf(false) }
     val share = com.harsh.desicrics.ui.system.rememberShareText()
     if (adding) LineupPlayerSheet(side, actions) { adding = false }
-    DesiCard(Modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            SectionLabel(stringResource(side.label), Modifier.weight(1f))
-            Text(pluralStringResource(Res.plurals.new_match_player_count, players.size, players.size), style = DesiTheme.type.caption, color = colors.muted)
+
+    Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+        DesiCard(Modifier.fillMaxWidth()) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                Avatar(state.name(side), size = 52)
+                Column(Modifier.weight(1f)) {
+                    DesiTextField(
+                        value = state.name(side),
+                        onValueChange = { actions.onTeamName(side, it) },
+                        label = stringResource(Res.string.new_match_team_name),
+                        enabled = form.teamId == null && !state.saving,
+                        error = invalid?.takeIf { state.name(side).isBlank() && it == MatchSetupError.TEAM_NAME_MISSING }?.let { stringResource(it.label) },
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
+                    )
+                }
+            }
+            if (form.teamId != null) Tag(stringResource(Res.string.setup_saved_team), tone = TagTone.BRAND, icon = DesiIcons.Verified)
         }
-        DesiTextField(
-            value = state.name(side),
-            onValueChange = { actions.onTeamName(side, it) },
-            label = stringResource(Res.string.new_match_team_name),
-            enabled = form.teamId == null && !state.saving,
-            error = invalid?.takeIf { state.name(side).isBlank() && it == MatchSetupError.TEAM_NAME_MISSING }?.let { stringResource(it.label) },
-            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
+        Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+            if (form.teamId == null) {
+                ActionTile(DesiIcons.Search, stringResource(Res.string.setup_find), { actions.onUseTeam(side) }, Modifier.weight(1f))
+                if (form.name.isNotBlank()) ActionTile(DesiIcons.Shield, stringResource(Res.string.setup_save), { if (!state.saving) actions.onSaveTeam(side) }, Modifier.weight(1f))
+            } else {
+                ActionTile(DesiIcons.Teams, stringResource(Res.string.new_match_squad_change), { actions.onUseTeam(side) }, Modifier.weight(1f))
+                ActionTile(DesiIcons.Close, stringResource(Res.string.new_match_squad_clear), { actions.onClearTeam(side) }, Modifier.weight(1f))
+            }
+            form.inviteLink?.let { link -> ActionTile(DesiIcons.Share, stringResource(Res.string.team_invite_share), { share(link) }, Modifier.weight(1f)) }
+        }
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+        SectionHeader(
+            stringResource(Res.string.setup_lineup) + " · " + pluralStringResource(Res.plurals.new_match_player_count, players.size, players.size),
+            icon = DesiIcons.Teams,
         )
-        if (form.teamId == null) {
-            TonalButton(stringResource(Res.string.setup_find), onClick = { actions.onUseTeam(side) }, modifier = Modifier.fillMaxWidth())
-        } else {
-            Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
-                TonalButton(stringResource(Res.string.new_match_squad_change), onClick = { actions.onUseTeam(side) }, modifier = Modifier.weight(1f))
-                GhostButton(stringResource(Res.string.new_match_squad_clear), onClick = { actions.onClearTeam(side) }, modifier = Modifier.weight(1f))
+        ListCard {
+            players.forEachIndexed { i, p ->
+                ListRow(
+                    title = p.name,
+                    subtitle = stringResource(
+                        when {
+                            p.profileId == null -> Res.string.setup_guest
+                            p.profileId?.startsWith("p-") == true -> Res.string.team_placeholder
+                            else -> Res.string.setup_linked
+                        },
+                    ),
+                    leading = { LineupNumber(i + 1, linked = p.profileId != null) },
+                    trailing = {
+                        if (form.captain == i) Tag(stringResource(Res.string.setup_captain_tag), tone = TagTone.BRAND, icon = DesiIcons.Star)
+                        if (form.keeper == i) Tag(stringResource(Res.string.setup_keeper_tag), tone = TagTone.NEUTRAL, icon = DesiIcons.Glove)
+                        androidx.compose.material3.IconButton({ actions.onRemovePlayer(side, i) }) {
+                            Icon(painterResource(DesiIcons.Close), stringResource(Res.string.new_match_remove_player, p.name), tint = colors.muted, modifier = Modifier.size(18.dp))
+                        }
+                    },
+                    divider = i > 0,
+                )
+            }
+            if (players.size < CreateMatchRequest.MAX_PLAYERS) {
+                ListRow(
+                    title = stringResource(Res.string.new_match_add_player),
+                    subtitle = stringResource(Res.string.setup_add_player_hint),
+                    leading = { IconTile(DesiIcons.PersonAdd, tint = colors.onBrand, container = colors.brand) },
+                    titleColor = colors.brand,
+                    divider = players.isNotEmpty(),
+                    trailing = {},
+                    onClick = { adding = true },
+                )
             }
         }
-        if (form.teamId == null && form.name.isNotBlank()) {
-            GhostButton(stringResource(Res.string.setup_save), { actions.onSaveTeam(side) }, enabled = !state.saving)
-        }
-        form.inviteLink?.let { link -> GhostButton(stringResource(Res.string.team_invite_share), { share(link) }) }
-        players.forEachIndexed { i, p ->
-            com.harsh.desicrics.designsystem.component.PlayerRow(p.name,
-                subtitle = stringResource(if (p.profileId == null) Res.string.setup_guest else if (p.profileId?.startsWith("p-") == true) Res.string.team_placeholder else Res.string.setup_linked),
-                trailing = { androidx.compose.material3.IconButton({ actions.onRemovePlayer(side, i) }) {
-                    Icon(painterResource(DesiIcons.Close), stringResource(Res.string.new_match_remove_player, p.name))
-                } })
-        }
-        PrimaryButton(stringResource(Res.string.new_match_add_player), { adding = true }, enabled = players.size < CreateMatchRequest.MAX_PLAYERS)
         if (players.size < CreateMatchRequest.MIN_PLAYERS) {
-            Text(stringResource(Res.string.new_match_players_hint), style = DesiTheme.type.caption, color = colors.muted)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s2)) {
+                Icon(painterResource(DesiIcons.Info), null, tint = colors.muted, modifier = Modifier.size(16.dp))
+                Text(stringResource(Res.string.setup_min_players), style = DesiTheme.type.caption, color = colors.muted)
+            }
+        }
+    }
+}
+
+/** A batting-order number; green once the player is a real profile, grey for a guest. */
+@Composable
+private fun LineupNumber(number: Int, linked: Boolean) {
+    val colors = DesiTheme.colors
+    Box(
+        Modifier.size(40.dp).clip(DesiTheme.radius.full).background(if (linked) colors.brandSoft else colors.sunk),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text("$number", style = DesiTheme.type.titleMd, color = if (linked) colors.brand else colors.muted)
+    }
+}
+
+/** Both teams facing each other, each tappable to go back and edit it. */
+@Composable
+private fun FixturePreview(state: NewMatchFormState, onEdit: (Int) -> Unit) {
+    val colors = DesiTheme.colors
+    val space = DesiTheme.space
+    Row(
+        Modifier.fillMaxWidth().clip(DesiTheme.radius.lg).heroBackground().padding(vertical = space.s5, horizontal = space.s3),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TeamSide.entries.forEachIndexed { index, side ->
+            if (index == 1) {
+                Text(stringResource(Res.string.setup_vs).uppercase(), style = DesiTheme.type.scoreMd, color = colors.onBrandStrong.copy(alpha = 0.6f))
+            }
+            Column(
+                Modifier.weight(1f).clip(DesiTheme.radius.md).clickable(role = Role.Button) { onEdit(index) }.padding(space.s2),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(space.s2),
+            ) {
+                Box(Modifier.clip(DesiTheme.radius.full).border(2.dp, colors.onBrandStrong, DesiTheme.radius.full).padding(2.dp)) {
+                    Avatar(state.name(side), size = 52)
+                }
+                Text(
+                    state.name(side),
+                    style = DesiTheme.type.bodyStrong,
+                    color = colors.onBrandStrong,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        pluralStringResource(Res.plurals.new_match_player_count, state.players(side).size, state.players(side).size),
+                        style = DesiTheme.type.caption,
+                        color = colors.onBrandStrong.copy(alpha = 0.8f),
+                    )
+                    Icon(painterResource(DesiIcons.Edit), stringResource(Res.string.setup_edit_lineup), tint = colors.onBrandStrong.copy(alpha = 0.8f), modifier = Modifier.size(14.dp))
+                }
+            }
         }
     }
 }
@@ -267,11 +414,12 @@ private fun LineupPlayerSheet(side: TeamSide, actions: NewMatchActions, close: (
     com.harsh.desicrics.designsystem.component.DesiSheet(stringResource(Res.string.new_match_add_player), close) {
         val labels = listOf(Res.string.home_search, Res.string.setup_phone, Res.string.setup_guest)
         SegmentedControl(labels.indices.toList(), mode, label = { stringResource(labels[it]) }, onSelect = { mode = it })
-        DesiTextField(query, { query = it.take(60) }, stringResource(Res.string.team_add_placeholder_name))
-        if (mode == 0) found.forEach { p ->
-            com.harsh.desicrics.designsystem.component.PlayerRow(p.name, subtitle = p.city, onClick = { actions.onLinkPlayer(side, p); close() })
+        Text(stringResource(listOf(Res.string.setup_mode_search_hint, Res.string.setup_mode_phone_hint, Res.string.setup_mode_guest_hint)[mode]), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        DesiTextField(query, { query = it.take(60) }, stringResource(Res.string.team_add_placeholder_name), leadingIcon = if (mode == 0) DesiIcons.Search else DesiIcons.Person)
+        if (mode == 0) {
+            if (found.isNotEmpty()) com.harsh.desicrics.ui.social.PlayerList(found) { p -> actions.onLinkPlayer(side, p); close() }
         } else {
-            if (mode == 1) DesiTextField(phone, { phone = it }, stringResource(Res.string.team_add_placeholder_phone),
+            if (mode == 1) DesiTextField(phone, { phone = it }, stringResource(Res.string.team_add_placeholder_phone), leadingIcon = DesiIcons.Phone,
                 keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone))
             PrimaryButton(stringResource(Res.string.new_match_add_player), {
                 if (mode == 2) { actions.onAddPlayer(side, query); close() }
@@ -281,9 +429,9 @@ private fun LineupPlayerSheet(side: TeamSide, actions: NewMatchActions, close: (
                     catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { failed = true }
                     finally { busy = false }
                 }
-            }, enabled = query.isNotBlank() && (mode == 2 || phone.count(Char::isDigit) in 10..13), loading = busy)
+            }, enabled = query.isNotBlank() && (mode == 2 || phone.count(Char::isDigit) in 10..13), loading = busy, leadingIcon = DesiIcons.PersonAdd, modifier = Modifier.fillMaxWidth())
         }
-        if (failed) Text(stringResource(Res.string.teams_action_failed))
+        if (failed) Text(stringResource(Res.string.teams_action_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
     }
 }
 
@@ -292,7 +440,7 @@ private fun RulesSection(state: NewMatchFormState, actions: NewMatchActions) {
     var customising by rememberSaveable { mutableStateOf(false) }
     val preset = RulesPreset.matching(state.rules)
 
-    Section(Res.string.new_match_section_rules) {
+    Section(Res.string.new_match_section_rules, DesiIcons.Whistle) {
         Text(stringResource(Res.string.new_match_rules_hint), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
         ChoiceChips(
             options = RulesPreset.entries.filter { it != RulesPreset.CUSTOM || preset == RulesPreset.CUSTOM },
@@ -301,7 +449,7 @@ private fun RulesSection(state: NewMatchFormState, actions: NewMatchActions) {
             onSelect = { picked -> picked.rules?.let { rules -> actions.onUpdate { it.copy(rules = rules) } } },
         )
         Text(stringResource(preset.hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
-        GhostButton(stringResource(Res.string.new_match_rules_customise), onClick = { customising = true }, modifier = Modifier.fillMaxWidth())
+        GhostButton(stringResource(Res.string.new_match_rules_customise), onClick = { customising = true }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Settings)
     }
     if (customising) {
         RulesSheet(
@@ -314,16 +462,16 @@ private fun RulesSection(state: NewMatchFormState, actions: NewMatchActions) {
 }
 
 @Composable
-private fun Section(title: StringResource, content: @Composable ColumnScope.() -> Unit) {
+private fun Section(title: StringResource, icon: DrawableResource, content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-        Text(stringResource(title), style = DesiTheme.type.titleMd, color = DesiTheme.colors.ink)
+        SectionHeader(stringResource(title), icon = icon)
         content()
     }
 }
 
 /** Pinned under the form, above the keyboard. Form errors show here, next to the button they block. */
 @Composable
-private fun StartBar(state: NewMatchFormState, label: StringResource, enabled: Boolean, onStart: () -> Unit) {
+private fun StartBar(state: NewMatchFormState, label: StringResource, enabled: Boolean, icon: DrawableResource, onStart: () -> Unit) {
     val colors = DesiTheme.colors
     Column(Modifier.fillMaxWidth().background(colors.surface)) {
         HorizontalDivider(color = colors.line)
@@ -345,7 +493,7 @@ private fun StartBar(state: NewMatchFormState, label: StringResource, enabled: B
                 enabled = enabled,
                 onClick = onStart,
                 loading = state.saving,
-                trailingIcon = DesiIcons.Forward,
+                trailingIcon = icon,
                 modifier = Modifier.fillMaxWidth(),
             )
         }

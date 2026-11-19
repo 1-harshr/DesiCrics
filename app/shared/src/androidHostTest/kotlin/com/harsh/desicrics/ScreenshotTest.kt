@@ -66,6 +66,11 @@ import com.harsh.desicrics.ui.social.PlayerContent
 import com.harsh.desicrics.ui.social.PlayerUiState
 import com.harsh.desicrics.ui.stats.CareerCards
 import com.harsh.desicrics.ui.teams.TeamContent
+import com.harsh.desicrics.ui.teams.TeamsContent
+import com.harsh.desicrics.ui.teams.TeamsUiState
+import com.harsh.desicrics.ui.tournament.TournamentsContent
+import com.harsh.desicrics.ui.tournament.TournamentsUiState
+import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.ui.teams.TeamUiState
 import com.harsh.desicrics.ui.tournament.TournamentContent
 import com.harsh.desicrics.ui.tournament.TournamentTab
@@ -262,6 +267,28 @@ class ScreenshotTest {
                 ),
             ),
             {}, {},
+        )
+    }
+
+    @Test
+    fun teamsList() = shoot("teams_list") {
+        TeamsContent(
+            TeamsUiState(loading = false, teams = listOf(TeamSummary("t1", "Andheri Strikers", "Mumbai", 14, TeamRole.ADMIN), TeamSummary("t2", "Powai XI", "", 9), TeamSummary("t3", "Bandra Blasters", "Mumbai", 11))),
+            {}, {}, {}, {},
+        )
+    }
+
+    @Test
+    fun tournamentsListDark() = shoot("tournaments_list_dark", dark = true) {
+        TournamentsContent(
+            TournamentsUiState(
+                loading = false,
+                tournaments = listOf(
+                    TournamentSummary("x", "Andheri Premier League", "Mumbai", TournamentFormat.ROUND_ROBIN, 8, isOrganiser = true),
+                    TournamentSummary("y", "Monsoon Cup", "", TournamentFormat.KNOCKOUT, 16),
+                ),
+            ),
+            {}, {}, {},
         )
     }
 }

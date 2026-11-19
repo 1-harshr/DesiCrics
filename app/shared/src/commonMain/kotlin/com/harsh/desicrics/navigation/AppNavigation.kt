@@ -2,6 +2,8 @@ package com.harsh.desicrics.navigation
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import com.harsh.desicrics.designsystem.component.DesiNavigationBar
+import com.harsh.desicrics.designsystem.component.NavTab
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.harsh.desicrics.designsystem.icon.DesiIcons
@@ -228,14 +230,16 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
         },
     )
     if (backStack.size == 1) {
-        val labels = listOf(Res.string.tab_home, Res.string.tab_feed, Res.string.home_tournaments, Res.string.tab_me)
-        val icons = listOf(DesiIcons.Bat, DesiIcons.Ball, DesiIcons.Cricket, DesiIcons.Person)
-        NavigationBar {
-            roots.indices.forEach { i ->
-                NavigationBarItem(selected == i, onClick = { selected = i },
-                    icon = { Icon(painterResource(icons[i]), null) }, label = { Text(stringResource(labels[i])) })
-            }
-        }
+        DesiNavigationBar(
+            tabs = listOf(
+                NavTab(stringResource(Res.string.tab_home), DesiIcons.Home, DesiIcons.HomeFilled),
+                NavTab(stringResource(Res.string.tab_feed), DesiIcons.Feed, DesiIcons.FeedFilled),
+                NavTab(stringResource(Res.string.home_tournaments), DesiIcons.Trophy, DesiIcons.TrophyFilled),
+                NavTab(stringResource(Res.string.tab_me), DesiIcons.Person, DesiIcons.PersonFilled),
+            ),
+            selected = selected,
+            onSelect = { selected = it },
+        )
     }
     }
 

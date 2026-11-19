@@ -157,19 +157,19 @@ fun <T> ChoiceChips(
             FilterChip(
                 selected = option == selected,
                 onClick = { onSelect(option) },
-                label = { Text(label(option), style = DesiTheme.type.body) },
+                label = { Text(label(option), style = if (option == selected) DesiTheme.type.bodyStrong else DesiTheme.type.body) },
                 shape = DesiTheme.radius.full,
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = colors.surface,
                     labelColor = colors.ink,
-                    selectedContainerColor = colors.brandSoft,
-                    selectedLabelColor = colors.brand,
+                    selectedContainerColor = colors.ink,
+                    selectedLabelColor = colors.bg,
                 ),
                 border = FilterChipDefaults.filterChipBorder(
                     enabled = true,
                     selected = option == selected,
                     borderColor = colors.line,
-                    selectedBorderColor = colors.brand,
+                    selectedBorderColor = colors.ink,
                 ),
             )
         }

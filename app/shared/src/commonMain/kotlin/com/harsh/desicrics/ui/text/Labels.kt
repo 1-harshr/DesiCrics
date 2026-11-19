@@ -5,6 +5,8 @@ import com.harsh.desicrics.auth.SignInError
 import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.PlayerRole
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import org.jetbrains.compose.resources.DrawableResource
 import com.harsh.desicrics.resources.*
 import org.jetbrains.compose.resources.StringResource
 
@@ -61,4 +63,13 @@ val SignInError.label: StringResource
         SignInError.CODE_EXPIRED -> Res.string.signin_error_code_expired
         SignInError.SMS_QUOTA -> Res.string.signin_error_sms_quota
         SignInError.UNKNOWN -> Res.string.signin_error_unknown
+    }
+
+/** The mark for a playing role, on option cards, chips and hero pills. */
+val PlayerRole.icon: DrawableResource
+    get() = when (this) {
+        PlayerRole.BATTER -> DesiIcons.Bat
+        PlayerRole.BOWLER -> DesiIcons.Ball
+        PlayerRole.ALL_ROUNDER -> DesiIcons.Cricket
+        PlayerRole.WICKET_KEEPER -> DesiIcons.Glove
     }

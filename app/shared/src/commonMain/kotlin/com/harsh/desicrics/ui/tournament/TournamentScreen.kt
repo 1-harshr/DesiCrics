@@ -1,5 +1,32 @@
 package com.harsh.desicrics.ui.tournament
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import com.harsh.desicrics.designsystem.component.ActionTile
+import com.harsh.desicrics.designsystem.component.Avatar
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.HeroChip
+import com.harsh.desicrics.designsystem.component.HeroChips
+import com.harsh.desicrics.designsystem.component.HeroIconButton
+import com.harsh.desicrics.designsystem.component.HeroIdentity
+import com.harsh.desicrics.designsystem.component.HeroScaffold
+import com.harsh.desicrics.designsystem.component.HeroStats
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.RankBadge
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.component.StatItem
+import com.harsh.desicrics.designsystem.component.Tag
+import com.harsh.desicrics.designsystem.component.TagTone
+import org.jetbrains.compose.resources.DrawableResource
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -157,70 +184,106 @@ internal fun TournamentContent(
     val colors = DesiTheme.colors
     var fixtureTeam by rememberSaveable { mutableStateOf<String?>(null) }
     var tab by rememberSaveable { mutableStateOf(initialTab) }
-    DesiScaffold(
-        title = details?.tournament?.name.orEmpty(),
-        onBack = onBack,
-        actions = {
-            IconButton(onClick = onShare) { Icon(painterResource(DesiIcons.Share), stringResource(Res.string.tournament_share)) }
-        },
-    ) { padding ->
-        when {
-            details == null && state.loading -> FullScreenLoading(Modifier.padding(padding))
-            details == null -> Text(
+    if (details == null) {
+        DesiScaffold(title = stringResource(Res.string.tournaments_title), onBack = onBack) { padding ->
+            if (state.loading) FullScreenLoading(Modifier.padding(padding))
+            else Text(
                 stringResource(Res.string.tournaments_load_failed),
                 style = DesiTheme.type.body,
                 color = colors.event.wicket,
                 modifier = Modifier.padding(padding).padding(space.screen),
             )
-            else -> Column(
-                Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = space.screen, vertical = space.s4),
-                verticalArrangement = Arrangement.spacedBy(space.s3),
-            ) {
-                val t = details.tournament
-                Text(
-                    listOf(stringResource(t.format.label), oversText(t.oversPerInnings), t.city)
-                        .filter { it.isNotBlank() }.joinToString(" · "),
-                    style = DesiTheme.type.body,
-                    color = colors.muted,
-                )
-                val organisers = t.organisers.map { it.name }.filter { it.isNotBlank() }
-                if (organisers.isNotEmpty()) {
-                    Text(stringResource(Res.string.tournament_organisers, organisers.joinToString()), style = DesiTheme.type.caption, color = colors.muted)
-                }
-                details.championId?.let { id ->
-                    Text(
-                        stringResource(Res.string.tournament_champion, t.teams.firstOrNull { it.teamId == id }?.name.orEmpty()),
-                        style = DesiTheme.type.titleMd,
-                        color = colors.brand,
-                    )
-                }
-                if (state.actionFailed) Text(stringResource(Res.string.tournament_action_failed), style = DesiTheme.type.body, color = colors.event.wicket)
-                val tabs = TournamentTab.entries.filter { it != TournamentTab.TABLE || details.tables.isNotEmpty() }
-                SegmentedControl(tabs, selected = tab.takeIf { it in tabs } ?: TournamentTab.FIXTURES, label = { stringResource(it.label) }, onSelect = { fixtureTeam = null; tab = it })
-                when (tab.takeIf { it in tabs } ?: TournamentTab.FIXTURES) {
-                    TournamentTab.FIXTURES -> {
-                        fixtureTeam?.let { id ->
-                            Text(t.teams.firstOrNull { it.teamId == id }?.name.orEmpty(), style = DesiTheme.type.titleMd)
-                            TextButton(onClick = { fixtureTeam = null; tab = TournamentTab.TABLE }) { Text(stringResource(Res.string.back_to_table)) }
-                        }
-                        val filtered = fixtureTeam?.let { id -> details.copy(fixtures = details.fixtures.filter { it.teamA.teamId == id || it.teamB.teamId == id }) } ?: details
-                        Fixtures(filtered, state.isOrganiser, onOpenMatch, onSchedule = { onSheet(TournamentSheet.Schedule(it)) }, onAdd = { onSheet(TournamentSheet.AddFixture) })
+        }
+        return
+    }
+    val t = details.tournament
+    HeroScaffold(
+        title = t.name,
+        onBack = onBack,
+        actions = { HeroIconButton(DesiIcons.Share, stringResource(Res.string.tournament_share), onShare) },
+        hero = {
+            HeroIdentity(
+                name = t.name,
+                eyebrow = stringResource(Res.string.tournament_eyebrow),
+                avatar = { IconTile(DesiIcons.TrophyFilled, Modifier.clip(DesiTheme.radius.full), size = 72.dp, tint = colors.brandStrong, container = colors.onBrandStrong) },
+            )
+            HeroChips(
+                listOf(
+                    HeroChip(stringResource(t.format.label), DesiIcons.Trophy),
+                    HeroChip(oversText(t.oversPerInnings), DesiIcons.Clock),
+                    HeroChip(t.city, DesiIcons.Location),
+                ),
+            )
+            details.championId?.let { id ->
+                HeroChips(listOf(HeroChip(stringResource(Res.string.tournament_champion, t.teams.firstOrNull { it.teamId == id }?.name.orEmpty()), DesiIcons.TrophyFilled)))
+            }
+            HeroStats(
+                listOf(
+                    StatItem("${t.confirmedTeams.size}", stringResource(Res.string.tournament_tab_teams)),
+                    StatItem("${details.fixtures.size}", stringResource(Res.string.tournament_tab_fixtures)),
+                    StatItem("${details.fixtures.count { it.status == MatchStatus.COMPLETED }}", stringResource(Res.string.tournament_stat_played)),
+                ),
+            )
+        },
+    ) {
+        val organisers = t.organisers.map { it.name }.filter { it.isNotBlank() }
+        if (organisers.isNotEmpty()) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s2)) {
+                Icon(painterResource(DesiIcons.Whistle), null, tint = colors.muted, modifier = Modifier.size(DesiTheme.size.iconSmall))
+                Text(stringResource(Res.string.tournament_organisers, organisers.joinToString()), style = DesiTheme.type.caption, color = colors.muted)
+            }
+        }
+        if (state.actionFailed) Text(stringResource(Res.string.tournament_action_failed), style = DesiTheme.type.body, color = colors.event.wicket)
+        val tabs = TournamentTab.entries.filter { it != TournamentTab.TABLE || details.tables.isNotEmpty() }
+        SegmentedControl(tabs, selected = tab.takeIf { it in tabs } ?: TournamentTab.FIXTURES, label = { stringResource(it.label) }, onSelect = { fixtureTeam = null; tab = it })
+        Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+            when (tab.takeIf { it in tabs } ?: TournamentTab.FIXTURES) {
+                TournamentTab.FIXTURES -> {
+                    fixtureTeam?.let { id ->
+                        SectionHeader(
+                            t.teams.firstOrNull { it.teamId == id }?.name.orEmpty(),
+                            icon = DesiIcons.Shield,
+                            action = stringResource(Res.string.back_to_table),
+                            onAction = { fixtureTeam = null; tab = TournamentTab.TABLE },
+                        )
                     }
-                    TournamentTab.TABLE -> details.tables.forEachIndexed { group, table -> PointsTable(table, if (details.tables.size > 1) group else null) { fixtureTeam = it; tab = TournamentTab.FIXTURES } }
-                    TournamentTab.TEAMS -> Teams(state, onSheet, onStart, onReview)
-                    TournamentTab.STATS -> {
-                        details.playerOfTournament?.let { best ->
-                            Text(
-                                stringResource(Res.string.tournament_player_of_tournament, best.name, mvpText(best.value)),
-                                style = DesiTheme.type.bodyStrong,
-                                color = colors.brand,
-                            )
-                        }
-                        Stats(details.keyStats, onOpenPlayer)
-                        GhostButton(stringResource(Res.string.tournament_leaderboard), onClick = onLeaderboard, modifier = Modifier.fillMaxWidth())
-                    }
+                    val filtered = fixtureTeam?.let { id -> details.copy(fixtures = details.fixtures.filter { it.teamA.teamId == id || it.teamB.teamId == id }) } ?: details
+                    Fixtures(filtered, state.isOrganiser, onOpenMatch, onSchedule = { onSheet(TournamentSheet.Schedule(it)) }, onAdd = { onSheet(TournamentSheet.AddFixture) })
+                }
+                TournamentTab.TABLE -> details.tables.forEachIndexed { group, table ->
+                    PointsTable(table, if (details.tables.size > 1) group else null, t.advance) { fixtureTeam = it; tab = TournamentTab.FIXTURES }
+                }
+                TournamentTab.TEAMS -> Teams(state, onSheet, onStart, onReview)
+                TournamentTab.STATS -> {
+                    details.playerOfTournament?.let { best -> PlayerOfTournament(best, onOpenPlayer) }
+                    Stats(details.keyStats, onOpenPlayer)
+                    ActionTile(DesiIcons.Leaderboard, stringResource(Res.string.tournament_leaderboard), onLeaderboard, Modifier.fillMaxWidth())
                 }
             }
+        }
+    }
+}
+
+/** The tournament's best player by MVP points, as a highlighted card. */
+@Composable
+private fun PlayerOfTournament(best: StatLeader, onOpenPlayer: (String) -> Unit) {
+    val colors = DesiTheme.colors
+    Row(
+        Modifier.fillMaxWidth().clip(DesiTheme.radius.md).background(colors.brandSoft)
+            .then(best.profileId?.let { id -> Modifier.clickable(role = Role.Button) { onOpenPlayer(id) } } ?: Modifier)
+            .padding(DesiTheme.space.s4),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
+    ) {
+        IconTile(DesiIcons.Star, size = 48.dp, tint = colors.onBrand, container = colors.brand)
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(Res.string.tournament_player_of_tournament_title).uppercase(), style = DesiTheme.type.label, color = colors.brand)
+            Text(best.name, style = DesiTheme.type.titleMd, color = colors.ink)
+            if (best.team.isNotBlank()) Text(best.team, style = DesiTheme.type.caption, color = colors.muted)
+        }
+        Column(horizontalAlignment = Alignment.End) {
+            Text(mvpText(best.value), style = DesiTheme.type.scoreMd, color = colors.brand)
+            Text(stringResource(Res.string.stats_mvp_points), style = DesiTheme.type.caption, color = colors.muted)
         }
     }
 }
@@ -235,20 +298,21 @@ private fun ColumnScope.Fixtures(
 ) {
     val t = details.tournament
     if (!t.started) {
-        Text(stringResource(Res.string.tournament_not_started), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+        EmptyState(DesiIcons.Calendar, stringResource(Res.string.tournament_not_started))
         return
     }
     if (isOrganiser && t.format == TournamentFormat.CUSTOM) {
-        TonalButton(stringResource(Res.string.tournament_add_fixture), onClick = onAdd, modifier = Modifier.fillMaxWidth())
+        TonalButton(stringResource(Res.string.tournament_add_fixture), onClick = onAdd, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
     }
-    if (details.fixtures.isEmpty()) Text(stringResource(Res.string.tournament_no_fixtures), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+    if (details.fixtures.isEmpty()) EmptyState(DesiIcons.Calendar, stringResource(Res.string.tournament_no_fixtures))
     // Latest round first: that's what's being played.
     for ((_, round) in details.fixtures.groupBy { it.fixture!!.round }.toSortedMap(compareByDescending { it })) {
-        SectionLabel(stageText(round.first().fixture!!), Modifier.padding(top = DesiTheme.space.s2))
+        SectionHeader(stageText(round.first().fixture!!), Modifier.padding(top = DesiTheme.space.s2), icon = DesiIcons.Calendar)
         round.forEach { match ->
             HomeMatchCard(match, isMine = false, onClick = { onOpenMatch(match.id) })
             if (match.status == MatchStatus.SCHEDULED) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+                    Icon(painterResource(DesiIcons.Clock), null, tint = DesiTheme.colors.muted, modifier = Modifier.size(16.dp))
                     Text(
                         match.scheduledAt?.let { formatDayAndTime(it) } ?: stringResource(Res.string.fixture_not_scheduled),
                         style = DesiTheme.type.caption,
@@ -266,32 +330,64 @@ private fun ColumnScope.Fixtures(
     }
 }
 
+/** A league table: rank, team and figures, with the places that go through tinted. Tap a team for its fixtures. */
 @Composable
-private fun PointsTable(table: List<PointsRow>, group: Int?, select: (String) -> Unit) {
+private fun PointsTable(table: List<PointsRow>, group: Int?, advance: Int, select: (String) -> Unit) {
     val colors = DesiTheme.colors
-    DesiCard(Modifier.fillMaxWidth()) {
-        if (group != null) SectionLabel(stringResource(Res.string.tournament_group, groupName(group)))
-        TableRow(
-            listOf(Res.string.table_team, Res.string.table_played, Res.string.table_won, Res.string.table_lost, Res.string.table_points, Res.string.table_nrr)
-                .map { stringResource(it) },
-            header = true,
-        )
-        table.forEach { row ->
-            val nrr = row.netRunRate
-            TableRow(listOf(row.name, "${row.played}", "${row.won}", "${row.lost}", "${row.points}", (if (nrr >= 0) "+" else "-") + kotlin.math.abs(nrr).format2())) { select(row.teamId) }
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        if (group != null) SectionHeader(stringResource(Res.string.tournament_group, groupName(group)), icon = DesiIcons.Leaderboard)
+        ListCard {
+            TableRow(
+                null,
+                listOf(Res.string.table_team, Res.string.table_played, Res.string.table_won, Res.string.table_lost, Res.string.table_points, Res.string.table_nrr)
+                    .map { stringResource(it) },
+            )
+            table.forEachIndexed { index, row ->
+                val nrr = row.netRunRate
+                HorizontalDivider(color = colors.line.copy(alpha = 0.7f))
+                TableRow(
+                    index + 1,
+                    listOf(row.name, "${row.played}", "${row.won}", "${row.lost}", "${row.points}", (if (nrr >= 0) "+" else "-") + kotlin.math.abs(nrr).format2()),
+                    qualifies = index < advance,
+                ) { select(row.teamId) }
+            }
+            if (table.isEmpty()) Text(stringResource(Res.string.tournament_no_fixtures), style = DesiTheme.type.body, color = colors.muted, modifier = Modifier.padding(DesiTheme.space.s4))
         }
-        if (table.isEmpty()) Text(stringResource(Res.string.tournament_no_fixtures), style = DesiTheme.type.body, color = colors.muted)
+        if (advance > 0 && table.size > advance) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+                Box(Modifier.size(10.dp).clip(DesiTheme.radius.full).background(colors.brand))
+                Text(stringResource(Res.string.table_qualify), style = DesiTheme.type.caption, color = colors.muted)
+            }
+        }
     }
 }
 
+/** A table line. [rank] null is the header. */
 @Composable
-private fun TableRow(cells: List<String>, header: Boolean = false, select: (() -> Unit)? = null) {
+private fun TableRow(rank: Int?, cells: List<String>, qualifies: Boolean = false, select: (() -> Unit)? = null) {
+    val colors = DesiTheme.colors
+    val header = rank == null
     val style = if (header) DesiTheme.type.label else DesiTheme.type.data
-    val color = if (header) DesiTheme.colors.muted else DesiTheme.colors.ink
-    Row(if (select == null) Modifier else Modifier.clickable(onClick = select).padding(vertical = 6.dp)) {
+    val color = if (header) colors.muted else colors.ink
+    Row(
+        Modifier.fillMaxWidth()
+            .background(if (qualifies) colors.brandSoft.copy(alpha = 0.5f) else Color.Transparent)
+            .then(if (select == null) Modifier else Modifier.clickable(onClick = select))
+            .padding(horizontal = DesiTheme.space.s4, vertical = if (header) DesiTheme.space.s3 else DesiTheme.space.s3),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(Modifier.width(36.dp)) { if (rank != null) RankBadge(rank, size = 26.dp) }
         Text(cells.first(), style = if (header) style else DesiTheme.type.bodyStrong, color = color, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(2.4f))
         cells.drop(1).forEachIndexed { i, cell ->
-            Text(cell, style = style, color = color, textAlign = TextAlign.End, maxLines = 1, modifier = Modifier.weight(if (i == cells.size - 2) 1.4f else 0.8f))
+            val points = i == cells.size - 3
+            Text(
+                cell,
+                style = if (points && !header) style.copy(fontWeight = FontWeight.Bold) else style,
+                color = if (points && !header) colors.brand else color,
+                textAlign = TextAlign.End,
+                maxLines = 1,
+                modifier = Modifier.weight(if (i == cells.size - 2) 1.4f else 0.8f),
+            )
         }
     }
 }
@@ -307,72 +403,71 @@ private fun ColumnScope.Teams(
     val canEnter = !t.started && (state.isOrganiser || t.registrationOpen) && state.registrable.isNotEmpty()
     if (canEnter) {
         val action = if (state.isOrganiser) Res.string.tournament_add_team else Res.string.tournament_register_team
-        TonalButton(stringResource(action), onClick = { onSheet(TournamentSheet.EnterTeam) }, modifier = Modifier.fillMaxWidth())
+        TonalButton(stringResource(action), onClick = { onSheet(TournamentSheet.EnterTeam) }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
     }
-    DesiCard(Modifier.fillMaxWidth()) {
-        t.teams.forEach { team -> EntryRow(team, state.isOrganiser && !t.started, onReview) }
-        if (t.teams.isEmpty()) Text(stringResource(Res.string.tournament_not_started), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+    if (t.teams.isEmpty()) EmptyState(DesiIcons.Shield, stringResource(Res.string.tournament_not_started))
+    else ListCard {
+        t.teams.forEachIndexed { index, team -> EntryRow(team, state.isOrganiser && !t.started, onReview, divider = index > 0) }
     }
     if (state.isOrganiser) {
-        GhostButton(stringResource(Res.string.tournament_add_organiser), onClick = { onSheet(TournamentSheet.AddOrganiser) }, modifier = Modifier.fillMaxWidth())
+        GhostButton(stringResource(Res.string.tournament_add_organiser), onClick = { onSheet(TournamentSheet.AddOrganiser) }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Whistle)
         if (!t.started) {
-            PrimaryButton(stringResource(Res.string.tournament_start), onClick = onStart, loading = state.saving, modifier = Modifier.fillMaxWidth())
+            PrimaryButton(stringResource(Res.string.tournament_start), onClick = onStart, loading = state.saving, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Bolt)
             Text(stringResource(Res.string.tournament_start_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         }
     }
 }
 
 @Composable
-private fun EntryRow(team: TournamentTeam, canReview: Boolean, onReview: (String, Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f).padding(vertical = DesiTheme.space.s2)) {
-            Text(team.name, style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
-            val note = listOfNotNull(
-                team.group?.let { stringResource(Res.string.tournament_group, groupName(it)) },
-                stringResource(Res.string.tournament_pending).takeIf { team.status == EntryStatus.PENDING },
-            )
-            if (note.isNotEmpty()) Text(note.joinToString(" · "), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
-        }
-        if (canReview && team.status == EntryStatus.PENDING) {
-            TextButton(onClick = { onReview(team.teamId, true) }) {
-                Text(stringResource(Res.string.tournament_confirm), style = DesiTheme.type.button, color = DesiTheme.colors.brand)
+private fun EntryRow(team: TournamentTeam, canReview: Boolean, onReview: (String, Boolean) -> Unit, divider: Boolean) {
+    val pending = team.status == EntryStatus.PENDING
+    ListRow(
+        title = team.name,
+        subtitle = team.group?.let { stringResource(Res.string.tournament_group, groupName(it)) },
+        leading = { Avatar(team.name, size = 40) },
+        trailing = {
+            if (canReview && pending) {
+                TextButton(onClick = { onReview(team.teamId, false) }) {
+                    Text(stringResource(Res.string.tournament_decline), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
+                }
+                TextButton(onClick = { onReview(team.teamId, true) }) {
+                    Text(stringResource(Res.string.tournament_confirm), style = DesiTheme.type.button, color = DesiTheme.colors.brand)
+                }
+            } else if (pending) {
+                Tag(stringResource(Res.string.tournament_pending_short), tone = TagTone.WARN, icon = DesiIcons.Clock)
             }
-            TextButton(onClick = { onReview(team.teamId, false) }) {
-                Text(stringResource(Res.string.tournament_decline), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
-            }
-        }
-    }
+        },
+        divider = divider,
+    )
 }
 
 @Composable
 private fun ColumnScope.Stats(stats: KeyStats, onOpenPlayer: (String) -> Unit) {
     val lists = listOf(Res.string.tournament_most_runs to stats.mostRuns, Res.string.tournament_most_wickets to stats.mostWickets, Res.string.tournament_most_sixes to stats.mostSixes)
     if (lists.all { it.second.isEmpty() }) {
-        Text(stringResource(Res.string.tournament_no_stats), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+        EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.tournament_no_stats))
         return
     }
-    for ((title, leaders) in lists) {
-        if (leaders.isEmpty()) continue
-        LeaderCard(title, leaders, onOpenPlayer)
+    val icons = listOf(DesiIcons.Bat, DesiIcons.Ball, DesiIcons.Bolt)
+    lists.forEachIndexed { i, (title, leaders) ->
+        if (leaders.isNotEmpty()) LeaderCard(title, leaders, onOpenPlayer, icons[i])
     }
 }
 
 @Composable
-internal fun LeaderCard(title: StringResource, leaders: List<StatLeader>, onOpenPlayer: (String) -> Unit) {
-    DesiCard(Modifier.fillMaxWidth()) {
-        SectionLabel(stringResource(title))
-        leaders.forEach { leader ->
-            Row(
-                Modifier.fillMaxWidth().then(
-                    leader.profileId?.let { id -> Modifier.clickable(role = Role.Button) { onOpenPlayer(id) } } ?: Modifier,
-                ),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(leader.name, style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
-                    Text(leader.team, style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
-                }
-                Text("${leader.value}", style = DesiTheme.type.scoreMd, color = DesiTheme.colors.ink)
+internal fun LeaderCard(title: StringResource, leaders: List<StatLeader>, onOpenPlayer: (String) -> Unit, icon: DrawableResource = DesiIcons.Leaderboard) {
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        SectionHeader(stringResource(title), icon = icon)
+        ListCard {
+            leaders.forEachIndexed { index, leader ->
+                ListRow(
+                    title = leader.name,
+                    subtitle = leader.team.ifBlank { null },
+                    leading = { RankBadge(index + 1) },
+                    trailing = { Text("${leader.value}", style = DesiTheme.type.scoreMd, color = if (index == 0) DesiTheme.colors.brand else DesiTheme.colors.ink) },
+                    divider = index > 0,
+                    onClick = leader.profileId?.let { id -> { onOpenPlayer(id) } },
+                )
             }
         }
     }

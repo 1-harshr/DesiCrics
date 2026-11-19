@@ -53,6 +53,7 @@ import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
 import com.harsh.desicrics.ui.system.rememberImagePicker
 import com.harsh.desicrics.ui.text.label
+import com.harsh.desicrics.ui.text.icon
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -316,14 +317,6 @@ private val PlayerRole.description: StringResource
         PlayerRole.BOWLER -> Res.string.profile_role_bowler_description
         PlayerRole.ALL_ROUNDER -> Res.string.profile_role_all_rounder_description
         PlayerRole.WICKET_KEEPER -> Res.string.profile_role_wicket_keeper_description
-    }
-
-private val PlayerRole.icon
-    get() = when (this) {
-        PlayerRole.BATTER -> DesiIcons.Bat
-        PlayerRole.BOWLER -> DesiIcons.Ball
-        PlayerRole.ALL_ROUNDER -> DesiIcons.Cricket
-        PlayerRole.WICKET_KEEPER -> DesiIcons.Glove
     }
 
 private val BowlingKind.label: StringResource

@@ -1,5 +1,21 @@
 package com.harsh.desicrics.ui.community
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.Icon
+import androidx.compose.ui.unit.dp
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.RankBadge
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.component.Tag
+import com.harsh.desicrics.designsystem.component.TagTone
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import com.harsh.desicrics.ui.components.PhotoAvatar
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -83,6 +99,7 @@ fun CommunityScreen(
                 value = state.city,
                 onValueChange = viewModel::setCity,
                 label = stringResource(Res.string.community_city),
+                leadingIcon = DesiIcons.Location,
                 supportingText = stringResource(Res.string.community_city_hint).takeIf { state.city.isBlank() },
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
@@ -90,11 +107,11 @@ fun CommunityScreen(
             if (state.failed) Text(stringResource(Res.string.community_load_failed), style = DesiTheme.type.body, color = colors.event.wicket)
             when (state.tab) {
                 CommunityTab.LOOKING_FOR -> {
-                    PrimaryButton(stringResource(Res.string.looking_for_post), onClick = { sheet = CommunitySheet.Post }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth())
+                    PrimaryButton(stringResource(Res.string.looking_for_post), onClick = { sheet = CommunitySheet.Post }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
                     // Your own posts are listed below, with their replies.
                     val others = state.posts.filter { it.author.profileId != myId }
                     if (!state.loading && state.city.isNotBlank() && others.isEmpty()) {
-                        Text(stringResource(Res.string.looking_for_empty), style = DesiTheme.type.body, color = colors.muted)
+                        EmptyState(DesiIcons.Search, stringResource(Res.string.looking_for_empty))
                     }
                     others.forEach { post ->
                         PostCard(post) {
@@ -107,7 +124,7 @@ fun CommunityScreen(
                         }
                     }
                     if (state.myPosts.isNotEmpty()) {
-                        SectionLabel(stringResource(Res.string.looking_for_mine), Modifier.padding(top = space.s4))
+                        SectionHeader(stringResource(Res.string.looking_for_mine), Modifier.padding(top = space.s4), icon = DesiIcons.History)
                         state.myPosts.forEach { post ->
                             PostCard(post) {
                                 if (post.open) {
@@ -132,35 +149,36 @@ fun CommunityScreen(
                     )
                     Text(stringResource(Res.string.rankings_hint), style = DesiTheme.type.caption, color = colors.muted)
                     val empty = if (state.rankPlayers) state.playerRankings.isEmpty() else state.teamRankings.isEmpty()
-                    if (!state.loading && state.city.isNotBlank() && empty) Text(stringResource(Res.string.rankings_empty), style = DesiTheme.type.body, color = colors.muted)
-                    if (state.rankPlayers) {
-                        state.playerRankings.forEachIndexed { i, row ->
-                            RankRow(i + 1, "${row.score}") { PlayerLine(row.player, onClick = { onOpenPlayer(row.player.profileId) }) }
-                        }
-                    } else {
-                        state.teamRankings.forEachIndexed { i, row ->
-                            RankRow(i + 1, "${row.rating}") { TeamRow(row.team, onClick = { onOpenTeam(row.team.id) }) }
+                    if (!state.loading && state.city.isNotBlank() && empty) EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.rankings_empty))
+                    if (!empty) ListCard {
+                        if (state.rankPlayers) {
+                            state.playerRankings.forEachIndexed { i, row ->
+                                RankRow(i + 1, "${row.score}", row.player.name, row.player.city, row.player.photoUrl) { onOpenPlayer(row.player.profileId) }
+                            }
+                        } else {
+                            state.teamRankings.forEachIndexed { i, row ->
+                                RankRow(i + 1, "${row.rating}", row.team.name, row.team.city, row.team.logoUrl) { onOpenTeam(row.team.id) }
+                            }
                         }
                     }
                 }
                 CommunityTab.DIRECTORY -> {
                     ChoiceChips(DirectoryKind.entries, selected = state.directoryKind, label = { stringResource(it.label) }, onSelect = viewModel::setDirectoryKind)
-                    PrimaryButton(stringResource(Res.string.directory_add), onClick = { sheet = CommunitySheet.AddEntry }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth())
-                    if (!state.loading && state.city.isNotBlank() && state.directory.isEmpty()) Text(stringResource(Res.string.directory_empty), style = DesiTheme.type.body, color = colors.muted)
-                    state.directory.forEach { entry ->
-                        DesiCard(Modifier.fillMaxWidth()) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Column(Modifier.weight(1f)) {
-                                    Text(entry.name, style = DesiTheme.type.bodyStrong, color = colors.ink)
-                                    val details = listOf(entry.phone, entry.notes).filter { it.isNotBlank() }.joinToString(" · ")
-                                    if (details.isNotEmpty()) Text(details, style = DesiTheme.type.caption, color = colors.muted)
-                                }
-                                if (entry.addedBy == myId) {
-                                    TextButton(onClick = { viewModel.removeEntry(entry.id) }) {
-                                        Text(stringResource(Res.string.directory_remove), style = DesiTheme.type.button, color = colors.muted)
+                    PrimaryButton(stringResource(Res.string.directory_add), onClick = { sheet = CommunitySheet.AddEntry }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
+                    if (!state.loading && state.city.isNotBlank() && state.directory.isEmpty()) EmptyState(state.directoryKind.icon, stringResource(Res.string.directory_empty))
+                    if (state.directory.isNotEmpty()) ListCard {
+                        state.directory.forEachIndexed { index, entry ->
+                            ListRow(
+                                title = entry.name,
+                                subtitle = listOf(entry.phone, entry.notes).filter { it.isNotBlank() }.joinToString(" · ").ifEmpty { null },
+                                leading = { IconTile(entry.kind.icon) },
+                                trailing = if (entry.addedBy == myId) ({
+                                    androidx.compose.material3.IconButton(onClick = { viewModel.removeEntry(entry.id) }) {
+                                        Icon(painterResource(DesiIcons.Delete), stringResource(Res.string.directory_remove), tint = colors.muted)
                                     }
-                                }
-                            }
+                                }) else null,
+                                divider = index > 0,
+                            )
                         }
                     }
                 }
@@ -186,7 +204,8 @@ fun CommunityScreen(
 private fun PostCard(post: LookingForPost, action: @Composable () -> Unit) {
     val colors = DesiTheme.colors
     DesiCard(Modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+            IconTile(post.kind.icon)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1)) {
                 Text(stringResource(post.kind.label), style = DesiTheme.type.bodyStrong, color = colors.ink)
                 Text(
@@ -196,22 +215,47 @@ private fun PostCard(post: LookingForPost, action: @Composable () -> Unit) {
                 )
                 if (post.note.isNotBlank()) Text(post.note, style = DesiTheme.type.body, color = colors.ink)
                 if (post.responseCount > 0) {
-                    Text(pluralStringResource(Res.plurals.looking_for_responses, post.responseCount, post.responseCount), style = DesiTheme.type.caption, color = colors.brand)
+                    Tag(pluralStringResource(Res.plurals.looking_for_responses, post.responseCount, post.responseCount), tone = TagTone.BRAND)
                 }
             }
-            action()
         }
+        Box(Modifier.align(Alignment.End)) { action() }
     }
 }
 
+/** A place in a city ranking: badge, photo or logo, name and city, then the score. */
 @Composable
-private fun RankRow(place: Int, value: String, content: @Composable () -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-        Text("$place", style = DesiTheme.type.scoreMd, color = DesiTheme.colors.muted)
-        Column(Modifier.weight(1f)) { content() }
-        Text(value, style = DesiTheme.type.scoreMd, color = DesiTheme.colors.ink)
-    }
+private fun RankRow(place: Int, value: String, name: String, city: String, photo: String?, onClick: () -> Unit) {
+    ListRow(
+        title = name,
+        subtitle = city.ifBlank { null },
+        leading = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+                RankBadge(place, size = 28.dp)
+                PhotoAvatar(name, photo, size = 40)
+            }
+        },
+        trailing = { Text(value, style = DesiTheme.type.scoreMd, color = if (place == 1) DesiTheme.colors.brand else DesiTheme.colors.ink) },
+        divider = place > 1,
+        onClick = onClick,
+    )
 }
+
+private val LookingForKind.icon: DrawableResource
+    get() = when (this) {
+        LookingForKind.OPPONENT -> DesiIcons.Swap
+        LookingForKind.PLAYER -> DesiIcons.PersonAdd
+        LookingForKind.GROUND -> DesiIcons.Stadium
+        LookingForKind.UMPIRE -> DesiIcons.Whistle
+        LookingForKind.SCORER -> DesiIcons.Edit
+    }
+
+private val DirectoryKind.icon: DrawableResource
+    get() = when (this) {
+        DirectoryKind.GROUND -> DesiIcons.Stadium
+        DirectoryKind.UMPIRE -> DesiIcons.Whistle
+        DirectoryKind.SCORER -> DesiIcons.Edit
+    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

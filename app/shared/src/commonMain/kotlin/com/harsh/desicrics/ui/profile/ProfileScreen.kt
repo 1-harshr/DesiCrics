@@ -45,7 +45,20 @@ import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.home.HomeMatchCard
 import com.harsh.desicrics.ui.stats.CareerSection
-import com.harsh.desicrics.ui.teams.TeamRow
+import com.harsh.desicrics.ui.teams.TeamList
+import com.harsh.desicrics.ui.text.icon
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.HeroChip
+import com.harsh.desicrics.designsystem.component.HeroChips
+import com.harsh.desicrics.designsystem.component.HeroIconButton
+import com.harsh.desicrics.designsystem.component.HeroIdentity
+import com.harsh.desicrics.designsystem.component.HeroScaffold
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import org.jetbrains.compose.resources.DrawableResource
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -108,43 +121,43 @@ private fun ProfileContent(
     val colors = DesiTheme.colors
     val space = DesiTheme.space
     var tab by rememberSaveable { mutableStateOf(ProfileTab.ABOUT) }
-    DesiScaffold(title = stringResource(Res.string.profile_title), onBack = onBack) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = space.screen, vertical = space.s4),
-            verticalArrangement = Arrangement.spacedBy(space.s5),
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s4)) {
-                PhotoAvatar(profile.name, profile.photoUrl, size = 64)
-                Column(verticalArrangement = Arrangement.spacedBy(space.s1)) {
-                    Text(profile.name, style = DesiTheme.type.titleLg, color = colors.ink)
-                    val role = stringResource(profile.role.label)
-                    Text(
-                        if (profile.city.isBlank()) role else stringResource(Res.string.common_joined, role, profile.city),
-                        style = DesiTheme.type.body,
-                        color = colors.muted,
-                    )
-                }
-            }
-            state.claimable.forEach { ClaimSuggestion(it, onClaim = { onClaimSuggested(it.profileId) }) }
-            SegmentedControl(
-                options = ProfileTab.entries,
-                selected = tab,
-                label = { stringResource(it.label) },
-                onSelect = { tab = it },
+    HeroScaffold(
+        title = profile.name,
+        onBack = null,
+        actions = { HeroIconButton(DesiIcons.Edit, stringResource(Res.string.profile_edit), onEdit) },
+        hero = {
+            HeroIdentity(
+                name = profile.name,
+                eyebrow = stringResource(Res.string.profile_eyebrow),
+                avatar = { PhotoAvatar(profile.name, profile.photoUrl, size = 72) },
             )
-            when (tab) {
-                ProfileTab.ABOUT -> AboutTab(profile, onEdit, onSignOut, onSettings)
-                ProfileTab.STATS -> stats()
-                ProfileTab.MATCHES -> ListTab(state.matches, Res.string.profile_no_matches, state.loadFailed) { matches ->
+            HeroChips(
+                listOf(
+                    HeroChip(stringResource(profile.role.label), profile.role.icon),
+                    HeroChip(profile.city, DesiIcons.Location),
+                    HeroChip(stringResource(profile.battingStyle.label), DesiIcons.Bat),
+                    HeroChip(if (profile.bowlingStyle == BowlingStyle.NONE) "" else stringResource(profile.bowlingStyle.label), DesiIcons.Ball),
+                ),
+            )
+        },
+    ) {
+        state.claimable.forEach { ClaimSuggestion(it, onClaim = { onClaimSuggested(it.profileId) }) }
+        SegmentedControl(
+            options = ProfileTab.entries,
+            selected = tab,
+            label = { stringResource(it.label) },
+            onSelect = { tab = it },
+        )
+        when (tab) {
+            ProfileTab.ABOUT -> AboutTab(profile, onEdit, onSignOut, onSettings)
+            ProfileTab.STATS -> stats()
+            ProfileTab.MATCHES -> ListTab(state.matches, Res.string.profile_no_matches, state.loadFailed, DesiIcons.History) { matches ->
+                Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
                     matches.forEach { HomeMatchCard(it, isMine = it.scorerUid == profile.uid, onClick = { onOpenMatch(it.id) }) }
                 }
-                ProfileTab.TEAMS -> ListTab(state.teams, Res.string.teams_empty, state.loadFailed) { teams ->
-                    teams.forEach { TeamRow(it, onClick = { onOpenTeam(it.id) }) }
-                }
+            }
+            ProfileTab.TEAMS -> ListTab(state.teams, Res.string.teams_empty, state.loadFailed, DesiIcons.Shield) { teams ->
+                TeamList(teams, onOpenTeam)
             }
         }
     }
@@ -153,35 +166,43 @@ private fun ProfileContent(
 @Composable
 private fun AboutTab(profile: UserProfile, onEdit: () -> Unit, onSignOut: () -> Unit, onSettings: (SettingsSheet) -> Unit) {
     val colors = DesiTheme.colors
-    DesiCard(Modifier.fillMaxWidth()) {
-        val empty = stringResource(Res.string.common_empty_value)
-        ProfileRow(Res.string.profile_mobile, profile.phone.ifBlank { empty })
-        HorizontalDivider(color = colors.line)
-        ProfileRow(Res.string.profile_email, profile.email ?: empty)
-        HorizontalDivider(color = colors.line)
-        ProfileRow(Res.string.profile_batting, stringResource(profile.battingStyle.label))
-        if (profile.bowlingStyle != BowlingStyle.NONE) {
-            HorizontalDivider(color = colors.line)
-            ProfileRow(Res.string.profile_bowling, stringResource(profile.bowlingStyle.label))
+    val space = DesiTheme.space
+    val empty = stringResource(Res.string.common_empty_value)
+    Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+        SectionHeader(stringResource(Res.string.profile_section_details), icon = DesiIcons.Person, action = stringResource(Res.string.profile_edit_short), onAction = onEdit)
+        ListCard {
+            ListRow(profile.phone.ifBlank { empty }, subtitle = stringResource(Res.string.profile_mobile), leading = { IconTile(DesiIcons.Phone) })
+            ListRow(profile.email ?: empty, subtitle = stringResource(Res.string.profile_email), leading = { IconTile(DesiIcons.Mail) }, divider = true)
+            ListRow(stringResource(profile.battingStyle.label), subtitle = stringResource(Res.string.profile_batting), leading = { IconTile(DesiIcons.Bat) }, divider = true)
+            if (profile.bowlingStyle != BowlingStyle.NONE) {
+                ListRow(stringResource(profile.bowlingStyle.label), subtitle = stringResource(Res.string.profile_bowling), leading = { IconTile(DesiIcons.Ball) }, divider = true)
+            }
         }
     }
-    PrimaryButton(stringResource(Res.string.profile_edit), onClick = onEdit, modifier = Modifier.fillMaxWidth())
-    SectionLabel(stringResource(Res.string.profile_settings))
-    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-        GhostButton(stringResource(Res.string.profile_claim), onClick = { onSettings(SettingsSheet.CLAIM) }, modifier = Modifier.fillMaxWidth())
-        GhostButton(stringResource(Res.string.profile_support), onClick = { onSettings(SettingsSheet.SUPPORT) }, modifier = Modifier.fillMaxWidth())
-        GhostButton(stringResource(Res.string.profile_sign_out), onClick = onSignOut, modifier = Modifier.fillMaxWidth())
-        GhostButton(stringResource(Res.string.profile_delete), onClick = { onSettings(SettingsSheet.DELETE) }, modifier = Modifier.fillMaxWidth())
+    Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+        SectionHeader(stringResource(Res.string.profile_settings), icon = DesiIcons.Settings)
+        ListCard {
+            ListRow(stringResource(Res.string.profile_claim), leading = { IconTile(DesiIcons.Badge) }, onClick = { onSettings(SettingsSheet.CLAIM) })
+            ListRow(stringResource(Res.string.profile_support), leading = { IconTile(DesiIcons.Support) }, divider = true, onClick = { onSettings(SettingsSheet.SUPPORT) })
+            ListRow(stringResource(Res.string.profile_sign_out), leading = { IconTile(DesiIcons.Logout) }, divider = true, onClick = onSignOut)
+            ListRow(
+                stringResource(Res.string.profile_delete),
+                leading = { IconTile(DesiIcons.Delete, tint = colors.event.wicket, container = colors.event.wicket.copy(alpha = 0.12f)) },
+                titleColor = colors.event.wicket,
+                divider = true,
+                onClick = { onSettings(SettingsSheet.DELETE) },
+            )
+        }
     }
 }
 
 /** A list that's still loading (null), empty, or ready. */
 @Composable
-private fun <T> ColumnScope.ListTab(items: List<T>?, empty: StringResource, failed: Boolean, content: @Composable ColumnScope.(List<T>) -> Unit) {
+private fun <T> ColumnScope.ListTab(items: List<T>?, empty: StringResource, failed: Boolean, icon: DrawableResource, content: @Composable ColumnScope.(List<T>) -> Unit) {
     when {
         items == null && failed -> Text(stringResource(Res.string.teams_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
         items == null -> Unit
-        items.isEmpty() -> Text(stringResource(empty), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+        items.isEmpty() -> EmptyState(icon, stringResource(empty))
         else -> content(items)
     }
 }
@@ -190,6 +211,7 @@ private fun <T> ColumnScope.ListTab(items: List<T>?, empty: StringResource, fail
 @Composable
 private fun ClaimSuggestion(player: PlayerSummary, onClaim: () -> Unit) {
     DesiCard(Modifier.fillMaxWidth()) {
+        IconTile(DesiIcons.Badge)
         Text(stringResource(Res.string.profile_claimable_title), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
         Text(stringResource(Res.string.profile_claimable_body, player.name), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
         PrimaryButton(stringResource(Res.string.profile_claimable_action), onClick = onClaim, modifier = Modifier.fillMaxWidth())
@@ -261,14 +283,6 @@ private fun DeleteAccountSheet(state: ProfileUiState, onDelete: () -> Unit, onDi
         }
         PrimaryButton(stringResource(Res.string.profile_delete_confirm), onClick = onDelete, loading = state.saving, modifier = Modifier.fillMaxWidth())
         GhostButton(stringResource(Res.string.common_cancel), onClick = onDismiss, modifier = Modifier.fillMaxWidth())
-    }
-}
-
-@Composable
-private fun ProfileRow(label: StringResource, value: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1)) {
-        Text(stringResource(label).uppercase(), style = DesiTheme.type.label, color = DesiTheme.colors.muted)
-        Text(value, style = DesiTheme.type.bodyLg, color = DesiTheme.colors.ink)
     }
 }
 
