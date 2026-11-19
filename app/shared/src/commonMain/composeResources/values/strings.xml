@@ -708,9 +708,8 @@
     <string name="match_share_link">Share link</string>
     <string name="match_share_link_hint">Anyone can follow along live, in the app or a browser.</string>
     <string name="match_share_link_text">Follow %1$s live on DesiCrics: %2$s</string>
-    <string name="match_share_card">Share scorecard image</string>
-    <string name="match_share_card_hint">A picture of the score, sized for WhatsApp status.</string>
-    <string name="match_share_card_title">Share the score</string>
+    <string name="match_share_card">Share a picture</string>
+    <string name="match_share_card_hint">Cards and story overlays for the result and every player.</string>
     <string name="share_card_footer">Scored on DesiCrics</string>
     <string name="team_view_player">View player</string>
     <string name="team_view_player_hint">Their matches, teams and stats.</string>
@@ -893,12 +892,9 @@
     <string name="team_logo_change">Change logo</string>
     <string name="stats_share">Share my stats card</string>
     <string name="stats_share_other">Share their stats card</string>
-    <string name="stats_share_action">Share stats card</string>
-    <string name="stats_share_card_hint">A picture of the numbers, sized for WhatsApp status.</string>
     <string name="stats_share_title">Share the stats</string>
     <string name="share_card_runs">runs</string>
     <string name="share_card_wickets">wickets</string>
-    <string name="share_card_best">Best %1$s · %2$s</string>
 
     <!-- Community: looking for, rankings, directory, stream overlay -->
     <string name="home_community">Community</string>
@@ -1201,4 +1197,34 @@
     <!-- Phase 8 · themes -->
     <string name="profile_theme">Theme</string>
     <string name="profile_theme_hint">How the app looks on this phone. Scoring works the same in every theme, and a four, six or wicket keeps its colour's meaning.</string>
+
+    <!-- Phase 7 · share studio -->
+    <string name="share_studio_title">Share a picture</string>
+    <string name="share_format_story">Story 9:16</string>
+    <string name="share_format_post">Post 1:1</string>
+    <string name="share_template_classic">Classic</string>
+    <string name="share_template_broadcast">Broadcast</string>
+    <string name="share_template_minimal">Minimal</string>
+    <string name="share_template_overlay">Overlay</string>
+    <string name="share_content_result">Result</string>
+    <string name="share_content_score">Score</string>
+    <string name="share_content_batting">Batting · %1$s</string>
+    <string name="share_content_bowling">Bowling · %1$s</string>
+    <string name="share_content_season">Season</string>
+    <string name="share_action">Share</string>
+    <string name="share_save">Save</string>
+    <string name="share_saved">Saved to your gallery.</string>
+    <string name="share_save_failed">Couldn't save the picture. Check there's space on your phone and try again.</string>
+    <string name="share_overlay_note">Best on Instagram stories: add it over your own photo. WhatsApp turns the clear parts black.</string>
+    <string name="share_preview_on_photo">Preview on a photo</string>
+    <string name="share_overs_detail">(%1$s ov)</string>
+    <string name="share_balls_detail">(%1$d)</string>
+    <string name="share_maidens">Maidens</string>
+    <string name="share_wickets_label">Wickets</string>
+    <string name="share_wicket_line">%1$s · %2$s</string>
+    <string name="share_form">Form</string>
+    <string name="share_season_caption">%1$s season</string>
+    <string name="share_result_action">Share the result</string>
+    <string name="share_scorecard_hint">Tap a player to share their innings or spell.</string>
+    <string name="share_player_action">Share %1$s's figures</string>
 </resources>

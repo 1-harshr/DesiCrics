@@ -67,6 +67,7 @@ import com.harsh.desicrics.designsystem.component.RunPad
 import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.component.WagonWheel
+import com.harsh.desicrics.designsystem.component.TonalButton
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.Delivery
@@ -90,6 +91,9 @@ import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.scoring.bowlerRuleBreak
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
+import com.harsh.desicrics.ui.share.ResultShare
+import com.harsh.desicrics.ui.share.ShareStudio
+import com.harsh.desicrics.ui.share.matchShareContents
 import com.harsh.desicrics.ui.system.rememberShareText
 import com.harsh.desicrics.ui.system.rememberSpeechInput
 import com.harsh.desicrics.ui.text.label
@@ -207,7 +211,8 @@ private sealed interface ScoringSheet {
     /** Where a scoring shot went, for the wagon wheel. */
     data class Zone(val runs: Int) : ScoringSheet
     data object Share : ScoringSheet
-    data object ShareCard : ScoringSheet
+    /** The share studio, opened on [initial] (a content key) or on the score. */
+    data class ShareCard(val initial: String? = null) : ScoringSheet
 }
 
 /**
@@ -357,6 +362,12 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
                 if (state.isComplete && result != null) {
                     ResultBanner(state.match, result)
                     MatchMvp(state)
+                    TonalButton(
+                        stringResource(Res.string.share_result_action),
+                        onClick = { sheet = ScoringSheet.ShareCard(ResultShare.KEY) },
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = DesiIcons.Share,
+                    )
                 } else if (!ui.isScorer) {
                     Text(stringResource(Res.string.match_not_your_match), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
                 }
@@ -373,7 +384,7 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
             }
             MatchTab.SCORECARD -> {
                 state.innings.forEach {
-                    InningsScorecard(it)
+                    InningsScorecard(it, onShare = { key -> sheet = ScoringSheet.ShareCard(key) })
                     InningsWagonWheel(it)
                 }
                 MatchMvp(state)
@@ -975,7 +986,7 @@ private fun ScoringSheets(
                     onClose()
                 },
                 SheetOption(stringResource(Res.string.match_share_card), stringResource(Res.string.match_share_card_hint)) {
-                    onSheet(ScoringSheet.ShareCard)
+                    onSheet(ScoringSheet.ShareCard())
                 },
                 SheetOption(stringResource(Res.string.match_share_overlay), stringResource(Res.string.match_share_overlay_hint)) {
                     actions.onShareOverlay()
@@ -984,7 +995,7 @@ private fun ScoringSheets(
             ),
             onDismiss = onClose,
         )
-        ScoringSheet.ShareCard -> ShareCardSheet(state, onDismiss = onClose)
+        is ScoringSheet.ShareCard -> ShareStudio(remember(state) { matchShareContents(state) }, onDismiss = onClose, initial = sheet.initial)
         is ScoringSheet.Zone -> ZoneSheet(
             runs = sheet.runs,
             onPick = { zone ->

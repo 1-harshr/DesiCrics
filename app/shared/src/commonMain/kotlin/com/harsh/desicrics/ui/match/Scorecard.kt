@@ -1,6 +1,7 @@
 package com.harsh.desicrics.ui.match
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -30,15 +33,20 @@ import com.harsh.desicrics.scoring.InningsState
 import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.stats.MvpPoints
 import com.harsh.desicrics.ui.stats.mvpText
+import com.harsh.desicrics.ui.share.battingShareKey
+import com.harsh.desicrics.ui.share.bowlingShareKey
 import com.harsh.desicrics.scoring.Retirement
 import com.harsh.desicrics.ui.text.dismissalText
 import com.harsh.desicrics.ui.text.label
 import com.harsh.desicrics.util.format2
 import org.jetbrains.compose.resources.stringResource
 
-/** One innings: batting with how each batter got out, extras, who's yet to bat, then bowling figures. */
+/**
+ * One innings: batting with how each batter got out, extras, who's yet to bat, then bowling figures.
+ * With [onShare], tapping a batter or bowler opens the share studio on their innings or spell (by key).
+ */
 @Composable
-internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifier) {
+internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifier, onShare: ((contentKey: String) -> Unit)? = null) {
     val colors = DesiTheme.colors
     DesiCard(modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -67,9 +75,11 @@ internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifi
             ),
             header = true,
         )
+        if (onShare != null) Text(stringResource(Res.string.share_scorecard_hint), style = DesiTheme.type.caption, color = colors.muted)
         innings.batters.forEach { card ->
             StatRow(
                 listOf(card.player.name, "${card.runs}", "${card.balls}", "${card.fours}", "${card.sixes}", card.strikeRate.format2()),
+                onClick = onShare?.takeIf { card.balls > 0 || card.runs > 0 }?.let { { it(battingShareKey(innings.number, card.player.id)) } },
                 subtitle = when (card.retired) {
                     Retirement.HURT -> stringResource(Res.string.scorecard_retired_hurt)
                     Retirement.NOT_OUT -> stringResource(Res.string.scorecard_retired_not_out)
@@ -101,7 +111,10 @@ internal fun InningsScorecard(innings: InningsState, modifier: Modifier = Modifi
             header = true,
         )
         innings.bowlers.forEach { card ->
-            StatRow(listOf(card.player.name, card.oversText, "${card.maidens}", "${card.runs}", "${card.wickets}", card.economy.format2()))
+            StatRow(
+                listOf(card.player.name, card.oversText, "${card.maidens}", "${card.runs}", "${card.wickets}", card.economy.format2()),
+                onClick = onShare?.takeIf { card.legalBalls > 0 }?.let { { it(bowlingShareKey(innings.number, card.player.id)) } },
+            )
         }
     }
 }
@@ -155,12 +168,19 @@ internal fun InningsWagonWheel(innings: InningsState) {
     }
 }
 
-/** A name column then five right-aligned numbers, the last one wider for rates like "137.50". */
+/**
+ * A name column then five right-aligned numbers, the last one wider for rates like "137.50". With
+ * [onClick], the row opens the share studio for that player.
+ */
 @Composable
-private fun StatRow(cells: List<String>, header: Boolean = false, subtitle: String? = null) {
+private fun StatRow(cells: List<String>, header: Boolean = false, subtitle: String? = null, onClick: (() -> Unit)? = null) {
     val colors = DesiTheme.colors
     val numberStyle = if (header) DesiTheme.type.label else DesiTheme.type.data
-    Row(verticalAlignment = Alignment.Top) {
+    val shareLabel = stringResource(Res.string.share_player_action, cells.first())
+    Row(
+        if (onClick == null) Modifier else Modifier.clip(DesiTheme.radius.sm).clickable(onClickLabel = shareLabel, role = Role.Button, onClick = onClick),
+        verticalAlignment = Alignment.Top,
+    ) {
         Column(Modifier.weight(2.6f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 if (header) cells.first().uppercase() else cells.first(),
