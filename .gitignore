@@ -41,3 +41,6 @@ server/data/
 # Locally built APKs
 app/androidApp/debug/
 app/androidApp/release/
+
+# Wrangler state for the proxy Worker
+.wrangler/

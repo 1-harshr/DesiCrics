@@ -45,12 +45,14 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
-
-        // The Ktor server. Locally the app calls localhost and `adb reverse tcp:8080 tcp:8080` forwards it
-        val apiBaseUrl = providers.gradleProperty("desicrics.apiBaseUrl").getOrElse("http://localhost:8080")
+    }
+    // The Ktor server. Debug builds call localhost, which `adb reverse tcp:8080 tcp:8080` forwards;
+    // release builds call the proxy Worker (proxy/), whose address stays put when the server moves hosts.
+    // -Pdesicrics.apiBaseUrl overrides either.
+    fun com.android.build.api.dsl.ApplicationBuildType.server(defaultUrl: String) {
+        val apiBaseUrl = providers.gradleProperty("desicrics.apiBaseUrl").getOrElse(defaultUrl)
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
-        // Where join links and public scorecards point. The same server, reachable from outside: set it
-        // to the deployed address (and add its Digital Asset Links file) once there is one.
+        // Where join links and public scorecards point: the same server, reachable from outside.
         val publicUrl = providers.gradleProperty("desicrics.publicUrl").getOrElse(apiBaseUrl)
         buildConfigField("String", "PUBLIC_URL", "\"$publicUrl\"")
         manifestPlaceholders["publicHost"] = publicUrl.substringAfter("://").substringBefore("/").substringBefore(":")
@@ -77,7 +79,11 @@ android {
         }
     }
     buildTypes {
+        debug {
+            server("http://localhost:8080")
+        }
         release {
+            server("https://desicrics-api.desicrics-proxy.workers.dev")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

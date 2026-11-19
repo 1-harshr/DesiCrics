@@ -25,11 +25,17 @@ docker build -t desicrics-server server
 | `FIREBASE_SERVICE_ACCOUNT` | For push | Path to a Firebase service account JSON key (mount it as a secret file). Without it, notifications only go to the in-app inbox. |
 | `ANDROID_SHA256_FINGERPRINTS` | For verified links | Comma-separated SHA-256 fingerprints of the app's signing certificates (`./gradlew :app:androidApp:signingReport`, or Play Console › App integrity). Served at `/.well-known/assetlinks.json`, so `/join`, `/m` and `/t` links open the app without a chooser. |
 
-Then build the app against the deployed address:
+## The permanent address
+
+The app never calls the host directly. Release builds call a Cloudflare Worker, `https://desicrics-api.desicrics-proxy.workers.dev` (`proxy/`), which passes every request, WebSockets included, through to wherever the server runs now. Join, match and tournament links use the same address, so moving hosts needs no new app build and old links keep working.
+
+To point it at a new host, change `BACKEND_URL` in `proxy/wrangler.jsonc`, then:
 
 ```sh
-./gradlew :app:androidApp:assembleRelease -Pdesicrics.apiBaseUrl=https://<host> -Pdesicrics.publicUrl=https://<host>
+cd proxy && npm install && npm run deploy   # first time: npx wrangler login
 ```
+
+To build the app against some other address instead, pass `-Pdesicrics.apiBaseUrl=https://<host> -Pdesicrics.publicUrl=https://<host>`.
 
 ## Option A: Cloud Run + Cloud SQL
 
@@ -85,8 +91,8 @@ Render can't build the image itself (no Android SDK), so `.github/workflows/serv
    
    Render sets `PORT`, and the health check path is `/`.
 4. **Redeploys:** copy the service's Deploy Hook URL into the `RENDER_DEPLOY_HOOK` repository secret, so each new image deploys itself.
-5. Build the app against `https://<service>.onrender.com`, or better, a domain you own pointed at it, so moving hosts later needs no new app build.
-6. **Keep it awake:** in [UptimeRobot](https://uptimerobot.com) (free), add an HTTP(s) monitor for `https://<service>.onrender.com/` every 5 minutes. The server then never sleeps, and Render's free 750 hours a month cover one service running all month. Without it, the app still copes: it wakes the server as it opens and waits up to 75 s for the first answer.
+5. Set `BACKEND_URL` in `proxy/wrangler.jsonc` to `https://<service>.onrender.com` and deploy the proxy (see [The permanent address](#the-permanent-address)).
+6. **Keep it awake:** in [UptimeRobot](https://uptimerobot.com) (free), add an HTTP(s) monitor for `https://desicrics-api.desicrics-proxy.workers.dev/` every 5 minutes, which checks the proxy and the server together. The server then never sleeps, and Render's free 750 hours a month cover one service running all month. Without it, the app still copes: it wakes the server as it opens and waits up to 75 s for the first answer.
 
 ## After the first deploy
 

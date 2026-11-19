@@ -1,0 +1,17 @@
+// The proxy in front of the server (see docs/deploy.md). Deploy from this folder: npm run deploy
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "desicrics-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-19",
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    // Where the server runs now. Change this and redeploy to move hosts.
+    "BACKEND_URL": "https://REPLACE-ME.onrender.com"
+  },
+  "observability": {
+    "enabled": true,
+    "traces": { "enabled": true }
+  }
+}
