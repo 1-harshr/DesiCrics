@@ -7,6 +7,7 @@ import com.harsh.desicrics.data.api.ApiConfig
 import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamSide
+import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.ui.newmatch.NewMatchFormState
 import com.harsh.desicrics.ui.newmatch.NewMatchViewModel
 import io.ktor.client.HttpClient
@@ -30,11 +31,14 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 /** The new match form against a fake server: each test answers the requests it cares about. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,5 +77,20 @@ class NewMatchViewModelTest {
         val state = vm.awaitState { it.squadTeam != null }
         assertEquals(strikers.id, state.squadTeam?.id)
         assertEquals(TeamSide.A, state.squadSide)
+    }
+
+    @Test
+    fun aFailedTeamsLoadIsShownAndRetried() = runTest {
+        var calls = 0
+        val vm = viewModel {
+            if (calls++ == 0) respond("", HttpStatusCode.InternalServerError)
+            else json(Json.encodeToString(ListSerializer(TeamSummary.serializer()), listOf(TeamSummary("t1", "Andheri Strikers", "Mumbai", 11))))
+        }
+        vm.loadMyTeams()
+        assertNull(vm.awaitState { it.myTeamsFailed }.myTeams)
+        vm.loadMyTeams()
+        val state = vm.awaitState { it.myTeams != null }
+        assertFalse(state.myTeamsFailed)
+        assertEquals(listOf("t1"), state.myTeams?.map { it.id })
     }
 }

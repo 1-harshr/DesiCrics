@@ -33,21 +33,30 @@ import com.harsh.desicrics.ui.teams.TeamRow
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.stringResource
 
-/** The caller's saved teams; null while they load. */
+/** The caller's saved teams; null while they load, or if loading [failed]. */
 @Composable
-internal fun TeamPickerSheet(teams: List<TeamSummary>?, search: suspend (String) -> List<TeamSummary>, onPick: (TeamSummary) -> Unit, onDismiss: () -> Unit) {
+internal fun TeamPickerSheet(
+    teams: List<TeamSummary>?,
+    failed: Boolean,
+    onRetry: () -> Unit,
+    search: suspend (String) -> List<TeamSummary>,
+    onPick: (TeamSummary) -> Unit,
+    onDismiss: () -> Unit,
+) {
     DesiSheet(stringResource(Res.string.new_match_pick_team), onDismiss) {
         var query by remember { mutableStateOf("") }
         var hits by remember(query) { mutableStateOf<List<TeamSummary>?>(null) }
-        var failed by remember(query) { mutableStateOf(false) }
+        var searchFailed by remember(query) { mutableStateOf(false) }
+        val searching = query.trim().length >= 2
         androidx.compose.runtime.LaunchedEffect(query) {
-            if (query.trim().length >= 2) try { kotlinx.coroutines.delay(250); hits = search(query) }
-            catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { failed = true }
+            if (searching) try { kotlinx.coroutines.delay(250); hits = search(query) }
+            catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { searchFailed = true }
         }
         com.harsh.desicrics.designsystem.component.DesiTextField(query, { query = it }, stringResource(Res.string.setup_find))
-        val results = if (query.trim().length >= 2) hits else teams
+        val results = if (searching) hits else teams
         when {
-            failed -> ErrorBanner(stringResource(Res.string.teams_load_failed))
+            searching && searchFailed -> ErrorBanner(stringResource(Res.string.teams_load_failed))
+            !searching && failed -> ErrorBanner(stringResource(Res.string.teams_load_failed), action = stringResource(Res.string.feed_retry), onAction = onRetry)
             results == null -> BallSpinner()
             results.isEmpty() -> EmptyState(DesiIcons.Shield, stringResource(Res.string.new_match_no_teams))
             else -> results.forEach { TeamRow(it, onClick = { onPick(it) }) }

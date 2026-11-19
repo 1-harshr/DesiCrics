@@ -166,6 +166,8 @@ fun NewMatchScreen(
     pickingFor?.let { side ->
         TeamPickerSheet(
             teams = state.myTeams,
+            failed = state.myTeamsFailed,
+            onRetry = viewModel::loadMyTeams,
             search = viewModel::findTeams,
             onPick = { team ->
                 pickingFor = null

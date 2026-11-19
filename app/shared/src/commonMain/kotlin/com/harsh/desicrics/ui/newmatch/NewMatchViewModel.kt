@@ -61,6 +61,8 @@ data class NewMatchFormState(
     val error: NewMatchError? = null,
     /** The caller's saved teams, loaded when they first open the team picker. */
     val myTeams: List<TeamSummary>? = null,
+    /** Loading [myTeams] failed; the picker offers a retry. */
+    val myTeamsFailed: Boolean = false,
     /** The saved team whose squad is being picked, and for which side. */
     val squadTeam: SavedTeam? = null,
     val squadSide: TeamSide? = null,
@@ -125,18 +127,19 @@ class NewMatchViewModel(
         }
     }
 
-    /** Loads the caller's teams for the picker, once. */
+    /** Loads the caller's teams for the picker, once it works; a failure is shown and tried again on the next call. */
     fun loadMyTeams() {
         if (_state.value.myTeams != null) return
+        _state.update { it.copy(myTeamsFailed = false) }
         viewModelScope.launch {
-            val teams = try {
-                teamRepository.myTeams()
+            try {
+                val teams = teamRepository.myTeams()
+                _state.update { it.copy(myTeams = teams) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                emptyList()
+                _state.update { it.copy(myTeamsFailed = true) }
             }
-            _state.update { it.copy(myTeams = teams) }
         }
     }
 
