@@ -17,6 +17,19 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.animation.ContentTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.ui.unit.IntOffset
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
+import com.harsh.desicrics.designsystem.theme.DesiMotion
+import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.ui.home.FeedScreen
 import androidx.compose.runtime.LaunchedEffect
@@ -109,36 +122,56 @@ private val RouteSerialization = SavedStateConfiguration {
 @Composable
 fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = null, onLinkHandled: () -> Unit = {}) {
     val roots = listOf(HomeRoute, FeedRoute, TournamentsRoute, ProfileRoute)
-    var selected by rememberSaveable { mutableIntStateOf(0) }
     val stacks = listOf(rememberNavBackStack(RouteSerialization, HomeRoute),
         rememberNavBackStack(RouteSerialization, FeedRoute), rememberNavBackStack(RouteSerialization, TournamentsRoute),
         rememberNavBackStack(RouteSerialization, ProfileRoute))
-    val backStack = stacks[selected]
-    val back: () -> Unit = { if (backStack.size > 1) backStack.removeLastOrNull() else selected = 0 }
+    // The tabs sit side by side on a pager: picking one slides to it, and from a tab's root a swipe does too.
+    val pager = rememberPagerState { stacks.size }
+    val scope = rememberCoroutineScope()
+    val select: (Int) -> Unit = { tab -> scope.launch { pager.animateScrollToPage(tab, animationSpec = tween(SLIDE_MS, easing = DesiMotion.standard)) } }
+    val currentStack = stacks[pager.currentPage]
+    // Each tab's saved state and ViewModels live up here, so they outlast the pager dropping the tab's
+    // page while another tab is showing.
+    val decorators = stacks.map {
+        listOf(rememberSaveableStateHolderNavEntryDecorator<NavKey>(), rememberViewModelStoreNavEntryDecorator<NavKey>())
+    }
 
     val social = koinInject<SocialRepository>()
     RegisterForPush(onToken = social::savePushToken)
 
     LaunchedEffect(link) {
         if (link == null) return@LaunchedEffect
-        routeFor(link)?.let { backStack.add(it) }
+        routeFor(link)?.let { currentStack.add(it) }
         onLinkHandled()
     }
 
     // The tab bar floats over a tab's root screen, above the system navigation bar. The screen pads for
     // neither on its own: it leaves room for both through LocalNavBarClearance.
-    val isRoot = backStack.size == 1
+    val isRoot = currentStack.size == 1
     val systemBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    // Back on another tab's root goes to Home before it leaves the app.
+    NavigationBackHandler(rememberNavigationEventState(NavigationEventInfo.None), isBackEnabled = isRoot && pager.currentPage != 0,
+        onBackCompleted = { select(0) })
     Box(Modifier.fillMaxSize()) {
-    CompositionLocalProvider(LocalNavBarClearance provides if (isRoot) NavBarClearance + systemBar else 0.dp) {
+    HorizontalPager(
+        state = pager,
+        modifier = Modifier.fillMaxSize(),
+        // Inside a tab, a sideways swipe would throw away the screen the user opened.
+        userScrollEnabled = isRoot,
+        key = { it },
+    ) { page ->
+    val backStack = stacks[page]
+    val back: () -> Unit = { if (backStack.size > 1) backStack.removeLastOrNull() else select(0) }
+    val atRoot = backStack.size == 1
+    CompositionLocalProvider(LocalNavBarClearance provides if (atRoot) NavBarClearance + systemBar else 0.dp) {
     NavDisplay(
-        modifier = Modifier.fillMaxSize().then(if (isRoot) Modifier.consumeWindowInsets(WindowInsets.navigationBars) else Modifier),
+        modifier = Modifier.fillMaxSize().then(if (atRoot) Modifier.consumeWindowInsets(WindowInsets.navigationBars) else Modifier),
         backStack = backStack,
         onBack = back,
-        entryDecorators = listOf(
-            rememberSaveableStateHolderNavEntryDecorator(),
-            rememberViewModelStoreNavEntryDecorator(),
-        ),
+        entryDecorators = decorators[page],
+        transitionSpec = { slideFrom(right = true) },
+        popTransitionSpec = { slideFrom(right = false) },
+        predictivePopTransitionSpec = { slideFrom(right = false) },
         entryProvider = entryProvider {
             entry<FeedRoute> {
                 FeedScreen(onOpen = { backStack.add(MatchRoute(it)) }, community = { backStack.add(CommunityRoute) },
@@ -150,7 +183,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                     playerPhoto = profile.photoUrl,
                     onNewMatch = { backStack.add(NewMatchRoute) },
                     onOpenMatch = { backStack.add(MatchRoute(it)) },
-                    onProfile = { selected = 3 },
+                    onProfile = { select(3) },
                     onTeams = { backStack.add(TeamsRoute) },
                     onSearch = { backStack.add(SearchRoute) },
                     onNotifications = { backStack.add(NotificationsRoute) },
@@ -243,6 +276,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
         },
     )
     }
+    }
     if (isRoot) {
         DesiNavigationBar(
             tabs = listOf(
@@ -251,13 +285,25 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                 NavTab(stringResource(Res.string.home_tournaments), DesiIcons.Trophy, DesiIcons.TrophyFilled),
                 NavTab(stringResource(Res.string.tab_me), DesiIcons.Person, DesiIcons.PersonFilled),
             ),
-            selected = selected,
-            onSelect = { selected = it },
+            selected = pager.targetPage,
+            onSelect = select,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
     }
 
+}
+
+private const val SLIDE_MS = 350
+
+/**
+ * Screens slide like the tabs do, never crossfade: an opened screen pushes in from the right, and back
+ * slides it out to the right again.
+ */
+private fun slideFrom(right: Boolean): ContentTransform {
+    val spec = tween<IntOffset>(SLIDE_MS, easing = DesiMotion.standard)
+    val sign = if (right) 1 else -1
+    return slideInHorizontally(spec) { sign * it } togetherWith slideOutHorizontally(spec) { -sign * it }
 }
 
 /** The screen a link path opens, or null for a link the app doesn't know. */
