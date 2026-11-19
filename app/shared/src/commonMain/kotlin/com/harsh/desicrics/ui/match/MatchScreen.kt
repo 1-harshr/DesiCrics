@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -65,6 +66,7 @@ import com.harsh.desicrics.designsystem.component.PadKeyStyle
 import com.harsh.desicrics.designsystem.component.RunPad
 import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.SegmentedControl
+import com.harsh.desicrics.designsystem.component.WagonWheel
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.Delivery
@@ -252,8 +254,17 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
         )
     }
     val crease = tab == MatchTab.LIVE && !state.isComplete
+    // With the wagon wheel on, the scorer taps where the ball went and then the runs. A zone stays armed
+    // until a ball is recorded or undone (either moves nextSeq on), or the same zone is tapped again.
+    val wagonWheel = ui.match?.rules?.wagonWheel == true
+    var armed by remember(ui.nextSeq) { mutableStateOf<FieldZone?>(null) }
+    // Dots, extras and wickets take no zone. Runs with none armed ask for one, with a Skip.
     val scoreRuns: (Int) -> Unit = { runs ->
-        if (ui.match?.rules?.wagonWheel == true && runs > 0) sheet = ScoringSheet.Zone(runs) else actions.onRuns(runs, null)
+        when {
+            !wagonWheel || runs == 0 -> actions.onRuns(runs, null)
+            armed != null -> actions.onRuns(runs, armed)
+            else -> sheet = ScoringSheet.Zone(runs)
+        }
     }
     // Voice scoring. Anything unclear opens a sheet or asks again; nothing ambiguous is recorded straight from speech.
     var misheard by remember { mutableStateOf(false) }
@@ -373,7 +384,11 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     }
     // The pad only shows with the live view, so the scorecard gets the whole screen.
     if (ui.isScorer && !state.isComplete && tab == MatchTab.LIVE) {
-        ScoringPad(ui, actions, askUndo, misheard, scoreRuns, nudged = nudges > 0, onBlockedKey = onBlockedKey, onSheet = { sheet = it })
+        ScoringPad(
+            ui, actions, askUndo, misheard, scoreRuns, nudged = nudges > 0, onBlockedKey = onBlockedKey, onSheet = { sheet = it },
+            armed = armed,
+            onZone = if (wagonWheel) ({ zone -> armed = zone.takeIf { it != armed } }) else null,
+        )
     }
 
     var autoOpened by remember { mutableStateOf<Pair<ScoringSheet, Int>?>(null) }
@@ -748,6 +763,8 @@ private fun ScoringPad(
     nudged: Boolean,
     onBlockedKey: () -> Unit,
     onSheet: (ScoringSheet) -> Unit,
+    armed: FieldZone? = null,
+    onZone: ((FieldZone) -> Unit)? = null,
 ) {
     val colors = DesiTheme.colors
     val canScore = ui.canScore
@@ -768,6 +785,18 @@ private fun ScoringPad(
             Modifier.windowInsetsPadding(WindowInsets.navigationBars).padding(DesiTheme.space.screen),
             verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
         ) {
+            // The field for the wagon wheel: a fixed strip, so on a small phone the crease above gives way
+            // and the keys stay put.
+            if (onZone != null) {
+                WagonWheel(
+                    labels = FieldZone.Clockwise.map { stringResource(it.label) },
+                    modifier = Modifier.height(DesiTheme.size.scoringField),
+                    selected = armed?.let { FieldZone.Clockwise.indexOf(it) },
+                    onSector = { onZone(FieldZone.Clockwise[it]) },
+                    description = stringResource(Res.string.scoring_field_description),
+                    aspectRatio = null,
+                )
+            }
             ui.error?.let { ScoringErrorBanner(it, actions.onDismissError) }
             val hint = when {
                 misheard -> stringResource(Res.string.scoring_voice_unknown)

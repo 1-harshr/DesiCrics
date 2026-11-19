@@ -1194,4 +1194,7 @@
     <string name="team_join_decline">Decline</string>
     <string name="notification_join_request">%1$s wants to join %2$s</string>
     <string name="notification_join_accepted">You're in %1$s</string>
+
+    <!-- Phase 7 · wagon wheel -->
+    <string name="scoring_field_description">Where the next shot went. Tap a part of the field, then the runs.</string>
 </resources>
