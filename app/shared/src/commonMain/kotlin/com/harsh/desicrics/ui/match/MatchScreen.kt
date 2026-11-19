@@ -245,16 +245,48 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
             dismissButton = { TextButton(onClick = { undoSeq = null }) { Text(stringResource(Res.string.common_cancel)) } },
         )
     }
-    Scoreboard(state, actions.onBack, onShare = { sheet = ScoringSheet.Share }, onOptions = if (ui.canEdit) ({ sheet = ScoringSheet.MatchOptions }) else null)
-    SegmentedControl(
-        options = MatchTab.entries,
-        selected = tab,
-        label = { stringResource(it.label) },
-        onSelect = { tab = it },
-        modifier = Modifier.padding(horizontal = DesiTheme.space.screen, vertical = DesiTheme.space.s3),
-    )
-    // The batters and bowler stay pinned above the pad so the scorer always sees who's in; the rest scrolls
-    // in what's left. Weighted, so on a short screen this gives way rather than the pad.
+    val crease = tab == MatchTab.LIVE && !state.isComplete
+    val scoreRuns: (Int) -> Unit = { runs ->
+        if (ui.match?.rules?.wagonWheel == true && runs > 0) sheet = ScoringSheet.Zone(runs) else actions.onRuns(runs, null)
+    }
+    // Voice scoring. Anything unclear opens a sheet or asks again; nothing ambiguous is recorded straight from speech.
+    var misheard by remember { mutableStateOf(false) }
+    val listen = rememberSpeechInput { heard ->
+        val command = heard?.let { VoiceCommands.parse(it) } ?: VoiceCommand.Unknown
+        misheard = command == VoiceCommand.Unknown || (!ui.canScore && command != VoiceCommand.Undo)
+        if (misheard) return@rememberSpeechInput
+        when (command) {
+            is VoiceCommand.Runs -> scoreRuns(command.runs)
+            is VoiceCommand.Extra -> actions.onExtra(command.type, command.runs)
+            VoiceCommand.Wicket -> sheet = ScoringSheet.Wicket
+            VoiceCommand.Undo -> if (ui.canUndo) askUndo()
+            VoiceCommand.Unknown -> Unit
+        }
+    }?.takeIf { ui.isScorer && crease }
+    // While the pad is up the screen is tight, so the header shrinks and the crease card tightens; the keys
+    // keep their full size. Followers and the other tabs get the roomy layout.
+    val compact = ui.isScorer && crease
+    Scoreboard(state, actions.onBack, onShare = { sheet = ScoringSheet.Share }, onOptions = if (ui.canEdit) ({ sheet = ScoringSheet.MatchOptions }) else null, compact = compact)
+    Row(
+        Modifier.padding(horizontal = DesiTheme.space.screen, vertical = if (compact) DesiTheme.space.s2 else DesiTheme.space.s3),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SegmentedControl(
+            options = MatchTab.entries,
+            selected = tab,
+            label = { stringResource(it.label) },
+            onSelect = { tab = it },
+            modifier = Modifier.weight(1f),
+        )
+        if (listen != null) {
+            IconButton(onClick = { misheard = false; listen() }, enabled = !ui.saving, modifier = Modifier.offset(x = DesiTheme.space.s2)) {
+                Icon(painterResource(DesiIcons.Mic), stringResource(Res.string.scoring_voice), tint = DesiTheme.colors.brand)
+            }
+        }
+    }
+    // The batters, bowler and this over come first, right above the pad, so the scorer always sees who's in;
+    // the compact header leaves room for them on a budget phone. Weighted and scrolling, so on a smaller
+    // screen this gives way rather than the pad, and what doesn't fit scrolls instead of being cut off.
     val scroll = rememberScrollState()
     // A connection warning appears at the top of the scrolling part; bring it into view.
     LaunchedEffect(ui.offline) { if (ui.offline) scroll.animateScrollTo(0) }
@@ -277,77 +309,55 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
             haptics.performHapticFeedback(HapticFeedbackType.Reject)
         }
     }
-    val crease = tab == MatchTab.LIVE && !state.isComplete
-    val scoreRuns: (Int) -> Unit = { runs ->
-        if (ui.match?.rules?.wagonWheel == true && runs > 0) sheet = ScoringSheet.Zone(runs) else actions.onRuns(runs, null)
-    }
-    // Voice scoring. Anything unclear opens a sheet or asks again; nothing ambiguous is recorded straight from speech.
-    var misheard by remember { mutableStateOf(false) }
-    val listen = rememberSpeechInput { heard ->
-        val command = heard?.let { VoiceCommands.parse(it) } ?: VoiceCommand.Unknown
-        misheard = command == VoiceCommand.Unknown || (!ui.canScore && command != VoiceCommand.Undo)
-        if (misheard) return@rememberSpeechInput
-        when (command) {
-            is VoiceCommand.Runs -> scoreRuns(command.runs)
-            is VoiceCommand.Extra -> actions.onExtra(command.type, command.runs)
-            VoiceCommand.Wicket -> sheet = ScoringSheet.Wicket
-            VoiceCommand.Undo -> if (ui.canUndo) askUndo()
-            VoiceCommand.Unknown -> Unit
-        }
-    }?.takeIf { ui.isScorer && crease }
-    Column(Modifier.fillMaxWidth().weight(1f)) {
+    Column(
+        Modifier.fillMaxWidth().weight(1f).verticalScroll(scroll)
+            .padding(horizontal = DesiTheme.space.screen).padding(bottom = DesiTheme.space.s4),
+        verticalArrangement = Arrangement.spacedBy(if (compact) DesiTheme.space.s2 else DesiTheme.space.s3),
+    ) {
         if (crease) {
-            Box(Modifier.padding(horizontal = DesiTheme.space.screen).padding(bottom = DesiTheme.space.s3)) {
-                CreaseCard(
+            CreaseCard(
                 ui,
                 innings,
                 blocking = needed?.takeIf { nudges > 0 },
                 nudges = nudges,
-                onVoice = listen?.let { start -> { misheard = false; start() } },
+                compact = compact,
                 onChoose = { sheet = it },
             )
-            }
         }
-        Column(
-            Modifier.fillMaxWidth().weight(1f).verticalScroll(scroll)
-                .padding(horizontal = DesiTheme.space.screen).padding(bottom = DesiTheme.space.s4),
-            verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
-        ) {
-            if (ui.saving || ui.reconciling) Text(stringResource(if (ui.saving) Res.string.score_saving else Res.string.score_checking), style = DesiTheme.type.caption)
-            if (ui.offline) {
-                ErrorBanner(
-                    listOfNotNull(stringResource(Res.string.match_offline), ui.confirmedAt?.let { stringResource(Res.string.score_confirmed, formatDayAndTime(it)) }).joinToString(" "),
-                    title = stringResource(Res.string.match_offline_title),
-                    icon = DesiIcons.CloudOff,
-                    warning = true,
-                )
-            }
-            when (tab) {
-                MatchTab.LIVE -> {
-                        if (!ui.isScorer) {
-                        Text(stringResource(Res.string.match_not_your_match), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
-                    }
-                    if (state.isComplete && ui.canUndo) {
-                        // Undo after an early ending reopens the match rather than taking back a ball.
-                        val endedEarly = state.result?.ending != null
-                        GhostButton(
-                            stringResource(if (endedEarly) Res.string.end_reopen else Res.string.match_undo_last_ball),
-                            onClick = if (endedEarly) actions.onUndo else askUndo,
-                            modifier = Modifier.fillMaxWidth(),
-                            leadingIcon = DesiIcons.History,
-                        )
-                    }
+        if (ui.saving || ui.reconciling) Text(stringResource(if (ui.saving) Res.string.score_saving else Res.string.score_checking), style = DesiTheme.type.caption)
+        if (ui.offline) {
+            ErrorBanner(
+                listOfNotNull(stringResource(Res.string.match_offline), ui.confirmedAt?.let { stringResource(Res.string.score_confirmed, formatDayAndTime(it)) }).joinToString(" "),
+                title = stringResource(Res.string.match_offline_title),
+                icon = DesiIcons.CloudOff,
+                warning = true,
+            )
+        }
+        when (tab) {
+            MatchTab.LIVE -> {
+                if (!ui.isScorer) {
+                    Text(stringResource(Res.string.match_not_your_match), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
                 }
-                MatchTab.SCORECARD -> {
-                    state.innings.forEach {
-                        InningsScorecard(it)
-                        InningsWagonWheel(it)
-                    }
-                    MatchMvp(state)
+                if (state.isComplete && ui.canUndo) {
+                    // Undo after an early ending reopens the match rather than taking back a ball.
+                    val endedEarly = state.result?.ending != null
+                    GhostButton(
+                        stringResource(if (endedEarly) Res.string.end_reopen else Res.string.match_undo_last_ball),
+                        onClick = if (endedEarly) actions.onUndo else askUndo,
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = DesiIcons.History,
+                    )
                 }
-                // Latest innings first, so the over in progress is at the top.
-                MatchTab.OVERS -> state.innings.asReversed().forEach { InningsOvers(it, showTitle = state.innings.size > 1) }
             }
+            MatchTab.SCORECARD -> {
+                state.innings.forEach {
+                    InningsScorecard(it)
+                    InningsWagonWheel(it)
+                }
+                MatchMvp(state)
+            }
+            // Latest innings first, so the over in progress is at the top.
+            MatchTab.OVERS -> state.innings.asReversed().forEach { InningsOvers(it, showTitle = state.innings.size > 1) }
         }
     }
     // The pad only shows with the live view, so the scorecard gets the whole screen.
@@ -396,13 +406,72 @@ private fun ScoringHaptics(ui: MatchUiState) {
     }
 }
 
-/** The green header: teams, then the batting side's score, overs and where the chase stands. */
+/**
+ * The green header: teams, then the batting side's score, overs and where the chase stands. [compact] fits
+ * it in two rows for while the scorer's pad is up, dropping the live badge and first-innings line.
+ */
 @Composable
-private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Unit, onOptions: (() -> Unit)?) {
+private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Unit, onOptions: (() -> Unit)?, compact: Boolean = false) {
     val colors = DesiTheme.colors
     val onGreen = colors.onBrandStrong
     val innings = state.current
     val match = state.match
+    val inningsName = stringResource(if (innings.number == 1) Res.string.match_innings_first else Res.string.match_innings_second)
+    val details = buildList {
+        add(stringResource(Res.string.match_run_rate, innings.runRate.format2()))
+        if (innings.isPowerplay) add(stringResource(Res.string.match_powerplay))
+        if (innings.isRevised) add(stringResource(Res.string.match_revised))
+        innings.target?.let { add(stringResource(Res.string.match_target, it)) }
+        innings.runsNeeded?.let { add(pluralStringResource(Res.plurals.match_need, innings.ballsRemaining, it, innings.ballsRemaining)) }
+    }.joinToString(" · ")
+    if (compact) {
+        Column(
+            Modifier.fillMaxWidth().background(colors.brandStrong)
+                .padding(start = DesiTheme.space.screen, end = DesiTheme.space.screen, bottom = DesiTheme.space.s3),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = onBack, modifier = Modifier.offset(x = -DesiTheme.space.s3)) {
+                    Icon(painterResource(DesiIcons.Back), stringResource(Res.string.common_back), tint = onGreen)
+                }
+                Text(
+                    stringResource(Res.string.match_title, match.teamA.name, match.teamB.name),
+                    style = DesiTheme.type.bodyStrong,
+                    color = onGreen,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = onShare, modifier = Modifier.offset(x = DesiTheme.space.s2)) {
+                    Icon(painterResource(DesiIcons.Share), stringResource(Res.string.match_share), tint = onGreen)
+                }
+                if (onOptions != null) {
+                    IconButton(onClick = onOptions, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
+                        Icon(painterResource(DesiIcons.More), stringResource(Res.string.match_options), tint = onGreen)
+                    }
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+                Text(innings.scoreText, style = DesiTheme.type.scoreLg, color = onGreen)
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(Res.string.match_innings_label, innings.battingTeam.name, inningsName).uppercase(),
+                        style = DesiTheme.type.label,
+                        color = onGreen.copy(alpha = 0.8f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        listOf(stringResource(Res.string.match_overs_of, innings.oversText, innings.maxBalls / 6), details).joinToString(" · "),
+                        style = DesiTheme.type.data,
+                        color = onGreen,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+        return
+    }
     Column(
         Modifier.fillMaxWidth().background(colors.brandStrong)
             .padding(start = DesiTheme.space.screen, end = DesiTheme.space.screen, bottom = DesiTheme.space.s5),
@@ -430,7 +499,6 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
                 }
             }
         }
-        val inningsName = stringResource(if (innings.number == 1) Res.string.match_innings_first else Res.string.match_innings_second)
         Row(Modifier.padding(top = DesiTheme.space.s2), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
             if (!state.isComplete) {
                 Box(Modifier.clip(DesiTheme.radius.full).background(colors.surface).padding(start = 2.dp, end = DesiTheme.space.s3, top = 2.dp, bottom = 2.dp)) {
@@ -458,14 +526,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
         if (result != null) {
             Text(resultText(match, result), style = DesiTheme.type.bodyStrong, color = onGreen)
         } else {
-            val details = buildList {
-                add(stringResource(Res.string.match_run_rate, innings.runRate.format2()))
-                if (innings.isPowerplay) add(stringResource(Res.string.match_powerplay))
-                if (innings.isRevised) add(stringResource(Res.string.match_revised))
-                innings.target?.let { add(stringResource(Res.string.match_target, it)) }
-                innings.runsNeeded?.let { add(pluralStringResource(Res.plurals.match_need, innings.ballsRemaining, it, innings.ballsRemaining)) }
-            }
-            Text(details.joinToString(" · "), style = DesiTheme.type.data, color = onGreen)
+            Text(details, style = DesiTheme.type.data, color = onGreen)
         }
         if (state.innings.size > 1) {
             val first = state.innings.first()
@@ -480,7 +541,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
 
 /**
  * Both batters, the bowler and the over so far, pinned above the pad. Empty slots are buttons for the
- * scorer to fill. With [onVoice], the header carries the mic for scoring by voice.
+ * scorer to fill. [compact] drops the title and tightens the spacing, for while the pad is up.
  */
 @Composable
 private fun CreaseCard(
@@ -488,7 +549,7 @@ private fun CreaseCard(
     innings: InningsState,
     blocking: ScoringSheet?,
     nudges: Int,
-    onVoice: (() -> Unit)?,
+    compact: Boolean,
     onChoose: (ScoringSheet) -> Unit,
 ) {
     fun batter(id: String?) = innings.battingTeam.players.firstOrNull { it.id == id }
@@ -501,24 +562,9 @@ private fun CreaseCard(
         innings.batters.filter { it.runs >= r.retireAtRuns && it.retiredAtWickets == null }.map { it.player.id }.toSet()
     }.orEmpty()
 
-    DesiCard(Modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            SectionHeader(stringResource(Res.string.match_section_crease), Modifier.weight(1f), icon = DesiIcons.Bat)
-            if (innings.isFreeHit) {
-                Text(
-                    stringResource(Res.string.match_free_hit).uppercase(),
-                    style = DesiTheme.type.label,
-                    color = DesiTheme.colors.onBrand,
-                    modifier = Modifier.clip(DesiTheme.radius.full).background(DesiTheme.colors.brand)
-                        .padding(horizontal = DesiTheme.space.s2, vertical = 2.dp),
-                )
-            }
-            if (onVoice != null) {
-                IconButton(onClick = onVoice, enabled = !ui.saving, modifier = Modifier.size(DesiTheme.size.touchTarget).offset(x = DesiTheme.space.s3)) {
-                    Icon(painterResource(DesiIcons.Mic), stringResource(Res.string.scoring_voice), tint = DesiTheme.colors.brand)
-                }
-            }
-        }
+    val space = DesiTheme.space
+    DesiCard(Modifier.fillMaxWidth(), padding = if (compact) space.s4 else space.s5, spacing = if (compact) space.s2 else space.s3) {
+        if (!compact) SectionHeader(stringResource(Res.string.match_section_crease), icon = DesiIcons.Bat)
         BatterSlot(batter(ui.strikerId), innings, onStrike = true, empty = stringResource(Res.string.match_choose_striker), ui.canEdit, mustRetire, rules, onChoose, nudges.takeIf { blocking == ScoringSheet.Striker }) {
             onChoose(ScoringSheet.Striker)
         }
@@ -543,8 +589,19 @@ private fun CreaseCard(
             )
         }
         HorizontalDivider(color = DesiTheme.colors.line)
-        ThisOver(innings)
+        ThisOver(innings, compact)
     }
+}
+
+@Composable
+private fun FreeHitTag() {
+    Text(
+        stringResource(Res.string.match_free_hit).uppercase(),
+        style = DesiTheme.type.label,
+        color = DesiTheme.colors.onBrand,
+        modifier = Modifier.clip(DesiTheme.radius.full).background(DesiTheme.colors.brand)
+            .padding(horizontal = DesiTheme.space.s2, vertical = 2.dp),
+    )
 }
 
 @Composable
@@ -647,9 +704,15 @@ private fun EmptySlot(text: String, enabled: Boolean, nudges: Int? = null, onCli
 }
 
 @Composable
-private fun ThisOver(innings: InningsState) {
+private fun ThisOver(innings: InningsState, compact: Boolean) {
     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
-        Text(stringResource(Res.string.match_section_this_over), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        // The next ball's free hit shows by the over it belongs to. Compact, the strip under the bowler speaks for itself.
+        if (!compact || innings.isFreeHit) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+                if (!compact) Text(stringResource(Res.string.match_section_this_over), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+                if (innings.isFreeHit) FreeHitTag()
+            }
+        }
         if (innings.currentOver.isEmpty()) {
             // Six empty slots, so the strip has its shape before the first ball.
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
@@ -724,9 +787,9 @@ private fun ScoringErrorBanner(error: ScoringError, onDismiss: () -> Unit) {
         ScoringError.SaveFailed -> stringResource(Res.string.scoring_error_save_failed)
         ScoringError.LoadFailed -> stringResource(Res.string.match_load_failed)
     }
+    // Above the keys space is tight, so a lost ball is one line; a refused one says which rule.
     ErrorBanner(
-        text,
-        title = stringResource(if (error is ScoringError.Rejected) Res.string.scoring_error_rejected_title else Res.string.scoring_error_save_title),
+        if (error == ScoringError.SaveFailed) stringResource(Res.string.scoring_error_save_title) else text,
         icon = if (error is ScoringError.Rejected) DesiIcons.Info else DesiIcons.CloudOff,
         action = stringResource(Res.string.match_dismiss),
         onAction = onDismiss,

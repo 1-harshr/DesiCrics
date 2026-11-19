@@ -52,11 +52,13 @@ import com.harsh.desicrics.designsystem.theme.DesiTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-/** A quiet surface that lets the content carry the hierarchy. */
+/** A quiet surface that lets the content carry the hierarchy. Dense screens can tighten [padding] and [spacing]. */
 @Composable
 fun DesiCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    padding: Dp = DesiTheme.space.s5,
+    spacing: Dp = DesiTheme.space.s3,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = DesiTheme.colors
@@ -66,8 +68,8 @@ fun DesiCard(
             .background(colors.surface)
             .border(1.dp, colors.line.copy(alpha = 0.7f), DesiTheme.radius.md)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(DesiTheme.space.s5),
-        verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
+            .padding(padding),
+        verticalArrangement = Arrangement.spacedBy(spacing),
         content = content,
     )
 }

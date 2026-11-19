@@ -149,6 +149,22 @@ class ScreenshotTest {
     @Test
     fun scoring() = shoot("scoring") { MatchContent(match(balls), actions) }
 
+    // A common budget phone, and a small old one, less the status and navigation bars: the batters, bowler
+    // and this over must stay in view above the pad.
+    @Test
+    @Config(sdk = [36], qualifiers = "w360dp-h692dp-xhdpi")
+    fun scoringBudgetPhone() = shoot("scoring_budget_phone") { MatchContent(match(balls), actions) }
+
+    @Test
+    @Config(sdk = [36], qualifiers = "w360dp-h692dp-xhdpi")
+    fun errorScoringBudgetPhone() = shoot("error_scoring_budget_phone") {
+        MatchContent(match(balls).copy(offline = true, confirmedAt = 0, error = ScoringError.SaveFailed), actions)
+    }
+
+    @Test
+    @Config(sdk = [36], qualifiers = "w360dp-h592dp-xhdpi")
+    fun scoringSmallPhone() = shoot("scoring_small_phone") { MatchContent(match(balls), actions) }
+
     @Test
     fun scoringFreeHitDark() = shoot("scoring_free_hit_dark", dark = true) { MatchContent(match(balls.dropLast(2)), actions) }
 
