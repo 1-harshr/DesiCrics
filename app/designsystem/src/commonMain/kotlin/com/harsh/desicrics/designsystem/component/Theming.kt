@@ -22,12 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.designsystem.theme.DesiThemeSpec
@@ -59,6 +61,19 @@ fun MotifArt(motif: Motif, modifier: Modifier = Modifier, contentDescription: St
         Modifier.clearAndSetSemantics {}
     }
     Canvas(modifier.then(semantics)) { with(motif) { draw(colors) } }
+}
+
+/** A [Motif] on a soft square, sized and shaped like an [IconTile] so it can lead a row. */
+@Composable
+fun MotifTile(
+    motif: Motif,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp,
+    container: Color = DesiTheme.colors.brandSoft,
+) {
+    Box(modifier.size(size).clip(DesiTheme.shapes.tile).background(container), contentAlignment = Alignment.Center) {
+        MotifArt(motif, Modifier.size(size * 0.6f))
+    }
 }
 
 /**

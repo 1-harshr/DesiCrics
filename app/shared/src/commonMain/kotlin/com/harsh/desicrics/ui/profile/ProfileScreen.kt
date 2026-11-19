@@ -38,7 +38,12 @@ import com.harsh.desicrics.designsystem.component.DesiTextField
 import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.SegmentedControl
+import com.harsh.desicrics.designsystem.component.MotifTile
+import com.harsh.desicrics.designsystem.component.ThemePicker
 import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.designsystem.theme.DesiThemeSpec
+import com.harsh.desicrics.designsystem.theme.DesiThemes
+import com.harsh.desicrics.data.ThemePreference
 import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.PlayerRole
@@ -65,11 +70,12 @@ import org.jetbrains.compose.resources.DrawableResource
 import com.harsh.desicrics.ui.text.label
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 private enum class ProfileTab { ABOUT, STATS, MATCHES, TEAMS }
 
-private enum class SettingsSheet { CLAIM, SUPPORT, DELETE }
+private enum class SettingsSheet { THEME, CLAIM, SUPPORT, DELETE }
 
 @Composable
 fun ProfileScreen(
@@ -83,6 +89,7 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val themes = koinInject<ThemePreference>()
     var sheet by rememberSaveable { mutableStateOf<SettingsSheet?>(null) }
     // Coming back from a team the user left or renamed, or a match they played.
     LifecycleResumeEffect(Unit) {
@@ -112,6 +119,7 @@ fun ProfileScreen(
     )
     when (sheet) {
         null -> Unit
+        SettingsSheet.THEME -> ThemeSheet(onSelect = themes::select, onDismiss = close)
         SettingsSheet.CLAIM -> ClaimSheet(state, onClaim = viewModel::claimByCode, onDismiss = close)
         SettingsSheet.SUPPORT -> SupportSheet(state, onSend = { category, message -> viewModel.contactSupport(category, message) }, onDismiss = close)
         SettingsSheet.DELETE -> DeleteAccountSheet(state, onDelete = { viewModel.deleteAccount(onSignOut) }, onDismiss = close)
@@ -219,7 +227,13 @@ private fun AboutTab(profile: UserProfile, onEdit: () -> Unit, onSignOut: () -> 
     Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
         SectionHeader(stringResource(Res.string.profile_settings), icon = DesiIcons.Settings)
         ListCard {
-            ListRow(stringResource(Res.string.profile_claim), leading = { IconTile(DesiIcons.Badge) }, onClick = { onSettings(SettingsSheet.CLAIM) })
+            ListRow(
+                stringResource(Res.string.profile_theme),
+                subtitle = stringResource(DesiTheme.spec.name),
+                leading = { MotifTile(DesiTheme.motifs.ball) },
+                onClick = { onSettings(SettingsSheet.THEME) },
+            )
+            ListRow(stringResource(Res.string.profile_claim), leading = { IconTile(DesiIcons.Badge) }, divider = true, onClick = { onSettings(SettingsSheet.CLAIM) })
             ListRow(stringResource(Res.string.profile_support), leading = { IconTile(DesiIcons.Support) }, divider = true, onClick = { onSettings(SettingsSheet.SUPPORT) })
             ListRow(stringResource(Res.string.profile_sign_out), leading = { IconTile(DesiIcons.Logout) }, divider = true, onClick = onSignOut)
             ListRow(
@@ -253,6 +267,15 @@ private fun ClaimSuggestion(player: PlayerSummary, saving: Boolean, failed: Bool
         Text(stringResource(Res.string.profile_claimable_body, player.name), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
         if (failed) ErrorBanner(stringResource(Res.string.profile_claimable_failed))
         PrimaryButton(stringResource(Res.string.profile_claimable_action), onClick = onClaim, loading = saving, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+/** Every theme as a live preview; picking one restyles the app straight away, sheet included. */
+@Composable
+private fun ThemeSheet(onSelect: (DesiThemeSpec) -> Unit, onDismiss: () -> Unit) {
+    DesiSheet(stringResource(Res.string.profile_theme), onDismiss, stringResource(Res.string.profile_theme_hint)) {
+        ThemePicker(DesiThemes.all, selected = DesiTheme.spec, onSelect = onSelect)
+        PrimaryButton(stringResource(Res.string.rules_done), onClick = onDismiss, modifier = Modifier.fillMaxWidth())
     }
 }
 

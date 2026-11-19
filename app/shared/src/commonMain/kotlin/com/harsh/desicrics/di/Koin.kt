@@ -6,6 +6,7 @@ import com.harsh.desicrics.data.MatchRepository
 import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.data.StatsRepository
 import com.harsh.desicrics.data.TeamRepository
+import com.harsh.desicrics.data.ThemePreference
 import com.harsh.desicrics.data.TournamentRepository
 import com.harsh.desicrics.data.UserRepository
 import com.harsh.desicrics.data.api.DesiCricsApi
@@ -31,6 +32,7 @@ import com.harsh.desicrics.ui.tournament.TournamentsViewModel
 import com.harsh.desicrics.ui.teams.TeamsViewModel
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
+import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -74,6 +76,7 @@ val dataModule = module {
     singleOf(::TournamentRepository)
     singleOf(::StatsRepository)
     singleOf(::CommunityRepository)
+    single { ThemePreference(Settings()) }
 }
 
 val viewModelModule = module {

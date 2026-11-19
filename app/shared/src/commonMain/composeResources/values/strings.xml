@@ -1197,4 +1197,8 @@
 
     <!-- Phase 7 · wagon wheel -->
     <string name="scoring_field_description">Where the next shot went. Tap a part of the field, then the runs.</string>
+
+    <!-- Phase 8 · themes -->
+    <string name="profile_theme">Theme</string>
+    <string name="profile_theme_hint">How the app looks on this phone. Scoring works the same in every theme, and a four, six or wicket keeps its colour's meaning.</string>
 </resources>

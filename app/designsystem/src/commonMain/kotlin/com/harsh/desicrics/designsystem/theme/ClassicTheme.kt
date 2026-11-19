@@ -3,7 +3,7 @@ package com.harsh.desicrics.designsystem.theme
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -58,20 +58,25 @@ private fun DrawScope.drawClassicStumps(colors: DesiColors) {
     drawLine(colors.brand, Offset(xs[1] + stroke * 0.4f, bailY), Offset(xs[2], bailY), stroke * 0.8f, StrokeCap.Round)
 }
 
-/** A brand-green ball with its seam in [DesiColors.onBrand]. */
+/** A brand-green ball with two seams bowing the same way in [DesiColors.onBrand], as on the app icon. */
 private fun DrawScope.drawClassicBall(colors: DesiColors) {
-    val radius = size.minDimension * 0.42f
-    drawCircle(colors.brand, radius, center)
-    val seam = Stroke(width = radius * 0.1f, cap = StrokeCap.Round)
-    val arc = Size(radius * 1.4f, radius * 2f)
-    drawArc(colors.onBrand, 300f, 120f, false, Offset(center.x - radius * 1.25f, center.y - radius), arc, style = seam)
-    drawArc(colors.onBrand, 120f, 120f, false, Offset(center.x - radius * 0.15f, center.y - radius), arc, style = seam)
+    val r = size.minDimension * 0.42f
+    val c = center
+    drawCircle(colors.brand, r, c)
+    val seam = Stroke(width = r * 0.11f, cap = StrokeCap.Round)
+    for (x in floatArrayOf(-0.17f, 0.17f)) {
+        val path = Path().apply {
+            moveTo(c.x + x * r, c.y - 0.92f * r)
+            quadraticTo(c.x + (x - 0.3f) * r, c.y, c.x + x * r, c.y + 0.92f * r)
+        }
+        drawPath(path, colors.onBrand, style = seam)
+    }
 }
 
 /** Two bails lying side by side, in brand green. */
 private fun DrawScope.drawClassicBails(colors: DesiColors) {
     val stroke = size.minDimension * 0.12f
     val y = center.y
-    drawLine(colors.brand, Offset(size.width * 0.15f, y), Offset(size.width * 0.46f, y), stroke, StrokeCap.Round)
-    drawLine(colors.brand, Offset(size.width * 0.54f, y), Offset(size.width * 0.85f, y), stroke, StrokeCap.Round)
+    drawLine(colors.brand, Offset(size.width * 0.15f, y), Offset(size.width * 0.42f, y), stroke, StrokeCap.Round)
+    drawLine(colors.brand, Offset(size.width * 0.58f, y), Offset(size.width * 0.85f, y), stroke, StrokeCap.Round)
 }
