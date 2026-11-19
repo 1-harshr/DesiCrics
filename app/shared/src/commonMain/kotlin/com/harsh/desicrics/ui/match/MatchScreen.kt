@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.designsystem.component.ErrorState
+import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import com.harsh.desicrics.ui.text.formatDayAndTime
 import com.harsh.desicrics.ui.text.commentaryText
@@ -118,6 +120,7 @@ fun MatchScreen(
             onWicket = viewModel::recordWicket,
             onUndo = viewModel::undo,
             onDismissError = viewModel::dismissError,
+            onRetry = viewModel::retry,
             onRetire = viewModel::retire,
             onSwapEnds = viewModel::swapEnds,
             onReplaceBowler = viewModel::replaceBowler,
@@ -156,6 +159,7 @@ class MatchActions(
     val onShareLink: () -> Unit = {},
     val onShareOverlay: () -> Unit = {},
     val onStartFixture: (SquadRequest, SquadRequest, TeamSide, TossDecision) -> Unit = { _, _, _, _ -> },
+    val onRetry: () -> Unit = {},
 )
 
 private enum class MatchTab { LIVE, SCORECARD, OVERS }
@@ -197,10 +201,7 @@ fun MatchContent(ui: MatchUiState, actions: MatchActions) {
         BrandStatusBar()
         when {
             ui.loading -> FullScreenLoading()
-            ui.notFound || state == null -> MessageScreen(
-                if (ui.notFound) Res.string.match_not_found else Res.string.match_load_failed,
-                actions.onBack,
-            )
+            ui.notFound || state == null -> MatchMissing(ui.notFound, actions)
             state.match.status == MatchStatus.SCHEDULED -> FixturePending(state.match, ui.fixture, actions.onStartFixture, actions.onBack)
             else -> Scoring(ui, state, actions)
         }
@@ -240,8 +241,14 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
     ) {
         if (ui.saving || ui.reconciling) Text(stringResource(if (ui.saving) Res.string.score_saving else Res.string.score_checking), style = DesiTheme.type.caption)
-        if (ui.offline) ui.confirmedAt?.let { Text(stringResource(Res.string.score_confirmed, formatDayAndTime(it)), style = DesiTheme.type.caption) }
-        if (ui.offline) Text(stringResource(Res.string.match_offline), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        if (ui.offline) {
+            ErrorBanner(
+                listOfNotNull(stringResource(Res.string.match_offline), ui.confirmedAt?.let { stringResource(Res.string.score_confirmed, formatDayAndTime(it)) }).joinToString(" "),
+                title = stringResource(Res.string.match_offline_title),
+                icon = DesiIcons.CloudOff,
+                warning = true,
+            )
+        }
         when (tab) {
             MatchTab.LIVE -> {
                 if (!state.isComplete) {
@@ -571,7 +578,7 @@ private fun ScoringPad(ui: MatchUiState, actions: MatchActions, askUndo: () -> U
             Modifier.windowInsetsPadding(WindowInsets.navigationBars).padding(DesiTheme.space.screen),
             verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
         ) {
-            ui.error?.let { ErrorBanner(it, actions.onDismissError) }
+            ui.error?.let { ScoringErrorBanner(it, actions.onDismissError) }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val hint = when {
                     misheard -> stringResource(Res.string.scoring_voice_unknown)
@@ -601,17 +608,19 @@ private fun ScoringPad(ui: MatchUiState, actions: MatchActions, askUndo: () -> U
 }
 
 @Composable
-private fun ErrorBanner(error: ScoringError, onDismiss: () -> Unit) {
-    val colors = DesiTheme.colors
+private fun ScoringErrorBanner(error: ScoringError, onDismiss: () -> Unit) {
     val text = when (error) {
         is ScoringError.Rejected -> stringResource(error.error.label)
         ScoringError.SaveFailed -> stringResource(Res.string.scoring_error_save_failed)
         ScoringError.LoadFailed -> stringResource(Res.string.match_load_failed)
     }
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(text, style = DesiTheme.type.body, color = colors.event.wicket, modifier = Modifier.weight(1f))
-        TextButton(onClick = onDismiss) { Text(stringResource(Res.string.match_dismiss), style = DesiTheme.type.button, color = colors.brand) }
-    }
+    ErrorBanner(
+        text,
+        title = stringResource(if (error is ScoringError.Rejected) Res.string.scoring_error_rejected_title else Res.string.scoring_error_save_title),
+        icon = if (error is ScoringError.Rejected) DesiIcons.Info else DesiIcons.CloudOff,
+        action = stringResource(Res.string.match_dismiss),
+        onAction = onDismiss,
+    )
 }
 
 @Composable
@@ -791,15 +800,14 @@ private fun ScoringSheets(
 }
 
 @Composable
-private fun MessageScreen(message: StringResource, onBack: () -> Unit) {
-    Column(
-        Modifier.fillMaxSize().padding(DesiTheme.space.s8),
-        verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(stringResource(message), style = DesiTheme.type.bodyLg, color = DesiTheme.colors.ink, textAlign = TextAlign.Center)
-        GhostButton(stringResource(Res.string.common_back), onClick = onBack)
-    }
+private fun MatchMissing(notFound: Boolean, actions: MatchActions) {
+    ErrorState(
+        title = stringResource(if (notFound) Res.string.error_match_missing_title else Res.string.error_match_title),
+        body = stringResource(if (notFound) Res.string.match_not_found else Res.string.error_connection_body),
+        icon = if (notFound) DesiIcons.SearchOff else DesiIcons.CloudOff,
+        onRetry = actions.onRetry.takeIf { !notFound },
+        secondary = { GhostButton(stringResource(Res.string.common_back), onClick = actions.onBack, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Back) },
+    )
 }
 
 /** How a ball looks in the over strip: "4", "W", "2wd", "nb", "1lb", "•". */

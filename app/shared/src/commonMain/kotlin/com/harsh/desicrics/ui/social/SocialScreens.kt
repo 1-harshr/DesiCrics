@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.social
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -150,11 +151,11 @@ fun NotificationsScreen(
     viewModel: NotificationsViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    NotificationsContent(state, onOpenMatch, onBack)
+    NotificationsContent(state, onOpenMatch, onBack, onRetry = viewModel::retry)
 }
 
 @Composable
-fun NotificationsContent(state: NotificationsUiState, onOpenMatch: (String) -> Unit, onBack: () -> Unit) {
+fun NotificationsContent(state: NotificationsUiState, onOpenMatch: (String) -> Unit, onBack: () -> Unit, onRetry: () -> Unit = {}) {
     val space = DesiTheme.space
     DesiScaffold(title = stringResource(Res.string.notifications_title), onBack = onBack) { padding ->
         when {
@@ -165,7 +166,7 @@ fun NotificationsContent(state: NotificationsUiState, onOpenMatch: (String) -> U
                 verticalArrangement = Arrangement.spacedBy(space.s2),
             ) {
                 if (state.loadFailed) {
-                    item { Text(stringResource(Res.string.notifications_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
+                    item { ErrorState(stringResource(Res.string.error_notifications_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
                 } else if (state.notifications.isEmpty()) {
                     item { EmptyState(DesiIcons.Notifications, stringResource(Res.string.notifications_empty_title), body = stringResource(Res.string.notifications_empty)) }
                 }
@@ -229,7 +230,7 @@ fun PlayerScreen(
     extra: @Composable (PlayerPage) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    PlayerContent(state, onFollow = viewModel::toggleFollow, onOpenTeam, onOpenMatch, onBack, extra)
+    PlayerContent(state, onFollow = viewModel::toggleFollow, onOpenTeam, onOpenMatch, onBack, extra, onRetry = viewModel::retry)
 }
 
 @Composable
@@ -240,6 +241,7 @@ fun PlayerContent(
     onOpenMatch: (String) -> Unit,
     onBack: () -> Unit,
     extra: @Composable (PlayerPage) -> Unit = {},
+    onRetry: () -> Unit = {},
 ) {
     val page = state.page
     val space = DesiTheme.space
@@ -247,11 +249,11 @@ fun PlayerContent(
     if (page == null) {
         DesiScaffold(title = "", onBack = onBack) { padding ->
             if (state.loading) FullScreenLoading(Modifier.padding(padding))
-            else Text(
-                stringResource(Res.string.player_load_failed),
-                style = DesiTheme.type.body,
-                color = colors.event.wicket,
-                modifier = Modifier.padding(padding).padding(space.screen),
+            else ErrorState(
+                stringResource(Res.string.error_player_title),
+                stringResource(Res.string.error_connection_body),
+                Modifier.padding(padding),
+                onRetry = onRetry,
             )
         }
         return

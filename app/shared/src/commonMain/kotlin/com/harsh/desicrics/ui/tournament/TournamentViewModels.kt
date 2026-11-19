@@ -32,6 +32,12 @@ class TournamentsViewModel(private val repository: TournamentRepository) : ViewM
     val state: StateFlow<TournamentsUiState> = _state
 
     init {
+        retry()
+    }
+
+    /** Loads the list, first time and after a failure. */
+    fun retry() {
+        _state.update { it.copy(loading = true, loadFailed = false) }
         viewModelScope.launch {
             attempt { repository.mine() }.fold(
                 onSuccess = { list -> _state.update { it.copy(loading = false, tournaments = list) } },

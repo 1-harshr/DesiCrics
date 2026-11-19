@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.stats
+import com.harsh.desicrics.designsystem.component.ErrorBanner
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import com.harsh.desicrics.designsystem.component.ListCard
 import com.harsh.desicrics.designsystem.component.ListRow
@@ -120,7 +122,7 @@ fun CareerSection(profileId: String, onCompare: (() -> Unit)? = null, name: Stri
         StatsFilters(state.filter, viewModel::setFilter)
         val stats = state.stats
         when {
-            stats == null && state.failed -> Text(stringResource(Res.string.stats_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+            stats == null && state.failed -> ErrorState(stringResource(Res.string.error_stats_title), stringResource(Res.string.error_connection_body), onRetry = viewModel::retry, compact = true)
             stats == null -> Unit
             stats.matches == 0 -> EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.stats_none_title), body = stringResource(Res.string.stats_none))
             else -> CareerCards(stats, onOpenMatch)
@@ -338,7 +340,7 @@ fun CompareScreen(profileId: String, name: String, onBack: () -> Unit, viewModel
             if (other != null) {
                 item { StatsFilters(state.filter, viewModel::setFilter) }
             }
-            if (state.failed) item { Text(stringResource(Res.string.stats_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
+            if (state.failed) item { ErrorBanner(stringResource(Res.string.stats_load_failed)) }
             if (pair != null && other != null) {
                 item { CompareTable(name, other.name, pair.first, pair.second) }
             }
@@ -421,7 +423,7 @@ fun LeaderboardScreen(
                     viewModel.update { it.copy(metric = metric) }
                 })
             }
-            if (state.failed) item { Text(stringResource(Res.string.stats_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
+            if (state.failed) item { ErrorBanner(stringResource(Res.string.stats_load_failed)) }
             else if (!state.loading && state.rows.isEmpty()) item { EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.leaderboard_empty)) }
             if (state.rows.isNotEmpty()) {
                 item {

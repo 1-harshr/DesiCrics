@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.tournament
+import com.harsh.desicrics.designsystem.component.ErrorBanner
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -143,6 +145,7 @@ fun TournamentScreen(
         onStart = viewModel::start,
         onReview = viewModel::review,
         onLeaderboard = onLeaderboard,
+        onRetry = viewModel::refresh,
     )
     when (val current = sheet) {
         null -> Unit
@@ -178,6 +181,7 @@ internal fun TournamentContent(
     onReview: (teamId: String, confirm: Boolean) -> Unit,
     onLeaderboard: () -> Unit = {},
     initialTab: TournamentTab = TournamentTab.FIXTURES,
+    onRetry: () -> Unit = {},
 ) {
     val details = state.details
     val space = DesiTheme.space
@@ -187,11 +191,11 @@ internal fun TournamentContent(
     if (details == null) {
         DesiScaffold(title = stringResource(Res.string.tournaments_title), onBack = onBack) { padding ->
             if (state.loading) FullScreenLoading(Modifier.padding(padding))
-            else Text(
-                stringResource(Res.string.tournaments_load_failed),
-                style = DesiTheme.type.body,
-                color = colors.event.wicket,
-                modifier = Modifier.padding(padding).padding(space.screen),
+            else ErrorState(
+                stringResource(Res.string.error_tournament_title),
+                stringResource(Res.string.error_connection_body),
+                Modifier.padding(padding),
+                onRetry = onRetry,
             )
         }
         return
@@ -233,7 +237,7 @@ internal fun TournamentContent(
                 Text(stringResource(Res.string.tournament_organisers, organisers.joinToString()), style = DesiTheme.type.caption, color = colors.muted)
             }
         }
-        if (state.actionFailed) Text(stringResource(Res.string.tournament_action_failed), style = DesiTheme.type.body, color = colors.event.wicket)
+        if (state.actionFailed) ErrorBanner(stringResource(Res.string.tournament_action_failed))
         val tabs = TournamentTab.entries.filter { it != TournamentTab.TABLE || details.tables.isNotEmpty() }
         SegmentedControl(tabs, selected = tab.takeIf { it in tabs } ?: TournamentTab.FIXTURES, label = { stringResource(it.label) }, onSelect = { fixtureTeam = null; tab = it })
         Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {

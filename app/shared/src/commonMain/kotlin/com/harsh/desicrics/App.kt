@@ -1,10 +1,13 @@
 package com.harsh.desicrics
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
@@ -58,22 +61,15 @@ fun App(link: String? = null, onLinkHandled: () -> Unit = {}) {
 
 @Composable
 private fun SessionErrorScreen(onRetry: () -> Unit, onSignOut: () -> Unit) {
-    val space = DesiTheme.space
-    Column(
-        modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = space.screen),
-        verticalArrangement = Arrangement.spacedBy(space.s3, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(stringResource(Res.string.session_error_title), style = DesiTheme.type.titleMd, color = DesiTheme.colors.ink)
-        Text(
-            stringResource(Res.string.session_error_body),
-            style = DesiTheme.type.body,
-            textAlign = TextAlign.Center,
-            color = DesiTheme.colors.muted,
-        )
-        PrimaryButton(stringResource(Res.string.common_try_again), onClick = onRetry, modifier = Modifier.padding(top = space.s2))
-        GhostButton(stringResource(Res.string.profile_sign_out), onClick = onSignOut)
-    }
+    ErrorState(
+        title = stringResource(Res.string.session_error_title),
+        body = stringResource(Res.string.session_error_body),
+        modifier = Modifier.background(DesiTheme.colors.bg).safeDrawingPadding(),
+        onRetry = onRetry,
+        secondary = {
+            GhostButton(stringResource(Res.string.profile_sign_out), onClick = onSignOut, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Logout)
+        },
+    )
 }
 
 @Preview

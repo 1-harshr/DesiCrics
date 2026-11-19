@@ -1,5 +1,7 @@
 package com.harsh.desicrics
 
+import com.harsh.desicrics.ui.match.ScoringError
+
 import com.harsh.desicrics.ui.teams.Insights
 import com.harsh.desicrics.model.WinRecord
 import com.harsh.desicrics.model.TeamInsights
@@ -290,5 +292,20 @@ class ScreenshotTest {
             ),
             {}, {}, {},
         )
+    }
+
+    @Test
+    fun errorTeam() = shoot("error_team") {
+        TeamContent(TeamUiState(myId = "me", loading = false, loadFailed = true), {}, {}, {}, {}, {}, {}, {})
+    }
+
+    @Test
+    fun errorNotificationsDark() = shoot("error_notifications_dark", dark = true) {
+        NotificationsContent(NotificationsUiState(loading = false, loadFailed = true), {}, {})
+    }
+
+    @Test
+    fun errorScoring() = shoot("error_scoring") {
+        MatchContent(match(balls).copy(offline = true, confirmedAt = 0, error = ScoringError.SaveFailed), actions)
     }
 }

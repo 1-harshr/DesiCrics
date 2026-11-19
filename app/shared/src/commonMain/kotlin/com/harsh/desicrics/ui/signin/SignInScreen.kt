@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.signin
+import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
@@ -366,7 +367,7 @@ private fun CodeForm(
 private fun Feedback(state: SignInUiState) {
     val colors = DesiTheme.colors
     state.error?.takeIf { it != SignInError.PHONE_INVALID }?.let {
-        Text(stringResource(it.label), style = DesiTheme.type.body, color = colors.event.wicket)
+        ErrorBanner(stringResource(it.label))
     }
     state.message?.let { message ->
         val text = when (message) {

@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.community
+import com.harsh.desicrics.designsystem.component.ErrorBanner
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Icon
@@ -104,7 +106,7 @@ fun CommunityScreen(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
             SegmentedControl(CommunityTab.entries, selected = state.tab, label = { stringResource(it.label) }, onSelect = viewModel::setTab)
-            if (state.failed) Text(stringResource(Res.string.community_load_failed), style = DesiTheme.type.body, color = colors.event.wicket)
+            if (state.failed) ErrorState(stringResource(Res.string.error_community_title), stringResource(Res.string.error_connection_body), onRetry = viewModel::retry, compact = true)
             when (state.tab) {
                 CommunityTab.LOOKING_FOR -> {
                     PrimaryButton(stringResource(Res.string.looking_for_post), onClick = { sheet = CommunitySheet.Post }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
@@ -280,7 +282,7 @@ private fun PostSheet(
         SectionLabel(stringResource(Res.string.looking_for_date))
         DatePicker(date, title = null, headline = null, showModeToggle = false)
         DesiTextField(value = note, onValueChange = { note = it.take(500) }, label = stringResource(Res.string.looking_for_note), singleLine = false)
-        if (failed) Text(stringResource(Res.string.community_action_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        if (failed) ErrorBanner(stringResource(Res.string.community_action_failed))
         PrimaryButton(
             stringResource(Res.string.looking_for_send),
             onClick = { date.selectedDateMillis?.let { onPost(kind, epochMillisAt(it, 0, 0), note, team?.id) } },
@@ -303,7 +305,7 @@ private fun RespondSheet(post: LookingForPost, saving: Boolean, failed: Boolean,
             label = stringResource(Res.string.looking_for_phone),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         )
-        if (failed) Text(stringResource(Res.string.community_action_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        if (failed) ErrorBanner(stringResource(Res.string.community_action_failed))
         PrimaryButton(
             stringResource(Res.string.looking_for_respond_send),
             onClick = { onSend(message, phone) },
@@ -328,7 +330,7 @@ private fun AddEntrySheet(saving: Boolean, failed: Boolean, onAdd: (String, Stri
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
         )
         DesiTextField(value = notes, onValueChange = { notes = it.take(500) }, label = stringResource(Res.string.directory_notes), singleLine = false)
-        if (failed) Text(stringResource(Res.string.community_action_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        if (failed) ErrorBanner(stringResource(Res.string.community_action_failed))
         PrimaryButton(stringResource(Res.string.directory_save), onClick = { onAdd(name, phone, notes) }, enabled = name.isNotBlank(), loading = saving, modifier = Modifier.fillMaxWidth())
     }
 }

@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.profile
+import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -130,7 +131,7 @@ private fun PhotoSection(state: ProfileFormState, onChangePhoto: () -> Unit) {
         PhotoAvatar(state.name, state.photoUrl, size = 72)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1)) {
             TonalButton(stringResource(Res.string.profile_photo_change), onClick = onChangePhoto, loading = state.uploadingPhoto)
-            if (state.photoFailed) Text(stringResource(Res.string.profile_photo_failed), style = DesiTheme.type.caption, color = DesiTheme.colors.event.wicket)
+            if (state.photoFailed) ErrorBanner(stringResource(Res.string.profile_photo_failed))
         }
     }
 }
@@ -298,7 +299,7 @@ private fun SaveBar(state: ProfileFormState, isOnboarding: Boolean, onSave: () -
             verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
         ) {
             if (state.error == ProfileFormError.SaveFailed) {
-                Text(stringResource(Res.string.profile_error_save_failed), style = DesiTheme.type.body, color = colors.event.wicket)
+                ErrorBanner(stringResource(Res.string.profile_error_save_failed))
             }
             PrimaryButton(
                 text = stringResource(if (isOnboarding) Res.string.profile_finish_setup else Res.string.profile_save),

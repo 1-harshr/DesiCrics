@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -95,7 +96,7 @@ internal fun FixturePending(
                 onSelect = { tossDecision = it },
             )
             Text(stringResource(Res.string.toss_first, match.team(if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other).name), style = DesiTheme.type.bodyStrong)
-            if (setup.failed) Text(stringResource(Res.string.fixture_start_failed), style = DesiTheme.type.body, color = colors.event.wicket)
+            if (setup.failed) ErrorBanner(stringResource(Res.string.fixture_start_failed))
             val a = squads[TeamSide.A]
             val b = squads[TeamSide.B]
             PrimaryButton(

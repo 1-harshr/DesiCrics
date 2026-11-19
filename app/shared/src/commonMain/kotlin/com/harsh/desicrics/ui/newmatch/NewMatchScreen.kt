@@ -1,44 +1,23 @@
 package com.harsh.desicrics.ui.newmatch
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import com.harsh.desicrics.designsystem.component.ActionTile
-import com.harsh.desicrics.designsystem.component.Avatar
-import com.harsh.desicrics.designsystem.component.IconTile
-import com.harsh.desicrics.designsystem.component.ListCard
-import com.harsh.desicrics.designsystem.component.ListRow
-import com.harsh.desicrics.designsystem.component.SectionHeader
-import com.harsh.desicrics.designsystem.component.Tag
-import com.harsh.desicrics.designsystem.component.TagTone
-import com.harsh.desicrics.designsystem.component.heroBackground
-import org.jetbrains.compose.resources.DrawableResource
-
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
@@ -55,30 +34,99 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.api.CreateMatchRequest
 import com.harsh.desicrics.api.MatchSetupError
 import com.harsh.desicrics.api.SquadPlayer
+import com.harsh.desicrics.designsystem.component.ActionTile
+import com.harsh.desicrics.designsystem.component.Avatar
 import com.harsh.desicrics.designsystem.component.BrandHeader
 import com.harsh.desicrics.designsystem.component.BrandStatusBar
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.component.DesiTextField
+import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.component.GhostButton
-import com.harsh.desicrics.designsystem.component.TonalButton
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.ListRow
 import com.harsh.desicrics.designsystem.component.NumberStepper
 import com.harsh.desicrics.designsystem.component.PrimaryButton
-import com.harsh.desicrics.designsystem.component.RemovableChip
-import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.SegmentedControl
+import com.harsh.desicrics.designsystem.component.Tag
+import com.harsh.desicrics.designsystem.component.TagTone
+import com.harsh.desicrics.designsystem.component.heroBackground
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
-import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.resources.Res
+import com.harsh.desicrics.resources.home_search
+import com.harsh.desicrics.resources.new_match_add_player
+import com.harsh.desicrics.resources.new_match_error_captain
+import com.harsh.desicrics.resources.new_match_error_create_failed
+import com.harsh.desicrics.resources.new_match_error_overs
+import com.harsh.desicrics.resources.new_match_error_player_name_invalid
+import com.harsh.desicrics.resources.new_match_error_player_twice
+import com.harsh.desicrics.resources.new_match_error_rules
+import com.harsh.desicrics.resources.new_match_error_same_team_names
+import com.harsh.desicrics.resources.new_match_error_team_name_missing
+import com.harsh.desicrics.resources.new_match_error_team_name_too_long
+import com.harsh.desicrics.resources.new_match_error_too_few_players
+import com.harsh.desicrics.resources.new_match_error_too_many_players
+import com.harsh.desicrics.resources.new_match_overs_fewer
+import com.harsh.desicrics.resources.new_match_overs_label
+import com.harsh.desicrics.resources.new_match_overs_more
+import com.harsh.desicrics.resources.new_match_player_count
+import com.harsh.desicrics.resources.new_match_remove_player
+import com.harsh.desicrics.resources.new_match_rules_customise
+import com.harsh.desicrics.resources.new_match_rules_hint
+import com.harsh.desicrics.resources.new_match_section_overs
+import com.harsh.desicrics.resources.new_match_section_rules
+import com.harsh.desicrics.resources.new_match_section_teams
+import com.harsh.desicrics.resources.new_match_squad_change
+import com.harsh.desicrics.resources.new_match_squad_clear
+import com.harsh.desicrics.resources.new_match_team_a
+import com.harsh.desicrics.resources.new_match_team_b
+import com.harsh.desicrics.resources.new_match_team_name
+import com.harsh.desicrics.resources.setup_add_player_hint
+import com.harsh.desicrics.resources.setup_captain_tag
+import com.harsh.desicrics.resources.setup_change_time
+import com.harsh.desicrics.resources.setup_continue
+import com.harsh.desicrics.resources.setup_details
+import com.harsh.desicrics.resources.setup_edit_lineup
+import com.harsh.desicrics.resources.setup_find
+import com.harsh.desicrics.resources.setup_guest
+import com.harsh.desicrics.resources.setup_keeper_tag
+import com.harsh.desicrics.resources.setup_later_hint
+import com.harsh.desicrics.resources.setup_lineup
+import com.harsh.desicrics.resources.setup_linked
+import com.harsh.desicrics.resources.setup_min_players
+import com.harsh.desicrics.resources.setup_mode_guest_hint
+import com.harsh.desicrics.resources.setup_mode_phone_hint
+import com.harsh.desicrics.resources.setup_mode_search_hint
+import com.harsh.desicrics.resources.setup_now
+import com.harsh.desicrics.resources.setup_phone
+import com.harsh.desicrics.resources.setup_save
+import com.harsh.desicrics.resources.setup_saved_team
+import com.harsh.desicrics.resources.setup_schedule
+import com.harsh.desicrics.resources.setup_step
+import com.harsh.desicrics.resources.setup_venue
+import com.harsh.desicrics.resources.setup_vs
+import com.harsh.desicrics.resources.setup_when_where
+import com.harsh.desicrics.resources.team_add_placeholder_name
+import com.harsh.desicrics.resources.team_add_placeholder_phone
+import com.harsh.desicrics.resources.team_invite_share
+import com.harsh.desicrics.resources.team_placeholder
+import com.harsh.desicrics.resources.teams_action_failed
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -431,7 +479,7 @@ private fun LineupPlayerSheet(side: TeamSide, actions: NewMatchActions, close: (
                 }
             }, enabled = query.isNotBlank() && (mode == 2 || phone.count(Char::isDigit) in 10..13), loading = busy, leadingIcon = DesiIcons.PersonAdd, modifier = Modifier.fillMaxWidth())
         }
-        if (failed) Text(stringResource(Res.string.teams_action_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        if (failed) ErrorBanner(stringResource(Res.string.teams_action_failed))
     }
 }
 
@@ -486,7 +534,7 @@ private fun StartBar(state: NewMatchFormState, label: StringResource, enabled: B
                     is NewMatchError.Invalid -> stringResource(error.error.label)
                     NewMatchError.CreateFailed -> stringResource(Res.string.new_match_error_create_failed)
                 }
-                Text(text, style = DesiTheme.type.body, color = colors.event.wicket)
+                ErrorBanner(text)
             }
             PrimaryButton(
                 text = stringResource(label),

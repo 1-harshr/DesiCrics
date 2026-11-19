@@ -168,6 +168,12 @@ class MatchViewModel(
 
     fun dismissError() = _state.update { it.copy(error = null) }
 
+    /** Starts watching the match again after it failed to load. */
+    fun retry() {
+        _state.update { it.copy(loading = true, error = null) }
+        refreshes.update { it + 1 }
+    }
+
     /** [zone] is where the shot went, when the match keeps a wagon wheel. */
     fun recordRuns(runs: Int, zone: FieldZone? = null) = record(runsOffBat = runs, zone = zone)
 

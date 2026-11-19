@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.teams
+import com.harsh.desicrics.designsystem.component.ErrorBanner
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.material3.TextButton
 import org.jetbrains.compose.resources.pluralStringResource
@@ -134,6 +136,7 @@ fun TeamScreen(
         onChangeLogo = pickLogo,
         onCompare = viewModel::compareWith,
         onLeave = { viewModel.leave(onBack) },
+        onRetry = viewModel::retry,
     )
 
     val team = state.team ?: return
@@ -211,6 +214,7 @@ fun TeamContent(
     onLeave: () -> Unit,
     onFollow: () -> Unit = {},
     onChangeLogo: () -> Unit = {},
+    onRetry: () -> Unit = {},
 ) {
     val team = state.team
     val colors = DesiTheme.colors
@@ -238,11 +242,11 @@ fun TeamContent(
     when {
         team == null -> DesiScaffold(title = stringResource(Res.string.teams_title), onBack = onBack) { padding ->
             if (state.loading) FullScreenLoading(Modifier.padding(padding))
-            else Text(
-                stringResource(Res.string.teams_load_failed),
-                style = DesiTheme.type.body,
-                color = colors.event.wicket,
-                modifier = Modifier.padding(padding).padding(space.screen),
+            else ErrorState(
+                stringResource(Res.string.error_team_title),
+                stringResource(Res.string.error_connection_body),
+                Modifier.padding(padding),
+                onRetry = onRetry,
             )
         }
         else -> HeroScaffold(
@@ -291,7 +295,7 @@ fun TeamContent(
             },
         ) {
             if (state.actionFailed) {
-                Text(stringResource(Res.string.teams_action_failed), style = DesiTheme.type.body, color = colors.event.wicket)
+                ErrorBanner(stringResource(Res.string.teams_action_failed))
             }
             Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
                 SectionHeader(stringResource(Res.string.team_members), icon = DesiIcons.Teams)

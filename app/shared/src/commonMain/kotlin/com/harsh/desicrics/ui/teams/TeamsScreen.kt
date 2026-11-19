@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.teams
+import com.harsh.desicrics.designsystem.component.ErrorBanner
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -63,7 +65,7 @@ fun TeamsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sheet by rememberSaveable { mutableStateOf(if (joinCode != null) JOIN else null) }
-    TeamsContent(state, onOpenTeam, onCreate = { sheet = CREATE }, onJoin = { sheet = JOIN }, onBack = onBack)
+    TeamsContent(state, onOpenTeam, onCreate = { sheet = CREATE }, onJoin = { sheet = JOIN }, onBack = onBack, onRetry = viewModel::refresh)
     val close = {
         sheet = null
         viewModel.clearErrors()
@@ -97,6 +99,7 @@ fun TeamsContent(
     onCreate: () -> Unit,
     onJoin: () -> Unit,
     onBack: () -> Unit,
+    onRetry: () -> Unit = {},
 ) {
     val space = DesiTheme.space
     DesiScaffold(title = stringResource(Res.string.teams_title), onBack = onBack) { padding ->
@@ -112,7 +115,7 @@ fun TeamsContent(
                 }
             }
             if (state.loadFailed) {
-                item { Text(stringResource(Res.string.teams_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
+                item { ErrorState(stringResource(Res.string.error_teams_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
             }
             if (!state.loading && state.teams.isEmpty() && !state.loadFailed) {
                 item { EmptyState(DesiIcons.Shield, stringResource(Res.string.teams_empty_title), body = stringResource(Res.string.teams_empty)) }
@@ -182,7 +185,7 @@ internal fun TeamDetailsSheet(
             label = stringResource(Res.string.teams_city),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
         )
-        if (failed) Text(stringResource(Res.string.teams_action_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        if (failed) ErrorBanner(stringResource(Res.string.teams_action_failed))
         PrimaryButton(action, onClick = { onSave(name, city) }, enabled = name.isNotBlank(), loading = saving, modifier = Modifier.fillMaxWidth())
     }
 }

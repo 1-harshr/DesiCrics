@@ -98,6 +98,9 @@ class CommunityViewModel(
         load()
     }
 
+    /** Loads the current tab again after a failure. */
+    fun retry() = load()
+
     private fun load() {
         job?.cancel()
         job = viewModelScope.launch { loadNow() }

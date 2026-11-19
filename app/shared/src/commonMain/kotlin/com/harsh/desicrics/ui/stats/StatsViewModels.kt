@@ -42,6 +42,9 @@ class CareerViewModel(private val profileId: String, private val repository: Sta
         load()
     }
 
+    /** Loads again after a failure. */
+    fun retry() = load()
+
     private fun load() {
         job?.cancel()
         val filter = _state.value.filter
@@ -98,6 +101,9 @@ class CompareViewModel(
         load()
     }
 
+    /** Loads again after a failure. */
+    fun retry() = load()
+
     private fun load() {
         val other = _state.value.other ?: return
         val filter = _state.value.filter
@@ -133,6 +139,9 @@ class LeaderboardViewModel(private val tournamentId: String?, private val reposi
         _state.update(transform)
         load()
     }
+
+    /** Loads again after a failure. */
+    fun retry() = load()
 
     private fun load() {
         job?.cancel()

@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -303,7 +304,7 @@ internal fun ZoneSheet(runs: Int, onPick: (FieldZone?) -> Unit, onDismiss: () ->
 internal fun HandoverSheet(code: String?, onDismiss: () -> Unit) {
     DesiSheet(stringResource(Res.string.match_handover), onDismiss) {
         if (code == null) {
-            Text(stringResource(Res.string.match_handover_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+            ErrorBanner(stringResource(Res.string.match_handover_failed))
         } else {
             Text(
                 code.chunked(3).joinToString(" "),

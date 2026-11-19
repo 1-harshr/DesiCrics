@@ -233,6 +233,15 @@ Pages about one thing (a team, a player, a tournament, your own profile) use `He
 - Empty lists use `EmptyState` with an icon and a line on what to do next.
 - Destructive rows (Leave team, Delete account) use the `event.wicket` tint on both the icon tile and the title.
 
+## Errors
+
+Never show an error as a bare red sentence.
+
+- If the page's content didn't load, show `ErrorState` in its place, full screen for the page or `compact` for one section or tab. It always has Try again, which reloads that content.
+- If an action or save failed, or the page is showing old data, show an `ErrorBanner` next to what it affects and leave the page as it is.
+- Write a title that says what didn't happen ("This team didn't load", "That ball didn't save") and a body that says what to do. Use the same connection line everywhere: "Check that you're online, then try again." Don't blame the user, and don't show codes or exception text.
+- Being offline is amber (`warning`), not red. Red is for something that actually failed.
+
 List pages (Teams, Tournaments, Notifications, Search, Leaderboards) keep `DesiScaffold` and use the same rows, tiles and empty states.
 
 ## Components
@@ -273,6 +282,8 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `StatGrid` | `Detail.kt` | Figures as equal-height tiles; the first `featured` tiles sit on the brand tint with larger numbers |
 | `RankBadge` | `Detail.kt` | Position in a ranking: first filled, second and third tinted |
 | `EmptyState` | `Detail.kt` | Icon tile, title, body and an optional action, on a card |
+| `ErrorState` | `Feedback.kt` | When content couldn't load: an amber mark (cloud for connection trouble, a crossed-out search for something that doesn't exist), a title, a body and Try again, plus an optional way out. Full screen, or `compact` on a card inside a section |
+| `ErrorBanner` | `Feedback.kt` | A problem that doesn't replace the page (a failed save, a refused action): icon, optional title, message and an optional action. Red by default; `warning` makes it amber for states that aren't failures, like being offline |
 | `DesiNavigationBar` | `Navigation.kt` | Bottom tabs: outlined icons, filled and green on a soft pill when selected |
 
 Illustrations live in `DesiIllustrations` (drawn with `Image`, not tinted). `BallMark` is the app icon's ball and speed lines, used in the sign-in header.

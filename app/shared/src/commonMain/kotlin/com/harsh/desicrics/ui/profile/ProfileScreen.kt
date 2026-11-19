@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.profile
+import com.harsh.desicrics.designsystem.component.ErrorBanner
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -96,6 +98,7 @@ fun ProfileScreen(
         onClaimSuggested = viewModel::claim,
         onSettings = { sheet = it },
         stats = { CareerSection(profile.uid, onCompare = onCompare, name = profile.name, onOpenMatch = onOpenMatch) },
+        onRetry = viewModel::refresh,
     )
     when (sheet) {
         null -> Unit
@@ -117,6 +120,7 @@ private fun ProfileContent(
     onClaimSuggested: (String) -> Unit,
     onSettings: (SettingsSheet) -> Unit,
     stats: @Composable () -> Unit = {},
+    onRetry: () -> Unit = {},
 ) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
@@ -151,12 +155,12 @@ private fun ProfileContent(
         when (tab) {
             ProfileTab.ABOUT -> AboutTab(profile, onEdit, onSignOut, onSettings)
             ProfileTab.STATS -> stats()
-            ProfileTab.MATCHES -> ListTab(state.matches, Res.string.profile_no_matches, state.loadFailed, DesiIcons.History) { matches ->
+            ProfileTab.MATCHES -> ListTab(state.matches, Res.string.profile_no_matches, state.loadFailed, DesiIcons.History, onRetry) { matches ->
                 Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
                     matches.forEach { HomeMatchCard(it, isMine = it.scorerUid == profile.uid, onClick = { onOpenMatch(it.id) }) }
                 }
             }
-            ProfileTab.TEAMS -> ListTab(state.teams, Res.string.teams_empty, state.loadFailed, DesiIcons.Shield) { teams ->
+            ProfileTab.TEAMS -> ListTab(state.teams, Res.string.teams_empty, state.loadFailed, DesiIcons.Shield, onRetry) { teams ->
                 TeamList(teams, onOpenTeam)
             }
         }
@@ -198,9 +202,9 @@ private fun AboutTab(profile: UserProfile, onEdit: () -> Unit, onSignOut: () -> 
 
 /** A list that's still loading (null), empty, or ready. */
 @Composable
-private fun <T> ColumnScope.ListTab(items: List<T>?, empty: StringResource, failed: Boolean, icon: DrawableResource, content: @Composable ColumnScope.(List<T>) -> Unit) {
+private fun <T> ColumnScope.ListTab(items: List<T>?, empty: StringResource, failed: Boolean, icon: DrawableResource, onRetry: () -> Unit, content: @Composable ColumnScope.(List<T>) -> Unit) {
     when {
-        items == null && failed -> Text(stringResource(Res.string.teams_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        items == null && failed -> ErrorState(stringResource(Res.string.error_list_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true)
         items == null -> Unit
         items.isEmpty() -> EmptyState(icon, stringResource(empty))
         else -> content(items)
@@ -279,7 +283,7 @@ private fun DeleteAccountSheet(state: ProfileUiState, onDelete: () -> Unit, onDi
     DesiSheet(stringResource(Res.string.profile_delete_title), onDismiss) {
         Text(stringResource(Res.string.profile_delete_body), style = DesiTheme.type.body, color = DesiTheme.colors.ink)
         if (state.result == SettingsResult.DELETE_FAILED) {
-            Text(stringResource(Res.string.profile_delete_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+            ErrorBanner(stringResource(Res.string.profile_delete_failed))
         }
         PrimaryButton(stringResource(Res.string.profile_delete_confirm), onClick = onDelete, loading = state.saving, modifier = Modifier.fillMaxWidth())
         GhostButton(stringResource(Res.string.common_cancel), onClick = onDismiss, modifier = Modifier.fillMaxWidth())

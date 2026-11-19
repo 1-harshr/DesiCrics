@@ -47,6 +47,12 @@ class NotificationsViewModel(private val repository: SocialRepository) : ViewMod
     val state: StateFlow<NotificationsUiState> = _state
 
     init {
+        retry()
+    }
+
+    /** Loads the inbox, first time and after a failure. */
+    fun retry() {
+        _state.update { it.copy(loading = true, loadFailed = false) }
         viewModelScope.launch {
             attempt { repository.notifications() }.fold(
                 onSuccess = { list -> _state.update { NotificationsUiState(loading = false, notifications = list) } },
@@ -68,6 +74,12 @@ class PlayerViewModel(
     val state: StateFlow<PlayerUiState> = _state
 
     init {
+        retry()
+    }
+
+    /** Loads the page, first time and after a failure. */
+    fun retry() {
+        _state.update { it.copy(loading = true, loadFailed = false) }
         viewModelScope.launch {
             attempt { repository.playerPage(profileId) }.fold(
                 onSuccess = { page -> _state.update { it.copy(loading = false, page = page) } },

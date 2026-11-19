@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.home
+import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -173,7 +174,7 @@ fun HomeContent(
         item { Greeting(playerName, playerPhoto, feed.unreadNotifications, onProfile, onSearch, onNotifications) }
         item { StartMatchCard(onNewMatch) }
         if (state.loadFailed) {
-            item { Text(stringResource(Res.string.home_error), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
+            item { ErrorBanner(stringResource(Res.string.home_error_body), title = stringResource(Res.string.home_error_title), icon = DesiIcons.CloudOff, warning = true) }
         }
         when {
             state.loading -> item {

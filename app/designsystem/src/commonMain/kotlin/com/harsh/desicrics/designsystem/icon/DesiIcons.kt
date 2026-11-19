@@ -2,6 +2,10 @@ package com.harsh.desicrics.designsystem.icon
 
 import com.harsh.desicrics.designsystem.resources.Res
 import com.harsh.desicrics.designsystem.resources.ic_add
+import com.harsh.desicrics.designsystem.resources.ic_search_off
+import com.harsh.desicrics.designsystem.resources.ic_refresh
+import com.harsh.desicrics.designsystem.resources.ic_error
+import com.harsh.desicrics.designsystem.resources.ic_cloud_off
 import com.harsh.desicrics.designsystem.resources.ic_badge
 import com.harsh.desicrics.designsystem.resources.ic_delete
 import com.harsh.desicrics.designsystem.resources.ic_support_agent
@@ -114,6 +118,12 @@ object DesiIcons {
     val Support: DrawableResource = Res.drawable.ic_support_agent
     val Delete: DrawableResource = Res.drawable.ic_delete
     val Badge: DrawableResource = Res.drawable.ic_badge
+
+    // Errors: connection trouble, something went wrong, nothing found, and try again.
+    val CloudOff: DrawableResource = Res.drawable.ic_cloud_off
+    val Error: DrawableResource = Res.drawable.ic_error
+    val SearchOff: DrawableResource = Res.drawable.ic_search_off
+    val Refresh: DrawableResource = Res.drawable.ic_refresh
 
     // Bottom tabs: outlined when idle, filled when selected.
     val Home: DrawableResource = Res.drawable.ic_home

@@ -1,4 +1,7 @@
 package com.harsh.desicrics.ui.home
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import com.harsh.desicrics.designsystem.component.ErrorBanner
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -82,13 +85,16 @@ internal fun FeedScreen(onOpen: (String) -> Unit, community: () -> Unit, ranking
                 stringResource(when (it) { "following" -> Res.string.feed_following; "city" -> Res.string.feed_city; else -> Res.string.feed_all })
             }, onSelect = { model.load(model.filter, audience = it) }) }
             if (model.incoming.isNotEmpty()) item { GhostButton(stringResource(Res.string.feed_new), { model.load(model.filter) }) }
-            if (model.failed && model.rows.isNotEmpty()) item { Text(stringResource(Res.string.feed_stale)) }
+            if (model.failed && model.rows.isNotEmpty()) item {
+                ErrorBanner(stringResource(Res.string.feed_stale), icon = DesiIcons.CloudOff, warning = true, action = stringResource(Res.string.feed_retry), onAction = { model.load(model.filter) })
+            }
             item { ChoiceChips(filters, model.filter, label = { stringResource(labels[filters.indexOf(it)]) }, onSelect = { model.load(it) }) }
             items(model.rows, key = { it.id }) { HomeMatchCard(it, false) { onOpen(it.id) } }
             item {
                 when {
                     model.loading -> CircularProgressIndicator()
-                    model.failed -> GhostButton(stringResource(Res.string.feed_retry), { model.load(model.filter) })
+                    model.failed && model.rows.isEmpty() -> ErrorState(stringResource(Res.string.error_feed_title), stringResource(Res.string.error_connection_body), onRetry = { model.load(model.filter) }, compact = true)
+                    model.failed -> Unit
                     model.rows.isEmpty() -> Text(stringResource(Res.string.feed_empty))
                     model.more -> GhostButton(stringResource(Res.string.feed_more), { model.load(model.filter, true) })
                 }

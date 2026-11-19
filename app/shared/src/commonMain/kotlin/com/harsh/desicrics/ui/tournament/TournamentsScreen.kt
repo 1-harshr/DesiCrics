@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.tournament
+import com.harsh.desicrics.designsystem.component.ErrorBanner
+import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -68,7 +70,7 @@ fun TournamentsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var creating by rememberSaveable { mutableStateOf(false) }
-    TournamentsContent(state, onOpen, onCreate = { creating = true }, onBack)
+    TournamentsContent(state, onOpen, onCreate = { creating = true }, onBack, onRetry = viewModel::retry)
     if (creating) {
         CreateTournamentSheet(
             saving = state.saving,
@@ -83,7 +85,7 @@ fun TournamentsScreen(
 }
 
 @Composable
-fun TournamentsContent(state: TournamentsUiState, onOpen: (String) -> Unit, onCreate: () -> Unit, onBack: () -> Unit) {
+fun TournamentsContent(state: TournamentsUiState, onOpen: (String) -> Unit, onCreate: () -> Unit, onBack: () -> Unit, onRetry: () -> Unit = {}) {
     val space = DesiTheme.space
     DesiScaffold(title = stringResource(Res.string.tournaments_title), onBack = onBack) { padding ->
         LazyColumn(
@@ -93,7 +95,7 @@ fun TournamentsContent(state: TournamentsUiState, onOpen: (String) -> Unit, onCr
         ) {
             item { CreateTournamentCard(onCreate) }
             if (state.loadFailed) {
-                item { Text(stringResource(Res.string.tournaments_load_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket) }
+                item { ErrorState(stringResource(Res.string.error_tournaments_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
             } else if (!state.loading && state.tournaments.isEmpty()) {
                 item { EmptyState(DesiIcons.Trophy, stringResource(Res.string.tournaments_empty_title), body = stringResource(Res.string.tournaments_empty)) }
             }
@@ -217,7 +219,7 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
             label = { stringResource(if (it) Res.string.rules_on else Res.string.rules_mode_off) },
             onSelect = { registration = it },
         )
-        if (failed) Text(stringResource(Res.string.tournament_create_failed), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
+        if (failed) ErrorBanner(stringResource(Res.string.tournament_create_failed))
         PrimaryButton(
             stringResource(Res.string.tournament_create_action),
             onClick = {

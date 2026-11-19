@@ -118,6 +118,14 @@ class TeamViewModel(
     private var searchJob: Job? = null
 
     init {
+        load()
+    }
+
+    /** Loads the team again after it failed to load. */
+    fun retry() = load()
+
+    private fun load() {
+        _state.update { it.copy(loading = true, loadFailed = false) }
         viewModelScope.launch {
             attempt { repository.team(teamId) }.fold(
                 onSuccess = { team -> show(team) },
