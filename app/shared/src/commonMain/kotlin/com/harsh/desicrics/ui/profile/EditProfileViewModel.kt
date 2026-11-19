@@ -76,7 +76,7 @@ class EditProfileViewModel(
 
     fun update(transform: (ProfileFormState) -> ProfileFormState) = _state.update { transform(it).copy(error = null) }
 
-    /** Uploads straight away, before the form is saved; needs a profile to attach to, so not during onboarding. */
+    /** Uploads straight away, before the form is saved; needs a profile to attach to, so onboarding asks after saving. */
     fun uploadPhoto(jpeg: ByteArray?) {
         if (jpeg == null) return
         _state.update { it.copy(uploadingPhoto = true, photoFailed = false) }
@@ -92,17 +92,15 @@ class EditProfileViewModel(
         }
     }
 
+    /** Runs the server's checks without saving, for a form split over steps. False shows the error. */
+    fun check(): Boolean {
+        val error = _state.value.toRequest().validate() ?: return true
+        _state.update { it.copy(error = ProfileFormError.Invalid(error)) }
+        return false
+    }
+
     fun save(onSaved: () -> Unit) {
-        val form = _state.value
-        val request = UpdateProfileRequest(
-            name = form.name.trim(),
-            phone = form.phone.trim(),
-            city = form.city.trim(),
-            role = form.role,
-            battingStyle = form.battingStyle,
-            bowlingStyle = form.bowlingStyle,
-            photoUrl = form.photoUrl,
-        )
+        val request = _state.value.toRequest()
         // Same check the server runs, for instant feedback.
         request.validate()?.let { error ->
             _state.update { it.copy(error = ProfileFormError.Invalid(error)) }
@@ -123,3 +121,13 @@ class EditProfileViewModel(
         }
     }
 }
+
+private fun ProfileFormState.toRequest() = UpdateProfileRequest(
+    name = name.trim(),
+    phone = phone.trim(),
+    city = city.trim(),
+    role = role,
+    battingStyle = battingStyle,
+    bowlingStyle = bowlingStyle,
+    photoUrl = photoUrl,
+)

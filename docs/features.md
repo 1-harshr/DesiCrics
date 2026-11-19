@@ -5,7 +5,7 @@ Every feature area, what we build, and the phase it lands in. See [roadmap.md](r
 | Area | What we build | Phase |
 |---|---|---|
 | Sign-in | Phone OTP and Google via Firebase Auth; the server verifies the ID token. No intro carousel: sign-in leads straight to a profile step. | 0 |
-| Profile | Name, photo, gender, city, player role, batting style, bowling style. Onboarding asks only for name, role and styles. | 0 |
+| Profile | Name, photo, gender, city, player role, batting style, bowling style. Onboarding is one question per screen: you (name, number, city), how you play, then optional steps for a photo, claiming placeholder players made with your number, joining or starting a team, following top teams and players in your city, and notifications. Steps with nothing to offer are skipped. | 0 |
 | Create match | Three-step wizard: teams → squads → rules. Defaults to T20 with a tennis ball. Rules cover match type, overs, ball type, pitch type, venue, start time, officials and power plays. Playing conditions (last man stands, retired batters returning, retire at a score, overs per bowler, back-to-back overs, wide and no-ball runs and re-bowling, free hits) start from a preset (Relaxed, Gully, Club, Standard) and can each be off, warn or enforce. | 1 |
 | Toss | One sheet before the first ball: winner and decision. | 1 |
 | Scoring | Thumb-zone run pad, contextual wicket sheet, server-validated undo, substitutes, revise target, end innings, end a match early (no result, concession, walkover, called off). Wagon wheel optional. | 1 |

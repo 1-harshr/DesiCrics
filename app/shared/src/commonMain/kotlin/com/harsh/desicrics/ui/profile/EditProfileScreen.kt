@@ -162,11 +162,11 @@ private fun Header(state: ProfileFormState, isOnboarding: Boolean, onBack: (() -
 }
 
 @Composable
-private fun AboutSection(state: ProfileFormState, onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit) {
+internal fun AboutSection(state: ProfileFormState, onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit, titled: Boolean = true) {
     val prefix = stringResource(Res.string.common_phone_prefix)
     val invalid = (state.error as? ProfileFormError.Invalid)?.error
 
-    Section(Res.string.profile_section_about) {
+    Section(Res.string.profile_section_about.takeIf { titled }) {
         DesiTextField(
             value = state.name,
             onValueChange = { value -> onUpdate { it.copy(name = value) } },
@@ -204,8 +204,8 @@ private fun AboutSection(state: ProfileFormState, onUpdate: ((ProfileFormState) 
 }
 
 @Composable
-private fun GameSection(state: ProfileFormState, onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit) {
-    Section(Res.string.profile_section_game) {
+internal fun GameSection(state: ProfileFormState, onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit, titled: Boolean = true) {
+    Section(Res.string.profile_section_game.takeIf { titled }) {
         SectionHeader(stringResource(Res.string.profile_role_section), icon = DesiIcons.Person)
         RoleGrid(state.role) { role -> onUpdate { it.copy(role = role) } }
 
@@ -279,9 +279,9 @@ private fun BowlingPicker(style: BowlingStyle, onSelect: (BowlingStyle) -> Unit)
 }
 
 @Composable
-private fun Section(title: StringResource, content: @Composable ColumnScope.() -> Unit) {
+private fun Section(title: StringResource?, content: @Composable ColumnScope.() -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
-        Text(stringResource(title), style = DesiTheme.type.titleMd, color = DesiTheme.colors.ink)
+        if (title != null) Text(stringResource(title), style = DesiTheme.type.titleMd, color = DesiTheme.colors.ink)
         content()
     }
 }

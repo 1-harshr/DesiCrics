@@ -1091,4 +1091,35 @@
     <string name="fixture_squad_pick">Pick who's playing</string>
     <string name="fixture_squad_ready_tag">Ready</string>
     <string name="fixture_squad_hint">Who's playing today. At least 2.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step">Step %1$d of %2$d</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_about_title">Welcome! First, you</string>
+    <string name="onboarding_about_subtitle">Your name and city, as teammates and scorers will see them.</string>
+    <string name="onboarding_game_title">How do you play?</string>
+    <string name="onboarding_game_subtitle">This goes on your player card. You can change it any time.</string>
+    <string name="onboarding_photo_title">Add a photo</string>
+    <string name="onboarding_photo_subtitle">So teammates can spot you on scorecards and team sheets.</string>
+    <string name="onboarding_photo_choose">Choose a photo</string>
+    <string name="onboarding_claim_title">Is this you?</string>
+    <string name="onboarding_claim_subtitle">Teams added these players with your mobile number. Claim yours to bring its matches and stats to your profile.</string>
+    <string name="onboarding_claim_done">Done. %1$s's matches and stats are yours now.</string>
+    <string name="onboarding_claim_code_hint">Got a claim code from your captain instead?</string>
+    <string name="onboarding_team_title">Join your team</string>
+    <string name="onboarding_team_subtitle">Enter the code your team admin shared, or start a team of your own.</string>
+    <string name="onboarding_team_or">or</string>
+    <string name="onboarding_team_done">You're in %1$s. Add more teams any time from Teams.</string>
+    <string name="onboarding_follow_title">Follow cricket near you</string>
+    <string name="onboarding_follow_subtitle">The top teams and players in %1$s. You'll hear when they play, win or hit a milestone.</string>
+    <string name="onboarding_follow_teams">Teams</string>
+    <string name="onboarding_follow_players">Players</string>
+    <string name="onboarding_notify_title">Never miss a ball</string>
+    <string name="onboarding_notify_subtitle">Turn on notifications to hear about the matches you follow.</string>
+    <string name="onboarding_notify_start">When a followed team or player starts a match</string>
+    <string name="onboarding_notify_live">The live score in one quiet notification, updated each over</string>
+    <string name="onboarding_notify_result">Results, fifties, hundreds and five-fors</string>
+    <string name="onboarding_notify_allow">Turn on notifications</string>
+    <string name="onboarding_notify_later">Not now</string>
 </resources>

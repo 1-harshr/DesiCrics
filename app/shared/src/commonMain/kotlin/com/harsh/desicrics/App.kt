@@ -14,7 +14,11 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -33,7 +37,9 @@ import com.harsh.desicrics.resources.session_error_body
 import com.harsh.desicrics.resources.session_error_title
 import com.harsh.desicrics.session.SessionState
 import com.harsh.desicrics.session.SessionViewModel
-import com.harsh.desicrics.ui.profile.EditProfileScreen
+import com.harsh.desicrics.ui.onboarding.OnboardingScreen
+import com.harsh.desicrics.navigation.JoinTeamRoute
+import com.harsh.desicrics.navigation.routeFor
 import com.harsh.desicrics.ui.signin.SignInScreen
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -48,13 +54,41 @@ fun App(link: String? = null, onLinkHandled: () -> Unit = {}) {
         Surface(Modifier.fillMaxSize(), color = DesiTheme.colors.bg) {
             val session = koinViewModel<SessionViewModel>()
             val state by session.state.collectAsStateWithLifecycle()
+            // Onboarding saves the profile partway through, so it outlasts the switch to signed in.
+            var onboarding by rememberSaveable { mutableStateOf(false) }
+            var onboarded by rememberSaveable { mutableStateOf(false) }
+            val current = state
+            LaunchedEffect(current) {
+                if (current is SessionState.NeedsProfile) onboarding = true
+                if (current == SessionState.SignedOut) onboarding = false
+            }
+            val onboardingUid = when {
+                current is SessionState.NeedsProfile -> current.user.uid
+                current is SessionState.SignedIn && onboarding -> current.profile.uid
+                else -> null
+            }
             // Auth gates the whole app; navigation only exists once there's a profile.
-            when (val current = state) {
-                SessionState.Loading -> FullScreenLoading()
-                SessionState.SignedOut -> SignInScreen()
-                is SessionState.NeedsProfile -> EditProfileScreen(isOnboarding = true, onDone = {}, onBack = null)
-                is SessionState.SignedIn -> AppNavigation(current.profile, onSignOut = session::signOut, link = link, onLinkHandled = onLinkHandled)
-                SessionState.Error -> SessionErrorScreen(onRetry = session::retry, onSignOut = session::signOut)
+            when {
+                onboardingUid != null -> OnboardingScreen(
+                    uid = onboardingUid,
+                    joinCode = link?.let { (routeFor(it) as? JoinTeamRoute)?.code },
+                    onJoinedFromLink = onLinkHandled,
+                    onFinished = {
+                        onboarding = false
+                        onboarded = true
+                    },
+                )
+                current == SessionState.Loading -> FullScreenLoading()
+                current == SessionState.SignedOut -> SignInScreen()
+                current is SessionState.SignedIn -> AppNavigation(
+                    current.profile,
+                    onSignOut = session::signOut,
+                    link = link,
+                    onLinkHandled = onLinkHandled,
+                    // Onboarding has just asked; asking again straight after would nag.
+                    askForNotifications = !onboarded,
+                )
+                else -> SessionErrorScreen(onRetry = session::retry, onSignOut = session::signOut)
             }
         }
     }

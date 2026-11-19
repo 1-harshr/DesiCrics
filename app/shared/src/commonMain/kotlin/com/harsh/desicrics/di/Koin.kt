@@ -15,6 +15,7 @@ import com.harsh.desicrics.ui.community.CommunityViewModel
 import com.harsh.desicrics.ui.home.HomeViewModel
 import com.harsh.desicrics.ui.match.MatchViewModel
 import com.harsh.desicrics.ui.newmatch.NewMatchViewModel
+import com.harsh.desicrics.ui.onboarding.OnboardingViewModel
 import com.harsh.desicrics.ui.profile.EditProfileViewModel
 import com.harsh.desicrics.ui.profile.ProfileViewModel
 import com.harsh.desicrics.ui.signin.SignInViewModel
@@ -78,6 +79,7 @@ val viewModelModule = module {
     viewModelOf(::SessionViewModel)
     viewModelOf(::SignInViewModel)
     viewModelOf(::EditProfileViewModel)
+    viewModelOf(::OnboardingViewModel)
     viewModelOf(::HomeViewModel)
     viewModelOf(::NewMatchViewModel)
     viewModel { (matchId: String) -> MatchViewModel(matchId, get(), get(), get(), get(), get()) }

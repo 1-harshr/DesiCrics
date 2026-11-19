@@ -61,6 +61,12 @@ import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.scoring.withScore
 import com.harsh.desicrics.ui.home.HomeContent
+import com.harsh.desicrics.ui.onboarding.OnboardingActions
+import com.harsh.desicrics.ui.onboarding.OnboardingContent
+import com.harsh.desicrics.ui.onboarding.OnboardingStep
+import com.harsh.desicrics.ui.onboarding.OnboardingUiState
+import com.harsh.desicrics.ui.onboarding.PreviewOnboardingForm
+import com.harsh.desicrics.ui.onboarding.PreviewOnboardingState
 import com.harsh.desicrics.ui.home.HomeUiState
 import com.harsh.desicrics.ui.match.MatchActions
 import com.harsh.desicrics.ui.match.MatchContent
@@ -360,9 +366,26 @@ class ScreenshotTest {
         com.harsh.desicrics.ui.signin.SignInContent(com.harsh.desicrics.ui.signin.SignInUiState(), emptyList(), {}, {}, {}, {})
     }
 
+    // Onboarding: one shot per step, plus a new player with nothing filled in yet.
+
     @Test
-    fun auditOnboarding() = shoot("audit_onboarding") {
-        com.harsh.desicrics.ui.profile.EditProfileContent(com.harsh.desicrics.ui.profile.ProfileFormState(loading = false), isOnboarding = true, onUpdate = {}, onSave = {}, onBack = null)
+    fun onboardingAboutEmpty() = shoot("onboarding_about_empty") {
+        OnboardingContent(com.harsh.desicrics.ui.profile.ProfileFormState(loading = false), OnboardingUiState(), OnboardingActions())
+    }
+
+    @Test
+    fun onboardingSteps() = OnboardingStep.entries.forEach { step ->
+        shoot("onboarding_${step.name.lowercase()}") { OnboardingContent(PreviewOnboardingForm, PreviewOnboardingState.copy(step = step), OnboardingActions()) }
+    }
+
+    @Test
+    fun onboardingGameDark() = shoot("onboarding_game_dark", dark = true) {
+        OnboardingContent(PreviewOnboardingForm, PreviewOnboardingState.copy(step = OnboardingStep.GAME), OnboardingActions())
+    }
+
+    @Test
+    fun onboardingDone() = shoot("onboarding_team_done") {
+        OnboardingContent(PreviewOnboardingForm, PreviewOnboardingState.copy(step = OnboardingStep.TEAM, teamName = "Andheri Strikers"), OnboardingActions())
     }
 
     @Test

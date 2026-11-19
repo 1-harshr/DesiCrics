@@ -120,7 +120,13 @@ private val RouteSerialization = SavedStateConfiguration {
  * the last. Each entry keeps its own saved state and ViewModels, cleared when it leaves the stack.
  */
 @Composable
-fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = null, onLinkHandled: () -> Unit = {}) {
+fun AppNavigation(
+    profile: UserProfile,
+    onSignOut: () -> Unit,
+    link: String? = null,
+    onLinkHandled: () -> Unit = {},
+    askForNotifications: Boolean = true,
+) {
     val roots = listOf(HomeRoute, FeedRoute, TournamentsRoute, ProfileRoute)
     val stacks = listOf(rememberNavBackStack(RouteSerialization, HomeRoute),
         rememberNavBackStack(RouteSerialization, FeedRoute), rememberNavBackStack(RouteSerialization, TournamentsRoute),
@@ -137,7 +143,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
     }
 
     val social = koinInject<SocialRepository>()
-    RegisterForPush(onToken = social::savePushToken)
+    RegisterForPush(onToken = social::savePushToken, askPermission = askForNotifications)
 
     LaunchedEffect(link) {
         if (link == null) return@LaunchedEffect
