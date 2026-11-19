@@ -9,6 +9,7 @@ import com.harsh.desicrics.navigation.routeFor
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.ui.newmatch.NewMatchFormState
+import com.harsh.desicrics.ui.components.publicCodeIn
 import com.harsh.desicrics.ui.newmatch.SideForm
 import com.harsh.desicrics.ui.teams.refusal
 import io.ktor.http.HttpStatusCode
@@ -53,5 +54,14 @@ class SharedLogicAndroidHostTest {
         assertEquals("Only team admins can do that", ApiException(HttpStatusCode.Forbidden, "Only team admins can do that").refusal())
         assertNull(ApiException(HttpStatusCode.InternalServerError, "Something went wrong on our side").refusal())
         assertNull(IOException("timeout").refusal())
+    }
+
+    @Test
+    fun aTeamsPublicCodeIsToldApartFromAnInviteCode() {
+        assertEquals("02407967", publicCodeIn("0240 7967"))
+        assertEquals("02407967", publicCodeIn("0240-7967"))
+        assertNull(publicCodeIn("AB3XY9"))
+        assertNull(publicCodeIn("0240796"))
+        assertNull(publicCodeIn("AB3XY967"))
     }
 }

@@ -19,6 +19,10 @@ import org.jetbrains.compose.resources.stringResource
 /** A player's or team's 8-digit public code, in two groups of four so it reads out easily: "4821 7390". */
 fun formatPublicCode(code: String): String = code.chunked(4).joinToString(" ")
 
+/** The public code typed in [input], spaces and dashes ignored, or null if it isn't one. Matches the server's. */
+fun publicCodeIn(input: String): String? =
+    input.filterNot { it == ' ' || it == '-' }.takeIf { it.length == 8 && it.all(Char::isDigit) }
+
 /** The code on a card of its own, with a button to share [shareText] (WhatsApp and the like). */
 @Composable
 fun PublicCodeCard(code: String, label: String, shareText: String) {

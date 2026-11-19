@@ -249,8 +249,8 @@ internal fun JoinTeamSheet(saving: Boolean, failed: Boolean, onJoin: (String) ->
         DesiTextField(
             value = code,
             onValueChange = { new -> code = new.filter { it.isLetterOrDigit() }.uppercase().take(8) },
-            label = stringResource(Res.string.teams_join_code),
-            error = stringResource(Res.string.teams_join_failed).takeIf { failed },
+            label = stringResource(Res.string.teams_join_any_code),
+            error = stringResource(Res.string.teams_join_no_team).takeIf { failed },
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters, imeAction = ImeAction.Done),
         )
         PrimaryButton(

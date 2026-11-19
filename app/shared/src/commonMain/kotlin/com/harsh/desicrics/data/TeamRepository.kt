@@ -25,6 +25,9 @@ class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfi
 
     suspend fun browse(query: String, offset: Int): List<TeamSummary> = api.browseTeams(query.trim(), offset)
 
+    /** The team with this 8-digit public code, or null if none has it. */
+    suspend fun teamIdByCode(code: String): String? = api.browseTeams(code, 0).firstOrNull { it.code == code }?.id
+
     suspend fun create(name: String, city: String, lineup: List<com.harsh.desicrics.api.SquadPlayer> = emptyList()): SavedTeam =
         api.createTeam(TeamRequest(name.trim(), city.trim(), lineup)).also { analytics.log(AnalyticsEvents.TEAM_CREATED, emptyMap()) }
 

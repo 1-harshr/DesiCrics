@@ -14,6 +14,7 @@ import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.ui.components.PhotoAvatar
+import com.harsh.desicrics.ui.components.publicCodeIn
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -124,7 +125,24 @@ class TeamsViewModel(private val repository: TeamRepository) : ViewModel() {
         repository.create(name, city)
     }
 
-    fun join(code: String, onJoined: (teamId: String) -> Unit) = save(onJoined, joining = true) { repository.join(code) }
+    /**
+     * An invite code joins straight away. A team's public code is on its page for anyone to see, so it only
+     * finds the team: [onJoined] opens it, where the caller can ask to join.
+     */
+    fun join(code: String, onJoined: (teamId: String) -> Unit) {
+        val publicCode = publicCodeIn(code)
+        if (publicCode == null) {
+            save(onJoined, joining = true) { repository.join(code) }
+            return
+        }
+        if (_state.value.saving) return
+        _state.update { it.copy(saving = true, joinFailed = false, actionFailed = false) }
+        viewModelScope.launch {
+            val teamId = attempt { repository.teamIdByCode(publicCode) }.getOrNull()
+            _state.update { it.copy(saving = false, joinFailed = teamId == null) }
+            teamId?.let(onJoined)
+        }
+    }
 
     fun clearErrors() = _state.update { it.copy(joinFailed = false, actionFailed = false) }
 

@@ -571,10 +571,12 @@
     <string name="teams_create_action">Create team</string>
     <string name="teams_save_action">Save</string>
     <string name="teams_join_title">Join a team</string>
-    <string name="teams_join_hint">Ask an admin for the team's invite code, or scan their QR code.</string>
+    <string name="teams_join_hint">Enter the 6-letter invite code an admin shared to join straight away, or the 8-digit team code from a team's page to find it and ask to join.</string>
     <string name="teams_join_code">Invite code</string>
+    <string name="teams_join_any_code">Invite or team code</string>
     <string name="teams_join_action">Join</string>
     <string name="teams_join_failed">That invite code is wrong.</string>
+    <string name="teams_join_no_team">No team has that code. Check it and try again.</string>
     <string name="teams_action_failed">That didn't work. Check your connection and try again.</string>
     <string name="team_members">Players</string>
     <string name="team_add_player">Add players</string>
