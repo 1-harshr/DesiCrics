@@ -71,7 +71,9 @@ Firebase config files are gitignored (this is a public repo), so each developer 
 
 Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
 
-- Android app: `./gradlew :app:androidApp:assembleDebug`
+- Android app: `./gradlew :app:androidApp:assembleLocalDebug`. The `server` flavor picks the backend, for
+  debug and release alike: `local` calls the server on this computer, `remote` the deployed one through the proxy
+  (`assembleRemoteDebug`, `assembleRemoteRelease`; see [docs/deploy.md](docs/deploy.md)).
 - Server: `docker compose up -d`, then `./gradlew :server:run` (start this first; the app expects it on port 8080). The app calls
   `http://localhost:8080`; forward that to your computer once per device connection with
   `adb reverse tcp:8080 tcp:8080` (emulators and USB devices). Android 17 blocks apps from LAN addresses like

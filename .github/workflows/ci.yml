@@ -58,7 +58,7 @@ jobs:
             exit 0
           fi
           printf '%s' "$GOOGLE_SERVICES_JSON" > app/androidApp/google-services.json
-          ./gradlew :app:androidApp:assembleDebug :app:androidApp:testDebugUnitTest
+          ./gradlew :app:androidApp:assembleLocalDebug :app:androidApp:testLocalDebugUnitTest
 
       - name: Upload test reports
         if: failure()

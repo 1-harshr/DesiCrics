@@ -46,16 +46,26 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-    // The Ktor server. Debug builds call localhost, which `adb reverse tcp:8080 tcp:8080` forwards;
-    // release builds call the proxy Worker (proxy/), whose address stays put when the server moves hosts.
-    // -Pdesicrics.apiBaseUrl overrides either.
-    fun com.android.build.api.dsl.ApplicationBuildType.server(defaultUrl: String) {
+    // Which Ktor server the app calls, independent of debug or release. `local` calls the server on this
+    // computer (Docker), which `adb reverse tcp:8080 tcp:8080` forwards; `remote` calls the proxy Worker
+    // (proxy/), whose address stays put when the server moves hosts. -Pdesicrics.apiBaseUrl overrides either.
+    flavorDimensions += "server"
+    fun com.android.build.api.dsl.ApplicationProductFlavor.server(defaultUrl: String) {
+        dimension = "server"
         val apiBaseUrl = providers.gradleProperty("desicrics.apiBaseUrl").getOrElse(defaultUrl)
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
         // Where join links and public scorecards point: the same server, reachable from outside.
         val publicUrl = providers.gradleProperty("desicrics.publicUrl").getOrElse(apiBaseUrl)
         buildConfigField("String", "PUBLIC_URL", "\"$publicUrl\"")
         manifestPlaceholders["publicHost"] = publicUrl.substringAfter("://").substringBefore("/").substringBefore(":")
+    }
+    productFlavors {
+        create("local") {
+            server("http://localhost:8080")
+        }
+        create("remote") {
+            server("https://desicrics-api.desicrics-proxy.workers.dev")
+        }
     }
     // Robolectric tests run the real services against Android's own notification manager.
     testOptions {
@@ -79,11 +89,7 @@ android {
         }
     }
     buildTypes {
-        debug {
-            server("http://localhost:8080")
-        }
         release {
-            server("https://desicrics-api.desicrics-proxy.workers.dev")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

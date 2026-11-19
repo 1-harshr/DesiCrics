@@ -27,7 +27,7 @@ docker build -t desicrics-server server
 
 ## The permanent address
 
-The app never calls the host directly. Release builds call a Cloudflare Worker, `https://desicrics-api.desicrics-proxy.workers.dev` (`proxy/`), which passes every request, WebSockets included, through to wherever the server runs now. Join, match and tournament links use the same address, so moving hosts needs no new app build and old links keep working.
+The app never calls the host directly. The `remote` builds (`assembleRemoteDebug`, `assembleRemoteRelease`) call a Cloudflare Worker, `https://desicrics-api.desicrics-proxy.workers.dev` (`proxy/`), which passes every request, WebSockets included, through to wherever the server runs now. Join, match and tournament links use the same address, so moving hosts needs no new app build and old links keep working.
 
 To point it at a new host, change `BACKEND_URL` in `proxy/wrangler.jsonc`, then:
 
