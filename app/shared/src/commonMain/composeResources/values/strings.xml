@@ -55,6 +55,7 @@
     <string name="profile_code_share_text">Add me on DesiCrics: my player code is %1$s</string>
     <string name="team_code">Team code, for finding the team</string>
     <string name="team_code_share_text">Find %1$s on DesiCrics with the team code %2$s</string>
+    <string name="team_member_invite_text">Come play for %1$s on DesiCrics! In the app, go to Teams, tap Join with a code, enter our team code %2$s and ask to join.</string>
     <string name="code_share">Share code</string>
     <string name="profile_email">Email</string>
     <string name="profile_batting">Batting</string>

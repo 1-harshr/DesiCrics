@@ -122,12 +122,16 @@ fun TeamScreen(
         sheet = null
         viewModel.clearError()
     }
+    // Players only see the public code, so their invite asks the friend to find the team by it and ask to join.
+    val memberInvite = state.team?.takeIf { it.code.isNotEmpty() }?.let {
+        stringResource(Res.string.team_member_invite_text, it.name, formatPublicCode(it.code))
+    }
 
     TeamContent(
         state = state,
         onBack = onBack,
         onAdd = { sheet = TeamSheet.Add },
-        onInvite = { sheet = TeamSheet.Invite },
+        onInvite = { if (state.isAdmin) sheet = TeamSheet.Invite else memberInvite?.let(share) },
         onRename = { sheet = TeamSheet.Rename },
         onMember = { member ->
             val canManage = state.isAdmin && member.player.profileId != state.myId
@@ -300,6 +304,9 @@ fun TeamContent(
                         HeroButton(stringResource(Res.string.team_add_player), onAdd, Modifier.weight(1f), icon = DesiIcons.PersonAdd)
                         HeroButton(stringResource(Res.string.team_invite_short), onInvite, Modifier.weight(1f), icon = DesiIcons.QrCode, filled = false)
                     }
+                }
+                if (state.myRole == TeamRole.MEMBER && team.code.isNotEmpty()) {
+                    HeroButton(stringResource(Res.string.team_invite_short), onInvite, Modifier.fillMaxWidth(), icon = DesiIcons.Share, filled = false)
                 }
                 // Someone outside the team can ask to join it, and follow it either way.
                 if (state.myRole == null) {
