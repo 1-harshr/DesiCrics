@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.api.SupportCategory
 import com.harsh.desicrics.api.SupportRequest
@@ -83,6 +84,11 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sheet by rememberSaveable { mutableStateOf<SettingsSheet?>(null) }
+    // Coming back from a team the user left or renamed, or a match they played.
+    LifecycleResumeEffect(Unit) {
+        viewModel.refresh()
+        onPauseOrDispose {}
+    }
     val close = {
         sheet = null
         viewModel.clearResult()

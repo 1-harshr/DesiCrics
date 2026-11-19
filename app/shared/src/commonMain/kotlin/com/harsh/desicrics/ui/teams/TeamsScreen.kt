@@ -41,6 +41,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.harsh.desicrics.designsystem.component.Avatar
 import com.harsh.desicrics.designsystem.component.BallSpinner
@@ -69,6 +70,11 @@ fun TeamsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sheet by rememberSaveable { mutableStateOf(if (joinCode != null) JOIN else null) }
+    // Coming back from a team the user left or renamed.
+    LifecycleResumeEffect(Unit) {
+        viewModel.refresh()
+        onPauseOrDispose {}
+    }
     TeamsContent(
         state,
         onOpenTeam,

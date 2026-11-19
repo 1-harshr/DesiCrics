@@ -37,10 +37,7 @@ class ProfileViewModel(
     private val _state = MutableStateFlow(ProfileUiState())
     val state: StateFlow<ProfileUiState> = _state
 
-    init {
-        refresh()
-    }
-
+    /** The screen calls this each time it comes into view, the first time included. */
     fun refresh() {
         viewModelScope.launch {
             val matches = attempt { teams.myMatches() }

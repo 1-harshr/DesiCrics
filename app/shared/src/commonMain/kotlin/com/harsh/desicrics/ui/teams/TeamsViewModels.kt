@@ -75,10 +75,7 @@ class TeamsViewModel(private val repository: TeamRepository) : ViewModel() {
     val state: StateFlow<TeamsUiState> = _state
     private var browseJob: Job? = null
 
-    init {
-        refresh()
-    }
-
+    /** The screen calls this each time it comes into view, the first time included. */
     fun refresh() {
         viewModelScope.launch {
             attempt { repository.myTeams() }.fold(
