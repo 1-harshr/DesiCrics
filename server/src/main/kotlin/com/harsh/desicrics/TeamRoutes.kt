@@ -44,6 +44,7 @@ fun Route.teamRoutes(teams: TeamService) {
 fun Route.playerRoutes(players: PlayerService) {
     route("/players") {
         get("/search") { call.respond(players.search(call.request.queryParameters["q"].orEmpty())) }
+        post("/placeholder") { call.respond(players.placeholder(call.user, call.receive<AddMemberRequest>())) }
         get("/claimable") { call.respond(players.claimable(call.user)) }
         post("/claim") { call.respond(players.claim(call.user, call.receive<ClaimRequest>())) }
     }

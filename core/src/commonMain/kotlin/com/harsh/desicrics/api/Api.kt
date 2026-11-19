@@ -75,26 +75,30 @@ data class CreateMatchRequest(
     val teamA: SquadRequest,
     val teamB: SquadRequest,
     val oversPerInnings: Int,
-    val tossWinner: TeamSide,
-    val tossDecision: TossDecision,
+    val tossWinner: TeamSide = TeamSide.A,
+    val tossDecision: TossDecision = TossDecision.BAT,
     val rules: MatchRules = MatchRules(),
+    val pending: Boolean = false,
+    val scheduledAt: Long? = null,
+    val venue: String = "",
 ) {
     /** Checked on the device for instant feedback and again on the server. */
     fun validate(): MatchSetupError? {
         val sides = listOf(teamA, teamB)
         val profiles = sides.flatMap { side -> side.players.mapNotNull { it.profileId } }
         return when {
+            teamA.teamId != null && teamA.teamId == teamB.teamId -> MatchSetupError.SAME_TEAM_NAMES
             sides.any { it.name.isBlank() } -> MatchSetupError.TEAM_NAME_MISSING
             teamA.name.trim().equals(teamB.name.trim(), ignoreCase = true) -> MatchSetupError.SAME_TEAM_NAMES
             sides.any { it.name.length > MAX_NAME } -> MatchSetupError.TEAM_NAME_TOO_LONG
-            sides.any { it.players.size < MIN_PLAYERS } -> MatchSetupError.TOO_FEW_PLAYERS
+            !pending && sides.any { it.players.size < MIN_PLAYERS } -> MatchSetupError.TOO_FEW_PLAYERS
             sides.any { it.players.size > MAX_PLAYERS } -> MatchSetupError.TOO_MANY_PLAYERS
             sides.any { side -> side.players.any { it.name.isBlank() || it.name.length > MAX_NAME } } -> MatchSetupError.PLAYER_NAME_INVALID
             // Nobody can play for both sides, or twice for one.
             profiles.size != profiles.toSet().size -> MatchSetupError.PLAYER_TWICE
             sides.any { side -> listOfNotNull(side.captain, side.keeper).any { it !in side.players.indices } } -> MatchSetupError.CAPTAIN_INVALID
             oversPerInnings !in OVERS -> MatchSetupError.OVERS_OUT_OF_RANGE
-            !rules.isValid() -> MatchSetupError.RULES_INVALID
+            venue.length > 120 || !rules.isValid() -> MatchSetupError.RULES_INVALID
             else -> null
         }
     }

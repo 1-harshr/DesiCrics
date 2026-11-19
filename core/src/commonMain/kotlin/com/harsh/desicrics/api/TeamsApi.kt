@@ -23,8 +23,9 @@ import kotlinx.serialization.Serializable
 //   POST   /support                             SupportRequest → 204
 
 @Serializable
-data class TeamRequest(val name: String, val city: String = "") {
+data class TeamRequest(val name: String, val city: String = "", val lineup: List<SquadPlayer> = emptyList()) {
     fun validate(): TeamError? = when {
+        lineup.size > CreateMatchRequest.MAX_PLAYERS || lineup.any { it.name.isBlank() || it.name.length > CreateMatchRequest.MAX_NAME } -> TeamError.MEMBER_INVALID
         name.isBlank() -> TeamError.NAME_MISSING
         name.trim().length > CreateMatchRequest.MAX_NAME -> TeamError.NAME_TOO_LONG
         city.length > 100 -> TeamError.CITY_TOO_LONG

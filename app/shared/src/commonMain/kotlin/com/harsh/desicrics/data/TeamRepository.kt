@@ -18,10 +18,13 @@ import com.harsh.desicrics.model.TeamSummary
 /** Saved teams, finding players, and the account. Every call goes to the server; nothing is cached. */
 class TeamRepository(private val api: DesiCricsApi, private val config: ApiConfig, private val analytics: Analytics) {
 
+    suspend fun searchTeams(query: String) = api.search(query).teams
+    suspend fun placeholder(name: String, phone: String) = api.placeholder(AddMemberRequest(placeholderName = name, placeholderPhone = phone))
+
     suspend fun myTeams(): List<TeamSummary> = api.myTeams()
 
-    suspend fun create(name: String, city: String): SavedTeam =
-        api.createTeam(TeamRequest(name.trim(), city.trim())).also { analytics.log(AnalyticsEvents.TEAM_CREATED, emptyMap()) }
+    suspend fun create(name: String, city: String, lineup: List<com.harsh.desicrics.api.SquadPlayer> = emptyList()): SavedTeam =
+        api.createTeam(TeamRequest(name.trim(), city.trim(), lineup)).also { analytics.log(AnalyticsEvents.TEAM_CREATED, emptyMap()) }
 
     suspend fun team(teamId: String): SavedTeam = api.team(teamId)
 

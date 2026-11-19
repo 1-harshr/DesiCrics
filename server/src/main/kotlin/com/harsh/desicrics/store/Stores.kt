@@ -139,7 +139,7 @@ interface PlayerStore {
 
 interface TeamStore {
     /** Saves the team with [adminId] as its first admin. False if [team]'s join code is taken. */
-    suspend fun create(team: SavedTeam, adminId: String, at: Long): Boolean
+    suspend fun create(team: SavedTeam, adminId: String, at: Long, lineup: List<com.harsh.desicrics.api.SquadPlayer> = emptyList()): Boolean
 
     /** With every member's role and summary, the join code, and placeholders' claim codes left for the caller to strip. */
     suspend fun get(teamId: String): SavedTeam?

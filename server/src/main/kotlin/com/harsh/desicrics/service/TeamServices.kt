@@ -52,7 +52,7 @@ class TeamService(
         val id = UUID.randomUUID().toString()
         withFreshCode { code ->
             val team = SavedTeam(id, request.name.trim(), request.city.trim(), user.uid, members = emptyList(), joinCode = code)
-            teams.create(team, adminId = user.uid, at = clock()).takeIf { it }
+            teams.create(team, adminId = user.uid, at = clock(), lineup = request.lineup).takeIf { it }
         }
         return get(user, id)
     }
@@ -165,6 +165,18 @@ class PlayerService(
     private val players: PlayerStore,
     private val users: UserStore,
 ) {
+    suspend fun placeholder(user: FirebasePrincipal, request: AddMemberRequest): PlayerSummary {
+        val name = request.placeholderName?.trim()
+        val phone = request.placeholderPhone.orEmpty().trim()
+        if (request.validate() != null || name.isNullOrEmpty() || !phone.matches(Regex("[+]?[0-9 ]{10,18}")))
+            throw ApiException(HttpStatusCode.BadRequest, "Enter a name and phone number")
+        val id = withFreshCode { code ->
+            val id = "p-" + UUID.randomUUID()
+            id.takeIf { players.createPlaceholder(id, name, phone, code, user.uid, System.currentTimeMillis()) }
+        }
+        return PlayerSummary(id, name, isPlaceholder = true)
+    }
+
     suspend fun search(query: String): List<PlayerSummary> =
         if (query.trim().length < 2) emptyList() else players.search(query, limit = 20)
 

@@ -131,6 +131,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             it[scoreSummary] = match.scoreSummary
         }
         if (updated == 0) return@query false
+        MatchPlayersTable.deleteWhere { matchId eq match.id }
         insertRoster(match.id, TeamSide.A, match.teamA)
         insertRoster(match.id, TeamSide.B, match.teamB)
         true
@@ -231,6 +232,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
                 it[scorerUid] = match.scorerUid
                 it[teamAId] = match.teamA.teamId
                 it[teamBId] = match.teamB.teamId
+                it[venue] = match.venue
                 it[scheduledAt] = match.scheduledAt
                 it[tournamentId] = match.fixture?.tournamentId
                 it[stage] = match.fixture?.stage
@@ -418,6 +420,7 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             innings = Json.decodeFromString(this[MatchesTable.inningsScores]),
             rules = Json.decodeFromString(this[MatchesTable.rules]),
             scorerUid = this[MatchesTable.scorerUid],
+            venue = this[MatchesTable.venue],
             scheduledAt = this[MatchesTable.scheduledAt],
             fixture = this[MatchesTable.tournamentId]?.let { tournament ->
                 FixtureInfo(tournament, this[MatchesTable.stage]!!, this[MatchesTable.roundNo]!!, this[MatchesTable.fixtureNo]!!, this[MatchesTable.groupNo])

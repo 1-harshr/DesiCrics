@@ -103,7 +103,9 @@ class MatchService(
             oversPerInnings = request.oversPerInnings,
             tossWinner = request.tossWinner,
             tossDecision = request.tossDecision,
-            status = MatchStatus.IN_PROGRESS,
+            status = if (request.pending) MatchStatus.SCHEDULED else MatchStatus.IN_PROGRESS,
+            scheduledAt = request.scheduledAt,
+            venue = request.venue.trim(),
             rules = request.rules,
         )
         matches.create(match)

@@ -1,6 +1,7 @@
 package com.harsh.desicrics.ui.match
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -46,7 +47,11 @@ internal fun FixturePending(
 ) {
     val space = DesiTheme.space
     val colors = DesiTheme.colors
-    var squads by remember { mutableStateOf(mapOf<TeamSide, SquadRequest>()) }
+    var squads by remember { mutableStateOf(if (match.fixture == null) TeamSide.entries.associateWith { side ->
+        val t = match.team(side)
+        SquadRequest(t.name, t.players.map { SquadPlayer(it.name, it.profileId) }, t.teamId,
+            t.players.indexOfFirst { it.id == t.captainId }.takeIf { it >= 0 }, t.players.indexOfFirst { it.id == t.keeperId }.takeIf { it >= 0 })
+    } else emptyMap()) }
     var picking by remember { mutableStateOf<TeamSide?>(null) }
     var tossWinner by remember { mutableStateOf(TeamSide.A) }
     var tossDecision by remember { mutableStateOf(TossDecision.BAT) }
@@ -58,6 +63,7 @@ internal fun FixturePending(
         GhostButton(stringResource(Res.string.common_back), onClick = onBack)
         Text(stringResource(Res.string.match_title, match.teamA.name, match.teamB.name), style = DesiTheme.type.titleLg, color = colors.ink)
         val where = listOfNotNull(
+            match.venue.takeIf { it.isNotBlank() },
             match.fixture?.let { stageText(it) },
             match.scheduledAt?.let { formatDayAndTime(it) } ?: stringResource(Res.string.fixture_not_scheduled),
         )
@@ -75,7 +81,7 @@ internal fun FixturePending(
                     if (squad == null) stringResource(Res.string.fixture_pick_squad, team.name)
                     else stringResource(Res.string.fixture_squad_ready, team.name, squad.players.size),
                     onClick = { picking = side },
-                    enabled = (if (side == TeamSide.A) setup.teamA else setup.teamB) != null,
+                    enabled = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -94,7 +100,7 @@ internal fun FixturePending(
             PrimaryButton(
                 stringResource(Res.string.fixture_start),
                 onClick = { if (a != null && b != null) onStart(a, b, tossWinner, tossDecision) },
-                enabled = a != null && b != null,
+                enabled = a != null && b != null && a.players.size >= 2 && b.players.size >= 2,
                 loading = setup.starting,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -102,7 +108,28 @@ internal fun FixturePending(
     }
 
     picking?.let { side ->
-        val team: SavedTeam = (if (side == TeamSide.A) setup?.teamA else setup?.teamB) ?: return@let
+        val team = if (side == TeamSide.A) setup?.teamA else setup?.teamB
+        if (team == null || match.fixture == null) {
+            val current = squads[side] ?: SquadRequest(match.team(side).name, emptyList(), match.team(side).teamId)
+            var players by remember(side) { mutableStateOf(current.players) }
+            var name by remember { mutableStateOf("") }
+            com.harsh.desicrics.designsystem.component.DesiSheet(current.name, { picking = null }) {
+                players.forEachIndexed { i, player ->
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        Text(player.name, Modifier.weight(1f))
+                        androidx.compose.material3.TextButton(onClick = { players = players.filterIndexed { index, _ -> index != i } }) { Text(stringResource(Res.string.directory_remove)) }
+                    }
+                }
+                com.harsh.desicrics.designsystem.component.DesiTextField(name, { name = it }, stringResource(Res.string.new_match_add_player))
+                TonalButton(stringResource(Res.string.new_match_add_player), { players = players + SquadPlayer(name.trim()); name = "" }, enabled = name.isNotBlank() && players.size < 20)
+                PrimaryButton(stringResource(Res.string.teams_save_action), {
+                    fun role(index: Int?) = index?.let { current.players.getOrNull(it) }?.let { players.indexOf(it).takeIf { n -> n >= 0 } }
+                    squads = squads + (side to current.copy(players = players, captain = role(current.captain), keeper = role(current.keeper)))
+                    picking = null
+                })
+            }
+            return@let
+        }
         val current = squads[side]
         SquadSheet(
             team = team,

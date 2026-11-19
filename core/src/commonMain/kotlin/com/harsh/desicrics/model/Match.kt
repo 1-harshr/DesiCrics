@@ -26,6 +26,7 @@ data class Match(
     val scheduledAt: Long? = null,
     /** Set when the match is a tournament fixture. */
     val fixture: FixtureInfo? = null,
+    val venue: String = "",
 ) {
     val battingFirst: TeamSide
         get() = if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other

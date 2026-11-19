@@ -113,6 +113,7 @@ object MatchesTable : Table("matches") {
     val scorerUid = varchar("scorer_uid", 128)
     val teamAId = varchar("team_a_id", 36).nullable()
     val teamBId = varchar("team_b_id", 36).nullable()
+    val venue = varchar("venue", 120).default("")
     val scheduledAt = long("scheduled_at").nullable()
     val tournamentId = varchar("tournament_id", 36).nullable()
     val stage = enumerationByName("stage", 15, Stage::class).nullable()

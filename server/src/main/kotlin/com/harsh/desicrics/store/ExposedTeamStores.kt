@@ -195,7 +195,7 @@ internal fun String.escapeLike() = replace("\\", "\\\\").replace("%", "\\%").rep
 
 class ExposedTeamStore(private val db: Database) : TeamStore {
 
-    override suspend fun create(team: SavedTeam, adminId: String, at: Long): Boolean = try {
+    override suspend fun create(team: SavedTeam, adminId: String, at: Long, lineup: List<com.harsh.desicrics.api.SquadPlayer>): Boolean = try {
         db.query {
             TeamsTable.insert {
                 it[id] = team.id
@@ -204,6 +204,24 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
                 it[joinCode] = team.joinCode!!
                 it[createdBy] = team.createdBy
                 it[createdAt] = at
+            }
+            for (member in lineup.distinctBy { it.profileId ?: it.name }) {
+                val pid = member.profileId ?: ("p-" + java.util.UUID.randomUUID()).also { generated ->
+                    PlayersTable.insert {
+                        it[id] = generated
+                        it[name] = member.name
+                        it[phone] = ""
+                        it[claimCode] = com.harsh.desicrics.service.newCode()
+                        it[createdBy] = adminId
+                        it[createdAt] = at
+                    }
+                }
+                if (pid != adminId) TeamMembersTable.insert {
+                    it[teamId] = team.id
+                    it[playerId] = pid
+                    it[role] = TeamRole.MEMBER
+                    it[joinedAt] = at
+                }
             }
             TeamMembersTable.insert {
                 it[teamId] = team.id

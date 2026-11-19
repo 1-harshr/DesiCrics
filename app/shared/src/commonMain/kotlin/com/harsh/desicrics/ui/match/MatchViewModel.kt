@@ -258,12 +258,12 @@ class MatchViewModel(
 
     /** Loads what starting a scheduled fixture needs, once. */
     private fun loadFixtureSetup(match: Match) {
-        val tournamentId = match.fixture?.tournamentId ?: return
+        val tournamentId = match.fixture?.tournamentId
         if (_state.value.fixture != null) return
         _state.update { it.copy(fixture = FixtureSetup(canStart = false, teamA = null, teamB = null)) }
         viewModelScope.launch {
             val organiser = try {
-                tournaments.details(tournamentId).tournament.isOrganiser(uid)
+                if (tournamentId == null) match.createdBy == uid else tournaments.details(tournamentId).tournament.isOrganiser(uid)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

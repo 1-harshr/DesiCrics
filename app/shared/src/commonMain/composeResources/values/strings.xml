@@ -938,4 +938,17 @@
     <string name="feed_retry">Retry</string>
     <string name="feed_empty">No matches here yet</string>
     <string name="feed_refresh">Refresh</string>
+    <string name="setup_step">Step %1$d of 3</string>
+    <string name="setup_details">Match details</string>
+    <string name="setup_continue">Continue</string>
+    <string name="setup_schedule">Schedule match</string>
+    <string name="setup_now">Play now</string>
+    <string name="setup_later">Set date and time</string>
+    <string name="setup_venue">Ground or location</string>
+    <string name="setup_guest">Guest</string>
+    <string name="setup_find">Find a team</string>
+    <string name="setup_save">Save as a team</string>
+    <string name="setup_edit_lineup">Edit lineup</string>
+    <string name="setup_linked">Linked player</string>
+    <string name="setup_phone">Phone</string>
 </resources>

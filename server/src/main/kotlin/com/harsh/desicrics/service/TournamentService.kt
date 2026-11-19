@@ -177,9 +177,10 @@ class TournamentService(
 
     /** Organisers start fixtures, and whoever starts one scores it. */
     suspend fun startFixture(user: FirebasePrincipal, matchId: String, request: StartFixtureRequest): MatchDetails {
-        val tournamentId = matches.details(matchId).match.fixture?.tournamentId
-            ?: throw ApiException(HttpStatusCode.Conflict, "Only tournament fixtures are started this way")
-        requireOrganiser(user, tournamentId)
+        val match = matches.details(matchId).match
+        val tournamentId = match.fixture?.tournamentId
+        if (tournamentId != null) requireOrganiser(user, tournamentId)
+        else if (match.createdBy != user.uid) throw ApiException(HttpStatusCode.Forbidden, "Only the organiser can start this match")
         return matches.startFixture(user, matchId, request)
     }
 

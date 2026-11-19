@@ -134,7 +134,7 @@ fun TournamentScreen(
         TournamentSheet.AddFixture -> state.details?.let { details ->
             AddFixtureSheet(details.tournament.confirmedTeams, onAdd = { a, b -> viewModel.addFixture(a, b); close() }, onDismiss = close)
         }
-        is TournamentSheet.Schedule -> ScheduleSheet(current.match, onSave = { at -> viewModel.schedule(current.match.id, at); close() }, onDismiss = close)
+        is TournamentSheet.Schedule -> ScheduleSheet(current.match.scheduledAt, onSave = { at -> viewModel.schedule(current.match.id, at); close() }, onDismiss = close)
     }
 }
 
@@ -389,8 +389,8 @@ private fun AddFixtureSheet(teams: List<TournamentTeam>, onAdd: (String, String)
 /** A day and a time for a fixture, in the phone's time zone. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScheduleSheet(match: Match, onSave: (Long?) -> Unit, onDismiss: () -> Unit) {
-    val date = rememberDatePickerState(initialSelectedDateMillis = match.scheduledAt)
+internal fun ScheduleSheet(scheduledAt: Long?, onSave: (Long?) -> Unit, onDismiss: () -> Unit) {
+    val date = rememberDatePickerState(initialSelectedDateMillis = scheduledAt)
     val time = rememberTimePickerState(initialHour = 9, initialMinute = 0)
     DesiSheet(stringResource(Res.string.fixture_reschedule), onDismiss) {
         DatePicker(date, title = null, headline = null, showModeToggle = false)

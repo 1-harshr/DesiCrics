@@ -32,12 +32,22 @@ import org.jetbrains.compose.resources.stringResource
 
 /** The caller's saved teams; null while they load. */
 @Composable
-internal fun TeamPickerSheet(teams: List<TeamSummary>?, onPick: (TeamSummary) -> Unit, onDismiss: () -> Unit) {
+internal fun TeamPickerSheet(teams: List<TeamSummary>?, search: suspend (String) -> List<TeamSummary>, onPick: (TeamSummary) -> Unit, onDismiss: () -> Unit) {
     DesiSheet(stringResource(Res.string.new_match_pick_team), onDismiss) {
+        var query by remember { mutableStateOf("") }
+        var hits by remember(query) { mutableStateOf<List<TeamSummary>?>(null) }
+        var failed by remember(query) { mutableStateOf(false) }
+        androidx.compose.runtime.LaunchedEffect(query) {
+            if (query.trim().length >= 2) try { kotlinx.coroutines.delay(250); hits = search(query) }
+            catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { failed = true }
+        }
+        com.harsh.desicrics.designsystem.component.DesiTextField(query, { query = it }, stringResource(Res.string.setup_find))
+        val results = if (query.trim().length >= 2) hits else teams
         when {
-            teams == null -> CircularProgressIndicator(color = DesiTheme.colors.brand)
-            teams.isEmpty() -> Text(stringResource(Res.string.new_match_no_teams), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
-            else -> teams.forEach { TeamRow(it, onClick = { onPick(it) }) }
+            failed -> Text(stringResource(Res.string.teams_load_failed))
+            results == null -> CircularProgressIndicator(color = DesiTheme.colors.brand)
+            results.isEmpty() -> Text(stringResource(Res.string.new_match_no_teams), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+            else -> results.forEach { TeamRow(it, onClick = { onPick(it) }) }
         }
     }
 }
@@ -93,7 +103,7 @@ internal fun SquadSheet(
         PrimaryButton(
             stringResource(Res.string.new_match_squad_done, squad.size),
             onClick = { onDone(squad, captain, keeper) },
-            enabled = squad.isNotEmpty(),
+            enabled = true,
             modifier = Modifier.fillMaxWidth(),
         )
     }

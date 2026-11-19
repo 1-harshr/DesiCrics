@@ -30,6 +30,7 @@ data class SideForm(
     val name: String = "",
     val players: List<SquadPlayer> = emptyList(),
     val teamId: String? = null,
+    val inviteLink: String? = null,
     /** Indexes into [players]. */
     val captain: Int? = null,
     val keeper: Int? = null,
@@ -50,6 +51,8 @@ data class SideForm(
 data class NewMatchFormState(
     val teamA: SideForm = SideForm(),
     val teamB: SideForm = SideForm(),
+    val scheduledAt: Long? = null,
+    val venue: String = "",
     val overs: Int = 10,
     val tossWinner: TeamSide = TeamSide.A,
     val tossDecision: TossDecision = TossDecision.BAT,
@@ -94,6 +97,34 @@ class NewMatchViewModel(
 
     fun removePlayer(side: TeamSide, index: Int) = updateSide(side) { it.without(index) }
 
+    suspend fun findTeams(q: String) = teamRepository.searchTeams(q)
+    suspend fun findPlayers(q: String) = teamRepository.search(q)
+    suspend fun byPhone(side: TeamSide, name: String, phone: String) = linkPlayer(side, teamRepository.placeholder(name, phone))
+    fun linkPlayer(side: TeamSide, player: PlayerSummary) {
+        updateSide(side) { form ->
+            if (form.players.any { it.profileId == player.profileId } || form.players.size >= CreateMatchRequest.MAX_PLAYERS) form
+            else form.copy(players = form.players + SquadPlayer(player.name, player.profileId))
+        }
+    }
+
+    fun saveTeam(side: TeamSide) {
+        val form = state.value.side(side)
+        if (form.teamId != null || state.value.saving) return
+        _state.update { it.copy(saving = true) }
+        viewModelScope.launch {
+            try {
+                val team = teamRepository.create(form.name, "", form.players)
+                updateSide(side) { form.copy(teamId = team.id, inviteLink = team.joinCode?.let(teamRepository::joinLink),
+                    players = form.players.map { p ->
+                        if (p.profileId != null) p else p.copy(profileId = team.members.firstOrNull { it.player.isPlaceholder && it.player.name == p.name }?.player?.profileId)
+                    }) }
+                _state.update { it.copy(myTeams = null) }
+            } catch (e: CancellationException) { throw e }
+            catch (e: Exception) { _state.update { it.copy(error = NewMatchError.CreateFailed) } }
+            finally { _state.update { it.copy(saving = false) } }
+        }
+    }
+
     /** Loads the caller's teams for the picker, once. */
     fun loadMyTeams() {
         if (_state.value.myTeams != null) return
@@ -136,6 +167,7 @@ class NewMatchViewModel(
                 name = team.name,
                 players = players.map { SquadPlayer(it.name, it.profileId) },
                 teamId = team.id,
+                inviteLink = team.joinCode?.let(teamRepository::joinLink),
                 captain = players.indexOfFirst { it.profileId == captainId }.takeIf { it >= 0 },
                 keeper = players.indexOfFirst { it.profileId == keeperId }.takeIf { it >= 0 },
             )
@@ -148,7 +180,9 @@ class NewMatchViewModel(
 
     fun create(onCreated: (matchId: String) -> Unit) {
         val form = _state.value
+        if (form.saving) return
         val request = CreateMatchRequest(
+            pending = true, scheduledAt = form.scheduledAt, venue = form.venue,
             teamA = form.teamA.toRequest(),
             teamB = form.teamB.toRequest(),
             oversPerInnings = form.overs,

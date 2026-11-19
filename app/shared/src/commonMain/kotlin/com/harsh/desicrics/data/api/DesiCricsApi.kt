@@ -166,6 +166,9 @@ class DesiCricsApi(
     suspend fun searchPlayers(query: String): List<PlayerSummary> =
         call { get("$baseUrl/players/search") { it(); parameter("q", query) } }.body()
 
+    suspend fun placeholder(request: AddMemberRequest): PlayerSummary =
+        call { post("$baseUrl/players/placeholder") { it(); json(request) } }.body()
+
     suspend fun claimablePlayers(): List<PlayerSummary> = call { get("$baseUrl/players/claimable", it) }.body()
 
     suspend fun claimPlayer(request: ClaimRequest): PlayerSummary = call { post("$baseUrl/players/claim") { it(); json(request) } }.body()
