@@ -150,6 +150,8 @@ fun CareerSection(
     onOpenMatch: ((String) -> Unit)? = null,
     /** False where a tab already says Stats. */
     heading: Boolean = true,
+    /** The user's own stats, worded "you"; anyone else's are "they". */
+    isMe: Boolean = false,
 ) {
     val viewModel: CareerViewModel = koinViewModel(key = "career-$profileId") { parametersOf(profileId) }
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -161,18 +163,23 @@ fun CareerSection(
         when {
             stats == null && state.failed -> ErrorState(stringResource(Res.string.error_stats_title), stringResource(Res.string.error_connection_body), onRetry = viewModel::retry, compact = true)
             stats == null -> Unit
-            stats.matches == 0 -> EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.stats_none_title), body = stringResource(Res.string.stats_none))
+            stats.matches == 0 -> EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.stats_none_title), body = stringResource(if (isMe) Res.string.stats_none else Res.string.stats_none_other))
             else -> CareerCards(stats, onOpenMatch)
         }
         val canShare = stats != null && stats.matches > 0 && name.isNotBlank()
         if (canShare || onCompare != null) {
             Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-                if (canShare) ActionTile(DesiIcons.Share, stringResource(Res.string.stats_share), { sharing = true }, Modifier.weight(1f))
+                if (canShare) ActionTile(DesiIcons.Share, stringResource(if (isMe) Res.string.stats_share else Res.string.stats_share_other), { sharing = true }, Modifier.weight(1f))
                 if (onCompare != null) ActionTile(DesiIcons.Swap, stringResource(Res.string.stats_compare), onCompare, Modifier.weight(1f))
             }
         }
         if (sharing && stats != null) {
-            ShareImageSheet(stringResource(Res.string.stats_share_title), onDismiss = { sharing = false }) { StatsShareCard(name, stats) }
+            ShareImageSheet(
+                stringResource(Res.string.stats_share_title),
+                onDismiss = { sharing = false },
+                hint = stringResource(Res.string.stats_share_card_hint),
+                action = stringResource(Res.string.stats_share_action),
+            ) { StatsShareCard(name, stats) }
         }
     }
 }

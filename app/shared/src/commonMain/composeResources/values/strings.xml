@@ -815,6 +815,7 @@
     <string name="stats_format_long">Longer</string>
     <string name="stats_load_failed">Couldn't load stats. Check your connection.</string>
     <string name="stats_none">No completed matches here yet. Stats count matches where you were picked from a team, not typed in by name.</string>
+    <string name="stats_none_other">No completed matches here yet. Stats count matches where they were picked from a team, not typed in by name.</string>
     <plurals name="stats_summary">
         <item quantity="one">%1$d match · %2$d won · %3$s MVP points</item>
         <item quantity="other">%1$d matches · %2$d won · %3$s MVP points</item>
@@ -888,6 +889,9 @@
     <string name="profile_photo_failed">Couldn't upload that picture. Try a smaller one or check your connection.</string>
     <string name="team_logo_change">Change logo</string>
     <string name="stats_share">Share my stats card</string>
+    <string name="stats_share_other">Share their stats card</string>
+    <string name="stats_share_action">Share stats card</string>
+    <string name="stats_share_card_hint">A picture of the numbers, sized for WhatsApp status.</string>
     <string name="stats_share_title">Share the stats</string>
     <string name="share_card_runs">runs</string>
     <string name="share_card_wickets">wickets</string>

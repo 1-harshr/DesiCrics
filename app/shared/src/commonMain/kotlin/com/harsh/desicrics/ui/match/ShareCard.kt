@@ -41,13 +41,19 @@ import org.jetbrains.compose.resources.stringResource
 internal fun ShareCardSheet(state: MatchState, onDismiss: () -> Unit) =
     ShareImageSheet(stringResource(Res.string.match_share_card_title), onDismiss) { ShareCard(state) }
 
-/** Any 9:16 card, previewed and shared as a picture. */
+/** Any 9:16 card, previewed and shared as a picture. [hint] and [action] default to the score card's words. */
 @Composable
-fun ShareImageSheet(title: String, onDismiss: () -> Unit, card: @Composable () -> Unit) {
+fun ShareImageSheet(
+    title: String,
+    onDismiss: () -> Unit,
+    hint: String = stringResource(Res.string.match_share_card_hint),
+    action: String = stringResource(Res.string.match_share),
+    card: @Composable () -> Unit,
+) {
     val layer = rememberGraphicsLayer()
     val scope = rememberCoroutineScope()
     val shareImage = rememberShareImage()
-    DesiSheet(title, onDismiss, stringResource(Res.string.match_share_card_hint)) {
+    DesiSheet(title, onDismiss, hint) {
         Box(
             Modifier.fillMaxWidth(0.75f).align(Alignment.CenterHorizontally).drawWithContent {
                 layer.record { this@drawWithContent.drawContent() }
@@ -57,7 +63,7 @@ fun ShareImageSheet(title: String, onDismiss: () -> Unit, card: @Composable () -
             card()
         }
         PrimaryButton(
-            stringResource(Res.string.match_share),
+            action,
             onClick = { scope.launch { shareImage(layer.toImageBitmap()) } },
             modifier = Modifier.fillMaxWidth(),
         )

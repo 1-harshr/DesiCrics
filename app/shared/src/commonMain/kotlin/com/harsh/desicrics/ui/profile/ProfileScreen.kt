@@ -107,7 +107,7 @@ fun ProfileScreen(
             viewModel.clearResult()
             sheet = it
         },
-        stats = { CareerSection(profile.uid, onCompare = onCompare, name = profile.name, onOpenMatch = onOpenMatch, heading = false) },
+        stats = { CareerSection(profile.uid, onCompare = onCompare, name = profile.name, onOpenMatch = onOpenMatch, heading = false, isMe = true) },
         onRetry = viewModel::refresh,
     )
     when (sheet) {
