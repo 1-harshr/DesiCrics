@@ -242,6 +242,9 @@
     <string name="new_match_error_create_failed">Couldn't start the match. Check your connection and try again.</string>
     <string name="new_match_error_save_team_failed">Couldn't save the team. Check your connection and try again.</string>
     <string name="new_match_error_load_team_failed">Couldn't load that team. Check your connection and try again.</string>
+    <string name="new_match_discard_title">Discard this match?</string>
+    <string name="new_match_discard_body">The teams and details you've set up will be lost.</string>
+    <string name="new_match_discard">Discard</string>
 
     <!-- Scoring screen -->
     <string name="match_title">%1$s vs %2$s</string>

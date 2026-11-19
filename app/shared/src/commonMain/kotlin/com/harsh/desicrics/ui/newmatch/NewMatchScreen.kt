@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -66,11 +67,15 @@ import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.resources.Res
+import com.harsh.desicrics.resources.common_cancel
 import com.harsh.desicrics.resources.home_search
 import com.harsh.desicrics.resources.new_match_add_player
 import com.harsh.desicrics.resources.new_match_add_done
 import com.harsh.desicrics.resources.new_match_add_names
 import com.harsh.desicrics.resources.team_add_added
+import com.harsh.desicrics.resources.new_match_discard
+import com.harsh.desicrics.resources.new_match_discard_body
+import com.harsh.desicrics.resources.new_match_discard_title
 import com.harsh.desicrics.resources.new_match_error_captain
 import com.harsh.desicrics.resources.new_match_error_create_failed
 import com.harsh.desicrics.resources.new_match_error_load_team_failed
@@ -224,8 +229,31 @@ fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions, initialS
     val colors = DesiTheme.colors
     var step by rememberSaveable { mutableStateOf(initialStep) }
     var scheduling by rememberSaveable { mutableStateOf(false) }
-    val back = { if (step == 0) actions.onBack() else step-- ; Unit }
-    androidx.navigationevent.compose.NavigationBackHandler(androidx.navigationevent.compose.rememberNavigationEventState(androidx.navigationevent.NavigationEventInfo.None), isBackEnabled = step > 0, onBackCompleted = back)
+    // Set while a team is edited from the details step: Back and Continue both return there.
+    var editingFromDetails by rememberSaveable { mutableStateOf(false) }
+    var confirmDiscard by rememberSaveable { mutableStateOf(false) }
+    val back: () -> Unit = {
+        when {
+            editingFromDetails -> { step = 2; editingFromDetails = false }
+            step > 0 -> step--
+            state.hasInput -> confirmDiscard = true
+            else -> actions.onBack()
+        }
+    }
+    androidx.navigationevent.compose.NavigationBackHandler(
+        androidx.navigationevent.compose.rememberNavigationEventState(androidx.navigationevent.NavigationEventInfo.None),
+        isBackEnabled = step > 0 || editingFromDetails || state.hasInput,
+        onBackCompleted = back,
+    )
+    if (confirmDiscard) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirmDiscard = false },
+            title = { Text(stringResource(Res.string.new_match_discard_title)) },
+            text = { Text(stringResource(Res.string.new_match_discard_body)) },
+            confirmButton = { TextButton(onClick = { confirmDiscard = false; actions.onBack() }) { Text(stringResource(Res.string.new_match_discard)) } },
+            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(Res.string.common_cancel)) } },
+        )
+    }
     if (scheduling) com.harsh.desicrics.ui.tournament.ScheduleSheet(state.scheduledAt, { at ->
         actions.onUpdate { it.copy(scheduledAt = at) }; scheduling = false
     }, { scheduling = false })
@@ -245,7 +273,7 @@ fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions, initialS
                     androidx.compose.runtime.key(step) { TeamStep(TeamSide.entries[step], state, actions) }
                 } else {
                     Section(Res.string.new_match_section_teams, DesiIcons.Teams) {
-                        FixturePreview(state, onEdit = { step = it })
+                        FixturePreview(state, onEdit = { step = it; editingFromDetails = true })
                     }
                     Section(Res.string.setup_when_where, DesiIcons.Stadium) {
                         DesiTextField(
@@ -291,7 +319,13 @@ fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions, initialS
         StartBar(state, if (step < 2) Res.string.setup_continue else if (state.scheduledAt == null) Res.string.setup_now else Res.string.setup_schedule,
             step == 2 || state.name(TeamSide.entries[step]).isNotBlank(),
             if (step < 2) DesiIcons.Forward else if (state.scheduledAt == null) DesiIcons.Play else DesiIcons.Calendar,
-        ) { if (step < 2) step++ else actions.onStart() }
+        ) {
+            when {
+                editingFromDetails -> { step = 2; editingFromDetails = false }
+                step < 2 -> step++
+                else -> actions.onStart()
+            }
+        }
     }
 }
 

@@ -73,6 +73,10 @@ data class NewMatchFormState(
     fun name(side: TeamSide) = side(side).name
     fun players(side: TeamSide) = side(side).players
 
+    /** Anything typed or picked, so leaving the form would lose it. Loading and errors don't count. */
+    val hasInput: Boolean
+        get() = copy(saving = false, error = null, myTeams = null, myTeamsFailed = false, squadTeam = null, squadSide = null) != NewMatchFormState()
+
     /** [teams] that can go on [side]: a saved team can't play itself, so the other side's is left out. */
     fun pickable(side: TeamSide, teams: List<TeamSummary>) = side(side.other).teamId.let { taken -> teams.filter { it.id != taken } }
 }
