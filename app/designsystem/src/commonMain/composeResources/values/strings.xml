@@ -7,4 +7,7 @@
     <string name="ds_innings_overs">%1$s ov</string>
     <string name="ds_yet_to_bat">Yet to bat</string>
     <string name="ds_try_again">Try again</string>
+
+    <!-- Phase 8 · themes -->
+    <string name="ds_theme_classic">Classic</string>
 </resources>

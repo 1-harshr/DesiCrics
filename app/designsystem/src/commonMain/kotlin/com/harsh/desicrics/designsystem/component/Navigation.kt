@@ -45,13 +45,13 @@ val NavBarClearance: Dp = BarHeight + 24.dp
 fun DesiNavigationBar(tabs: List<NavTab>, selected: Int, onSelect: (Int) -> Unit, modifier: Modifier = Modifier) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
-    val shape = DesiTheme.radius.full
+    val shape = DesiTheme.shapes.pill
     ShortNavigationBar(
         modifier = modifier
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(start = space.s6, end = space.s6, bottom = space.s4)
             .shadow(BarElevation, shape)
-            .border(1.dp, colors.line.copy(alpha = 0.7f), shape),
+            .border(DesiTheme.shapes.border, colors.line.copy(alpha = 0.7f), shape),
         containerColor = colors.surface,
         windowInsets = WindowInsets(0),
     ) {

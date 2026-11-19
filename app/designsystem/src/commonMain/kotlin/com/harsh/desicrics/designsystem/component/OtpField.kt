@@ -54,9 +54,9 @@ fun OtpField(
                         Modifier
                             .weight(1f)
                             .aspectRatio(0.85f)
-                            .clip(DesiTheme.radius.md)
+                            .clip(DesiTheme.shapes.medium)
                             .background(if (digit != null) colors.surface else colors.sunk)
-                            .border(if (active || isError) 2.dp else 1.dp, outline, DesiTheme.radius.md),
+                            .border(if (active || isError) DesiTheme.shapes.borderFocus else DesiTheme.shapes.border, outline, DesiTheme.shapes.medium),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(digit?.toString().orEmpty(), style = DesiTheme.type.scoreMd, color = colors.ink)

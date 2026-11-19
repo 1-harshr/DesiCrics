@@ -64,9 +64,9 @@ fun DesiCard(
     val colors = DesiTheme.colors
     Column(
         modifier
-            .clip(DesiTheme.radius.md)
+            .clip(DesiTheme.shapes.medium)
             .background(colors.surface)
-            .border(1.dp, colors.line.copy(alpha = 0.7f), DesiTheme.radius.md)
+            .border(DesiTheme.shapes.border, colors.line.copy(alpha = 0.7f), DesiTheme.shapes.medium)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(padding),
         verticalArrangement = Arrangement.spacedBy(spacing),
@@ -80,7 +80,7 @@ fun LiveDot(modifier: Modifier = Modifier, size: Dp = 8.dp) {
     val color = DesiTheme.colors.event.wicket
     if (DesiTheme.reduceMotion) {
         Box(modifier.size(size * 2), contentAlignment = Alignment.Center) {
-            Box(Modifier.size(size).clip(DesiTheme.radius.full).background(color))
+            Box(Modifier.size(size).clip(DesiTheme.shapes.pill).background(color))
         }
         return
     }
@@ -94,9 +94,9 @@ fun LiveDot(modifier: Modifier = Modifier, size: Dp = 8.dp) {
     Box(modifier.size(size * 2), contentAlignment = Alignment.Center) {
         Box(
             Modifier.size(size * (1f + ring)).graphicsLayer { alpha = 0.45f * (1f - ring) }
-                .clip(DesiTheme.radius.full).background(color),
+                .clip(DesiTheme.shapes.pill).background(color),
         )
-        Box(Modifier.size(size).clip(DesiTheme.radius.full).background(color))
+        Box(Modifier.size(size).clip(DesiTheme.shapes.pill).background(color))
     }
 }
 
@@ -139,7 +139,7 @@ fun MatchCard(
     val colors = DesiTheme.colors
     val live = teams.any { it.batting }
     Column(
-        modifier.fillMaxWidth().clip(DesiTheme.radius.md)
+        modifier.fillMaxWidth().clip(DesiTheme.shapes.medium)
             .background(colors.surface)
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
     ) {
@@ -278,7 +278,7 @@ fun PlayerRow(
 fun Avatar(name: String, image: (@Composable () -> Unit)? = null, modifier: Modifier = Modifier, size: Int = 40) {
     val colors = DesiTheme.colors
     Box(
-        modifier.size(size.dp).clip(DesiTheme.radius.full).background(colors.brandSoft).clearAndSetSemantics {},
+        modifier.size(size.dp).clip(DesiTheme.shapes.pill).background(colors.brandSoft).clearAndSetSemantics {},
         contentAlignment = Alignment.Center,
     ) {
         val initials = initials(name)

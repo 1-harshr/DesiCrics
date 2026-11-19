@@ -48,9 +48,9 @@ fun BallChip(ball: Ball, modifier: Modifier = Modifier) {
     Box(
         modifier
             .size(DesiTheme.size.ballChip)
-            .clip(DesiTheme.radius.full)
+            .clip(DesiTheme.shapes.pill)
             .background(fill)
-            .border(1.5.dp, outline, DesiTheme.radius.full),
+            .border(DesiTheme.shapes.borderControl, outline, DesiTheme.shapes.pill),
         contentAlignment = Alignment.Center,
     ) {
         // Two-letter extras ("Wd", "Nb") need a smaller size to fit the 32dp circle.
@@ -143,9 +143,9 @@ private fun PadKeyButton(key: PadKey, enabled: Boolean, onClick: () -> Unit, mod
     Box(
         modifier
             .height(DesiTheme.size.scoringTarget)
-            .clip(DesiTheme.radius.lg)
+            .clip(DesiTheme.shapes.large)
             .background(if (isWicket && enabled) event.wicket else colors.surface)
-            .border(1.dp, if (isWicket && enabled) event.wicket else colors.line, DesiTheme.radius.lg)
+            .border(DesiTheme.shapes.border, if (isWicket && enabled) event.wicket else colors.line, DesiTheme.shapes.large)
             .clickable(enabled = enabled || tappable, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {

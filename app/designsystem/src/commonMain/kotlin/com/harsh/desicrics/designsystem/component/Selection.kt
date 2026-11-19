@@ -53,7 +53,7 @@ fun <T> SegmentedControl(
         modifier
             .fillMaxWidth()
             .height(DesiTheme.size.touchTarget)
-            .clip(DesiTheme.radius.full)
+            .clip(DesiTheme.shapes.pill)
             .background(colors.sunk)
             .padding(4.dp),
     ) {
@@ -64,9 +64,9 @@ fun <T> SegmentedControl(
                 .offset(x = thumbOffset)
                 .width(segment)
                 .fillMaxHeight()
-                .clip(DesiTheme.radius.full)
+                .clip(DesiTheme.shapes.pill)
                 .background(colors.surface)
-                .border(1.dp, colors.line, DesiTheme.radius.full),
+                .border(DesiTheme.shapes.border, colors.line, DesiTheme.shapes.pill),
         )
         Row(Modifier.fillMaxWidth().fillMaxHeight().selectableGroup()) {
             options.forEachIndexed { index, option ->
@@ -76,7 +76,7 @@ fun <T> SegmentedControl(
                     Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .clip(DesiTheme.radius.full)
+                        .clip(DesiTheme.shapes.pill)
                         .selectable(selected = isSelected, role = Role.RadioButton, onClick = { onSelect(option) }),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -113,16 +113,16 @@ fun OptionCard(
     val background by animateColorAsState(if (selected) colors.brandSoft else colors.surface, tween(DesiTheme.motion.BASE_MS))
     Column(
         modifier
-            .clip(DesiTheme.radius.lg)
+            .clip(DesiTheme.shapes.large)
             .background(background)
-            .border(if (selected) 2.dp else 1.dp, border, DesiTheme.radius.lg)
+            .border(if (selected) DesiTheme.shapes.borderFocus else DesiTheme.shapes.border, border, DesiTheme.shapes.large)
             .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
             .padding(DesiTheme.space.s4),
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1),
     ) {
         Row(Modifier.fillMaxWidth().padding(bottom = DesiTheme.space.s2), verticalAlignment = Alignment.Top) {
             Box(
-                Modifier.size(40.dp).clip(DesiTheme.radius.md).background(if (selected) colors.surface else colors.brandSoft),
+                Modifier.size(40.dp).clip(DesiTheme.shapes.medium).background(if (selected) colors.surface else colors.brandSoft),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(painterResource(icon), contentDescription = null, tint = colors.brand, modifier = Modifier.size(DesiTheme.size.icon))
@@ -153,9 +153,9 @@ fun PlayerCard(
     val colors = DesiTheme.colors
     Column(
         modifier
-            .clip(DesiTheme.radius.lg)
+            .clip(DesiTheme.shapes.large)
             .background(colors.surface)
-            .border(1.dp, colors.line, DesiTheme.radius.lg)
+            .border(DesiTheme.shapes.border, colors.line, DesiTheme.shapes.large)
             .padding(DesiTheme.space.s5),
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s4),
     ) {
@@ -181,7 +181,7 @@ fun PlayerCard(
                         color = colors.brand,
                         maxLines = 1,
                         modifier = Modifier
-                            .clip(DesiTheme.radius.full)
+                            .clip(DesiTheme.shapes.pill)
                             .background(colors.brandSoft)
                             .padding(horizontal = DesiTheme.space.s3, vertical = 6.dp),
                     )

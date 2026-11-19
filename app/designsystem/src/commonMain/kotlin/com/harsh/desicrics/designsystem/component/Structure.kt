@@ -123,7 +123,7 @@ fun DesiTextField(
         keyboardActions = keyboardActions,
         visualTransformation = visualTransformation,
         textStyle = DesiTheme.type.bodyLg,
-        shape = DesiTheme.radius.md,
+        shape = DesiTheme.shapes.medium,
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = colors.brand,
             unfocusedBorderColor = colors.line,
@@ -159,7 +159,7 @@ fun <T> ChoiceChips(
                 selected = option == selected,
                 onClick = { onSelect(option) },
                 label = { Text(label(option), style = if (option == selected) DesiTheme.type.bodyStrong else DesiTheme.type.body) },
-                shape = DesiTheme.radius.full,
+                shape = DesiTheme.shapes.pill,
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = colors.surface,
                     labelColor = colors.ink,
@@ -198,7 +198,7 @@ fun DesiSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = fullHeight),
         containerColor = colors.surface,
-        shape = DesiTheme.radius.lg,
+        shape = DesiTheme.shapes.large,
     ) {
         Column(
             Modifier
