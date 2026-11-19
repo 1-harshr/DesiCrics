@@ -278,10 +278,34 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
         }
     }
     val crease = tab == MatchTab.LIVE && !state.isComplete
+    val scoreRuns: (Int) -> Unit = { runs ->
+        if (ui.match?.rules?.wagonWheel == true && runs > 0) sheet = ScoringSheet.Zone(runs) else actions.onRuns(runs, null)
+    }
+    // Voice scoring. Anything unclear opens a sheet or asks again; nothing ambiguous is recorded straight from speech.
+    var misheard by remember { mutableStateOf(false) }
+    val listen = rememberSpeechInput { heard ->
+        val command = heard?.let { VoiceCommands.parse(it) } ?: VoiceCommand.Unknown
+        misheard = command == VoiceCommand.Unknown || (!ui.canScore && command != VoiceCommand.Undo)
+        if (misheard) return@rememberSpeechInput
+        when (command) {
+            is VoiceCommand.Runs -> scoreRuns(command.runs)
+            is VoiceCommand.Extra -> actions.onExtra(command.type, command.runs)
+            VoiceCommand.Wicket -> sheet = ScoringSheet.Wicket
+            VoiceCommand.Undo -> if (ui.canUndo) askUndo()
+            VoiceCommand.Unknown -> Unit
+        }
+    }?.takeIf { ui.isScorer && crease }
     Column(Modifier.fillMaxWidth().weight(1f)) {
         if (crease) {
             Box(Modifier.padding(horizontal = DesiTheme.space.screen).padding(bottom = DesiTheme.space.s3)) {
-                CreaseCard(ui, innings, blocking = needed?.takeIf { nudges > 0 }, nudges = nudges, onChoose = { sheet = it })
+                CreaseCard(
+                ui,
+                innings,
+                blocking = needed?.takeIf { nudges > 0 },
+                nudges = nudges,
+                onVoice = listen?.let { start -> { misheard = false; start() } },
+                onChoose = { sheet = it },
+            )
             }
         }
         Column(
@@ -300,8 +324,7 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
             }
             when (tab) {
                 MatchTab.LIVE -> {
-                    if (!state.isComplete) ThisOver(innings)
-                    if (!ui.isScorer) {
+                        if (!ui.isScorer) {
                         Text(stringResource(Res.string.match_not_your_match), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
                     }
                     if (state.isComplete && ui.canUndo) {
@@ -329,7 +352,7 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     }
     // The pad only shows with the live view, so the scorecard gets the whole screen.
     if (ui.isScorer && !state.isComplete && tab == MatchTab.LIVE) {
-        ScoringPad(ui, actions, askUndo, nudged = nudges > 0, onBlockedKey = onBlockedKey, onSheet = { sheet = it })
+        ScoringPad(ui, actions, askUndo, misheard, scoreRuns, nudged = nudges > 0, onBlockedKey = onBlockedKey, onSheet = { sheet = it })
     }
 
     var autoOpened by remember { mutableStateOf<Pair<ScoringSheet, Int>?>(null) }
@@ -455,9 +478,19 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
     }
 }
 
-/** Both batters and the bowler. Empty slots are buttons for the scorer to fill. */
+/**
+ * Both batters, the bowler and the over so far, pinned above the pad. Empty slots are buttons for the
+ * scorer to fill. With [onVoice], the header carries the mic for scoring by voice.
+ */
 @Composable
-private fun CreaseCard(ui: MatchUiState, innings: InningsState, blocking: ScoringSheet?, nudges: Int, onChoose: (ScoringSheet) -> Unit) {
+private fun CreaseCard(
+    ui: MatchUiState,
+    innings: InningsState,
+    blocking: ScoringSheet?,
+    nudges: Int,
+    onVoice: (() -> Unit)?,
+    onChoose: (ScoringSheet) -> Unit,
+) {
     fun batter(id: String?) = innings.battingTeam.players.firstOrNull { it.id == id }
     val bowler = innings.bowlingTeam.players.firstOrNull { it.id == ui.bowlerId }
     val chooseBowler = if (innings.legalBalls == 0) Res.string.match_choose_opening_bowler else Res.string.match_choose_next_bowler
@@ -479,6 +512,11 @@ private fun CreaseCard(ui: MatchUiState, innings: InningsState, blocking: Scorin
                     modifier = Modifier.clip(DesiTheme.radius.full).background(DesiTheme.colors.brand)
                         .padding(horizontal = DesiTheme.space.s2, vertical = 2.dp),
                 )
+            }
+            if (onVoice != null) {
+                IconButton(onClick = onVoice, enabled = !ui.saving, modifier = Modifier.size(DesiTheme.size.touchTarget).offset(x = DesiTheme.space.s3)) {
+                    Icon(painterResource(DesiIcons.Mic), stringResource(Res.string.scoring_voice), tint = DesiTheme.colors.brand)
+                }
             }
         }
         BatterSlot(batter(ui.strikerId), innings, onStrike = true, empty = stringResource(Res.string.match_choose_striker), ui.canEdit, mustRetire, rules, onChoose, nudges.takeIf { blocking == ScoringSheet.Striker }) {
@@ -504,6 +542,8 @@ private fun CreaseCard(ui: MatchUiState, innings: InningsState, blocking: Scorin
                 onOptions = if (ui.canEdit) ({ onChoose(ScoringSheet.BowlerOptions) }) else null,
             )
         }
+        HorizontalDivider(color = DesiTheme.colors.line)
+        ThisOver(innings)
     }
 }
 
@@ -608,16 +648,15 @@ private fun EmptySlot(text: String, enabled: Boolean, nudges: Int? = null, onCli
 
 @Composable
 private fun ThisOver(innings: InningsState) {
-    Column(Modifier.padding(top = DesiTheme.space.s2), verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
-        SectionHeader(stringResource(Res.string.match_section_this_over), icon = DesiIcons.Ball)
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        Text(stringResource(Res.string.match_section_this_over), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         if (innings.currentOver.isEmpty()) {
-            // Six empty slots, so the strip has its shape before the first ball, plus the line saying why.
+            // Six empty slots, so the strip has its shape before the first ball.
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
                 repeat(6) {
                     Box(Modifier.size(DesiTheme.size.ballChip).clip(DesiTheme.radius.full).border(1.5.dp, DesiTheme.colors.line, DesiTheme.radius.full))
                 }
             }
-            Text(stringResource(Res.string.match_over_empty), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         } else {
             OverStrip(innings.currentOver.map { ballFor(it) })
         }
@@ -630,6 +669,8 @@ private fun ScoringPad(
     ui: MatchUiState,
     actions: MatchActions,
     askUndo: () -> Unit,
+    misheard: Boolean,
+    runs: (Int) -> Unit,
     nudged: Boolean,
     onBlockedKey: () -> Unit,
     onSheet: (ScoringSheet) -> Unit,
@@ -647,23 +688,6 @@ private fun ScoringPad(
         PadKey("out", stringResource(Res.string.scoring_key_out), PadKeyStyle.Wicket, enabled = canScore),
         PadKey("undo", stringResource(Res.string.scoring_key_undo), PadKeyStyle.Utility, enabled = ui.canUndo),
     )
-    var misheard by remember { mutableStateOf(false) }
-    val runs: (Int) -> Unit = { runs ->
-        if (ui.match?.rules?.wagonWheel == true && runs > 0) onSheet(ScoringSheet.Zone(runs)) else actions.onRuns(runs, null)
-    }
-    // Anything unclear opens a sheet or asks again; nothing ambiguous is recorded straight from speech.
-    val listen = rememberSpeechInput { heard ->
-        val command = heard?.let { VoiceCommands.parse(it) } ?: VoiceCommand.Unknown
-        misheard = command == VoiceCommand.Unknown || (!canScore && command != VoiceCommand.Undo)
-        if (misheard) return@rememberSpeechInput
-        when (command) {
-            is VoiceCommand.Runs -> runs(command.runs)
-            is VoiceCommand.Extra -> actions.onExtra(command.type, command.runs)
-            VoiceCommand.Wicket -> onSheet(ScoringSheet.Wicket)
-            VoiceCommand.Undo -> if (ui.canUndo) askUndo()
-            VoiceCommand.Unknown -> Unit
-        }
-    }
     Column(Modifier.fillMaxWidth().background(colors.surface)) {
         HorizontalDivider(color = colors.line)
         Column(
@@ -676,17 +700,8 @@ private fun ScoringPad(
                 !canScore && !ui.saving && ui.error == null -> stringResource(Res.string.match_pick_players_first)
                 else -> null
             }
-            // No empty row when there's nothing to say and no mic, so the crease above keeps the room.
-            if (hint != null || listen != null) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(hint.orEmpty(), style = DesiTheme.type.body, color = if (nudged) colors.event.wicket else colors.muted, modifier = Modifier.weight(1f))
-                    if (listen != null) {
-                        IconButton(onClick = { misheard = false; listen() }, enabled = !ui.saving) {
-                            Icon(painterResource(DesiIcons.Mic), stringResource(Res.string.scoring_voice), tint = colors.brand)
-                        }
-                    }
-                }
-            }
+            // Only when there's something to say, so the crease above keeps the room.
+            if (hint != null) Text(hint, style = DesiTheme.type.body, color = if (nudged) colors.event.wicket else colors.muted)
             RunPad(keys, enabled = !ui.saving, onBlockedKey = { onBlockedKey() }, onKey = { key ->
                 when (key.id) {
                     "wd" -> onSheet(ScoringSheet.Extra(ExtraType.WIDE))
