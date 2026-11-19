@@ -248,6 +248,7 @@ fun TeamContent(
                 onClick = { settings = false; confirmLeave = true },
             )
         }
+        if (!state.isAdmin) Text(stringResource(Res.string.team_settings_admins_only), style = DesiTheme.type.caption, color = colors.muted)
     }
     // Stays open until the caller is out, so a refusal shows here rather than behind the sheet.
     var leaveTapped by remember { mutableStateOf(false) }
