@@ -8,7 +8,7 @@
   "preview_urls": false,
   "vars": {
     // Where the server runs now. Change this and redeploy to move hosts.
-    "BACKEND_URL": "https://REPLACE-ME.onrender.com"
+    "BACKEND_URL": "https://desicrics-server-latest.onrender.com"
   },
   "observability": {
     "enabled": true,
