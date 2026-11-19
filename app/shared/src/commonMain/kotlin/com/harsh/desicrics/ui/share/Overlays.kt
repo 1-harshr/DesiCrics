@@ -86,9 +86,9 @@ fun BattingOverlay(figures: BattingFigures, format: ShareFormat) = OverlayFrame(
     Text(figures.name, style = type.titleLg.sized(if (post) 28 else 34, if (post) 32 else 38).overlay(), maxLines = 1, overflow = TextOverflow.Ellipsis)
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(20.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("${figures.runs}${if (figures.notOut) "*" else ""}", style = type.scoreXl.sized(if (post) 96 else 120).overlay())
-                Text("(${figures.balls})", style = type.scoreMd.sized(30, 34).overlay(0.85f), modifier = Modifier.padding(bottom = 14.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text("${figures.runs}${if (figures.notOut) "*" else ""}", style = type.scoreXl.sized(if (post) 80 else 120).overlay(), modifier = Modifier.alignByBaseline())
+                Text("(${figures.balls})", style = type.scoreMd.sized(30, 34).overlay(0.85f), modifier = Modifier.alignByBaseline())
             }
             OverlayStats(
                 listOf(
@@ -108,7 +108,7 @@ fun BowlingOverlay(figures: BowlingFigures, format: ShareFormat) = OverlayFrame(
     val type = DesiTheme.type
     val post = format == ShareFormat.POST
     Text(figures.name, style = type.titleLg.sized(if (post) 28 else 34, if (post) 32 else 38).overlay(), maxLines = 1, overflow = TextOverflow.Ellipsis)
-    Text(figures.figures, style = type.scoreXl.sized(if (post) 96 else 120).overlay())
+    Text(figures.figures, style = type.scoreXl.sized(if (post) 80 else 120).overlay())
     OverlayStats(
         listOf(
             ShareStat(figures.overs, stringResource(Res.string.stats_overs)),
@@ -132,9 +132,9 @@ fun ResultOverlay(figures: ResultFigures, format: ShareFormat) = OverlayFrame(fi
     figures.innings.forEach { line ->
         Column {
             Text(line.label, style = type.titleMd.sized(if (post) 20 else 24, if (post) 24 else 28).overlay(0.9f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(line.value, style = type.scoreXl.sized(if (post) 56 else 76).overlay())
-                line.detail?.let { Text(it, style = type.data.sized(16, 20).overlay(0.85f), modifier = Modifier.padding(bottom = 10.dp)) }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(line.value, style = type.scoreXl.sized(if (post) 48 else 76).overlay(), modifier = Modifier.alignByBaseline())
+                line.detail?.let { Text(it, style = type.data.sized(16, 20).overlay(0.85f), modifier = Modifier.alignByBaseline()) }
             }
         }
     }
@@ -150,14 +150,14 @@ fun SeasonOverlay(figures: SeasonFigures, format: ShareFormat) = OverlayFrame(fi
     val type = DesiTheme.type
     val post = format == ShareFormat.POST
     Text(figures.name, style = type.titleLg.sized(if (post) 28 else 34, if (post) 32 else 38).overlay(), maxLines = 1, overflow = TextOverflow.Ellipsis)
-    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(figures.lead.value, style = type.scoreXl.sized(if (post) 96 else 120).overlay())
-        Text(figures.lead.label.uppercase(), style = type.label.sized(16, 20).overlay(0.85f), modifier = Modifier.padding(bottom = 18.dp))
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(figures.lead.value, style = type.scoreXl.sized(if (post) 80 else 120).overlay(), modifier = Modifier.alignByBaseline())
+        Text(figures.lead.label.uppercase(), style = type.label.sized(16, 20).overlay(0.85f), modifier = Modifier.alignByBaseline())
     }
     OverlayStats(figures.stats)
     if (figures.form.size >= 2) {
-        Text(stringResource(Res.string.share_form).uppercase(), style = type.label.overlay(0.85f), modifier = Modifier.padding(top = 8.dp))
-        FormSparkline(figures.form, Modifier.fillMaxWidth().height(if (post) 44.dp else 64.dp))
+        if (!post) Text(stringResource(Res.string.share_form).uppercase(), style = type.label.overlay(0.85f), modifier = Modifier.padding(top = 8.dp))
+        FormSparkline(figures.form, Modifier.fillMaxWidth().height(if (post) 36.dp else 64.dp))
     }
 }
 
@@ -171,10 +171,10 @@ private fun OverlayFrame(caption: String, format: ShareFormat, content: @Composa
     val share = DesiTheme.colors.share
     Column(
         Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = if (format == ShareFormat.POST) 24.dp else 48.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(if (format == ShareFormat.POST) 4.dp else 8.dp, Alignment.CenterVertically),
     ) {
         content()
-        Row(Modifier.padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(Modifier.padding(top = if (format == ShareFormat.POST) 8.dp else 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(painterResource(DesiIllustrations.BallMark), contentDescription = null, tint = share.overlayInk, modifier = Modifier.size(22.dp))
             Text(stringResource(Res.string.app_name).uppercase(), style = type.label.sized(13, 16).overlay())
             Text(caption, style = type.caption.overlay(0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
