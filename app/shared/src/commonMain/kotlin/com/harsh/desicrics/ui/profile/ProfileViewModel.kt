@@ -9,6 +9,7 @@ import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.ui.teams.attempt
+import com.harsh.desicrics.util.AppInfo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -30,6 +31,7 @@ data class ProfileUiState(
 class ProfileViewModel(
     private val teams: TeamRepository,
     private val auth: AuthRepository,
+    private val app: AppInfo,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileUiState())
@@ -59,8 +61,8 @@ class ProfileViewModel(
 
     fun claim(profileId: String) = claim { teams.claim(profileId) }
 
-    fun contactSupport(category: SupportCategory, message: String, appVersion: String) = run(SettingsResult.SUPPORT_SENT, SettingsResult.SUPPORT_FAILED) {
-        teams.contactSupport(category, message, appVersion)
+    fun contactSupport(category: SupportCategory, message: String) = run(SettingsResult.SUPPORT_SENT, SettingsResult.SUPPORT_FAILED) {
+        teams.contactSupport(category, message, app.version)
     }
 
     /** Clears the account on the server, then deletes the Firebase user, then signs out. */

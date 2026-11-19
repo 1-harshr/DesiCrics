@@ -46,7 +46,7 @@ import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-/** Needs an `ApiConfig` from the platform module (Android: BuildConfig, iOS: Swift). */
+/** Needs an `ApiConfig` and an `AppInfo` from the platform module (Android: BuildConfig, iOS: Swift). */
 val dataModule = module {
     single { Firebase.auth }
     single {

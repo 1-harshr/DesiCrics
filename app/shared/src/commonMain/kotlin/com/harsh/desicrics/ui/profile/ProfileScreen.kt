@@ -107,7 +107,7 @@ fun ProfileScreen(
     when (sheet) {
         null -> Unit
         SettingsSheet.CLAIM -> ClaimSheet(state, onClaim = viewModel::claimByCode, onDismiss = close)
-        SettingsSheet.SUPPORT -> SupportSheet(state, onSend = { category, message -> viewModel.contactSupport(category, message, "") }, onDismiss = close)
+        SettingsSheet.SUPPORT -> SupportSheet(state, onSend = { category, message -> viewModel.contactSupport(category, message) }, onDismiss = close)
         SettingsSheet.DELETE -> DeleteAccountSheet(state, onDelete = { viewModel.deleteAccount(onSignOut) }, onDismiss = close)
     }
 }
