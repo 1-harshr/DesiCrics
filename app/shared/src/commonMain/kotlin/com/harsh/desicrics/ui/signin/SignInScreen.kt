@@ -169,12 +169,12 @@ private fun Hero() {
     val crease = colors.onBrandStrong.copy(alpha = 0.28f)
     val stripe = colors.onBrandStrong.copy(alpha = 0.045f)
 
-    // The delivery: slides in from the left and settles. System "remove animations" makes this instant,
-    // and previews show it already settled.
+    // The delivery: slides in from the left and settles. It waits a beat so the splash has cleared before
+    // the ball moves. System "remove animations" makes this instant, and previews show it already settled.
     val inPreview = LocalInspectionMode.current
     val travel = remember { Animatable(if (inPreview) 1f else 0f) }
     LaunchedEffect(Unit) {
-        travel.animateTo(1f, tween(durationMillis = 700, easing = DesiTheme.motion.emphasizedDecelerate))
+        travel.animateTo(1f, tween(durationMillis = 1400, delayMillis = 300, easing = DesiTheme.motion.emphasizedDecelerate))
     }
 
     Box(
