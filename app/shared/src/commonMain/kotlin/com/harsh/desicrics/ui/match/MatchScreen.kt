@@ -198,6 +198,8 @@ private sealed interface ScoringSheet {
     data object ReplaceBowler : ScoringSheet
     data object MatchOptions : ScoringSheet
     data object EndMatch : ScoringSheet
+    /** Asks before declaring, which ends the innings (or concedes the chase). */
+    data object Declare : ScoringSheet
     data object Penalty : ScoringSheet
     data object ReviseTarget : ScoringSheet
     /** Where a scoring shot went, for the wagon wheel. */
@@ -906,11 +908,17 @@ private fun ScoringSheets(
                     stringResource(Res.string.match_declare),
                     stringResource(if (innings.number == 1) Res.string.match_declare_hint else Res.string.match_declare_chase_hint),
                 ) {
-                    actions.onDeclare()
-                    onClose()
+                    onSheet(ScoringSheet.Declare)
                 },
             ),
             onDismiss = onClose,
+        )
+        ScoringSheet.Declare -> androidx.compose.material3.AlertDialog(
+            onDismissRequest = onClose,
+            title = { Text(stringResource(if (innings.number == 1) Res.string.match_declare_confirm else Res.string.match_declare_chase_confirm)) },
+            text = { Text(stringResource(if (innings.number == 1) Res.string.match_declare_hint else Res.string.match_declare_chase_hint)) },
+            confirmButton = { TextButton(onClick = { onClose(); actions.onDeclare() }) { Text(stringResource(Res.string.match_declare)) } },
+            dismissButton = { TextButton(onClick = onClose) { Text(stringResource(Res.string.common_cancel)) } },
         )
         ScoringSheet.EndMatch -> EndMatchSheet(
             match = state.match,

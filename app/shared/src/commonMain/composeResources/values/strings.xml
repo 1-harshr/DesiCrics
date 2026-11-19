@@ -502,6 +502,8 @@
     <string name="match_declare">Declare</string>
     <string name="match_declare_hint">End this innings now. Undo brings it back.</string>
     <string name="match_declare_chase_hint">End the chase now and concede the match. Undo brings it back.</string>
+    <string name="match_declare_confirm">Declare the innings?</string>
+    <string name="match_declare_chase_confirm">Declare and concede the match?</string>
     <string name="match_revise">Rain: revise overs</string>
     <string name="match_revise_hint">Cut the overs after an interruption. In the chase, set the new target too.</string>
     <string name="match_revise_first_innings_note">Applies to both innings. Set the chase's target when it starts.</string>

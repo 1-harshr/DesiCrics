@@ -3,6 +3,7 @@ package com.harsh.desicrics
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -49,7 +50,16 @@ class MatchScreenTest {
 
     private val strikers = Team("Andheri Strikers", listOf("Rohan", "Aarav", "Kabir").mapIndexed { i, n -> Player("a$i", n) })
     private val royals = Team("Powai XI", listOf("Esha", "Farhan", "Gaurav").mapIndexed { i, n -> Player("b$i", n) })
-    private val actions = MatchActions({}, {}, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _ -> }, {}, { _, _ -> }, {}, {})
+    private var declared = 0
+    private val actions = MatchActions({}, {}, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _, _, _ -> }, {}, {}, { _, _ -> }, {}, {}, { _, _ -> }, { _, _ -> }, { declared++ }, { _, _ -> }, {}, {})
+
+    /** Two balls into the first innings, scored by this phone. */
+    private fun live(): MatchUiState {
+        val base = Match("m", "me", 0, strikers, royals, 5, TeamSide.A, TossDecision.BAT, scorerUid = "me")
+        val deliveries = listOf(Delivery(0, 1, "a0", "a1", "b0", runsOffBat = 4), Delivery(1, 1, "a0", "a1", "b0", runsOffBat = 1))
+        val match = base.withScore(ScoringEngine.compute(base, deliveries))
+        return MatchUiState(loading = false, match = match, deliveries = deliveries, state = ScoringEngine.compute(match, deliveries), isScorer = true)
+    }
 
     /** Two balls, then Powai concede: finished, watched by someone who isn't scoring it. */
     private fun finished(): MatchUiState {
@@ -71,5 +81,25 @@ class MatchScreenTest {
         compose.onNodeWithText("Live").performClick()
         compose.onAllNodesWithText(result).assertCountEquals(2)
         compose.onAllNodesWithText("Only the scorer", substring = true).assertCountEquals(0)
+    }
+
+    @Test
+    fun declaringAsksFirst() {
+        compose.setContent { DesiTheme(reduceMotion = true) { MatchContent(live(), actions) } }
+        compose.onNodeWithContentDescription("Match options").performClick()
+        compose.onNodeWithText("Declare").performClick()
+        compose.onNodeWithText("Declare the innings?").assertExists()
+        check(declared == 0)
+
+        compose.onNodeWithText("Cancel").performClick()
+        compose.onAllNodesWithText("Declare the innings?").assertCountEquals(0)
+        check(declared == 0)
+
+        compose.onNodeWithContentDescription("Match options").performClick()
+        compose.onNodeWithText("Declare").performClick()
+        // The options sheet has gone, so the only Declare left is the dialog's button.
+        compose.onNodeWithText("Declare the innings?").assertExists()
+        compose.onNodeWithText("Declare").performClick()
+        check(declared == 1)
     }
 }
