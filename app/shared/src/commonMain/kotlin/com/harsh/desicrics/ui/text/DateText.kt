@@ -40,6 +40,17 @@ fun epochMillisAt(dayUtcMillis: Long, hour: Int, minute: Int): Long {
     return LocalDateTime(day, LocalTime(hour, minute)).toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
 }
 
+/** A moment split back into a date picker's day (UTC midnight) and the clock time, in the phone's time zone. */
+data class PickerMoment(val dayUtcMillis: Long, val hour: Int, val minute: Int)
+
+/** The reverse of [epochMillisAt], to start the pickers on a time already set. */
+@OptIn(ExperimentalTime::class)
+fun pickerMoment(epochMillis: Long): PickerMoment {
+    val local = Instant.fromEpochMilliseconds(epochMillis).toLocalDateTime(TimeZone.currentSystemDefault())
+    val day = LocalDateTime(local.date, LocalTime(0, 0)).toInstant(TimeZone.UTC).toEpochMilliseconds()
+    return PickerMoment(day, local.hour, local.minute)
+}
+
 /**
  * When something happened, the way people say it: "Just now", "12 min ago", "3 h ago", "Yesterday", and the
  * day and time beyond that. [now] is passed in so tests and previews stay stable.

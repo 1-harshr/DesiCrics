@@ -99,6 +99,7 @@ import com.harsh.desicrics.ui.stats.mvpText
 import com.harsh.desicrics.ui.system.rememberShareText
 import com.harsh.desicrics.ui.teams.TeamRow
 import com.harsh.desicrics.ui.text.epochMillisAt
+import com.harsh.desicrics.ui.text.pickerMoment
 import com.harsh.desicrics.ui.text.formatDayAndTime
 import com.harsh.desicrics.ui.text.oversText
 import com.harsh.desicrics.util.format2
@@ -541,8 +542,10 @@ private fun AddFixtureSheet(teams: List<TournamentTeam>, onAdd: (String, String)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ScheduleSheet(scheduledAt: Long?, onSave: (Long?) -> Unit, onDismiss: () -> Unit) {
-    val date = rememberDatePickerState(initialSelectedDateMillis = scheduledAt)
-    val time = rememberTimePickerState(initialHour = 9, initialMinute = 0)
+    // Start from the fixture's own day and time, so changing just one keeps the other.
+    val current = scheduledAt?.let(::pickerMoment)
+    val date = rememberDatePickerState(initialSelectedDateMillis = current?.dayUtcMillis)
+    val time = rememberTimePickerState(initialHour = current?.hour ?: 9, initialMinute = current?.minute ?: 0)
     DesiSheet(stringResource(Res.string.fixture_reschedule), onDismiss) {
         DatePicker(date, title = null, headline = null, showModeToggle = false)
         TimePicker(time)

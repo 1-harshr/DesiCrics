@@ -14,6 +14,9 @@ import com.harsh.desicrics.ui.newmatch.SideForm
 import com.harsh.desicrics.ui.teams.refusal
 import io.ktor.http.HttpStatusCode
 import java.io.IOException
+import com.harsh.desicrics.ui.text.PickerMoment
+import com.harsh.desicrics.ui.text.epochMillisAt
+import com.harsh.desicrics.ui.text.pickerMoment
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -63,5 +66,13 @@ class SharedLogicAndroidHostTest {
         assertNull(publicCodeIn("AB3XY9"))
         assertNull(publicCodeIn("0240796"))
         assertNull(publicCodeIn("AB3XY967"))
+    }
+
+    @Test
+    fun aScheduledTimeOpensThePickersOnItsOwnDayAndTime() {
+        val day = 1_795_305_600_000L // 22 Nov 2026, as a date picker gives it (UTC midnight).
+        assertEquals(PickerMoment(day, 18, 45), pickerMoment(epochMillisAt(day, 18, 45)))
+        // Just after midnight, where the UTC day would be the one before east of Greenwich.
+        assertEquals(PickerMoment(day, 0, 15), pickerMoment(epochMillisAt(day, 0, 15)))
     }
 }
