@@ -1,0 +1,60 @@
+name: Server image
+
+# Builds the server's Docker image and publishes it to GitHub's container registry, for hosts that
+# deploy a ready-made image (Render, see docs/deploy.md). The jar is built here rather than in the
+# image because core's Android target needs the Android SDK, which these runners have.
+on:
+  push:
+    branches: [main]
+    paths: [server/**, core/**, gradle/**, '*.gradle.kts', .github/workflows/server-image.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: server-image
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # Matches gradle/gradle-daemon-jvm.properties.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build the server jar
+        run: ./gradlew :server:buildFatJar
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push the image
+        run: |
+          image=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/desicrics-server
+          docker build -t "$image:latest" -t "$image:${{ github.sha }}" server
+          docker push --all-tags "$image"
+
+      # Add the service's deploy hook URL (Render › Settings › Deploy Hook) as the RENDER_DEPLOY_HOOK
+      # repository secret to redeploy on every new image; without it, deploy from Render's dashboard.
+      - name: Tell Render to deploy
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK" ]; then
+            echo "RENDER_DEPLOY_HOOK secret not set; skipping."
+            exit 0
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK" > /dev/null

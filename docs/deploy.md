@@ -69,6 +69,24 @@ fly deploy --config fly.toml --dockerfile server/Dockerfile server
 
 `fly.toml` keeps one machine always running (no scale to zero), for the same WebSocket reason.
 
+## Option C: Render (free, for staging)
+
+Free, but the web service sleeps after about 15 minutes without traffic (the next request waits about a minute) and the free Postgres expires after 30 days. Fine for trying the app with a few people; not for a live Sunday.
+
+Render can't build the image itself (no Android SDK), so `.github/workflows/server-image.yml` builds it on every push to `main` that touches the server and publishes it as `ghcr.io/<owner>/desicrics-server`.
+
+1. **Postgres:** New › Postgres, Free, region Singapore (the closest to India). From its Connections section, note the *internal* hostname, database, user and password.
+2. **Image:** run the Server image workflow once (Actions › Server image › Run workflow), then make the package public (GitHub › Packages › desicrics-server › Package settings), or give Render a GitHub token as registry credentials.
+3. **Web service:** New › Web Service › Existing image, `ghcr.io/<owner>/desicrics-server:latest`, Free, region Singapore. Environment:
+   - `DATABASE_URL` = `jdbc:postgresql://<internal hostname>:5432/<database>`
+   - `DATABASE_USER`, `DATABASE_PASSWORD` from step 1
+   - `DATABASE_POOL_SIZE` = `5` (the free database allows few connections)
+   - `FIREBASE_SERVICE_ACCOUNT` as a secret file, for push (optional)
+   
+   Render sets `PORT`, and the health check path is `/`.
+4. **Redeploys:** copy the service's Deploy Hook URL into the `RENDER_DEPLOY_HOOK` repository secret, so each new image deploys itself.
+5. Build the app against `https://<service>.onrender.com`, or better, a domain you own pointed at it, so moving hosts later needs no new app build.
+
 ## After the first deploy
 
 1. Open `https://<host>/` and check it answers "DesiCrics API".
