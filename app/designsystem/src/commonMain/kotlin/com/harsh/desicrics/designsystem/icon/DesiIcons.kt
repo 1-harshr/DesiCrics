@@ -65,6 +65,7 @@ import com.harsh.desicrics.designsystem.resources.ic_person
 import com.harsh.desicrics.designsystem.resources.ic_remove
 import com.harsh.desicrics.designsystem.resources.ic_search
 import com.harsh.desicrics.designsystem.resources.ic_share
+import com.harsh.desicrics.designsystem.resources.ic_download
 import com.harsh.desicrics.designsystem.resources.ic_sports_baseball
 import com.harsh.desicrics.designsystem.resources.ic_sports_cricket
 import com.harsh.desicrics.designsystem.resources.ic_sync
@@ -94,6 +95,7 @@ object DesiIcons {
     val Search: DrawableResource = Res.drawable.ic_search
     val Notifications: DrawableResource = Res.drawable.ic_notifications
     val Share: DrawableResource = Res.drawable.ic_share
+    val Download: DrawableResource = Res.drawable.ic_download
     val Teams: DrawableResource = Res.drawable.ic_groups
     val Mic: DrawableResource = Res.drawable.ic_mic
     val ChevronRight: DrawableResource = Res.drawable.ic_chevron_right
