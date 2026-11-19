@@ -191,7 +191,7 @@ private fun NotificationRow(notification: Notification, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
     ) {
         val (icon, tint) = when (notification.kind) {
-            NotificationKind.MATCH_STARTED -> DesiIcons.Bolt to colors.event.wicket
+            NotificationKind.MATCH_STARTED -> DesiIcons.Cricket to colors.event.wicket
             NotificationKind.MATCH_RESULT -> DesiIcons.Trophy to colors.brand
             NotificationKind.MILESTONE_RUNS -> DesiIcons.Bat to colors.event.four
             NotificationKind.MILESTONE_WICKETS -> DesiIcons.Ball to colors.event.six

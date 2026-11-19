@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.home
+import com.harsh.desicrics.designsystem.component.LiveDot
 import com.harsh.desicrics.designsystem.component.EmptyState
 import com.harsh.desicrics.designsystem.component.TonalButton
 import com.harsh.desicrics.designsystem.component.SegmentedControl
@@ -92,7 +93,7 @@ internal fun FeedScreen(onOpen: (String) -> Unit, community: () -> Unit, ranking
     val space = DesiTheme.space
     LaunchedEffect(model.filter, model.scope) { while (true) { kotlinx.coroutines.delay(30_000); model.load(model.filter, background = true) } }
     val statusLabels = listOf(Res.string.feed_status_all, Res.string.feed_status_live, Res.string.feed_status_upcoming, Res.string.feed_status_results)
-    val statusIcons = listOf(null, DesiIcons.Bolt, DesiIcons.Calendar, DesiIcons.Trophy)
+    val statusIcons = listOf(null, null, DesiIcons.Calendar, DesiIcons.Trophy)
     DesiScaffold(stringResource(Res.string.tab_feed), actions = {
         // Refreshing is a pull on the list; these two lead to the rest of the community.
         IconButton(onClick = rankings) { Icon(painterResource(DesiIcons.Leaderboard), stringResource(Res.string.home_leaderboards)) }
@@ -125,6 +126,7 @@ internal fun FeedScreen(onOpen: (String) -> Unit, community: () -> Unit, ranking
                         label = { stringResource(statusLabels[StatusFilters.indexOf(it)]) },
                         onSelect = { model.load(it) },
                         icon = { statusIcons[StatusFilters.indexOf(it)] },
+                        leading = { status -> if (status == "IN_PROGRESS") ({ LiveDot() }) else null },
                     )
                 }
                 if (model.incoming.isNotEmpty()) item {

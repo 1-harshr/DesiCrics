@@ -254,7 +254,7 @@ All in `designsystem/component/`. Light and dark previews are in `Catalogue.kt`.
 | `ScoreHeader` | `Scoring.kt` | Label, score (`score.xl`), overs (`data`) and an optional target / run-rate line |
 | `RunPad` | `Scoring.kt` | 4-column grid of 64dp keys; the caller defines the keys and what they do |
 | `MatchCard` | `Content.kt` | A match in a feed: status slot (e.g. `LiveBadge`), meta, both teams side by side, and a footer line. A finished match passes a `CardResult`: the winner gets a trophy, the loser's name and score dim, and the result sits in a green strip across the foot of the card (neutral for a tie) |
-| `LiveBadge` | `Content.kt` | Red dot plus LIVE |
+| `LiveDot` / `LiveBadge` | `Content.kt` | The sign for "happening now": a red dot with a ring that pulses out of it; with LIVE beside it as a badge. Use the dot wherever something is live (the Live filter, badges), never a lightning bolt |
 | `PlayerRow` / `Avatar` | `Content.kt` | Avatar (photo slot, initial or person icon), name, secondary line |
 | `DesiCard` / `SectionLabel` | `Content.kt` | Flat bordered surface; uppercase section label |
 | `PrimaryButton` / `TonalButton` / `GhostButton` | `Buttons.kt` | 52dp rounded buttons, each with an optional leading icon. Primary: brand fill, optional trailing arrow, spinner while loading, faded brand when disabled. Tonal: soft `sunk` fill with a brand-tinted leading icon, for secondary options. Ghost: outline with a brand icon |

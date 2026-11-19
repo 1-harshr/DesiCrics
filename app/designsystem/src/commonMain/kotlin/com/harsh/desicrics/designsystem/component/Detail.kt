@@ -483,6 +483,8 @@ fun <T> FilterRow(
     onSelect: (T) -> Unit,
     modifier: Modifier = Modifier,
     icon: (T) -> DrawableResource? = { null },
+    /** Drawn instead of an icon, for marks that aren't icons (the live dot). */
+    leading: (T) -> (@Composable () -> Unit)? = { null },
 ) {
     val colors = DesiTheme.colors
     androidx.compose.foundation.lazy.LazyRow(modifier, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
@@ -501,7 +503,8 @@ fun <T> FilterRow(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                icon(option)?.let { Icon(painterResource(it), null, tint = content, modifier = Modifier.size(18.dp)) }
+                val mark = leading(option)
+                if (mark != null) mark() else icon(option)?.let { Icon(painterResource(it), null, tint = content, modifier = Modifier.size(18.dp)) }
                 Text(label(option), style = if (isSelected) DesiTheme.type.bodyStrong else DesiTheme.type.body, color = content, maxLines = 1)
             }
         }

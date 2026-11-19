@@ -1,4 +1,13 @@
 package com.harsh.desicrics.designsystem.component
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.runtime.getValue
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.buildAnnotatedString
@@ -62,12 +71,32 @@ fun DesiCard(
     )
 }
 
-/** Red dot plus "LIVE". */
+/** The sign for "happening now": a red dot with a soft ring that pulses out from it. */
+@Composable
+fun LiveDot(modifier: Modifier = Modifier, size: Dp = 8.dp) {
+    val color = DesiTheme.colors.event.wicket
+    val pulse = rememberInfiniteTransition(label = "live")
+    val ring by pulse.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(1400, easing = LinearEasing), RepeatMode.Restart),
+        label = "ring",
+    )
+    Box(modifier.size(size * 2), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier.size(size * (1f + ring)).graphicsLayer { alpha = 0.45f * (1f - ring) }
+                .clip(DesiTheme.radius.full).background(color),
+        )
+        Box(Modifier.size(size).clip(DesiTheme.radius.full).background(color))
+    }
+}
+
+/** Pulsing red dot plus "LIVE". */
 @Composable
 fun LiveBadge(modifier: Modifier = Modifier) {
     val color = DesiTheme.colors.event.wicket
-    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Box(Modifier.size(7.dp).clip(DesiTheme.radius.full).background(color))
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        LiveDot(size = 7.dp)
         Text(stringResource(Res.string.ds_live), style = DesiTheme.type.label, color = color)
     }
 }
