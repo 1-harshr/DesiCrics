@@ -11,6 +11,8 @@ import com.harsh.desicrics.model.SearchResults
 /** Following, search, player pages and the notification inbox. */
 class SocialRepository(private val api: DesiCricsApi, private val config: ApiConfig) {
 
+    suspend fun feedPage(status: String?, last: com.harsh.desicrics.model.Match?) = api.feedPage(status, last)
+
     suspend fun search(query: String): SearchResults = api.search(query.trim())
 
     suspend fun playerPage(profileId: String): PlayerPage = api.playerPage(profileId)

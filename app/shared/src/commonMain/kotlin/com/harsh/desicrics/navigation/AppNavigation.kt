@@ -1,6 +1,15 @@
 package com.harsh.desicrics.navigation
 
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import com.harsh.desicrics.resources.*
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.Modifier
+import com.harsh.desicrics.ui.home.FeedScreen
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
@@ -38,6 +47,7 @@ import kotlinx.serialization.modules.subclass
 // Screens a signed-in user moves between. Sign-in, onboarding and the session error screen sit outside
 // this: App switches to them from the session state.
 
+@Serializable data object FeedRoute : NavKey
 @Serializable data object HomeRoute : NavKey
 @Serializable data object ProfileRoute : NavKey
 @Serializable data object EditProfileRoute : NavKey
@@ -62,6 +72,7 @@ import kotlinx.serialization.modules.subclass
 private val RouteSerialization = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
+            subclass(FeedRoute::class)
             subclass(HomeRoute::class)
             subclass(ProfileRoute::class)
             subclass(EditProfileRoute::class)
@@ -88,8 +99,13 @@ private val RouteSerialization = SavedStateConfiguration {
  */
 @Composable
 fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = null, onLinkHandled: () -> Unit = {}) {
-    val backStack = rememberNavBackStack(RouteSerialization, HomeRoute)
-    val back: () -> Unit = { backStack.removeLastOrNull() }
+    val roots = listOf(HomeRoute, FeedRoute, TournamentsRoute, ProfileRoute)
+    var selected by rememberSaveable { mutableIntStateOf(0) }
+    val stacks = listOf(rememberNavBackStack(RouteSerialization, HomeRoute),
+        rememberNavBackStack(RouteSerialization, FeedRoute), rememberNavBackStack(RouteSerialization, TournamentsRoute),
+        rememberNavBackStack(RouteSerialization, ProfileRoute))
+    val backStack = stacks[selected]
+    val back: () -> Unit = { if (backStack.size > 1) backStack.removeLastOrNull() else selected = 0 }
 
     val social = koinInject<SocialRepository>()
     RegisterForPush(onToken = social::savePushToken)
@@ -100,7 +116,9 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
         onLinkHandled()
     }
 
+    Column(Modifier.fillMaxSize()) {
     NavDisplay(
+        modifier = Modifier.weight(1f),
         backStack = backStack,
         onBack = back,
         entryDecorators = listOf(
@@ -108,13 +126,17 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
             rememberViewModelStoreNavEntryDecorator(),
         ),
         entryProvider = entryProvider {
+            entry<FeedRoute> {
+                FeedScreen(onOpen = { backStack.add(MatchRoute(it)) }, community = { backStack.add(CommunityRoute) },
+                    rankings = { backStack.add(LeaderboardRoute()) })
+            }
             entry<HomeRoute> {
                 HomeScreen(
                     playerName = profile.name,
                     playerPhoto = profile.photoUrl,
                     onNewMatch = { backStack.add(NewMatchRoute) },
                     onOpenMatch = { backStack.add(MatchRoute(it)) },
-                    onProfile = { backStack.add(ProfileRoute) },
+                    onProfile = { selected = 3 },
                     onTeams = { backStack.add(TeamsRoute) },
                     onSearch = { backStack.add(SearchRoute) },
                     onNotifications = { backStack.add(NotificationsRoute) },
@@ -205,6 +227,18 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
             }
         },
     )
+    if (backStack.size == 1) {
+        val labels = listOf(Res.string.tab_home, Res.string.tab_feed, Res.string.home_tournaments, Res.string.tab_me)
+        val icons = listOf(DesiIcons.Bat, DesiIcons.Ball, DesiIcons.Cricket, DesiIcons.Person)
+        NavigationBar {
+            roots.indices.forEach { i ->
+                NavigationBarItem(selected == i, onClick = { selected = i },
+                    icon = { Icon(painterResource(icons[i]), null) }, label = { Text(stringResource(labels[i])) })
+            }
+        }
+    }
+    }
+
 }
 
 /** The screen a link path opens, or null for a link the app doesn't know. */

@@ -35,6 +35,7 @@ interface UserStore {
 
 interface MatchStore {
     /** Newest first. */
+    suspend fun feedPage(status: com.harsh.desicrics.model.MatchStatus?, before: Long?, afterId: String): List<Match>
     suspend fun recent(limit: Int): List<Match>
 
     suspend fun details(matchId: String): MatchDetails?

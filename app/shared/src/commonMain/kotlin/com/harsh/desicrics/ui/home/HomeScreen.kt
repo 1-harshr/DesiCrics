@@ -181,24 +181,13 @@ fun HomeContent(
                     CircularProgressIndicator(color = DesiTheme.colors.brand)
                 }
             }
-            state.isEmpty -> item { EmptyMatches() }
+            feed.mine.isEmpty() && !state.loadFailed -> item { EmptyMatches() }
         }
         feedSection(Res.string.home_section_mine, feed.mine, currentUid, onOpenMatch, first = true)
-        feedSection(Res.string.home_section_live, feed.live, currentUid, onOpenMatch, first = feed.mine.isEmpty())
-        feedSection(Res.string.home_section_upcoming, feed.upcoming, currentUid, onOpenMatch)
-        feedSection(Res.string.home_section_recent, feed.recent, currentUid, onOpenMatch)
         item {
-            Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
-                SectionLabel(stringResource(Res.string.home_explore))
-                Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                    HomeDestination(stringResource(Res.string.teams_title), DesiIcons.Teams, onTeams, Modifier.weight(1f))
-                    HomeDestination(stringResource(Res.string.home_tournaments), DesiIcons.Cricket, onTournaments, Modifier.weight(1f))
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                    HomeDestination(stringResource(Res.string.home_leaderboards), DesiIcons.Ball, onLeaderboards, Modifier.weight(1f))
-                    HomeDestination(stringResource(Res.string.home_community), DesiIcons.Person, onCommunity, Modifier.weight(1f))
-                }
-                HomeDestination(stringResource(Res.string.home_take_over), DesiIcons.Sync, onTakeOver, Modifier.fillMaxWidth())
+            Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                HomeDestination(stringResource(Res.string.teams_title), DesiIcons.Teams, onTeams, Modifier.weight(1f))
+                HomeDestination(stringResource(Res.string.home_take_over), DesiIcons.Sync, onTakeOver, Modifier.weight(1f))
             }
         }
         item { Box(Modifier.windowInsetsPadding(WindowInsets.navigationBars)) }

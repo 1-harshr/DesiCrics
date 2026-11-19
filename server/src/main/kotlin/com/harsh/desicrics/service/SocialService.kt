@@ -47,6 +47,13 @@ class SocialService(
         )
     }
 
+    suspend fun page(status: String?, before: String?, id: String?): List<Match> {
+        val filter = status?.let { MatchStatus.entries.find { s -> s.name == it } ?: throw ApiException(HttpStatusCode.BadRequest, "Invalid match status") }
+        val time = before?.toLongOrNull()
+        if ((before != null && time == null) || (time == null) != (id == null)) throw ApiException(HttpStatusCode.BadRequest, "Invalid cursor")
+        return matches.feedPage(filter, time, id.orEmpty())
+    }
+
     suspend fun search(query: String): SearchResults {
         if (query.trim().length < 2) return SearchResults()
         return SearchResults(

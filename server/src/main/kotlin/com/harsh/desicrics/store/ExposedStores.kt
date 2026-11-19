@@ -26,6 +26,8 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.inSubQuery
 import org.jetbrains.exposed.v1.core.isNotNull
+import org.jetbrains.exposed.v1.core.less
+import org.jetbrains.exposed.v1.jdbc.andWhere
 import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.isNull
@@ -82,6 +84,16 @@ class ExposedUserStore(private val db: Database) : UserStore {
 }
 
 class ExposedMatchStore(private val db: Database) : MatchStore {
+
+    override suspend fun feedPage(status: MatchStatus?, before: Long?, afterId: String): List<Match> = db.query {
+        val query = MatchesTable.selectAll()
+        status?.let { query.andWhere { MatchesTable.status eq it } }
+        before?.let { time -> query.andWhere {
+            (MatchesTable.createdAt less time) or ((MatchesTable.createdAt eq time) and (MatchesTable.id less afterId))
+        } }
+        query.orderBy(MatchesTable.createdAt to SortOrder.DESC, MatchesTable.id to SortOrder.DESC)
+            .limit(30).map { it.toMatch(players = emptyList()) }
+    }
 
     override suspend fun recent(limit: Int): List<Match> = db.query {
         val rows = MatchesTable.selectAll()
