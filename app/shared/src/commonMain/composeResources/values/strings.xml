@@ -652,6 +652,7 @@
     <string name="profile_claimable_title">Is this you?</string>
     <string name="profile_claimable_body">A team added %1$s with your mobile number.</string>
     <string name="profile_claimable_action">That's me</string>
+    <string name="profile_claimable_failed">Couldn't claim them. Check your connection and try again.</string>
     <string name="profile_support">Contact support</string>
     <string name="profile_support_hint">Report a problem or suggest something. We read everything.</string>
     <string name="profile_support_category">About</string>

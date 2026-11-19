@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -95,7 +96,11 @@ fun ProfileScreen(
         onOpenMatch = onOpenMatch,
         onOpenTeam = onOpenTeam,
         onClaimSuggested = viewModel::claim,
-        onSettings = { sheet = it },
+        // Each sheet starts clean, not with the outcome of an earlier claim or message.
+        onSettings = {
+            viewModel.clearResult()
+            sheet = it
+        },
         stats = { CareerSection(profile.uid, onCompare = onCompare, name = profile.name, onOpenMatch = onOpenMatch, heading = false) },
         onRetry = viewModel::refresh,
     )
@@ -124,6 +129,8 @@ private fun ProfileContent(
     val colors = DesiTheme.colors
     val space = DesiTheme.space
     var tab by rememberSaveable { mutableStateOf(ProfileTab.ABOUT) }
+    // The suggestion last tapped, so only its card shows the claim going through or failing.
+    var claiming by remember { mutableStateOf<String?>(null) }
     HeroScaffold(
         title = profile.name,
         onBack = null,
@@ -144,7 +151,18 @@ private fun ProfileContent(
             )
         },
     ) {
-        state.claimable.forEach { ClaimSuggestion(it, onClaim = { onClaimSuggested(it.profileId) }) }
+        state.claimable.forEach { player ->
+            val mine = claiming == player.profileId
+            ClaimSuggestion(
+                player,
+                saving = mine && state.saving,
+                failed = mine && state.result == SettingsResult.CLAIM_FAILED,
+                onClaim = {
+                    claiming = player.profileId
+                    onClaimSuggested(player.profileId)
+                },
+            )
+        }
         SegmentedControl(
             options = ProfileTab.entries,
             selected = tab,
@@ -152,7 +170,10 @@ private fun ProfileContent(
             onSelect = { tab = it },
         )
         when (tab) {
-            ProfileTab.ABOUT -> AboutTab(profile, onEdit, onSignOut, onSettings)
+            ProfileTab.ABOUT -> AboutTab(profile, onEdit, onSignOut, onSettings = {
+                claiming = null
+                onSettings(it)
+            })
             ProfileTab.STATS -> stats()
             ProfileTab.MATCHES -> ListTab(state.matches, Res.string.profile_no_matches, state.loadFailed, DesiIcons.History, onRetry) { matches ->
                 Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
@@ -219,12 +240,13 @@ private fun <T> ColumnScope.ListTab(items: List<T>?, empty: StringResource, fail
 
 /** A team added this user, by their verified number, before they had the app. */
 @Composable
-private fun ClaimSuggestion(player: PlayerSummary, onClaim: () -> Unit) {
+private fun ClaimSuggestion(player: PlayerSummary, saving: Boolean, failed: Boolean, onClaim: () -> Unit) {
     DesiCard(Modifier.fillMaxWidth()) {
         IconTile(DesiIcons.Badge)
         Text(stringResource(Res.string.profile_claimable_title), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
         Text(stringResource(Res.string.profile_claimable_body, player.name), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
-        PrimaryButton(stringResource(Res.string.profile_claimable_action), onClick = onClaim, modifier = Modifier.fillMaxWidth())
+        if (failed) ErrorBanner(stringResource(Res.string.profile_claimable_failed))
+        PrimaryButton(stringResource(Res.string.profile_claimable_action), onClick = onClaim, loading = saving, modifier = Modifier.fillMaxWidth())
     }
 }
 
