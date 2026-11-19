@@ -58,7 +58,7 @@ class TeamsTest {
         assertEquals(TeamRole.MEMBER, joined.roleOf("dev"))
         // Members don't see the join code.
         assertNull(joined.joinCode)
-        assertEquals(listOf(TeamSummary(team.id, "Andheri Strikers", "Mumbai", 2, TeamRole.MEMBER)), client.get("/teams/mine") { bearerAuth("test-dev") }.body())
+        assertEquals(listOf(TeamSummary(team.id, "Andheri Strikers", "Mumbai", 2, TeamRole.MEMBER, code = team.code)), client.get("/teams/mine") { bearerAuth("test-dev") }.body())
 
         // Only admins manage the team.
         val rename = client.put("/teams/${team.id}") { bearerAuth("test-dev"); jsonBody(TeamRequest("Mine now")) }
@@ -66,6 +66,29 @@ class TeamsTest {
         val newCode = client.post("/teams/${team.id}/join-code") { bearerAuth("test-asha") }.body<SavedTeam>().joinCode
         assertTrue(newCode != code)
         assertEquals(HttpStatusCode.NotFound, client.post("/teams/join/$code") { bearerAuth("test-dev") }.status)
+    }
+
+    @Test
+    fun playersAndTeamsHavePublicCodesToFindThemBy() = apiTest { client ->
+        val asha = client.setUpProfile("asha").body<com.harsh.desicrics.model.UserProfile>()
+        val dev = client.setUpProfile("dev", name = "Dev Patel").body<com.harsh.desicrics.model.UserProfile>()
+        assertTrue(asha.code.length == 8 && asha.code.all(Char::isDigit))
+        assertTrue(asha.code != dev.code)
+        // Editing the profile keeps the code.
+        assertEquals(asha.code, client.setUpProfile("asha", name = "Asha K").body<com.harsh.desicrics.model.UserProfile>().code)
+
+        val team = client.createTeam("asha")
+        assertTrue(team.code.length == 8 && team.code.all(Char::isDigit))
+
+        // Spaces in a code are fine, the way it's shown in the app.
+        val spaced = dev.code.chunked(4).joinToString(" ")
+        val found = client.get("/players/search?q=$spaced") { bearerAuth("test-asha") }.body<List<PlayerSummary>>()
+        assertEquals(listOf("dev" to dev.code), found.map { it.profileId to it.code })
+        val search = client.get("/search?q=${team.code}") { bearerAuth("test-dev") }.body<com.harsh.desicrics.model.SearchResults>()
+        assertEquals(listOf(team.id), search.teams.map { it.id })
+        assertTrue(search.players.isEmpty())
+        // The public code finds the team but doesn't let anyone in.
+        assertEquals(HttpStatusCode.NotFound, client.post("/teams/join/${team.code}") { bearerAuth("test-dev") }.status)
     }
 
     @Test

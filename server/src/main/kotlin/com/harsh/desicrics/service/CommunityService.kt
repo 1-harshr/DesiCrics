@@ -110,7 +110,7 @@ class CommunityService(
         // Ratings come from every match between saved teams, so a visiting side's strength counts too.
         val ratings = Rankings.teams(matches.completedBetweenSavedTeams()).filterKeys { it in local }
         return ratings.entries.sortedByDescending { it.value.rating }.take(50).mapNotNull { (id, rating) ->
-            teams.get(id)?.let { TeamRanking(TeamSummary(it.id, it.name, it.city, it.members.size, logoUrl = it.logoUrl), rating.rating, rating.played) }
+            teams.get(id)?.let { TeamRanking(TeamSummary(it.id, it.name, it.city, it.members.size, logoUrl = it.logoUrl, code = it.code), rating.rating, rating.played) }
         }
     }
 
@@ -177,7 +177,7 @@ class CommunityService(
         val authors = players.summaries(rows.map { it.authorUid })
         return rows.mapNotNull { row ->
             val author = authors[row.authorUid] ?: return@mapNotNull null
-            val team = row.teamId?.let { teams.get(it) }?.let { TeamSummary(it.id, it.name, it.city, it.members.size, logoUrl = it.logoUrl) }
+            val team = row.teamId?.let { teams.get(it) }?.let { TeamSummary(it.id, it.name, it.city, it.members.size, logoUrl = it.logoUrl, code = it.code) }
             val responses = if (withResponses) responsesOf(row.id) else emptyList()
             LookingForPost(row.id, row.kind, row.city, row.date, row.note, author, team, counts[row.id] ?: 0, row.open, responses)
         }

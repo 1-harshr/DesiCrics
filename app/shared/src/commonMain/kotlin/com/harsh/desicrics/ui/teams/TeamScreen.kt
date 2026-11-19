@@ -88,6 +88,7 @@ import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.components.PhotoAvatar
+import com.harsh.desicrics.ui.components.formatPublicCode
 import com.harsh.desicrics.ui.match.OptionsSheet
 import com.harsh.desicrics.ui.match.SheetOption
 import com.harsh.desicrics.ui.system.rememberImagePicker
@@ -145,12 +146,13 @@ fun TeamScreen(
     val team = state.team ?: return
     when (val current = sheet) {
         null -> Unit
+        // Stays open after each add, so a whole squad goes in without reopening it.
         TeamSheet.Add -> AddMemberSheet(
             state = state,
             onSearch = viewModel::search,
-            onPick = { viewModel.addPlayer(it.profileId); close() },
-            onPlaceholder = { name, phone -> viewModel.addPlaceholder(name, phone); close() },
-            onDismiss = close,
+            onPick = { viewModel.addPlayer(it.profileId) },
+            onPlaceholder = viewModel::addPlaceholder,
+            onDismiss = { viewModel.search(""); close() },
         )
         TeamSheet.Invite -> InviteSheet(
             team = team,
@@ -314,6 +316,13 @@ fun TeamContent(
         ) {
             if (state.actionFailed) {
                 ErrorBanner(stringResource(Res.string.teams_action_failed))
+            }
+            if (team.code.isNotEmpty()) {
+                com.harsh.desicrics.ui.components.PublicCodeCard(
+                    code = team.code,
+                    label = stringResource(Res.string.team_code),
+                    shareText = stringResource(Res.string.team_code_share_text, team.name, com.harsh.desicrics.ui.components.formatPublicCode(team.code)),
+                )
             }
             if (team.joinRequests.isNotEmpty()) {
                 JoinRequests(team.joinRequests, enabled = !state.saving, onAccept = onAcceptRequest, onDecline = onDeclineRequest)
@@ -498,7 +507,10 @@ private fun RecordAgainst(others: List<TeamSummary>, selected: TeamSummary?, sta
     }
 }
 
-/** Search for someone on the app, or add a placeholder for someone who isn't. */
+/**
+ * Search for people on the app (by name or player code) or add placeholders for people who aren't, as
+ * many as needed: each add keeps the sheet open, and the search stays so the next pick is one tap away.
+ */
 @Composable
 private fun AddMemberSheet(
     state: TeamUiState,
@@ -507,9 +519,10 @@ private fun AddMemberSheet(
     onPlaceholder: (name: String, phone: String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val memberIds = state.team?.members.orEmpty().map { it.player.profileId }.toSet()
+    val memberIds = state.team?.members.orEmpty().map { it.player.profileId }.toSet() + state.adding
     var name by rememberSaveable { mutableStateOf("") }
     var phone by rememberSaveable { mutableStateOf("") }
+    var added by rememberSaveable { mutableStateOf(0) }
     DesiSheet(stringResource(Res.string.team_add_title), onDismiss) {
         DesiTextField(
             value = state.searchQuery,
@@ -517,7 +530,7 @@ private fun AddMemberSheet(
             label = stringResource(Res.string.team_add_search),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Search),
         )
-        val results = state.searchResults.filter { it.profileId !in memberIds }
+        val results = state.searchResults
         if (state.searchQuery.trim().length >= 2 && !state.searching && results.isEmpty()) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
                 Icon(painterResource(DesiIcons.Info), null, tint = DesiTheme.colors.muted, modifier = Modifier.size(16.dp))
@@ -526,11 +539,17 @@ private fun AddMemberSheet(
         }
         Column(Modifier.fillMaxWidth().clip(DesiTheme.radius.md)) {
             results.forEach { player ->
+                val inTeam = player.profileId in memberIds
                 PlayerRow(
                     name = player.name,
-                    subtitle = listOfNotNull(player.role?.let { stringResource(it.label) }, player.city.ifBlank { null }).joinToString(" · ").ifEmpty { null },
+                    subtitle = listOfNotNull(player.role?.let { stringResource(it.label) }, player.city.ifBlank { null }, player.code?.let(::formatPublicCode))
+                        .joinToString(" · ").ifEmpty { null },
                     avatar = { PhotoAvatar(player.name, player.photoUrl) },
-                    onClick = { onPick(player) },
+                    trailing = {
+                        if (inTeam) Tag(stringResource(Res.string.team_add_added), tone = TagTone.BRAND, icon = DesiIcons.CheckCircle)
+                        else Icon(painterResource(DesiIcons.PersonAdd), null, tint = DesiTheme.colors.brand, modifier = Modifier.size(DesiTheme.size.iconSmall))
+                    },
+                    onClick = if (inTeam) null else ({ onPick(player); added++ }),
                 )
             }
         }
@@ -551,8 +570,19 @@ private fun AddMemberSheet(
         )
         PrimaryButton(
             stringResource(Res.string.team_add_placeholder_action, name.trim()),
-            onClick = { onPlaceholder(name, phone) },
+            onClick = {
+                onPlaceholder(name.trim(), phone)
+                added++
+                name = ""
+                phone = ""
+            },
             enabled = name.isNotBlank(),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        if (state.actionFailed) ErrorBanner(stringResource(Res.string.teams_action_failed))
+        GhostButton(
+            if (added == 0) stringResource(Res.string.team_add_done) else pluralStringResource(Res.plurals.team_add_done_count, added, added),
+            onClick = onDismiss,
             modifier = Modifier.fillMaxWidth(),
         )
     }

@@ -54,9 +54,16 @@ class ExposedUserStore(private val db: Database) : UserStore {
         UsersTable.selectAll().where { (UsersTable.uid eq uid) and UsersTable.deletedAt.isNull() }.singleOrNull()?.toProfile()
     }
 
+    /** A new user gets a fresh public code; an existing one keeps theirs. */
     override suspend fun upsert(profile: UserProfile) {
+        // Codes are random, so a clash is rare and retrying is enough.
+        repeat(5) { if (save(profile, com.harsh.desicrics.service.newPublicCode())) return }
+        error("Couldn't make a player code")
+    }
+
+    private suspend fun save(profile: UserProfile, newCode: String): Boolean = try {
         db.query {
-            UsersTable.upsert {
+            UsersTable.upsert(onUpdateExclude = listOf(UsersTable.code)) {
                 it[uid] = profile.uid
                 it[name] = profile.name
                 it[phone] = profile.phone
@@ -68,8 +75,12 @@ class ExposedUserStore(private val db: Database) : UserStore {
                 it[bowlingStyle] = profile.bowlingStyle
                 it[createdAt] = profile.createdAt
                 it[deletedAt] = null
+                it[code] = profile.code.ifEmpty { newCode }
             }
         }
+        true
+    } catch (e: Exception) {
+        if (e.isUniqueViolation()) false else throw e
     }
 
     private fun ResultRow.toProfile() = UserProfile(
@@ -83,6 +94,7 @@ class ExposedUserStore(private val db: Database) : UserStore {
         battingStyle = this[UsersTable.battingStyle],
         bowlingStyle = this[UsersTable.bowlingStyle],
         createdAt = this[UsersTable.createdAt],
+        code = this[UsersTable.code],
     )
 }
 

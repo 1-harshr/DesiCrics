@@ -50,7 +50,7 @@ private val fakeTokens = TokenVerifier { token ->
 private val testPostgres: String? = System.getenv("TEST_POSTGRES_URL")
 
 /** A fresh, empty database for one test. */
-private fun freshDatabase(): DatabaseConfig {
+internal fun freshDatabase(): DatabaseConfig {
     val postgres = testPostgres ?: return DatabaseConfig(
         url = "jdbc:h2:mem:${UUID.randomUUID()};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1",
     )

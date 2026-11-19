@@ -171,6 +171,13 @@ private fun AboutTab(profile: UserProfile, onEdit: () -> Unit, onSignOut: () -> 
     val colors = DesiTheme.colors
     val space = DesiTheme.space
     val empty = stringResource(Res.string.common_empty_value)
+    if (profile.code.isNotEmpty()) {
+        com.harsh.desicrics.ui.components.PublicCodeCard(
+            code = profile.code,
+            label = stringResource(Res.string.profile_code),
+            shareText = stringResource(Res.string.profile_code_share_text, com.harsh.desicrics.ui.components.formatPublicCode(profile.code)),
+        )
+    }
     Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
         SectionHeader(stringResource(Res.string.profile_section_details), icon = DesiIcons.Person, action = stringResource(Res.string.profile_edit_short), onAction = onEdit)
         ListCard {

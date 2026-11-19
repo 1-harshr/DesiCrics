@@ -68,6 +68,9 @@ import com.harsh.desicrics.model.TossDecision
 import com.harsh.desicrics.resources.Res
 import com.harsh.desicrics.resources.home_search
 import com.harsh.desicrics.resources.new_match_add_player
+import com.harsh.desicrics.resources.new_match_add_done
+import com.harsh.desicrics.resources.new_match_add_names
+import com.harsh.desicrics.resources.team_add_added
 import com.harsh.desicrics.resources.new_match_error_captain
 import com.harsh.desicrics.resources.new_match_error_create_failed
 import com.harsh.desicrics.resources.new_match_error_overs
@@ -310,7 +313,7 @@ private fun TeamStep(side: TeamSide, state: NewMatchFormState, actions: NewMatch
     val invalid = (state.error as? NewMatchError.Invalid)?.error
     var adding by rememberSaveable(side) { mutableStateOf(false) }
     val share = com.harsh.desicrics.ui.system.rememberShareText()
-    if (adding) LineupPlayerSheet(side, actions) { adding = false }
+    if (adding) LineupPlayerSheet(side, players, actions) { adding = false }
 
     Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
         DesiCard(Modifier.fillMaxWidth()) {
@@ -443,8 +446,12 @@ private fun FixturePreview(state: NewMatchFormState, onEdit: (Int) -> Unit) {
     }
 }
 
+/**
+ * Adds players to one side's lineup, as many as needed: every add keeps the sheet open and clears the
+ * field for the next name. Guests can go in several at once, separated by commas or new lines.
+ */
 @Composable
-private fun LineupPlayerSheet(side: TeamSide, actions: NewMatchActions, close: () -> Unit) {
+private fun LineupPlayerSheet(side: TeamSide, players: List<SquadPlayer>, actions: NewMatchActions, close: () -> Unit) {
     var query by rememberSaveable { mutableStateOf("") }
     var phone by rememberSaveable { mutableStateOf("") }
     var mode by rememberSaveable { mutableStateOf(0) }
@@ -452,6 +459,9 @@ private fun LineupPlayerSheet(side: TeamSide, actions: NewMatchActions, close: (
     var busy by androidx.compose.runtime.remember { mutableStateOf(false) }
     var failed by androidx.compose.runtime.remember { mutableStateOf(false) }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val full = players.size >= CreateMatchRequest.MAX_PLAYERS
+    val linked = players.mapNotNull { it.profileId }.toSet()
+    val guests = query.split(',', '\n').map { it.trim() }.filter { it.isNotEmpty() }
     androidx.compose.runtime.LaunchedEffect(query, mode) {
         failed = false
         if (mode == 0 && query.trim().length >= 2) try {
@@ -459,27 +469,56 @@ private fun LineupPlayerSheet(side: TeamSide, actions: NewMatchActions, close: (
             found = actions.searchPlayers(query)
         } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { failed = true }
     }
+    val addGuests = {
+        guests.forEach { actions.onAddPlayer(side, it) }
+        query = ""
+    }
     com.harsh.desicrics.designsystem.component.DesiSheet(stringResource(Res.string.new_match_add_player), close) {
         val labels = listOf(Res.string.home_search, Res.string.setup_phone, Res.string.setup_guest)
         SegmentedControl(labels.indices.toList(), mode, label = { stringResource(labels[it]) }, onSelect = { mode = it })
         Text(stringResource(listOf(Res.string.setup_mode_search_hint, Res.string.setup_mode_phone_hint, Res.string.setup_mode_guest_hint)[mode]), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
-        DesiTextField(query, { query = it.take(60) }, stringResource(Res.string.team_add_placeholder_name), leadingIcon = if (mode == 0) DesiIcons.Search else DesiIcons.Person)
+        DesiTextField(
+            query,
+            { query = it.take(if (mode == 2) 600 else 60) },
+            stringResource(Res.string.team_add_placeholder_name),
+            leadingIcon = if (mode == 0) DesiIcons.Search else DesiIcons.Person,
+            // Enter adds the guest and leaves the keyboard up for the next name.
+            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = if (mode == 2) ImeAction.Done else ImeAction.Next),
+            keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { if (mode == 2 && !full) addGuests() }),
+        )
         if (mode == 0) {
-            if (found.isNotEmpty()) com.harsh.desicrics.ui.social.PlayerList(found) { p -> actions.onLinkPlayer(side, p); close() }
+            if (found.isNotEmpty()) com.harsh.desicrics.ui.social.PlayerList(
+                found,
+                trailing = { p ->
+                    if (p.profileId in linked) Tag(stringResource(Res.string.team_add_added), tone = TagTone.BRAND, icon = DesiIcons.CheckCircle)
+                    else Icon(painterResource(DesiIcons.PersonAdd), null, tint = DesiTheme.colors.brand, modifier = Modifier.size(18.dp))
+                },
+            ) { p -> if (p.profileId !in linked && !full) actions.onLinkPlayer(side, p) }
         } else {
             if (mode == 1) DesiTextField(phone, { phone = it }, stringResource(Res.string.team_add_placeholder_phone), leadingIcon = DesiIcons.Phone,
                 keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone))
-            PrimaryButton(stringResource(Res.string.new_match_add_player), {
-                if (mode == 2) { actions.onAddPlayer(side, query); close() }
-                else scope.launch {
-                    busy = true
-                    try { actions.byPhone(side, query.trim(), phone); close() }
-                    catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { failed = true }
-                    finally { busy = false }
-                }
-            }, enabled = query.isNotBlank() && (mode == 2 || phone.count(Char::isDigit) in 10..13), loading = busy, leadingIcon = DesiIcons.PersonAdd, modifier = Modifier.fillMaxWidth())
+            PrimaryButton(
+                if (mode == 2 && guests.size > 1) pluralStringResource(Res.plurals.new_match_add_names, guests.size, guests.size) else stringResource(Res.string.new_match_add_player),
+                {
+                    if (mode == 2) addGuests()
+                    else scope.launch {
+                        busy = true
+                        try {
+                            actions.byPhone(side, query.trim(), phone)
+                            query = ""
+                            phone = ""
+                        } catch (e: kotlinx.coroutines.CancellationException) { throw e } catch (e: Exception) { failed = true }
+                        finally { busy = false }
+                    }
+                },
+                enabled = !full && guests.isNotEmpty() && (mode == 2 || phone.count(Char::isDigit) in 10..13),
+                loading = busy,
+                leadingIcon = DesiIcons.PersonAdd,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
         if (failed) ErrorBanner(stringResource(Res.string.teams_action_failed))
+        GhostButton(pluralStringResource(Res.plurals.new_match_add_done, players.size, players.size), onClick = close, modifier = Modifier.fillMaxWidth())
     }
 }
 

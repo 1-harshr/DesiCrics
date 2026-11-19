@@ -16,6 +16,8 @@ data class UserProfile(
     val battingStyle: BattingStyle = BattingStyle.RIGHT_HAND,
     val bowlingStyle: BowlingStyle = BowlingStyle.NONE,
     val createdAt: Long = 0,
+    /** The player's public code, 8 digits, so others can find them exactly. Set by the server. */
+    val code: String = "",
 )
 
 @Serializable

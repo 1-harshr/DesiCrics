@@ -54,6 +54,7 @@ import com.harsh.desicrics.model.PlayerRole
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.components.PhotoAvatar
+import com.harsh.desicrics.ui.components.formatPublicCode
 import com.harsh.desicrics.ui.home.HomeMatchCard
 import com.harsh.desicrics.ui.teams.TeamRow
 import com.harsh.desicrics.ui.teams.TeamList
@@ -125,7 +126,8 @@ internal fun PlayerList(players: List<PlayerSummary>, trailing: (@Composable Row
         players.forEachIndexed { index, player ->
             ListRow(
                 title = player.name,
-                subtitle = listOfNotNull(player.role?.let { stringResource(it.label) }, player.city.ifBlank { null }).joinToString(" · ").ifEmpty { null },
+                subtitle = listOfNotNull(player.role?.let { stringResource(it.label) }, player.city.ifBlank { null }, player.code?.let(::formatPublicCode))
+                    .joinToString(" · ").ifEmpty { null },
                 leading = { PhotoAvatar(player.name, player.photoUrl, size = 44) },
                 trailing = trailing?.let { content -> { content(player) } },
                 divider = index > 0,

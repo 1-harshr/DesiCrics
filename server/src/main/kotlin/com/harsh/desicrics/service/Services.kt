@@ -57,7 +57,8 @@ class ProfileService(
         )
         users.upsert(profile)
         players.syncUser(profile)
-        return profile
+        // Read back for the public code, which the store assigns on first save.
+        return users.get(user.uid) ?: profile
     }
 }
 

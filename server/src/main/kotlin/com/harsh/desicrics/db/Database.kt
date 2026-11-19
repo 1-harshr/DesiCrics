@@ -50,6 +50,8 @@ object UsersTable : Table("users") {
     val createdAt = long("created_at")
     /** Set when the account was deleted; the row stays, cleared, so old scorecards still resolve. */
     val deletedAt = long("deleted_at").nullable()
+    /** Public, 8 digits, never changes. */
+    val code = varchar("code", 8)
     override val primaryKey = PrimaryKey(uid)
 }
 
@@ -70,6 +72,8 @@ object TeamsTable : Table("teams") {
     val name = varchar("name", 60)
     val city = varchar("city", 100)
     val joinCode = varchar("join_code", 8)
+    /** Public, 8 digits, never changes; the join code is the secret one. */
+    val code = varchar("code", 8)
     val logoUrl = varchar("logo_url", 200).nullable()
     val createdBy = varchar("created_by", 128)
     val createdAt = long("created_at")

@@ -209,6 +209,7 @@ class ScreenshotTest {
                         TeamMember(PlayerSummary("p3", "Kabir", isPlaceholder = true), TeamRole.MEMBER, claimCode = "K7M2QX"),
                     ),
                     joinCode = "AB3XY9",
+                    code = "48217390",
                     joinRequests = listOf(PlayerSummary("p4", "Ishaan Rao", "Mumbai")),
                 ),
                 otherTeams = listOf(TeamSummary("t2", "Powai XI", "", 9)),

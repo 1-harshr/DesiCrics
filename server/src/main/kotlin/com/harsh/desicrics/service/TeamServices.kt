@@ -28,6 +28,13 @@ private val CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 internal fun newCode(length: Int = 6): String = (1..length).map { CODE_ALPHABET.random() }.joinToString("")
 
+/** A public code for a player or team: 8 digits, easy to read out and type on a number pad. */
+internal fun newPublicCode(): String = (1..8).map { ('0'..'9').random() }.joinToString("")
+
+/** [query] as a public code, if it is one: 8 digits, ignoring spaces and dashes. */
+internal fun publicCodeIn(query: String): String? =
+    query.filterNot { it == ' ' || it == '-' }.takeIf { it.length == 8 && it.all(Char::isDigit) }
+
 /** Tries fresh codes until [save] accepts one; codes are random, so a clash is rare and retrying is enough. */
 internal suspend fun <T> withFreshCode(save: suspend (code: String) -> T?): T {
     repeat(5) { save(newCode())?.let { return it } }
@@ -55,7 +62,7 @@ class TeamService(
         requireProfile(user)
         val id = UUID.randomUUID().toString()
         withFreshCode { code ->
-            val team = SavedTeam(id, request.name.trim(), request.city.trim(), user.uid, members = emptyList(), joinCode = code)
+            val team = SavedTeam(id, request.name.trim(), request.city.trim(), user.uid, members = emptyList(), joinCode = code, code = newPublicCode())
             teams.create(team, adminId = user.uid, at = clock(), lineup = request.lineup).takeIf { it }
         }
         return get(user, id)

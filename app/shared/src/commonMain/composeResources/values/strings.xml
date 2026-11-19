@@ -51,6 +51,11 @@
     <!-- Profile -->
     <string name="profile_title">Profile</string>
     <string name="profile_mobile">Mobile</string>
+    <string name="profile_code">Your player code, for teams to add you</string>
+    <string name="profile_code_share_text">Add me on DesiCrics: my player code is %1$s</string>
+    <string name="team_code">Team code, for finding the team</string>
+    <string name="team_code_share_text">Find %1$s on DesiCrics with the team code %2$s</string>
+    <string name="code_share">Share code</string>
     <string name="profile_email">Email</string>
     <string name="profile_batting">Batting</string>
     <string name="profile_bowling">Bowling</string>
@@ -205,6 +210,14 @@
     <plurals name="new_match_player_count">
         <item quantity="one">%1$d player</item>
         <item quantity="other">%1$d players</item>
+    </plurals>
+    <plurals name="new_match_add_names">
+        <item quantity="one">Add %1$d player</item>
+        <item quantity="other">Add %1$d players</item>
+    </plurals>
+    <plurals name="new_match_add_done">
+        <item quantity="one">Done · %1$d player</item>
+        <item quantity="other">Done · %1$d players</item>
     </plurals>
     <string name="new_match_players_hint">At least 2 players. Press enter after each name.</string>
     <string name="new_match_section_overs">Overs</string>
@@ -546,13 +559,13 @@
     <string name="teams_create_action">Create team</string>
     <string name="teams_save_action">Save</string>
     <string name="teams_join_title">Join a team</string>
-    <string name="teams_join_hint">Ask an admin for the team's code, or scan their QR code.</string>
-    <string name="teams_join_code">Team code</string>
+    <string name="teams_join_hint">Ask an admin for the team's invite code, or scan their QR code.</string>
+    <string name="teams_join_code">Invite code</string>
     <string name="teams_join_action">Join</string>
-    <string name="teams_join_failed">That team code is wrong.</string>
+    <string name="teams_join_failed">That invite code is wrong.</string>
     <string name="teams_action_failed">That didn't work. Check your connection and try again.</string>
     <string name="team_members">Players</string>
-    <string name="team_add_player">Add a player</string>
+    <string name="team_add_player">Add players</string>
     <string name="team_invite">Invite with a code</string>
     <string name="team_rename">Edit team</string>
     <string name="team_leave">Leave team</string>
@@ -572,10 +585,16 @@
     <string name="team_invite_share">Share invite</string>
     <string name="team_invite_new_code">New code</string>
     <string name="team_invite_new_code_hint">Makes the old code and QR stop working.</string>
-    <string name="team_invite_text">Join %1$s on DesiCrics: %2$s (team code %3$s)</string>
+    <string name="team_invite_text">Join %1$s on DesiCrics: %2$s (invite code %3$s)</string>
     <string name="team_qr_description">QR code to join the team</string>
-    <string name="team_add_title">Add a player</string>
-    <string name="team_add_search">Search by name or mobile</string>
+    <string name="team_add_title">Add players</string>
+    <string name="team_add_added">Added</string>
+    <string name="team_add_done">Done</string>
+    <plurals name="team_add_done_count">
+        <item quantity="one">Done · %1$d added</item>
+        <item quantity="other">Done · %1$d added</item>
+    </plurals>
+    <string name="team_add_search">Search by name or player code</string>
     <string name="team_add_search_empty">Nobody on DesiCrics matches that. Add them below instead.</string>
     <string name="team_add_placeholder_title">Not on the app?</string>
     <string name="team_add_placeholder_hint">Add them by name. They can claim the player and its stats when they join.</string>
@@ -644,7 +663,7 @@
         <item quantity="other">Notifications, %1$d unread</item>
     </plurals>
     <string name="search_title">Search</string>
-    <string name="search_hint">Teams, players or matches</string>
+    <string name="search_hint">Teams, players, matches or a code</string>
     <string name="search_empty">Nothing matches that.</string>
     <string name="search_section_teams">Teams</string>
     <string name="search_section_players">Players</string>
@@ -1004,9 +1023,9 @@
     <string name="setup_later_hint">Tap to schedule it for later</string>
     <string name="setup_change_time">Tap to change the time</string>
     <string name="setup_vs">vs</string>
-    <string name="setup_mode_search_hint">Pick someone on DesiCrics so the match counts in their stats.</string>
+    <string name="setup_mode_search_hint">Find someone on DesiCrics by name or player code, so the match counts in their stats.</string>
     <string name="setup_mode_phone_hint">They get this player and its stats when they sign in with this number.</string>
-    <string name="setup_mode_guest_hint">A name only. Their runs and wickets stay on this scorecard.</string>
+    <string name="setup_mode_guest_hint">A name only. Their runs and wickets stay on this scorecard. Add several at once with commas: Rohan, Kabir, Arjun.</string>
     <!-- Errors: a title saying what didn't happen, a body saying what to do -->
     <string name="error_connection_body">Check that you're online, then try again. Nothing you've entered is lost.</string>
     <string name="error_team_title">This team didn't load</string>
@@ -1109,14 +1128,14 @@
     <string name="onboarding_claim_code_hint">Got a claim code from your captain instead?</string>
     <string name="onboarding_team_title">Join your team</string>
     <string name="onboarding_team_subtitle">Find your team by name and ask to join, or start one of your own.</string>
-    <string name="onboarding_team_search">Your team's name</string>
+    <string name="onboarding_team_search">Your team's name or code</string>
     <string name="onboarding_team_ask">Ask to join</string>
     <string name="onboarding_team_requested">Requested</string>
     <string name="onboarding_team_none">No team called "%1$s" yet.</string>
     <string name="onboarding_team_create">Create "%1$s"</string>
     <string name="onboarding_team_create_hint">A new team, with you as its admin</string>
     <string name="onboarding_team_requested_hint">We've asked the team's admins. You'll get a notification when you're in.</string>
-    <string name="onboarding_team_have_code">Have a team code?</string>
+    <string name="onboarding_team_have_code">Have an invite code?</string>
     <string name="onboarding_team_done">You're in %1$s. Add more teams any time from Teams.</string>
     <string name="onboarding_follow_title">Follow cricket near you</string>
     <string name="onboarding_follow_subtitle">The top teams and players in %1$s. You'll hear when they play, win or hit a milestone.</string>

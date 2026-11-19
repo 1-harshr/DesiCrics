@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /** Runs [block], returning failures instead of throwing them; cancellation still propagates. */
 internal suspend fun <T> attempt(block: suspend () -> T): Result<T> = try {
@@ -91,6 +93,8 @@ data class TeamUiState(
     val searchQuery: String = "",
     val searchResults: List<PlayerSummary> = emptyList(),
     val searching: Boolean = false,
+    /** Players added from search whose add is still on its way, so their row shows added straight away. */
+    val adding: Set<String> = emptySet(),
     /** The caller's other teams, to compare records against. */
     val otherTeams: List<TeamSummary> = emptyList(),
     val headToHead: HeadToHead? = null,
@@ -116,6 +120,9 @@ class TeamViewModel(
     val state: StateFlow<TeamUiState> = _state
 
     private var searchJob: Job? = null
+
+    /** Adds run one after another, so an admin can tap through a whole squad without waiting on each. */
+    private val adds = Mutex()
 
     init {
         load()
@@ -159,9 +166,22 @@ class TeamViewModel(
         }
     }
 
-    fun addPlayer(profileId: String) = act { repository.addPlayer(teamId, profileId) }
+    fun addPlayer(profileId: String) {
+        _state.update { it.copy(adding = it.adding + profileId) }
+        queueAdd { repository.addPlayer(teamId, profileId) }.invokeOnCompletion { _state.update { it.copy(adding = it.adding - profileId) } }
+    }
 
-    fun addPlaceholder(name: String, phone: String) = act { repository.addPlaceholder(teamId, name, phone) }
+    fun addPlaceholder(name: String, phone: String) = queueAdd { repository.addPlaceholder(teamId, name, phone) }
+
+    /** Like [act], but queued rather than dropped while another add runs, and the search stays as it was. */
+    private fun queueAdd(call: suspend () -> SavedTeam) = viewModelScope.launch {
+        adds.withLock {
+            attempt { call() }.fold(
+                onSuccess = { team -> _state.update { it.copy(team = team, actionFailed = false) } },
+                onFailure = { _state.update { it.copy(actionFailed = true) } },
+            )
+        }
+    }
 
     fun setRole(profileId: String, role: TeamRole) = act { repository.setRole(teamId, profileId, role) }
 

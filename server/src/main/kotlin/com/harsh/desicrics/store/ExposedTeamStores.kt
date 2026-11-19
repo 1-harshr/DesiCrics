@@ -79,9 +79,10 @@ class ExposedPlayerStore(private val db: Database) : PlayerStore {
     override suspend fun search(query: String, limit: Int): List<PlayerSummary> = db.query {
         val text = query.trim().lowercase()
         val byName = PlayersTable.name.lowerCase() like "%${text.escapeLike()}%"
+        val byCode = com.harsh.desicrics.service.publicCodeIn(query)?.let { UsersTable.code eq it }
         PlayersTable.join(UsersTable, JoinType.INNER, PlayersTable.userUid, UsersTable.uid)
             .selectAll()
-            .where { PlayersTable.userUid.isNotNull() and UsersTable.deletedAt.isNull() and byName }
+            .where { PlayersTable.userUid.isNotNull() and UsersTable.deletedAt.isNull() and (if (byCode != null) byName or byCode else byName) }
             .orderBy(PlayersTable.name)
             .limit(limit)
             .map { it.toSummary() }
@@ -182,6 +183,7 @@ private fun ResultRow.toSummary(): PlayerSummary {
         role = if (isUser) this[UsersTable.role] else null,
         isPlaceholder = this[PlayersTable.claimCode] != null,
         photoUrl = if (isUser) this[UsersTable.photoUrl] else null,
+        code = if (isUser) this[UsersTable.code] else null,
     )
 }
 
@@ -202,6 +204,7 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
                 it[name] = team.name
                 it[city] = team.city
                 it[joinCode] = team.joinCode!!
+                it[code] = team.code
                 it[createdBy] = team.createdBy
                 it[createdAt] = at
             }
@@ -255,6 +258,7 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
                 summaries[id]?.let { TeamMember(it, member[TeamMembersTable.role], codes[id]) }
             },
             joinCode = row[TeamsTable.joinCode],
+            code = row[TeamsTable.code],
             logoUrl = row[TeamsTable.logoUrl],
         )
     }
@@ -271,7 +275,7 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
             .associate { it[TeamMembersTable.teamId] to it[count].toInt() }
         TeamsTable.selectAll().where { TeamsTable.id inList mine.keys }.orderBy(TeamsTable.name).map {
             val id = it[TeamsTable.id]
-            TeamSummary(id, it[TeamsTable.name], it[TeamsTable.city], sizes[id] ?: 0, mine[id], it[TeamsTable.logoUrl])
+            TeamSummary(id, it[TeamsTable.name], it[TeamsTable.city], sizes[id] ?: 0, mine[id], it[TeamsTable.logoUrl], it[TeamsTable.code])
         }
     }
 
@@ -353,13 +357,15 @@ class ExposedTeamStore(private val db: Database) : TeamStore {
 
     override suspend fun search(query: String, limit: Int): List<TeamSummary> = db.query {
         val pattern = "%${query.trim().lowercase().escapeLike()}%"
-        val rows = TeamsTable.selectAll().where { TeamsTable.name.lowerCase() like pattern }.orderBy(TeamsTable.name).limit(limit).toList()
+        val byCode = com.harsh.desicrics.service.publicCodeIn(query)?.let { TeamsTable.code eq it }
+        val byName = TeamsTable.name.lowerCase() like pattern
+        val rows = TeamsTable.selectAll().where { if (byCode != null) byName or byCode else byName }.orderBy(TeamsTable.name).limit(limit).toList()
         val count = TeamMembersTable.playerId.count()
         val sizes = TeamMembersTable.select(TeamMembersTable.teamId, count)
             .where { TeamMembersTable.teamId inList rows.map { it[TeamsTable.id] } }
             .groupBy(TeamMembersTable.teamId)
             .associate { it[TeamMembersTable.teamId] to it[count].toInt() }
-        rows.map { TeamSummary(it[TeamsTable.id], it[TeamsTable.name], it[TeamsTable.city], sizes[it[TeamsTable.id]] ?: 0, logoUrl = it[TeamsTable.logoUrl]) }
+        rows.map { TeamSummary(it[TeamsTable.id], it[TeamsTable.name], it[TeamsTable.city], sizes[it[TeamsTable.id]] ?: 0, logoUrl = it[TeamsTable.logoUrl], code = it[TeamsTable.code]) }
     }
 
     override suspend fun setLogo(teamId: String, url: String?) {

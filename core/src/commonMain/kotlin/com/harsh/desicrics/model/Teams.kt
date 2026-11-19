@@ -15,6 +15,8 @@ data class PlayerSummary(
     val isPlaceholder: Boolean = false,
     /** A path on the server ("/images/…") or a full URL, e.g. a Google profile photo. */
     val photoUrl: String? = null,
+    /** A signed-up player's public code; null for placeholders. */
+    val code: String? = null,
 )
 
 @Serializable
@@ -38,6 +40,8 @@ data class SavedTeam(
     val members: List<TeamMember>,
     /** Only sent to admins. */
     val joinCode: String? = null,
+    /** The team's public code, 8 digits, for finding it exactly. Unlike [joinCode], it lets no one in. */
+    val code: String = "",
     /** Profile IDs who played the team's last match, to start the next one with the same squad. */
     val lastSquad: List<String> = emptyList(),
     val logoUrl: String? = null,
@@ -58,6 +62,7 @@ data class TeamSummary(
     /** The caller's role, or null if they aren't a member. */
     val myRole: TeamRole? = null,
     val logoUrl: String? = null,
+    val code: String = "",
 )
 
 /** How two saved teams have done against each other in completed matches. */
