@@ -178,6 +178,8 @@ data class TeamUiState(
     /** The caller's other teams, to compare records against. */
     val otherTeams: List<TeamSummary> = emptyList(),
     val headToHead: HeadToHead? = null,
+    /** The last record picked didn't load; picking it again retries. */
+    val headToHeadFailed: Boolean = false,
     /** The organiser view, loaded for admins only. */
     val insights: TeamInsights? = null,
     /** Null until known. */
@@ -298,8 +300,12 @@ class TeamViewModel(
     }
 
     fun compareWith(otherId: String) {
+        _state.update { it.copy(headToHeadFailed = false) }
         viewModelScope.launch {
-            attempt { repository.headToHead(teamId, otherId) }.getOrNull()?.let { h2h -> _state.update { it.copy(headToHead = h2h) } }
+            attempt { repository.headToHead(teamId, otherId) }.fold(
+                onSuccess = { h2h -> _state.update { it.copy(headToHead = h2h) } },
+                onFailure = { _state.update { it.copy(headToHead = null, headToHeadFailed = true) } },
+            )
         }
     }
 

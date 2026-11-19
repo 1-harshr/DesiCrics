@@ -534,6 +534,7 @@ private fun RecordAgainst(others: List<TeamSummary>, selected: TeamSummary?, sta
                 columns = 4,
             )
         }
+        if (state.headToHeadFailed) ErrorBanner(stringResource(Res.string.team_record_failed))
     }
 }
 
