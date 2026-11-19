@@ -902,6 +902,7 @@
     <string name="community_city_hint">Set your city on your profile to fill this in.</string>
     <string name="community_load_failed">Couldn't load this. Check your connection.</string>
     <string name="community_action_failed">That didn't work. Check the details and your connection.</string>
+    <string name="community_list_action_failed">That didn't go through. Check your connection and try again.</string>
     <string name="looking_for_opponent">An opponent</string>
     <string name="looking_for_player">A player</string>
     <string name="looking_for_ground">A ground</string>

@@ -93,6 +93,11 @@ fun CommunityScreen(
         sheet = null
         viewModel.clearError()
     }
+    // A failure on the list (closing a post, removing an entry) mustn't greet the next sheet.
+    val show = { next: CommunitySheet ->
+        viewModel.clearError()
+        sheet = next
+    }
 
     DesiScaffold(title = stringResource(Res.string.community_title), onBack = onBack) { padding ->
         Column(
@@ -108,10 +113,17 @@ fun CommunityScreen(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
             SegmentedControl(CommunityTab.entries, selected = state.tab, label = { stringResource(it.label) }, onSelect = viewModel::setTab)
+            if (state.actionFailed && sheet == null) {
+                ErrorBanner(
+                    stringResource(Res.string.community_list_action_failed),
+                    action = stringResource(Res.string.match_dismiss),
+                    onAction = viewModel::clearError,
+                )
+            }
             if (state.failed) ErrorState(stringResource(Res.string.error_community_title), stringResource(Res.string.error_connection_body), onRetry = viewModel::retry, compact = true)
             when (state.tab) {
                 CommunityTab.LOOKING_FOR -> {
-                    PrimaryButton(stringResource(Res.string.looking_for_post), onClick = { sheet = CommunitySheet.Post }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
+                    PrimaryButton(stringResource(Res.string.looking_for_post), onClick = { show(CommunitySheet.Post) }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
                     // Posts you run (yours, and your teams' if you're an admin) are listed below, with their replies.
                     val mine = state.myPosts.map { it.id }.toSet()
                     val others = state.posts.filter { it.author.profileId != myId && it.id !in mine }
@@ -122,7 +134,7 @@ fun CommunityScreen(
                         PostCard(post) {
                             when {
                                 post.id in state.answered -> Text(stringResource(Res.string.looking_for_responded), style = DesiTheme.type.caption, color = colors.brand)
-                                else -> TextButton(onClick = { sheet = CommunitySheet.Respond(post) }) {
+                                else -> TextButton(onClick = { show(CommunitySheet.Respond(post)) }) {
                                     Text(stringResource(Res.string.looking_for_respond), style = DesiTheme.type.button, color = colors.brand)
                                 }
                             }
@@ -170,7 +182,7 @@ fun CommunityScreen(
                 }
                 CommunityTab.DIRECTORY -> {
                     ChoiceChips(DirectoryKind.entries, selected = state.directoryKind, label = { stringResource(it.label) }, onSelect = viewModel::setDirectoryKind)
-                    PrimaryButton(stringResource(Res.string.directory_add), onClick = { sheet = CommunitySheet.AddEntry }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
+                    PrimaryButton(stringResource(Res.string.directory_add), onClick = { show(CommunitySheet.AddEntry) }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
                     if (!state.loading && state.city.isNotBlank() && state.directory.isEmpty()) EmptyState(state.directoryKind.icon, stringResource(Res.string.directory_empty))
                     if (state.directory.isNotEmpty()) ListCard {
                         state.directory.forEachIndexed { index, entry ->
