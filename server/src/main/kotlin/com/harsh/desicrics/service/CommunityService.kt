@@ -63,14 +63,18 @@ class CommunityService(
         return views(community.openPosts(city, kind, today), withResponses = false)
     }
 
-    suspend fun mine(user: FirebasePrincipal): List<LookingForPost> = views(community.postsBy(user.uid), withResponses = true)
+    /** Posts the caller runs: their own, and their teams' when they're an admin, with the replies. */
+    suspend fun mine(user: FirebasePrincipal): List<LookingForPost> {
+        val adminOf = teams.forPlayer(user.uid).filter { it.myRole == TeamRole.ADMIN }.map { it.id }
+        return views(community.postsBy(user.uid, adminOf), withResponses = true)
+    }
 
-    /** One response per person per post; the author can't answer their own. */
+    /** One response per person per post; whoever runs a post can't answer it. */
     suspend fun respond(user: FirebasePrincipal, postId: String, request: RespondRequest): LookingForPost {
         request.validate()?.let { throw ApiException(HttpStatusCode.BadRequest, it) }
         requireProfile(user)
         val post = community.post(postId)?.takeIf { it.open } ?: throw ApiException(HttpStatusCode.NotFound, "That post is closed")
-        if (post.authorUid == user.uid) throw ApiException(HttpStatusCode.BadRequest, "That's your own post")
+        if (runs(post, user)) throw ApiException(HttpStatusCode.BadRequest, "That's your own post")
         if (!community.respond(postId, ResponseRow(user.uid, request.message.trim(), request.phone.trim(), clock()))) {
             throw ApiException(HttpStatusCode.Conflict, "You've already answered this one")
         }
@@ -79,7 +83,7 @@ class CommunityService(
 
     suspend fun close(user: FirebasePrincipal, postId: String): LookingForPost {
         val post = community.post(postId) ?: throw ApiException(HttpStatusCode.NotFound, "Post not found")
-        if (post.authorUid != user.uid) throw ApiException(HttpStatusCode.Forbidden, "Only whoever posted it can close it")
+        if (!runs(post, user)) throw ApiException(HttpStatusCode.Forbidden, "Only whoever posted it can close it")
         community.close(postId)
         return view(post.copy(open = false), withResponses = true)
     }
@@ -182,6 +186,10 @@ class CommunityService(
             LookingForPost(row.id, row.kind, row.city, row.date, row.note, author, team, counts[row.id] ?: 0, row.open, responses)
         }
     }
+
+    /** The author runs a post, and so does every admin of the team it's for. */
+    private suspend fun runs(post: PostRow, user: FirebasePrincipal): Boolean =
+        post.authorUid == user.uid || post.teamId?.let { teams.get(it) }?.roleOf(user.uid) == TeamRole.ADMIN
 
     private suspend fun view(row: PostRow, withResponses: Boolean) = views(listOf(row), withResponses).single()
 

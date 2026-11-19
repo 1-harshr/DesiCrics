@@ -252,7 +252,8 @@ interface CommunityStore {
     suspend fun post(id: String): PostRow?
     /** Open posts in [city] (any case) from [fromDate] on, soonest first. */
     suspend fun openPosts(city: String, kind: LookingForKind?, fromDate: Long): List<PostRow>
-    suspend fun postsBy(uid: String): List<PostRow>
+    /** Posts [uid] wrote or that are for one of [teamIds], newest first. */
+    suspend fun postsBy(uid: String, teamIds: Collection<String> = emptyList()): List<PostRow>
     suspend fun close(id: String)
     /** False if they already responded. */
     suspend fun respond(postId: String, response: ResponseRow): Boolean

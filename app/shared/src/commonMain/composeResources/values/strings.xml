@@ -920,6 +920,7 @@
         <item quantity="one">%1$d reply</item>
         <item quantity="other">%1$d replies</item>
     </plurals>
+    <string name="looking_for_show_replies">Show or hide the replies</string>
     <string name="looking_for_respond">Reply</string>
     <string name="looking_for_respond_title">Reply to %1$s</string>
     <string name="looking_for_message">Message</string>

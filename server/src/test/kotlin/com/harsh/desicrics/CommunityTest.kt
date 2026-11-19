@@ -3,6 +3,7 @@ package com.harsh.desicrics
 import com.harsh.desicrics.api.DirectoryRequest
 import com.harsh.desicrics.api.LookingForRequest
 import com.harsh.desicrics.api.RespondRequest
+import com.harsh.desicrics.api.SetRoleRequest
 import com.harsh.desicrics.api.SquadPlayer
 import com.harsh.desicrics.api.SquadRequest
 import com.harsh.desicrics.api.TeamRequest
@@ -14,6 +15,7 @@ import com.harsh.desicrics.model.LookingForKind
 import com.harsh.desicrics.model.LookingForPost
 import com.harsh.desicrics.model.OverlayScore
 import com.harsh.desicrics.model.SavedTeam
+import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamInsights
 import com.harsh.desicrics.model.TeamRanking
 import com.harsh.desicrics.model.Wicket
@@ -24,6 +26,7 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import kotlin.test.Test
@@ -65,6 +68,29 @@ class CommunityTest {
         assertEquals(HttpStatusCode.Forbidden, client.post("/looking-for/${post.id}/close") { bearerAuth("test-dev") }.status)
         client.post("/looking-for/${post.id}/close") { bearerAuth("test-asha") }
         assertTrue(client.get("/looking-for?city=Pune") { bearerAuth("test-dev") }.body<List<LookingForPost>>().isEmpty())
+    }
+
+    @Test
+    fun aTeamsAdminsRunItsPosts() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("arjun", name = "Arjun")
+        client.setUpProfile("dev", name = "Dev")
+        val team = client.post("/teams") { bearerAuth("test-asha"); jsonBody(TeamRequest("Kothrud Kings", "Pune")) }.body<SavedTeam>()
+        client.post("/teams/join/${team.joinCode}") { bearerAuth("test-arjun") }
+        client.put("/teams/${team.id}/members/arjun") { bearerAuth("test-asha"); jsonBody(SetRoleRequest(TeamRole.ADMIN)) }
+        val post = client.post("/looking-for") {
+            bearerAuth("test-asha")
+            jsonBody(LookingForRequest(LookingForKind.OPPONENT, "Pune", tomorrow, teamId = team.id))
+        }.body<LookingForPost>()
+        client.post("/looking-for/${post.id}/responses") { bearerAuth("test-dev"); jsonBody(RespondRequest("We're in!", "9123456789")) }
+
+        // Another admin of the team sees the replies, can't answer it, and can close it.
+        val mine = client.get("/looking-for/mine") { bearerAuth("test-arjun") }.body<List<LookingForPost>>().single()
+        assertEquals("9123456789", mine.responses.single().phone)
+        assertEquals(HttpStatusCode.BadRequest, client.post("/looking-for/${post.id}/responses") { bearerAuth("test-arjun"); jsonBody(RespondRequest("Me", "9123456789")) }.status)
+        assertEquals(HttpStatusCode.OK, client.post("/looking-for/${post.id}/close") { bearerAuth("test-arjun") }.status)
+        // Someone who isn't an admin doesn't.
+        assertTrue(client.get("/looking-for/mine") { bearerAuth("test-dev") }.body<List<LookingForPost>>().isEmpty())
     }
 
     @Test

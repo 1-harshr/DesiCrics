@@ -2,7 +2,9 @@ package com.harsh.desicrics.ui.community
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.component.ErrorState
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Icon
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.component.EmptyState
@@ -84,6 +86,7 @@ fun CommunityScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var sheet by remember { mutableStateOf<CommunitySheet?>(null) }
+    var expanded by remember { mutableStateOf(setOf<String>()) }
     val space = DesiTheme.space
     val colors = DesiTheme.colors
     val close = {
@@ -109,8 +112,9 @@ fun CommunityScreen(
             when (state.tab) {
                 CommunityTab.LOOKING_FOR -> {
                     PrimaryButton(stringResource(Res.string.looking_for_post), onClick = { sheet = CommunitySheet.Post }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)
-                    // Your own posts are listed below, with their replies.
-                    val others = state.posts.filter { it.author.profileId != myId }
+                    // Posts you run (yours, and your teams' if you're an admin) are listed below, with their replies.
+                    val mine = state.myPosts.map { it.id }.toSet()
+                    val others = state.posts.filter { it.author.profileId != myId && it.id !in mine }
                     if (!state.loading && state.city.isNotBlank() && others.isEmpty()) {
                         EmptyState(DesiIcons.Search, stringResource(Res.string.looking_for_empty))
                     }
@@ -127,15 +131,16 @@ fun CommunityScreen(
                     if (state.myPosts.isNotEmpty()) {
                         SectionHeader(stringResource(Res.string.looking_for_mine), Modifier.padding(top = space.s4), icon = DesiIcons.History)
                         state.myPosts.forEach { post ->
-                            PostCard(post) {
+                            val open = post.id in expanded
+                            PostCard(post, repliesOpen = open, onToggleReplies = { expanded = if (open) expanded - post.id else expanded + post.id }) {
                                 if (post.open) {
                                     TextButton(onClick = { viewModel.close(post.id) }) {
                                         Text(stringResource(Res.string.looking_for_close), style = DesiTheme.type.button, color = colors.muted)
                                     }
                                 } else Text(stringResource(Res.string.looking_for_closed), style = DesiTheme.type.caption, color = colors.muted)
                             }
-                            // The replies, with numbers to call: only the author ever sees these.
-                            post.responses.forEach { reply ->
+                            // The replies, with numbers to call: only whoever runs the post ever sees these.
+                            if (open) post.responses.forEach { reply ->
                                 Text("${reply.from.name} · ${reply.phone}: ${reply.message}", style = DesiTheme.type.body, color = colors.ink, modifier = Modifier.padding(start = space.s4))
                             }
                         }
@@ -202,7 +207,13 @@ fun CommunityScreen(
 }
 
 @Composable
-private fun PostCard(post: LookingForPost, action: @Composable () -> Unit) {
+private fun PostCard(
+    post: LookingForPost,
+    repliesOpen: Boolean = false,
+    /** Set when the caller may read the replies; otherwise the count is plain text. */
+    onToggleReplies: (() -> Unit)? = null,
+    action: @Composable () -> Unit,
+) {
     val colors = DesiTheme.colors
     DesiCard(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
@@ -216,7 +227,15 @@ private fun PostCard(post: LookingForPost, action: @Composable () -> Unit) {
                 )
                 if (post.note.isNotBlank()) Text(post.note, style = DesiTheme.type.body, color = colors.ink)
                 if (post.responseCount > 0) {
-                    Tag(pluralStringResource(Res.plurals.looking_for_responses, post.responseCount, post.responseCount), tone = TagTone.BRAND)
+                    val count = pluralStringResource(Res.plurals.looking_for_responses, post.responseCount, post.responseCount)
+                    if (onToggleReplies != null) {
+                        Tag(
+                            count,
+                            Modifier.clip(DesiTheme.radius.full).clickable(onClickLabel = stringResource(Res.string.looking_for_show_replies), onClick = onToggleReplies),
+                            tone = TagTone.BRAND,
+                            icon = if (repliesOpen) DesiIcons.ExpandLess else DesiIcons.ExpandMore,
+                        )
+                    } else Text(count, style = DesiTheme.type.caption, color = colors.muted)
                 }
             }
         }

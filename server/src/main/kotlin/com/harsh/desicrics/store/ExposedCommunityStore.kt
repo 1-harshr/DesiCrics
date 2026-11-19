@@ -19,6 +19,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greaterEq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.lowerCase
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.insert
@@ -55,8 +56,10 @@ class ExposedCommunityStore(private val db: Database) : CommunityStore {
         LookingForPostsTable.selectAll().where { where }.orderBy(LookingForPostsTable.forDate).limit(100).map { it.toPost() }
     }
 
-    override suspend fun postsBy(uid: String): List<PostRow> = db.query {
-        LookingForPostsTable.selectAll().where { LookingForPostsTable.authorUid eq uid }
+    override suspend fun postsBy(uid: String, teamIds: Collection<String>): List<PostRow> = db.query {
+        var where: Op<Boolean> = LookingForPostsTable.authorUid eq uid
+        if (teamIds.isNotEmpty()) where = where or (LookingForPostsTable.teamId inList teamIds)
+        LookingForPostsTable.selectAll().where { where }
             .orderBy(LookingForPostsTable.createdAt, SortOrder.DESC).limit(50).map { it.toPost() }
     }
 
