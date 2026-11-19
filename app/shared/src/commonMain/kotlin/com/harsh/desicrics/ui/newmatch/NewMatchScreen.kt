@@ -259,12 +259,13 @@ fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions, initialS
     }, { scheduling = false })
     Column(Modifier.fillMaxSize().background(colors.bg).imePadding()) {
         BrandStatusBar()
+        // Pinned above the scrolling form, so the back arrow and progress stay in reach on the long details step.
+        BrandHeader(
+            title = stringResource(if (step == 2) Res.string.setup_details else TeamSide.entries[step].label),
+            subtitle = stringResource(Res.string.setup_step, step + 1),
+            onBack = back,
+        ) { StepProgress(step) }
         Column(Modifier.weight(1f).verticalScroll(androidx.compose.runtime.key(step) { rememberScrollState() })) {
-            BrandHeader(
-                title = stringResource(if (step == 2) Res.string.setup_details else TeamSide.entries[step].label),
-                subtitle = stringResource(Res.string.setup_step, step + 1),
-                onBack = back,
-            ) { StepProgress(step) }
             Column(
                 Modifier.padding(horizontal = DesiTheme.space.screen, vertical = DesiTheme.space.s6),
                 verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s8),
