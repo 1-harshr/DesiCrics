@@ -166,6 +166,7 @@ fun TeamScreen(
             action = stringResource(Res.string.teams_save_action),
             saving = state.saving,
             failed = state.actionFailed,
+            error = state.actionError,
             initialName = team.name,
             initialCity = team.city,
             onSave = { name, city -> viewModel.rename(name, city); close() },
@@ -244,8 +245,17 @@ fun TeamContent(
             )
         }
     }
-    if (confirmLeave) DesiSheet(stringResource(Res.string.team_confirm_leave, team?.name.orEmpty()), { confirmLeave = false }) {
-        GhostButton(stringResource(Res.string.team_leave), { confirmLeave = false; onLeave() }, leadingIcon = DesiIcons.Logout)
+    // Stays open until the caller is out, so a refusal shows here rather than behind the sheet.
+    var leaveTapped by remember { mutableStateOf(false) }
+    if (confirmLeave) DesiSheet(
+        stringResource(Res.string.team_confirm_leave, team?.name.orEmpty()),
+        { confirmLeave = false; leaveTapped = false },
+        stringResource(Res.string.team_leave_hand_over).takeIf { state.mustHandOver },
+    ) {
+        if (!state.mustHandOver) {
+            GhostButton(stringResource(Res.string.team_leave), { leaveTapped = true; onLeave() }, enabled = !state.saving, leadingIcon = DesiIcons.Logout)
+            if (leaveTapped && state.actionFailed) ErrorBanner(state.actionError ?: stringResource(Res.string.teams_action_failed))
+        }
     }
     when {
         team == null -> DesiScaffold(title = stringResource(Res.string.teams_title), onBack = onBack) { padding ->
@@ -315,7 +325,7 @@ fun TeamContent(
             },
         ) {
             if (state.actionFailed) {
-                ErrorBanner(stringResource(Res.string.teams_action_failed))
+                ErrorBanner(state.actionError ?: stringResource(Res.string.teams_action_failed))
             }
             if (team.code.isNotEmpty()) {
                 com.harsh.desicrics.ui.components.PublicCodeCard(
@@ -579,7 +589,7 @@ private fun AddMemberSheet(
             enabled = name.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
         )
-        if (state.actionFailed) ErrorBanner(stringResource(Res.string.teams_action_failed))
+        if (state.actionFailed) ErrorBanner(state.actionError ?: stringResource(Res.string.teams_action_failed))
         GhostButton(
             if (added == 0) stringResource(Res.string.team_add_done) else pluralStringResource(Res.plurals.team_add_done_count, added, added),
             onClick = onDismiss,

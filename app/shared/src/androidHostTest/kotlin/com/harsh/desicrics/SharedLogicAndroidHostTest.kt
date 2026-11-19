@@ -1,6 +1,7 @@
 package com.harsh.desicrics
 
 import com.harsh.desicrics.api.SquadPlayer
+import com.harsh.desicrics.data.api.ApiException
 import com.harsh.desicrics.navigation.JoinTeamRoute
 import com.harsh.desicrics.navigation.MatchRoute
 import com.harsh.desicrics.navigation.TournamentRoute
@@ -9,6 +10,9 @@ import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.ui.newmatch.NewMatchFormState
 import com.harsh.desicrics.ui.newmatch.SideForm
+import com.harsh.desicrics.ui.teams.refusal
+import io.ktor.http.HttpStatusCode
+import java.io.IOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -41,5 +45,13 @@ class SharedLogicAndroidHostTest {
         assertEquals(listOf("t1", "t2"), form.pickable(TeamSide.A, teams).map { it.id })
         val other = NewMatchFormState(teamB = SideForm("Powai XI", teamId = "t2"))
         assertEquals(listOf("t1"), other.pickable(TeamSide.A, teams).map { it.id })
+    }
+
+    @Test
+    fun onlyTheServersRefusalsAreShownAsTheyAre() {
+        assertEquals("Make someone else an admin first", ApiException(HttpStatusCode.Conflict, "Make someone else an admin first").refusal())
+        assertEquals("Only team admins can do that", ApiException(HttpStatusCode.Forbidden, "Only team admins can do that").refusal())
+        assertNull(ApiException(HttpStatusCode.InternalServerError, "Something went wrong on our side").refusal())
+        assertNull(IOException("timeout").refusal())
     }
 }

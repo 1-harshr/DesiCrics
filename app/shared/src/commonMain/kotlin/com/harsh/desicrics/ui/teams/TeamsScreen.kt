@@ -219,6 +219,8 @@ internal fun TeamDetailsSheet(
     onDismiss: () -> Unit,
     initialName: String = "",
     initialCity: String = "",
+    /** The server's reason, shown instead of the connection message when [failed]. */
+    error: String? = null,
 ) {
     var name by rememberSaveable { mutableStateOf(initialName) }
     var city by rememberSaveable { mutableStateOf(initialCity) }
@@ -235,7 +237,7 @@ internal fun TeamDetailsSheet(
             label = stringResource(Res.string.teams_city),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
         )
-        if (failed) ErrorBanner(stringResource(Res.string.teams_action_failed))
+        if (failed) ErrorBanner(error ?: stringResource(Res.string.teams_action_failed))
         PrimaryButton(action, onClick = { onSave(name, city) }, enabled = name.isNotBlank(), loading = saving, modifier = Modifier.fillMaxWidth())
     }
 }

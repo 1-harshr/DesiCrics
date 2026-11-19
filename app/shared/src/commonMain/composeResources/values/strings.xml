@@ -993,6 +993,7 @@
     <string name="show_deliveries">Show deliveries</string>
     <string name="team_settings">Team settings</string>
     <string name="team_confirm_leave">Leave %1$s?</string>
+    <string name="team_leave_hand_over">You're the team's only admin. Make someone else an admin first: tap them under Players, then Make admin.</string>
     <string name="back_to_table">Back to standings</string>
     <string name="toss_first">%1$s will bat first</string>
     <string name="stats_terms">Scoring terms</string>

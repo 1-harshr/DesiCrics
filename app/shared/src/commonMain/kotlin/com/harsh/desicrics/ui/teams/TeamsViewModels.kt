@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.data.TeamRepository
+import com.harsh.desicrics.data.api.ApiException
 import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.HeadToHead
 import com.harsh.desicrics.model.PlayerSummary
@@ -31,6 +32,12 @@ internal suspend fun <T> attempt(block: suspend () -> T): Result<T> = try {
 } catch (e: Exception) {
     Result.failure(e)
 }
+
+/**
+ * Why the server turned a request down ("Make someone else an admin first"), worth showing as it is; null
+ * when the request never got an answer or the server itself failed, where the connection message fits.
+ */
+internal fun Throwable.refusal(): String? = (this as? ApiException)?.takeIf { it.status.value in 400..499 }?.message
 
 data class TeamsUiState(
     val loading: Boolean = true,
@@ -143,6 +150,8 @@ data class TeamUiState(
     val loadFailed: Boolean = false,
     val saving: Boolean = false,
     val actionFailed: Boolean = false,
+    /** The server's reason the last action failed, if it gave one; see [refusal]. */
+    val actionError: String? = null,
     val searchQuery: String = "",
     val searchResults: List<PlayerSummary> = emptyList(),
     val searching: Boolean = false,
@@ -158,6 +167,10 @@ data class TeamUiState(
 ) {
     val myRole: TeamRole? get() = team?.roleOf(myId)
     val isAdmin: Boolean get() = myRole == TeamRole.ADMIN
+
+    /** The only admin, with others in the team: the server won't let them leave until someone else is one. */
+    val mustHandOver: Boolean
+        get() = isAdmin && team != null && team.members.size > 1 && team.members.count { it.role == TeamRole.ADMIN } == 1
 }
 
 class TeamViewModel(
@@ -230,8 +243,8 @@ class TeamViewModel(
     private fun queueAdd(call: suspend () -> SavedTeam) = viewModelScope.launch {
         adds.withLock {
             attempt { call() }.fold(
-                onSuccess = { team -> _state.update { it.copy(team = team, actionFailed = false) } },
-                onFailure = { _state.update { it.copy(actionFailed = true) } },
+                onSuccess = { team -> _state.update { it.copy(team = team, actionFailed = false, actionError = null) } },
+                onFailure = { e -> _state.update { it.copy(actionFailed = true, actionError = e.refusal()) } },
             )
         }
     }
@@ -259,10 +272,10 @@ class TeamViewModel(
     fun leave(onLeft: () -> Unit) {
         val me = myId ?: return
         viewModelScope.launch {
-            _state.update { it.copy(saving = true, actionFailed = false) }
-            val left = attempt { repository.remove(teamId, me) }.isSuccess
-            _state.update { it.copy(saving = false, actionFailed = !left) }
-            if (left) onLeft()
+            _state.update { it.copy(saving = true, actionFailed = false, actionError = null) }
+            val left = attempt { repository.remove(teamId, me) }
+            _state.update { it.copy(saving = false, actionFailed = left.isFailure, actionError = left.exceptionOrNull()?.refusal()) }
+            if (left.isSuccess) onLeft()
         }
     }
 
@@ -283,15 +296,15 @@ class TeamViewModel(
         }
     }
 
-    fun clearError() = _state.update { it.copy(actionFailed = false) }
+    fun clearError() = _state.update { it.copy(actionFailed = false, actionError = null) }
 
     private fun act(call: suspend () -> SavedTeam) {
         if (_state.value.saving) return
-        _state.update { it.copy(saving = true, actionFailed = false) }
+        _state.update { it.copy(saving = true, actionFailed = false, actionError = null) }
         viewModelScope.launch {
             attempt { call() }.fold(
                 onSuccess = { show(it) },
-                onFailure = { _state.update { it.copy(saving = false, actionFailed = true) } },
+                onFailure = { e -> _state.update { it.copy(saving = false, actionFailed = true, actionError = e.refusal()) } },
             )
         }
     }
