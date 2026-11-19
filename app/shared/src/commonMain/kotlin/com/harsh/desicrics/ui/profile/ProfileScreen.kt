@@ -35,7 +35,6 @@ import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.DesiTextField
 import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.PrimaryButton
-import com.harsh.desicrics.designsystem.component.SectionLabel
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.BattingStyle
@@ -258,7 +257,7 @@ private fun SupportSheet(state: ProfileUiState, onSend: (SupportCategory, String
             PrimaryButton(stringResource(Res.string.rules_done), onClick = onDismiss, modifier = Modifier.fillMaxWidth())
             return@DesiSheet
         }
-        SectionLabel(stringResource(Res.string.profile_support_category))
+        SectionHeader(stringResource(Res.string.profile_support_category))
         ChoiceChips(SupportCategory.entries, selected = category, label = { stringResource(it.label) }, onSelect = { category = it })
         DesiTextField(
             value = message,

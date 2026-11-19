@@ -1,4 +1,6 @@
 package com.harsh.desicrics.designsystem.component
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.layout.layout
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -115,6 +117,7 @@ fun HeroScaffold(
                     Modifier
                         .fillMaxWidth()
                         .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+                        .padding(bottom = LocalNavBarClearance.current)
                         .padding(horizontal = space.screen, vertical = space.s5),
                     verticalArrangement = Arrangement.spacedBy(space.s5),
                     content = content,
@@ -485,9 +488,19 @@ fun <T> FilterRow(
     icon: (T) -> DrawableResource? = { null },
     /** Drawn instead of an icon, for marks that aren't icons (the live dot). */
     leading: (T) -> (@Composable () -> Unit)? = { null },
+    /** The screen margin the row sits in; it scrolls out to the screen edge through it rather than stopping short. */
+    bleed: Dp = DesiTheme.space.screen,
 ) {
     val colors = DesiTheme.colors
-    androidx.compose.foundation.lazy.LazyRow(modifier, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+    androidx.compose.foundation.lazy.LazyRow(
+        modifier.layout { measurable, constraints ->
+            val extra = bleed.roundToPx() * 2
+            val placeable = measurable.measure(constraints.copy(minWidth = constraints.minWidth + extra, maxWidth = constraints.maxWidth + extra))
+            layout(placeable.width - extra, placeable.height) { placeable.place(-bleed.roundToPx(), 0) }
+        },
+        contentPadding = PaddingValues(horizontal = bleed),
+        horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
+    ) {
         items(options.size) { index ->
             val option = options[index]
             val isSelected = option == selected

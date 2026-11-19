@@ -293,7 +293,8 @@ private fun PhoneForm(
     )
     Feedback(state)
 
-    OtherWays {
+    // Only when there is another way: an empty heading reads as something failed to load.
+    if (providers.isNotEmpty()) OtherWays {
         providers.forEach { provider ->
             TonalButton(
                 text = stringResource(Res.string.signin_continue_with, provider.displayName),

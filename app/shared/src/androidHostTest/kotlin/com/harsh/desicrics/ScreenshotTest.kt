@@ -352,4 +352,43 @@ class ScreenshotTest {
             )
         }
     }
+
+    // Audit: screens with no other screenshot.
+
+    @Test
+    fun auditSignIn() = shoot("audit_sign_in") {
+        com.harsh.desicrics.ui.signin.SignInContent(com.harsh.desicrics.ui.signin.SignInUiState(), emptyList(), {}, {}, {}, {})
+    }
+
+    @Test
+    fun auditOnboarding() = shoot("audit_onboarding") {
+        com.harsh.desicrics.ui.profile.EditProfileContent(com.harsh.desicrics.ui.profile.ProfileFormState(loading = false), isOnboarding = true, onUpdate = {}, onSave = {}, onBack = null)
+    }
+
+    @Test
+    fun auditFixtureStart() = shoot("audit_fixture_start") {
+        com.harsh.desicrics.ui.match.FixturePending(
+            Match("f", "me", 0, strikers, royals, 5, TeamSide.A, TossDecision.BAT, status = MatchStatus.SCHEDULED),
+            com.harsh.desicrics.ui.match.FixtureSetup(canStart = true, teamA = null, teamB = null), { _, _, _, _ -> }, {},
+        )
+    }
+
+    @Test
+    fun auditScorecard() = shoot("audit_scorecard") {
+        val state = match(balls).state!!
+        Column(Modifier.background(DesiTheme.colors.bg).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            com.harsh.desicrics.ui.match.InningsScorecard(state.current)
+            com.harsh.desicrics.ui.match.InningsOvers(state.current, showTitle = false)
+        }
+    }
+
+    @Test
+    fun auditTournamentTabs() = shoot("audit_tournament_teams") {
+        val teams = listOf("Andheri Strikers", "Powai XI", "Bandra Blasters", "Juhu Kings").mapIndexed { i, n -> TournamentTeam("t$i", n, i + 1) }
+        TournamentContent(
+            TournamentUiState(myId = "me", loading = false, details = TournamentDetails(Tournament("x", "Andheri Premier League", "Mumbai", TournamentFormat.ROUND_ROBIN, 8, createdBy = "me", teams = teams))),
+            {}, {}, {}, {}, {}, {}, { _, _ -> },
+            initialTab = TournamentTab.TEAMS,
+        )
+    }
 }

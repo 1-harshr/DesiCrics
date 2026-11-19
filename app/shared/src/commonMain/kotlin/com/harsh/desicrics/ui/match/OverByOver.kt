@@ -1,4 +1,9 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.designsystem.component.EmptyState
+import org.jetbrains.compose.resources.painterResource
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.*
@@ -19,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.component.OverStrip
-import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
@@ -42,9 +47,9 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun InningsOvers(innings: InningsState, showTitle: Boolean) {
     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
-        if (showTitle) SectionLabel(stringResource(Res.string.scorecard_innings, innings.battingTeam.name))
+        if (showTitle) SectionHeader(stringResource(Res.string.scorecard_innings, innings.battingTeam.name), icon = DesiIcons.Bat)
         if (innings.overs.isEmpty()) {
-            Text(stringResource(Res.string.overs_empty), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+            EmptyState(DesiIcons.Ball, stringResource(Res.string.overs_empty))
         }
         innings.overs.asReversed().forEach { key(innings.number, it.number) { OverCard(it, it.number == innings.overs.last().number) } }
     }
@@ -72,7 +77,19 @@ private fun OverCard(over: OverSummary, latest: Boolean) {
             }
         }
         OverStrip(over.balls.map { ballFor(it.delivery) })
-        Text(stringResource(if (expanded) Res.string.hide_deliveries else Res.string.show_deliveries), style = DesiTheme.type.caption)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+                stringResource(if (expanded) Res.string.hide_deliveries else Res.string.show_deliveries),
+                style = DesiTheme.type.button,
+                color = DesiTheme.colors.brand,
+            )
+            Icon(
+                painterResource(if (expanded) DesiIcons.ExpandLess else DesiIcons.ExpandMore),
+                null,
+                tint = DesiTheme.colors.brand,
+                modifier = Modifier.size(DesiTheme.size.iconSmall),
+            )
+        }
         if (!expanded) return@DesiCard
         HorizontalDivider(color = colors.line)
         // Newest ball first, like the over list.

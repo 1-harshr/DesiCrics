@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.social
+import com.harsh.desicrics.ui.text.relativeTime
 import com.harsh.desicrics.designsystem.component.ErrorState
 
 import androidx.compose.foundation.background
@@ -200,7 +201,7 @@ private fun NotificationRow(notification: Notification, onClick: () -> Unit) {
         IconTile(icon, tint = tint, container = tint.copy(alpha = 0.12f))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(notificationText(notification), style = if (unread) DesiTheme.type.bodyStrong else DesiTheme.type.body, color = colors.ink)
-            Text(formatDayAndTime(notification.createdAt), style = DesiTheme.type.caption, color = colors.muted)
+            Text(relativeTime(notification.createdAt), style = DesiTheme.type.caption, color = colors.muted)
         }
         if (unread) Box(Modifier.padding(top = 6.dp).size(8.dp).clip(DesiTheme.radius.full).background(colors.brand))
     }

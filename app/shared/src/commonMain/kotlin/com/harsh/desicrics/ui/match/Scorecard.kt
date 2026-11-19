@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.designsystem.icon.DesiIcons
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,7 +20,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiCard
-import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.WagonWheel
 import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.Player
@@ -116,7 +117,7 @@ internal fun MatchMvp(state: MatchState) {
     val players = (state.match.teamA.players + state.match.teamB.players).associateBy { it.id }
     val ranked = points.entries.sortedByDescending { it.value }.take(5).mapNotNull { (id, tenths) -> players[id]?.let { it to tenths } }
     DesiCard(Modifier.fillMaxWidth()) {
-        SectionLabel(stringResource(Res.string.scorecard_mvp))
+        SectionHeader(stringResource(Res.string.scorecard_mvp), icon = DesiIcons.Star)
         if (state.isComplete) {
             ranked.firstOrNull()?.let { (best, _) ->
                 Text(stringResource(Res.string.scorecard_player_of_the_match, best.name), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.brand)
@@ -139,7 +140,7 @@ internal fun InningsWagonWheel(innings: InningsState) {
     val batters = innings.batters.filter { innings.zoneRuns(it.player.id).isNotEmpty() }.map { it.player }
     val runs = innings.zoneRuns(batterId)
     DesiCard(Modifier.fillMaxWidth()) {
-        SectionLabel(stringResource(Res.string.scorecard_wagon_wheel))
+        SectionHeader(stringResource(Res.string.scorecard_wagon_wheel), icon = DesiIcons.Stadium)
         ChoiceChips(
             options = listOf<Player?>(null) + batters,
             selected = batters.firstOrNull { it.id == batterId },

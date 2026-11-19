@@ -249,7 +249,7 @@ fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions, initialS
                             ListRow(
                                 title = state.scheduledAt?.let { com.harsh.desicrics.ui.text.formatDayAndTime(it) } ?: stringResource(Res.string.setup_now),
                                 subtitle = stringResource(if (state.scheduledAt == null) Res.string.setup_later_hint else Res.string.setup_change_time),
-                                leading = { IconTile(if (state.scheduledAt == null) DesiIcons.Bolt else DesiIcons.Calendar) },
+                                leading = { IconTile(if (state.scheduledAt == null) DesiIcons.Play else DesiIcons.Calendar) },
                                 trailing = if (state.scheduledAt != null) ({
                                     androidx.compose.material3.IconButton({ actions.onUpdate { it.copy(scheduledAt = null) } }) {
                                         Icon(painterResource(DesiIcons.Close), stringResource(Res.string.setup_now), tint = colors.muted)
@@ -281,7 +281,7 @@ fun NewMatchContent(state: NewMatchFormState, actions: NewMatchActions, initialS
         }
         StartBar(state, if (step < 2) Res.string.setup_continue else if (state.scheduledAt == null) Res.string.setup_now else Res.string.setup_schedule,
             step == 2 || state.name(TeamSide.entries[step]).isNotBlank(),
-            if (step < 2) DesiIcons.Forward else if (state.scheduledAt == null) DesiIcons.Bolt else DesiIcons.Calendar,
+            if (step < 2) DesiIcons.Forward else if (state.scheduledAt == null) DesiIcons.Play else DesiIcons.Calendar,
         ) { if (step < 2) step++ else actions.onStart() }
     }
 }

@@ -150,7 +150,7 @@ fun TournamentScreen(
     when (val current = sheet) {
         null -> Unit
         TournamentSheet.EnterTeam -> DesiSheet(stringResource(Res.string.tournament_add_team), close) {
-            if (state.registrable.isEmpty()) Text(stringResource(Res.string.new_match_no_teams), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+            if (state.registrable.isEmpty()) EmptyState(DesiIcons.Shield, stringResource(Res.string.new_match_no_teams))
             state.registrable.forEach { team -> TeamRow(team, onClick = { viewModel.enterTeam(team.id); close() }) }
         }
         TournamentSheet.AddOrganiser -> DesiSheet(stringResource(Res.string.tournament_add_organiser), close) {
@@ -221,7 +221,8 @@ internal fun TournamentContent(
             details.championId?.let { id ->
                 HeroChips(listOf(HeroChip(stringResource(Res.string.tournament_champion, t.teams.firstOrNull { it.teamId == id }?.name.orEmpty()), DesiIcons.TrophyFilled)))
             }
-            HeroStats(
+            // Before the start there are no fixtures to count, so the strip would only show zeros.
+            if (t.started) HeroStats(
                 listOf(
                     StatItem("${t.confirmedTeams.size}", stringResource(Res.string.tournament_tab_teams)),
                     StatItem("${details.fixtures.size}", stringResource(Res.string.tournament_tab_fixtures)),
@@ -340,6 +341,10 @@ private fun PointsTable(table: List<PointsRow>, group: Int?, advance: Int, selec
     val colors = DesiTheme.colors
     Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
         if (group != null) SectionHeader(stringResource(Res.string.tournament_group, groupName(group)), icon = DesiIcons.Leaderboard)
+        if (table.isEmpty()) {
+            EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.tournament_no_fixtures))
+            return@Column
+        }
         ListCard {
             TableRow(
                 null,
@@ -355,7 +360,6 @@ private fun PointsTable(table: List<PointsRow>, group: Int?, advance: Int, selec
                     qualifies = index < advance,
                 ) { select(row.teamId) }
             }
-            if (table.isEmpty()) Text(stringResource(Res.string.tournament_no_fixtures), style = DesiTheme.type.body, color = colors.muted, modifier = Modifier.padding(DesiTheme.space.s4))
         }
         if (advance > 0 && table.size > advance) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
@@ -416,7 +420,7 @@ private fun ColumnScope.Teams(
     if (state.isOrganiser) {
         GhostButton(stringResource(Res.string.tournament_add_organiser), onClick = { onSheet(TournamentSheet.AddOrganiser) }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Whistle)
         if (!t.started) {
-            PrimaryButton(stringResource(Res.string.tournament_start), onClick = onStart, loading = state.saving, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Bolt)
+            PrimaryButton(stringResource(Res.string.tournament_start), onClick = onStart, loading = state.saving, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Play)
             Text(stringResource(Res.string.tournament_start_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         }
     }
@@ -452,7 +456,7 @@ private fun ColumnScope.Stats(stats: KeyStats, onOpenPlayer: (String) -> Unit) {
         EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.tournament_no_stats))
         return
     }
-    val icons = listOf(DesiIcons.Bat, DesiIcons.Ball, DesiIcons.Bolt)
+    val icons = listOf(DesiIcons.Bat, DesiIcons.Ball, DesiIcons.Six)
     lists.forEachIndexed { i, (title, leaders) ->
         if (leaders.isNotEmpty()) LeaderCard(title, leaders, onOpenPlayer, icons[i])
     }

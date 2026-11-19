@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.newmatch
+import com.harsh.desicrics.designsystem.icon.DesiIcons
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,7 @@ import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.NumberStepper
 import com.harsh.desicrics.designsystem.component.PrimaryButton
-import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.MatchRules
@@ -39,7 +40,7 @@ internal enum class RulesPreset(val rules: MatchRules?, val label: StringResourc
 @Composable
 internal fun RulesSheet(rules: MatchRules, oversPerInnings: Int, onChange: (MatchRules) -> Unit, onDismiss: () -> Unit) {
     DesiSheet(stringResource(Res.string.rules_title), onDismiss, stringResource(Res.string.rules_modes_hint)) {
-        SectionLabel(stringResource(Res.string.rules_section_batting))
+        SectionHeader(stringResource(Res.string.rules_section_batting), icon = DesiIcons.Bat)
         Rule(Res.string.rules_last_man, Res.string.rules_last_man_hint) {
             SegmentedControl(
                 options = listOf(false, true),
@@ -73,7 +74,7 @@ internal fun RulesSheet(rules: MatchRules, oversPerInnings: Int, onChange: (Matc
             }
         }
 
-        SectionLabel(stringResource(Res.string.rules_section_bowling), Modifier.padding(top = DesiTheme.space.s4))
+        SectionHeader(stringResource(Res.string.rules_section_bowling), Modifier.padding(top = DesiTheme.space.s4), icon = DesiIcons.Ball)
         Rule(Res.string.rules_over_limit, Res.string.rules_over_limit_hint) {
             ModeControl(rules.bowlerOverLimitMode) { onChange(rules.copy(bowlerOverLimitMode = it)) }
             if (rules.bowlerOverLimitMode != RuleMode.OFF) {
@@ -99,7 +100,7 @@ internal fun RulesSheet(rules: MatchRules, oversPerInnings: Int, onChange: (Matc
             ModeControl(rules.consecutiveOversMode) { onChange(rules.copy(consecutiveOversMode = it)) }
         }
 
-        SectionLabel(stringResource(Res.string.rules_section_extras), Modifier.padding(top = DesiTheme.space.s4))
+        SectionHeader(stringResource(Res.string.rules_section_extras), Modifier.padding(top = DesiTheme.space.s4), icon = DesiIcons.Info)
         ExtraRule(
             title = Res.string.rules_wide,
             penalty = rules.widePenalty,
@@ -118,7 +119,7 @@ internal fun RulesSheet(rules: MatchRules, oversPerInnings: Int, onChange: (Matc
             ModeControl(rules.freeHitMode) { onChange(rules.copy(freeHitMode = it)) }
         }
 
-        SectionLabel(stringResource(Res.string.rules_section_scoring), Modifier.padding(top = DesiTheme.space.s4))
+        SectionHeader(stringResource(Res.string.rules_section_scoring), Modifier.padding(top = DesiTheme.space.s4), icon = DesiIcons.Edit)
         Rule(Res.string.rules_wagon_wheel, Res.string.rules_wagon_wheel_hint) {
             SegmentedControl(
                 options = listOf(false, true),

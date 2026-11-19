@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.designsystem.component.EmptyState
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import androidx.compose.foundation.background
@@ -37,7 +38,7 @@ import com.harsh.desicrics.designsystem.component.PadKey
 import com.harsh.desicrics.designsystem.component.PlayerRow
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.RunPad
-import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.component.WagonWheel
 import com.harsh.desicrics.designsystem.icon.DesiIcons
@@ -71,7 +72,7 @@ internal fun PlayerSheet(
 ) {
     DesiSheet(title, onDismiss) {
         if (players.isEmpty()) {
-            Text(stringResource(Res.string.scoring_no_players), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+            EmptyState(DesiIcons.Teams, stringResource(Res.string.scoring_no_players))
         }
         Column(Modifier.fillMaxWidth().clip(DesiTheme.radius.md)) {
             players.forEach { player ->
@@ -183,7 +184,7 @@ internal fun WicketSheet(
     var fielder by remember { mutableStateOf<Player?>(null) }
 
     DesiSheet(stringResource(Res.string.scoring_wicket_title), onDismiss) {
-        SectionLabel(stringResource(Res.string.scoring_wicket_how))
+        SectionHeader(stringResource(Res.string.scoring_wicket_how))
         ChoiceChips(
             options = DismissalKind.entries,
             selected = kind,
@@ -194,16 +195,16 @@ internal fun WicketSheet(
             },
         )
         if (!kind.strikerOnly && nonStriker != null) {
-            SectionLabel(stringResource(Res.string.scoring_wicket_who), Modifier.padding(top = DesiTheme.space.s2))
+            SectionHeader(stringResource(Res.string.scoring_wicket_who), Modifier.padding(top = DesiTheme.space.s2))
             SegmentedControl(listOf(striker, nonStriker), selected = out, label = { it.name }, onSelect = { out = it })
         }
         if (kind.allowsRuns) {
-            SectionLabel(stringResource(Res.string.scoring_wicket_runs), Modifier.padding(top = DesiTheme.space.s2))
+            SectionHeader(stringResource(Res.string.scoring_wicket_runs), Modifier.padding(top = DesiTheme.space.s2), icon = DesiIcons.Swap)
             ChoiceChips(listOf(0, 1, 2, 3), selected = runs, label = { "$it" }, onSelect = { runs = it })
         }
         if (kind.hasFielder) {
             val label = if (kind == DismissalKind.STUMPED) Res.string.scoring_wicket_keeper else Res.string.scoring_wicket_fielder
-            SectionLabel(stringResource(label), Modifier.padding(top = DesiTheme.space.s2))
+            SectionHeader(stringResource(label), Modifier.padding(top = DesiTheme.space.s2))
             // Tap the selected fielder again to clear it.
             ChoiceChips(fielders, selected = fielder, label = { it.name }, onSelect = { fielder = if (fielder == it) null else it })
         }
@@ -330,7 +331,7 @@ internal fun PenaltySheet(
     var toBatting by remember { mutableStateOf(true) }
     var runs by remember { mutableStateOf(5) }
     DesiSheet(stringResource(Res.string.match_penalty), onDismiss, stringResource(Res.string.match_penalty_hint)) {
-        SectionLabel(stringResource(Res.string.match_penalty_to))
+        SectionHeader(stringResource(Res.string.match_penalty_to))
         SegmentedControl(listOf(true, false), selected = toBatting, label = { if (it) battingTeam else fieldingTeam }, onSelect = { toBatting = it })
         if (!toBatting) {
             Text(stringResource(Res.string.match_penalty_fielding_note), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)

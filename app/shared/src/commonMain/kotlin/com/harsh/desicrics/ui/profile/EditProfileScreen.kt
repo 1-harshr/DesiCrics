@@ -41,7 +41,7 @@ import com.harsh.desicrics.designsystem.component.OptionCard
 import com.harsh.desicrics.designsystem.component.PhoneNumberField
 import com.harsh.desicrics.designsystem.component.PlayerCard
 import com.harsh.desicrics.designsystem.component.PrimaryButton
-import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.component.TonalButton
 import com.harsh.desicrics.designsystem.icon.DesiIcons
@@ -206,10 +206,10 @@ private fun AboutSection(state: ProfileFormState, onUpdate: ((ProfileFormState) 
 @Composable
 private fun GameSection(state: ProfileFormState, onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit) {
     Section(Res.string.profile_section_game) {
-        SectionLabel(stringResource(Res.string.profile_role_section))
+        SectionHeader(stringResource(Res.string.profile_role_section), icon = DesiIcons.Person)
         RoleGrid(state.role) { role -> onUpdate { it.copy(role = role) } }
 
-        SectionLabel(stringResource(Res.string.profile_batting_section), Modifier.padding(top = DesiTheme.space.s2))
+        SectionHeader(stringResource(Res.string.profile_batting_section), Modifier.padding(top = DesiTheme.space.s2), icon = DesiIcons.Bat)
         SegmentedControl(
             options = BattingStyle.entries,
             selected = state.battingStyle,
@@ -217,7 +217,7 @@ private fun GameSection(state: ProfileFormState, onUpdate: ((ProfileFormState) -
             onSelect = { style -> onUpdate { it.copy(battingStyle = style) } },
         )
 
-        SectionLabel(stringResource(Res.string.profile_bowling_section), Modifier.padding(top = DesiTheme.space.s2))
+        SectionHeader(stringResource(Res.string.profile_bowling_section), Modifier.padding(top = DesiTheme.space.s2), icon = DesiIcons.Ball)
         BowlingPicker(state.bowlingStyle) { style -> onUpdate { it.copy(bowlingStyle = style) } }
     }
 }

@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.designsystem.component.HeroChips
+import com.harsh.desicrics.designsystem.component.HeroChip
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -159,38 +161,7 @@ internal fun EndedBeforePlay(match: Match, result: MatchResult, canUndo: Boolean
     val colors = DesiTheme.colors
     val space = DesiTheme.space
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Column(
-            Modifier.fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
-                .heroBackground().padding(start = space.screen, end = space.screen, bottom = space.s6),
-            verticalArrangement = Arrangement.spacedBy(space.s4),
-        ) {
-            IconButton(onClick = onBack, modifier = Modifier.padding(top = space.s1)) {
-                Icon(painterResource(DesiIcons.Back), stringResource(Res.string.common_back), tint = colors.onBrandStrong)
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                TeamSide.entries.forEachIndexed { index, side ->
-                    if (index == 1) Text(stringResource(Res.string.setup_vs).uppercase(), style = DesiTheme.type.scoreMd, color = colors.onBrandStrong.copy(alpha = 0.6f))
-                    val team = match.team(side)
-                    val won = result.winner == side
-                    Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(space.s2)) {
-                        Box(contentAlignment = Alignment.BottomEnd) {
-                            Avatar(team.name, size = 64)
-                            if (won) {
-                                Box(Modifier.size(26.dp).clip(DesiTheme.radius.full).background(colors.event.extra), contentAlignment = Alignment.Center) {
-                                    Icon(painterResource(DesiIcons.TrophyFilled), null, tint = colors.brandStrong, modifier = Modifier.size(16.dp))
-                                }
-                            }
-                        }
-                        Text(
-                            team.name,
-                            style = DesiTheme.type.bodyStrong,
-                            color = if (result.winner != null && !won) colors.onBrandStrong.copy(alpha = 0.6f) else colors.onBrandStrong,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-            }
-        }
+        MatchupHero(match, onBack, winner = result.winner)
         Column(Modifier.padding(space.screen).padding(top = space.s2), verticalArrangement = Arrangement.spacedBy(space.s4)) {
             Row(
                 Modifier.fillMaxWidth().clip(DesiTheme.radius.md)
@@ -209,6 +180,50 @@ internal fun EndedBeforePlay(match: Match, result: MatchResult, canUndo: Boolean
             )
             if (canUndo) GhostButton(stringResource(Res.string.end_reopen_fixture), onUndo, Modifier.fillMaxWidth(), leadingIcon = DesiIcons.History)
         }
+    }
+}
+
+/**
+ * Two teams facing each other on the green, for a match page without a scoreboard (a fixture waiting to start,
+ * or one that ended before a ball). [chips] are facts like the stage and the date. [winner] gets a trophy and
+ * the other side dims.
+ */
+@Composable
+internal fun MatchupHero(match: Match, onBack: () -> Unit, winner: TeamSide? = null, chips: List<HeroChip> = emptyList()) {
+    val colors = DesiTheme.colors
+    val space = DesiTheme.space
+    Column(
+        Modifier.fillMaxWidth().clip(androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
+            .heroBackground().padding(start = space.screen, end = space.screen, bottom = space.s6),
+        verticalArrangement = Arrangement.spacedBy(space.s4),
+    ) {
+        IconButton(onClick = onBack, modifier = Modifier.padding(top = space.s1)) {
+            Icon(painterResource(DesiIcons.Back), stringResource(Res.string.common_back), tint = colors.onBrandStrong)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TeamSide.entries.forEachIndexed { index, side ->
+                if (index == 1) Text(stringResource(Res.string.setup_vs).uppercase(), style = DesiTheme.type.scoreMd, color = colors.onBrandStrong.copy(alpha = 0.6f))
+                val team = match.team(side)
+                val won = winner == side
+                Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(space.s2)) {
+                    Box(contentAlignment = Alignment.BottomEnd) {
+                        Avatar(team.name, size = 64)
+                        if (won) {
+                            Box(Modifier.size(26.dp).clip(DesiTheme.radius.full).background(colors.event.extra), contentAlignment = Alignment.Center) {
+                                Icon(painterResource(DesiIcons.TrophyFilled), null, tint = colors.brandStrong, modifier = Modifier.size(16.dp))
+                            }
+                        }
+                    }
+                    Text(
+                        team.name,
+                        style = DesiTheme.type.bodyStrong,
+                        color = if (winner != null && !won) colors.onBrandStrong.copy(alpha = 0.6f) else colors.onBrandStrong,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        }
+        if (chips.isNotEmpty()) HeroChips(chips, Modifier.align(Alignment.CenterHorizontally))
     }
 }
 

@@ -1,4 +1,8 @@
 package com.harsh.desicrics.ui.home
+import com.harsh.desicrics.designsystem.component.LocalNavBarClearance
+import com.harsh.desicrics.ui.text.dayLabel
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.ActionTile
 import com.harsh.desicrics.ui.match.resultIcon
 import com.harsh.desicrics.ui.text.resultText
 import com.harsh.desicrics.designsystem.component.CardResult
@@ -57,7 +61,7 @@ import com.harsh.desicrics.designsystem.component.DesiTextField
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.LiveBadge
 import com.harsh.desicrics.designsystem.component.MatchCard
-import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.TeamLine
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.icon.DesiIllustrations
@@ -171,7 +175,7 @@ fun HomeContent(
 
     LazyColumn(
         Modifier.fillMaxSize().background(DesiTheme.colors.bg),
-        contentPadding = PaddingValues(start = space.screen, end = space.screen, bottom = space.s8),
+        contentPadding = PaddingValues(start = space.screen, end = space.screen, bottom = space.s8 + LocalNavBarClearance.current),
         verticalArrangement = Arrangement.spacedBy(space.s4),
     ) {
         item { Greeting(playerName, playerPhoto, feed.unreadNotifications, onProfile, onSearch, onNotifications) }
@@ -190,28 +194,11 @@ fun HomeContent(
         feedSection(Res.string.home_section_mine, feed.mine, currentUid, onOpenMatch, first = true)
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                HomeDestination(stringResource(Res.string.teams_title), DesiIcons.Teams, onTeams, Modifier.weight(1f))
-                HomeDestination(stringResource(Res.string.home_take_over), DesiIcons.Sync, onTakeOver, Modifier.weight(1f))
+                ActionTile(DesiIcons.Shield, stringResource(Res.string.teams_title), onTeams, Modifier.weight(1f))
+                ActionTile(DesiIcons.Swap, stringResource(Res.string.home_take_over), onTakeOver, Modifier.weight(1f))
             }
         }
         item { Box(Modifier.windowInsetsPadding(WindowInsets.navigationBars)) }
-    }
-}
-
-@Composable
-private fun HomeDestination(text: String, icon: DrawableResource, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val colors = DesiTheme.colors
-    Row(
-        modifier
-            .clip(DesiTheme.radius.md)
-            .background(colors.surface)
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(DesiTheme.space.s4),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
-    ) {
-        Icon(painterResource(icon), contentDescription = null, tint = colors.brand, modifier = Modifier.size(DesiTheme.size.icon))
-        Text(text, style = DesiTheme.type.bodyStrong, color = colors.ink, maxLines = 2)
     }
 }
 
@@ -224,7 +211,7 @@ private fun LazyListScope.feedSection(
 ) {
     if (matches.isEmpty()) return
     item(key = "section-$title") {
-        SectionLabel(stringResource(title), if (first) Modifier else Modifier.padding(top = DesiTheme.space.s4))
+        SectionHeader(stringResource(title), if (first) Modifier else Modifier.padding(top = DesiTheme.space.s4))
     }
     items(matches, key = { "$title-${it.id}" }) { HomeMatchCard(it, isMine = it.scorerUid == currentUid, onClick = { onOpenMatch(it.id) }) }
 }
@@ -319,19 +306,7 @@ private fun StartMatchCard(onClick: () -> Unit, modifier: Modifier = Modifier) {
 
 @Composable
 private fun EmptyMatches() {
-    val colors = DesiTheme.colors
-    Column(
-        Modifier.fillMaxWidth().clip(DesiTheme.radius.lg).background(colors.surface)
-            .padding(vertical = DesiTheme.space.s6, horizontal = DesiTheme.space.s5),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
-    ) {
-        Box(Modifier.size(56.dp).clip(DesiTheme.radius.full).background(colors.brandSoft), contentAlignment = Alignment.Center) {
-            Icon(painterResource(DesiIcons.Cricket), contentDescription = null, tint = colors.brand)
-        }
-        Text(stringResource(Res.string.home_empty_title), style = DesiTheme.type.titleMd, color = colors.ink, modifier = Modifier.padding(top = DesiTheme.space.s2))
-        Text(stringResource(Res.string.home_empty_body), style = DesiTheme.type.body, color = colors.muted, textAlign = TextAlign.Center)
-    }
+    EmptyState(DesiIcons.Cricket, stringResource(Res.string.home_empty_title), body = stringResource(Res.string.home_empty_body))
 }
 
 /** A match in the feed: each team's score in batting order, with the chase, toss or result underneath. */
@@ -354,7 +329,8 @@ internal fun HomeMatchCard(match: Match, isMine: Boolean, onClick: () -> Unit) {
         teams = teams,
         status = {
             when {
-                match.status == MatchStatus.COMPLETED -> StatusLabel(stringResource(Res.string.home_status_result))
+                // The strip at the foot already says how it ended; up top, when it was played.
+                match.status == MatchStatus.COMPLETED -> StatusLabel(dayLabel(match.createdAt))
                 match.status == MatchStatus.SCHEDULED -> StatusLabel(stringResource(Res.string.home_section_upcoming))
                 match.innings.isEmpty() -> StatusLabel(stringResource(Res.string.home_status_not_started))
                 else -> LiveBadge()

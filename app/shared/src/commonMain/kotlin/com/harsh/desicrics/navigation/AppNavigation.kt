@@ -1,8 +1,13 @@
 package com.harsh.desicrics.navigation
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.WindowInsets
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import com.harsh.desicrics.designsystem.component.DesiNavigationBar
+import com.harsh.desicrics.designsystem.component.LocalNavBarClearance
+import com.harsh.desicrics.designsystem.component.NavBarClearance
 import com.harsh.desicrics.designsystem.component.NavTab
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -10,7 +15,9 @@ import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.resources.*
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.ui.home.FeedScreen
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -118,9 +125,14 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
         onLinkHandled()
     }
 
-    Column(Modifier.fillMaxSize()) {
+    // The tab bar floats over a tab's root screen, above the system navigation bar. The screen pads for
+    // neither on its own: it leaves room for both through LocalNavBarClearance.
+    val isRoot = backStack.size == 1
+    val systemBar = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    Box(Modifier.fillMaxSize()) {
+    CompositionLocalProvider(LocalNavBarClearance provides if (isRoot) NavBarClearance + systemBar else 0.dp) {
     NavDisplay(
-        modifier = Modifier.weight(1f),
+        modifier = Modifier.fillMaxSize().then(if (isRoot) Modifier.consumeWindowInsets(WindowInsets.navigationBars) else Modifier),
         backStack = backStack,
         onBack = back,
         entryDecorators = listOf(
@@ -183,7 +195,8 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
                 )
             }
             entry<TournamentsRoute> {
-                TournamentsScreen(onOpen = { backStack.add(TournamentRoute(it)) }, onBack = back)
+                // The Tournaments tab's root, like Feed and Me, has no back arrow.
+                TournamentsScreen(onOpen = { backStack.add(TournamentRoute(it)) }, onBack = if (backStack.size > 1) back else null)
             }
             entry<TournamentRoute> { route ->
                 TournamentScreen(
@@ -229,7 +242,8 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
             }
         },
     )
-    if (backStack.size == 1) {
+    }
+    if (isRoot) {
         DesiNavigationBar(
             tabs = listOf(
                 NavTab(stringResource(Res.string.tab_home), DesiIcons.Home, DesiIcons.HomeFilled),
@@ -239,6 +253,7 @@ fun AppNavigation(profile: UserProfile, onSignOut: () -> Unit, link: String? = n
             ),
             selected = selected,
             onSelect = { selected = it },
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
     }

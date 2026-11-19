@@ -50,7 +50,6 @@ import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.DesiTextField
 import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.PrimaryButton
-import com.harsh.desicrics.designsystem.component.SectionLabel
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.DirectoryKind
@@ -275,11 +274,11 @@ private fun PostSheet(
     DesiSheet(stringResource(Res.string.looking_for_post_title), onDismiss) {
         ChoiceChips(LookingForKind.entries, selected = kind, label = { stringResource(it.label) }, onSelect = { kind = it })
         if (teams.isNotEmpty()) {
-            SectionLabel(stringResource(Res.string.looking_for_as_team))
+            SectionHeader(stringResource(Res.string.looking_for_as_team), icon = DesiIcons.Shield)
             val myself = stringResource(Res.string.looking_for_myself)
             ChoiceChips(listOf<TeamSummary?>(null) + teams, selected = team, label = { it?.name ?: myself }, onSelect = { team = it })
         }
-        SectionLabel(stringResource(Res.string.looking_for_date))
+        SectionHeader(stringResource(Res.string.looking_for_date), icon = DesiIcons.Calendar)
         DatePicker(date, title = null, headline = null, showModeToggle = false)
         DesiTextField(value = note, onValueChange = { note = it.take(500) }, label = stringResource(Res.string.looking_for_note), singleLine = false)
         if (failed) ErrorBanner(stringResource(Res.string.community_action_failed))

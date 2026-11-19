@@ -1076,4 +1076,19 @@
     <string name="end_walkover_note">No ball was bowled. In a tournament it counts as a win, with no runs towards net run rate.</string>
     <string name="end_called_off_note">No ball was bowled. In a league each team gets a point; in a knockout the higher seed goes through.</string>
     <string name="scoring_error_end_invalid">The match can't end that way now. Pick again.</string>
+    <string name="time_just_now">Just now</string>
+    <string name="time_today">Today</string>
+    <string name="time_yesterday">Yesterday</string>
+    <plurals name="time_minutes_ago">
+        <item quantity="one">%1$d min ago</item>
+        <item quantity="other">%1$d min ago</item>
+    </plurals>
+    <plurals name="time_hours_ago">
+        <item quantity="one">%1$d h ago</item>
+        <item quantity="other">%1$d h ago</item>
+    </plurals>
+    <string name="fixture_squads">Squads</string>
+    <string name="fixture_squad_pick">Pick who's playing</string>
+    <string name="fixture_squad_ready_tag">Ready</string>
+    <string name="fixture_squad_hint">Who's playing today. At least 2.</string>
 </resources>

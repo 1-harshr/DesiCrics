@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.tournament
+import com.harsh.desicrics.designsystem.component.LocalNavBarClearance
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.component.ErrorState
 
@@ -51,7 +52,6 @@ import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.DesiTextField
 import com.harsh.desicrics.designsystem.component.NumberStepper
 import com.harsh.desicrics.designsystem.component.PrimaryButton
-import com.harsh.desicrics.designsystem.component.SectionLabel
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.TournamentFormat
@@ -65,7 +65,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun TournamentsScreen(
     onOpen: (String) -> Unit,
-    onBack: () -> Unit,
+    /** Null where it is a tab of its own, with nothing behind it. */
+    onBack: (() -> Unit)?,
     viewModel: TournamentsViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -85,12 +86,12 @@ fun TournamentsScreen(
 }
 
 @Composable
-fun TournamentsContent(state: TournamentsUiState, onOpen: (String) -> Unit, onCreate: () -> Unit, onBack: () -> Unit, onRetry: () -> Unit = {}) {
+fun TournamentsContent(state: TournamentsUiState, onOpen: (String) -> Unit, onCreate: () -> Unit, onBack: (() -> Unit)?, onRetry: () -> Unit = {}) {
     val space = DesiTheme.space
     DesiScaffold(title = stringResource(Res.string.tournaments_title), onBack = onBack) { padding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(padding),
-            contentPadding = PaddingValues(horizontal = space.screen, vertical = space.s4),
+            contentPadding = PaddingValues(start = space.screen, top = space.s4, end = space.screen, bottom = space.s4 + LocalNavBarClearance.current),
             verticalArrangement = Arrangement.spacedBy(space.s3),
         ) {
             item { CreateTournamentCard(onCreate) }
@@ -179,7 +180,7 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
             label = stringResource(Res.string.tournament_city),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
         )
-        SectionLabel(stringResource(Res.string.tournament_format))
+        SectionHeader(stringResource(Res.string.tournament_format), icon = DesiIcons.Trophy)
         ChoiceChips(TournamentFormat.entries, selected = format, label = { stringResource(it.label) }, onSelect = {
             format = it
             advance = if (it == TournamentFormat.ROUND_ROBIN) 0 else 2
@@ -204,14 +205,14 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
             )
         }
         if (advanceOptions.isNotEmpty()) {
-            SectionLabel(stringResource(Res.string.tournament_advance))
+            SectionHeader(stringResource(Res.string.tournament_advance))
             val none = stringResource(Res.string.tournament_advance_none)
             ChoiceChips(advanceOptions, selected = advance, label = { if (it == 0) none else "$it" }, onSelect = { advance = it })
         }
-        SectionLabel(stringResource(Res.string.new_match_section_rules))
+        SectionHeader(stringResource(Res.string.new_match_section_rules), icon = DesiIcons.Whistle)
         ChoiceChips(RulesPreset.entries.filter { it.rules != null }, selected = preset, label = { stringResource(it.label) }, onSelect = { preset = it })
         Text(stringResource(preset.hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
-        SectionLabel(stringResource(Res.string.tournament_registration))
+        SectionHeader(stringResource(Res.string.tournament_registration), icon = DesiIcons.PersonAdd)
         Text(stringResource(Res.string.tournament_registration_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         SegmentedControl(
             options = listOf(false, true),

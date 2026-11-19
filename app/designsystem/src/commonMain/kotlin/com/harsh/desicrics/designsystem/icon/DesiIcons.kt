@@ -2,6 +2,8 @@ package com.harsh.desicrics.designsystem.icon
 
 import com.harsh.desicrics.designsystem.resources.Res
 import com.harsh.desicrics.designsystem.resources.ic_add
+import com.harsh.desicrics.designsystem.resources.ic_expand_less
+import com.harsh.desicrics.designsystem.resources.ic_play_arrow
 import com.harsh.desicrics.designsystem.resources.ic_event_busy
 import com.harsh.desicrics.designsystem.resources.ic_flag
 import com.harsh.desicrics.designsystem.resources.ic_nights_stay
@@ -35,7 +37,6 @@ import com.harsh.desicrics.designsystem.resources.ic_shield
 import com.harsh.desicrics.designsystem.resources.ic_military_tech
 import com.harsh.desicrics.designsystem.resources.ic_info
 import com.harsh.desicrics.designsystem.resources.ic_verified
-import com.harsh.desicrics.designsystem.resources.ic_bolt
 import com.harsh.desicrics.designsystem.resources.ic_sports_score
 import com.harsh.desicrics.designsystem.resources.ic_swap_horiz
 import com.harsh.desicrics.designsystem.resources.ic_insights
@@ -113,7 +114,6 @@ object DesiIcons {
     val Medal: DrawableResource = Res.drawable.ic_military_tech
     val Info: DrawableResource = Res.drawable.ic_info
     val Verified: DrawableResource = Res.drawable.ic_verified
-    val Bolt: DrawableResource = Res.drawable.ic_bolt
     val Target: DrawableResource = Res.drawable.ic_sports_score
     val Swap: DrawableResource = Res.drawable.ic_swap_horiz
     val Insights: DrawableResource = Res.drawable.ic_insights
@@ -127,6 +127,9 @@ object DesiIcons {
     /** A ball sailing over the rope: sixes. */
     val Six: DrawableResource = Res.drawable.ic_north_east
     val ExpandMore: DrawableResource = Res.drawable.ic_expand_more
+    val ExpandLess: DrawableResource = Res.drawable.ic_expand_less
+    /** Start playing now (not "live": live is the red dot). */
+    val Play: DrawableResource = Res.drawable.ic_play_arrow
 
     // Ending a match early: why it stopped, a team giving up, and a fixture called off.
     val Rain: DrawableResource = Res.drawable.ic_rainy

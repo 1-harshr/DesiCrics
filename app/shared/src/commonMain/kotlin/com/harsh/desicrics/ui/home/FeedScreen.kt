@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.home
+import com.harsh.desicrics.designsystem.component.LocalNavBarClearance
 import com.harsh.desicrics.designsystem.component.LiveDot
 import com.harsh.desicrics.designsystem.component.EmptyState
 import com.harsh.desicrics.designsystem.component.TonalButton
@@ -106,7 +107,7 @@ internal fun FeedScreen(onOpen: (String) -> Unit, community: () -> Unit, ranking
         ) {
             LazyColumn(
                 Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = space.screen, vertical = space.s2),
+                contentPadding = PaddingValues(start = space.screen, top = space.s2, end = space.screen, bottom = space.s2 + LocalNavBarClearance.current),
                 verticalArrangement = Arrangement.spacedBy(space.s3),
             ) {
                 item {

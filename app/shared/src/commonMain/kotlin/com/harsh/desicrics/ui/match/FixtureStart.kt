@@ -1,4 +1,24 @@
 package com.harsh.desicrics.ui.match
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.background
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.painterResource
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import com.harsh.desicrics.designsystem.component.TagTone
+import com.harsh.desicrics.designsystem.component.Tag
+import com.harsh.desicrics.designsystem.component.SectionHeader
+import com.harsh.desicrics.designsystem.component.ListRow
+import com.harsh.desicrics.designsystem.component.ListCard
+import com.harsh.desicrics.designsystem.component.IconTile
+import com.harsh.desicrics.designsystem.component.HeroChip
+import com.harsh.desicrics.designsystem.component.EmptyState
+import com.harsh.desicrics.designsystem.component.DesiTextField
+import com.harsh.desicrics.designsystem.component.DesiSheet
+import com.harsh.desicrics.designsystem.component.Avatar
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.model.AbandonReason
 import com.harsh.desicrics.model.MatchEnding
@@ -63,45 +83,67 @@ internal fun FixturePending(
     var tossWinner by remember { mutableStateOf(TeamSide.A) }
     var tossDecision by remember { mutableStateOf(TossDecision.BAT) }
 
-    Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = space.screen, vertical = space.s4),
-        verticalArrangement = Arrangement.spacedBy(space.s3),
-    ) {
-        GhostButton(stringResource(Res.string.common_back), onClick = onBack)
-        Text(stringResource(Res.string.match_title, match.teamA.name, match.teamB.name), style = DesiTheme.type.titleLg, color = colors.ink)
-        val where = listOfNotNull(
-            match.venue.takeIf { it.isNotBlank() },
-            match.fixture?.let { stageText(it) },
-            match.scheduledAt?.let { formatDayAndTime(it) } ?: stringResource(Res.string.fixture_not_scheduled),
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        MatchupHero(
+            match,
+            onBack,
+            chips = listOf(
+                HeroChip(match.fixture?.let { stageText(it) }.orEmpty(), DesiIcons.Trophy),
+                HeroChip(match.scheduledAt?.let { formatDayAndTime(it) } ?: stringResource(Res.string.fixture_not_scheduled), DesiIcons.Calendar),
+                HeroChip(match.venue, DesiIcons.Location),
+            ),
         )
-        Text(where.joinToString(" · "), style = DesiTheme.type.body, color = colors.muted)
-        Text(stringResource(Res.string.fixture_waiting), style = DesiTheme.type.body, color = colors.muted)
-
-        if (setup?.canStart != true) return@Column
-        DesiCard(Modifier.fillMaxWidth()) {
-            SectionLabel(stringResource(Res.string.fixture_start))
-            Text(stringResource(Res.string.fixture_start_hint), style = DesiTheme.type.caption, color = colors.muted)
-            for (side in TeamSide.entries) {
-                val team = match.team(side)
-                val squad = squads[side]
-                TonalButton(
-                    if (squad == null) stringResource(Res.string.fixture_pick_squad, team.name)
-                    else stringResource(Res.string.fixture_squad_ready, team.name, squad.players.size),
-                    onClick = { picking = side },
-                    enabled = match.fixture == null || (if (side == TeamSide.A) setup.teamA else setup.teamB) != null,
-                    modifier = Modifier.fillMaxWidth(),
-                )
+        Column(Modifier.padding(horizontal = space.screen, vertical = space.s5), verticalArrangement = Arrangement.spacedBy(space.s5)) {
+            if (setup?.canStart != true) {
+                EmptyState(DesiIcons.Clock, stringResource(Res.string.fixture_waiting))
+                return@Column
             }
-            Text(stringResource(Res.string.new_match_toss_won), style = DesiTheme.type.body, color = colors.muted)
-            SegmentedControl(TeamSide.entries, selected = tossWinner, label = { match.team(it).name }, onSelect = { tossWinner = it })
-            Text(stringResource(Res.string.new_match_toss_chose), style = DesiTheme.type.body, color = colors.muted)
-            SegmentedControl(
-                TossDecision.entries,
-                selected = tossDecision,
-                label = { stringResource(if (it == TossDecision.BAT) Res.string.new_match_toss_bat else Res.string.new_match_toss_bowl) },
-                onSelect = { tossDecision = it },
-            )
-            Text(stringResource(Res.string.toss_first, match.team(if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other).name), style = DesiTheme.type.bodyStrong)
+            Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+                SectionHeader(stringResource(Res.string.fixture_squads), icon = DesiIcons.Teams)
+                ListCard {
+                    TeamSide.entries.forEachIndexed { index, side ->
+                        val team = match.team(side)
+                        val squad = squads[side]
+                        val enabled = match.fixture == null || (if (side == TeamSide.A) setup.teamA else setup.teamB) != null
+                        ListRow(
+                            title = team.name,
+                            subtitle = if (squad == null) stringResource(Res.string.fixture_squad_pick)
+                            else pluralStringResource(Res.plurals.new_match_player_count, squad.players.size, squad.players.size),
+                            leading = { Avatar(team.name, size = 40) },
+                            trailing = {
+                                if (squad != null && squad.players.size >= 2) Tag(stringResource(Res.string.fixture_squad_ready_tag), tone = TagTone.BRAND, icon = DesiIcons.CheckCircle)
+                                Icon(painterResource(DesiIcons.ChevronRight), null, tint = colors.muted, modifier = Modifier.size(DesiTheme.size.iconSmall))
+                            },
+                            divider = index > 0,
+                            onClick = if (enabled) ({ picking = side }) else null,
+                        )
+                    }
+                }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+                SectionHeader(stringResource(Res.string.new_match_section_toss), icon = DesiIcons.Swap)
+                Text(stringResource(Res.string.new_match_toss_won), style = DesiTheme.type.body, color = colors.muted)
+                SegmentedControl(TeamSide.entries, selected = tossWinner, label = { match.team(it).name }, onSelect = { tossWinner = it })
+                Text(stringResource(Res.string.new_match_toss_chose), style = DesiTheme.type.body, color = colors.muted)
+                SegmentedControl(
+                    TossDecision.entries,
+                    selected = tossDecision,
+                    label = { stringResource(if (it == TossDecision.BAT) Res.string.new_match_toss_bat else Res.string.new_match_toss_bowl) },
+                    onSelect = { tossDecision = it },
+                )
+                Row(
+                    Modifier.fillMaxWidth().clip(DesiTheme.radius.md).background(colors.brandSoft).padding(space.s3),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(space.s2),
+                ) {
+                    Icon(painterResource(DesiIcons.Bat), null, tint = colors.brand, modifier = Modifier.size(DesiTheme.size.iconSmall))
+                    Text(
+                        stringResource(Res.string.toss_first, match.team(if (tossDecision == TossDecision.BAT) tossWinner else tossWinner.other).name),
+                        style = DesiTheme.type.bodyStrong,
+                        color = colors.brand,
+                    )
+                }
+            }
             if (setup.failed) ErrorBanner(stringResource(Res.string.fixture_start_failed))
             val a = squads[TeamSide.A]
             val b = squads[TeamSide.B]
@@ -110,14 +152,18 @@ internal fun FixturePending(
                 onClick = { if (a != null && b != null) onStart(a, b, tossWinner, tossDecision) },
                 enabled = a != null && b != null && a.players.size >= 2 && b.players.size >= 2,
                 loading = setup.starting,
+                leadingIcon = DesiIcons.Play,
                 modifier = Modifier.fillMaxWidth(),
             )
-        }
-        // No-shows and wash-outs happen: the organiser records them here instead of leaving the fixture hanging.
-        DesiCard(Modifier.fillMaxWidth()) {
-            SectionLabel(stringResource(Res.string.end_didnt_happen))
-            Text(stringResource(Res.string.end_didnt_happen_hint), style = DesiTheme.type.caption, color = colors.muted)
-            GhostButton(stringResource(Res.string.end_title_before), onClick = { ending = true }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Flag)
+            // No-shows and wash-outs happen: the organiser records them here instead of leaving the fixture hanging.
+            ListCard {
+                ListRow(
+                    title = stringResource(Res.string.end_title_before),
+                    subtitle = stringResource(Res.string.end_didnt_happen_hint),
+                    leading = { IconTile(DesiIcons.Flag) },
+                    onClick = { ending = true },
+                )
+            }
         }
     }
 
@@ -127,20 +173,39 @@ internal fun FixturePending(
             val current = squads[side] ?: SquadRequest(match.team(side).name, emptyList(), match.team(side).teamId)
             var players by remember(side) { mutableStateOf(current.players) }
             var name by remember { mutableStateOf("") }
-            com.harsh.desicrics.designsystem.component.DesiSheet(current.name, { picking = null }) {
-                players.forEachIndexed { i, player ->
-                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                        Text(player.name, Modifier.weight(1f))
-                        androidx.compose.material3.TextButton(onClick = { players = players.filterIndexed { index, _ -> index != i } }) { Text(stringResource(Res.string.directory_remove)) }
+            DesiSheet(current.name, { picking = null }, stringResource(Res.string.fixture_squad_hint)) {
+                if (players.isNotEmpty()) ListCard {
+                    players.forEachIndexed { i, player ->
+                        ListRow(
+                            title = player.name,
+                            leading = { Avatar(player.name, size = 36) },
+                            trailing = {
+                                IconButton(onClick = { players = players.filterIndexed { index, _ -> index != i } }) {
+                                    Icon(painterResource(DesiIcons.Close), stringResource(Res.string.new_match_remove_player, player.name), tint = colors.muted, modifier = Modifier.size(18.dp))
+                                }
+                            },
+                            divider = i > 0,
+                        )
                     }
                 }
-                com.harsh.desicrics.designsystem.component.DesiTextField(name, { name = it }, stringResource(Res.string.new_match_add_player))
-                TonalButton(stringResource(Res.string.new_match_add_player), { players = players + SquadPlayer(name.trim()); name = "" }, enabled = name.isNotBlank() && players.size < 20)
+                val add = { players = players + SquadPlayer(name.trim()); name = "" }
+                DesiTextField(
+                    name,
+                    { name = it.take(60) },
+                    stringResource(Res.string.team_add_placeholder_name),
+                    leadingIcon = DesiIcons.Person,
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Words,
+                        imeAction = androidx.compose.ui.text.input.ImeAction.Done,
+                    ),
+                    keyboardActions = androidx.compose.foundation.text.KeyboardActions(onDone = { if (name.isNotBlank() && players.size < 20) add() }),
+                )
+                TonalButton(stringResource(Res.string.new_match_add_player), add, Modifier.fillMaxWidth(), leadingIcon = DesiIcons.PersonAdd, enabled = name.isNotBlank() && players.size < 20)
                 PrimaryButton(stringResource(Res.string.teams_save_action), {
                     fun role(index: Int?) = index?.let { current.players.getOrNull(it) }?.let { players.indexOf(it).takeIf { n -> n >= 0 } }
                     squads = squads + (side to current.copy(players = players, captain = role(current.captain), keeper = role(current.keeper)))
                     picking = null
-                })
+                }, Modifier.fillMaxWidth())
             }
             return@let
         }

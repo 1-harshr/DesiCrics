@@ -1,4 +1,7 @@
 package com.harsh.desicrics.ui.newmatch
+import com.harsh.desicrics.designsystem.component.ErrorBanner
+import com.harsh.desicrics.designsystem.icon.DesiIcons
+import com.harsh.desicrics.designsystem.component.EmptyState
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +22,7 @@ import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.PlayerRow
 import com.harsh.desicrics.designsystem.component.PrimaryButton
-import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
@@ -44,9 +47,9 @@ internal fun TeamPickerSheet(teams: List<TeamSummary>?, search: suspend (String)
         com.harsh.desicrics.designsystem.component.DesiTextField(query, { query = it }, stringResource(Res.string.setup_find))
         val results = if (query.trim().length >= 2) hits else teams
         when {
-            failed -> Text(stringResource(Res.string.teams_load_failed))
+            failed -> ErrorBanner(stringResource(Res.string.teams_load_failed))
             results == null -> CircularProgressIndicator(color = DesiTheme.colors.brand)
-            results.isEmpty() -> Text(stringResource(Res.string.new_match_no_teams), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+            results.isEmpty() -> EmptyState(DesiIcons.Shield, stringResource(Res.string.new_match_no_teams))
             else -> results.forEach { TeamRow(it, onClick = { onPick(it) }) }
         }
     }
@@ -95,9 +98,9 @@ internal fun SquadSheet(
             }
         }
         if (squad.isNotEmpty()) {
-            SectionLabel(stringResource(Res.string.new_match_squad_captain), Modifier.padding(top = DesiTheme.space.s2))
+            SectionHeader(stringResource(Res.string.new_match_squad_captain), Modifier.padding(top = DesiTheme.space.s2), icon = DesiIcons.Star)
             ChoiceChips(squad, selected = squad.firstOrNull { it.profileId == captain }, label = { it.name }, onSelect = { captain = it.profileId })
-            SectionLabel(stringResource(Res.string.new_match_squad_keeper), Modifier.padding(top = DesiTheme.space.s2))
+            SectionHeader(stringResource(Res.string.new_match_squad_keeper), Modifier.padding(top = DesiTheme.space.s2), icon = DesiIcons.Glove)
             ChoiceChips(squad, selected = squad.firstOrNull { it.profileId == keeper }, label = { it.name }, onSelect = { keeper = it.profileId })
         }
         PrimaryButton(

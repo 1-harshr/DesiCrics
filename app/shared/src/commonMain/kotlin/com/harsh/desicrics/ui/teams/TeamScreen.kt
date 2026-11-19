@@ -77,7 +77,6 @@ import com.harsh.desicrics.designsystem.component.FullScreenLoading
 import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.PlayerRow
 import com.harsh.desicrics.designsystem.component.PrimaryButton
-import com.harsh.desicrics.designsystem.component.SectionLabel
 import com.harsh.desicrics.designsystem.component.TonalButton
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.PlayerRole
@@ -498,7 +497,10 @@ private fun AddMemberSheet(
         )
         val results = state.searchResults.filter { it.profileId !in memberIds }
         if (state.searchQuery.trim().length >= 2 && !state.searching && results.isEmpty()) {
-            Text(stringResource(Res.string.team_add_search_empty), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+                Icon(painterResource(DesiIcons.Info), null, tint = DesiTheme.colors.muted, modifier = Modifier.size(16.dp))
+                Text(stringResource(Res.string.team_add_search_empty), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+            }
         }
         Column(Modifier.fillMaxWidth().clip(DesiTheme.radius.md)) {
             results.forEach { player ->
@@ -510,7 +512,7 @@ private fun AddMemberSheet(
                 )
             }
         }
-        SectionLabel(stringResource(Res.string.team_add_placeholder_title), Modifier.padding(top = DesiTheme.space.s2))
+        SectionHeader(stringResource(Res.string.team_add_placeholder_title), Modifier.padding(top = DesiTheme.space.s2), icon = DesiIcons.PersonAdd)
         Text(stringResource(Res.string.team_add_placeholder_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         DesiTextField(
             value = name,

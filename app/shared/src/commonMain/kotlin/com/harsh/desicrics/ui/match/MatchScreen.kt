@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.match
+import androidx.compose.foundation.border
 import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.AbandonReason
 import com.harsh.desicrics.model.MatchEnding
@@ -58,7 +59,7 @@ import com.harsh.desicrics.designsystem.component.OverStrip
 import com.harsh.desicrics.designsystem.component.PadKey
 import com.harsh.desicrics.designsystem.component.PadKeyStyle
 import com.harsh.desicrics.designsystem.component.RunPad
-import com.harsh.desicrics.designsystem.component.SectionLabel
+import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
@@ -345,22 +346,15 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
             IconButton(onClick = onBack, modifier = Modifier.offset(x = -DesiTheme.space.s3)) {
                 Icon(painterResource(DesiIcons.Back), stringResource(Res.string.common_back), tint = onGreen)
             }
+            // The two names are what this screen is about: up to two lines, and nothing else competing in the row.
             Text(
                 stringResource(Res.string.match_title, match.teamA.name, match.teamB.name),
                 style = DesiTheme.type.titleMd,
                 color = onGreen,
-                maxLines = 1,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            if (!state.isComplete) {
-                Box(
-                    Modifier.padding(start = DesiTheme.space.s2).clip(DesiTheme.radius.full).background(colors.surface)
-                        .padding(horizontal = DesiTheme.space.s3, vertical = 6.dp),
-                ) {
-                    LiveBadge()
-                }
-            }
             IconButton(onClick = onShare, modifier = Modifier.offset(x = DesiTheme.space.s2)) {
                 Icon(painterResource(DesiIcons.Share), stringResource(Res.string.match_share), tint = onGreen)
             }
@@ -371,12 +365,20 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
             }
         }
         val inningsName = stringResource(if (innings.number == 1) Res.string.match_innings_first else Res.string.match_innings_second)
-        Text(
-            stringResource(Res.string.match_innings_label, innings.battingTeam.name, inningsName).uppercase(),
-            style = DesiTheme.type.label,
-            color = onGreen.copy(alpha = 0.8f),
-            modifier = Modifier.padding(top = DesiTheme.space.s2),
-        )
+        Row(Modifier.padding(top = DesiTheme.space.s2), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+            if (!state.isComplete) {
+                Box(Modifier.clip(DesiTheme.radius.full).background(colors.surface).padding(start = 2.dp, end = DesiTheme.space.s3, top = 2.dp, bottom = 2.dp)) {
+                    LiveBadge()
+                }
+            }
+            Text(
+                stringResource(Res.string.match_innings_label, innings.battingTeam.name, inningsName).uppercase(),
+                style = DesiTheme.type.label,
+                color = onGreen.copy(alpha = 0.8f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
             Text(innings.scoreText, style = DesiTheme.type.scoreXl, color = onGreen)
             Text(
@@ -425,7 +427,7 @@ private fun CreaseCard(ui: MatchUiState, innings: InningsState, onChoose: (Scori
 
     DesiCard(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            SectionLabel(stringResource(Res.string.match_section_crease), Modifier.weight(1f))
+            SectionHeader(stringResource(Res.string.match_section_crease), Modifier.weight(1f), icon = DesiIcons.Bat)
             if (innings.isFreeHit) {
                 Text(
                     stringResource(Res.string.match_free_hit).uppercase(),
@@ -550,9 +552,15 @@ private fun EmptySlot(text: String, enabled: Boolean, onClick: () -> Unit) {
 @Composable
 private fun ThisOver(innings: InningsState) {
     Column(Modifier.padding(top = DesiTheme.space.s2), verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
-        SectionLabel(stringResource(Res.string.match_section_this_over))
+        SectionHeader(stringResource(Res.string.match_section_this_over), icon = DesiIcons.Ball)
         if (innings.currentOver.isEmpty()) {
-            Text(stringResource(Res.string.match_over_empty), style = DesiTheme.type.body, color = DesiTheme.colors.muted)
+            // Six empty slots, so the strip has its shape before the first ball, plus the line saying why.
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+                repeat(6) {
+                    Box(Modifier.size(DesiTheme.size.ballChip).clip(DesiTheme.radius.full).border(1.5.dp, DesiTheme.colors.line, DesiTheme.radius.full))
+                }
+            }
+            Text(stringResource(Res.string.match_over_empty), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         } else {
             OverStrip(innings.currentOver.map { ballFor(it) })
         }
