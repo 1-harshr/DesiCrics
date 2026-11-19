@@ -59,7 +59,8 @@ val dataModule = module {
                 pingIntervalMillis = 20_000
             }
             install(HttpTimeout) {
-                requestTimeoutMillis = 15_000
+                // Long enough to outlast a sleeping server waking up (about a minute on Render's free plan).
+                requestTimeoutMillis = 75_000
                 connectTimeoutMillis = 10_000
             }
         }

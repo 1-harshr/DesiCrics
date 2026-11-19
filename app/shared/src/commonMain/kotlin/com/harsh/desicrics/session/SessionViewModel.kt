@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.AuthUser
 import com.harsh.desicrics.data.UserRepository
+import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.model.UserProfile
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,13 @@ sealed interface SessionState {
 class SessionViewModel(
     private val authRepository: AuthRepository,
     userRepository: UserRepository,
+    api: DesiCricsApi,
 ) : ViewModel() {
+
+    init {
+        // Starts a sleeping server waking while the splash and sign-in play, instead of on the first real request.
+        viewModelScope.launch { api.wakeUp() }
+    }
 
     private val retries = MutableStateFlow(0)
 

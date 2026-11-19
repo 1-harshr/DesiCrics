@@ -93,6 +93,14 @@ class DesiCricsApi(
 ) {
     private val baseUrl = config.baseUrl.trimEnd('/')
 
+    /**
+     * Pokes the server so one that sleeps when idle (Render's free plan takes about a minute to wake) is
+     * up by the time the user has signed in. Failures don't matter: the real requests report their own.
+     */
+    suspend fun wakeUp() {
+        runCatching { http.get(baseUrl) }
+    }
+
     /** Null until the user finishes onboarding. */
     suspend fun myProfile(): UserProfile? = try {
         call { get("$baseUrl/me", it) }.body()
