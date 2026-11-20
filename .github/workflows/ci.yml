@@ -9,11 +9,85 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Each job runs on its own runner in parallel, so one failing area doesn't hide the others.
 jobs:
-  build:
+  # Shared rules: on the JVM (server, Android) and JS (web).
+  core:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    # The server tests run on H2 locally; in CI they also run on the Postgres the server uses in production.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      # Matches gradle/gradle-daemon-jvm.properties.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Tests
+        run: ./gradlew :core:jvmTest :core:jsNodeTest :core:testAndroidHostTest
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-core
+          path: '**/build/reports/tests/'
+
+  # The shared app code and design system. Needs no Firebase config, unlike the APK below.
+  app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Tests
+        run: ./gradlew :app:designsystem:compileAndroidMain :app:shared:testAndroidHostTest
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-app
+          path: '**/build/reports/tests/'
+
+  # Server tests on H2, as they run locally.
+  server:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Tests
+        run: ./gradlew :server:test
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-server
+          path: '**/build/reports/tests/'
+
+  # The same server tests on the Postgres the server uses in production.
+  server-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     services:
       postgres:
         image: postgres:17-alpine
@@ -31,7 +105,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Matches gradle/gradle-daemon-jvm.properties.
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
@@ -39,32 +112,66 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Unit tests (core on JVM and JS, app, server)
-        run: ./gradlew :core:jvmTest :core:jsNodeTest :core:testAndroidHostTest :app:designsystem:compileAndroidMain :app:shared:testAndroidHostTest :server:test
-
-      - name: Server tests on Postgres
+      - name: Tests
         env:
           TEST_POSTGRES_URL: jdbc:postgresql://localhost:5432/desicrics
-        run: ./gradlew :server:test --rerun-tasks
-
-      # google-services.json is gitignored. Add its contents as the GOOGLE_SERVICES_JSON repository
-      # secret to also build the APK; without it this step is skipped.
-      - name: Build debug APK and run its tests
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: |
-          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
-            echo "GOOGLE_SERVICES_JSON secret not set; skipping the APK build."
-            exit 0
-          fi
-          printf '%s' "$GOOGLE_SERVICES_JSON" > app/androidApp/google-services.json
-          ./gradlew :app:androidApp:assembleLocalDebug :app:androidApp:testLocalDebugUnitTest
+        run: ./gradlew :server:test
 
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: test-reports
+          name: test-reports-server-postgres
+          path: '**/build/reports/tests/'
+
+  # google-services.json is gitignored. Add its contents as the GOOGLE_SERVICES_JSON repository
+  # secret to also build the APK; without it this job's build steps are skipped.
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+    steps:
+      - name: Check the secret is set
+        id: config
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "::notice::GOOGLE_SERVICES_JSON secret not set; skipping the APK build."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.ready == 'true'
+
+      - name: Write google-services.json
+        if: steps.config.outputs.ready == 'true'
+        run: |
+          printf '%s' "$GOOGLE_SERVICES_JSON" > app/androidApp/google-services.json
+          if ! jq -e '.project_info.project_id' app/androidApp/google-services.json > /dev/null; then
+            echo "::error::GOOGLE_SERVICES_JSON isn't a google-services.json (no project_info). Set it to the raw file contents, not base64 or a service account."
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.config.outputs.ready == 'true'
+        with:
+          distribution: zulu
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+        if: steps.config.outputs.ready == 'true'
+
+      - name: Build debug APK and run its tests
+        if: steps.config.outputs.ready == 'true'
+        run: ./gradlew :app:androidApp:assembleLocalDebug :app:androidApp:testLocalDebugUnitTest
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-android
           path: '**/build/reports/tests/'
 
   # The web app (docs/web.md). It builds :core with Kotlin/JS, so it needs Java and Gradle too.
