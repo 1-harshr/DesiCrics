@@ -20,7 +20,7 @@ export function AppShell({ tabs, homeLabel, children }: { tabs: NavTab[]; homeLa
     <div className={styles.shell}>
       <nav className={styles.bar}>
         <Link to="/" className={styles.brand} aria-label={homeLabel}>
-          <img src="/icon.svg" alt="" />
+          <img src={`${import.meta.env.BASE_URL}icon.svg`} alt="" />
         </Link>
         {tabs.map((tab) => (
           <NavLink key={tab.to} to={tab.to} end={tab.to === "/"} className={({ isActive }) => [styles.tab, isActive && styles.active].filter(Boolean).join(" ")}>
