@@ -98,8 +98,8 @@ export function MatchCard({
     const lost = result?.winner != null && !won;
     return (
       <div className={[styles.side, lost && styles.dim].filter(Boolean).join(" ")}>
-        <div className={styles.sideName}>
-          {team.name}
+        <div className={styles.sideName} title={team.name}>
+          <span className={styles.sideNameText}>{team.name}</span>
           {won && <Icon name="emoji_events_filled" size={18} />}
         </div>
         {team.score && <div className={styles.sideScore}>{team.score}</div>}

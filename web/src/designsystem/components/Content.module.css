@@ -65,7 +65,8 @@ a.card:hover, button.card:hover { border-color: color-mix(in srgb, var(--brand) 
 .matchMeta { color: var(--muted); font: 400 13px/18px var(--font-body); text-align: right; }
 .teams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-3); }
 .side { min-width: 0; }
-.sideName { display: flex; align-items: center; gap: var(--space-1); font: 600 17px/24px var(--font-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sideName { display: flex; align-items: center; gap: var(--space-1); font: 600 17px/24px var(--font-body); }
+.sideNameText { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sideName svg { color: var(--brand); flex: none; }
 .sideScore { margin-top: var(--space-1); font: 700 32px/36px var(--font-display); font-variant-numeric: tabular-nums; }
 .sideNote { color: var(--muted); font: 400 13px/18px var(--font-body); }

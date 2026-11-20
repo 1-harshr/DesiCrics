@@ -22,5 +22,8 @@
   "web_match_live_updates": "Live · updates every ball",
   "web_match_reconnecting": "Reconnecting to live updates…",
   "web_match_overs_innings": "{{1}} · {{2}}",
-  "web_match_tournament_link": "See the tournament"
+  "web_match_tournament_link": "See the tournament",
+  "web_tournament_missing_title": "This tournament isn't here",
+  "web_tournament_not_started": "The organisers haven't made the fixtures yet.",
+  "web_tournament_enter_in_app": "Entering is done in the DesiCrics app."
 }

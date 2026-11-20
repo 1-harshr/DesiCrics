@@ -112,3 +112,76 @@ export interface MatchDetails {
 export interface ApiErrorBody {
   message: string;
 }
+
+export type TournamentFormat = "KNOCKOUT" | "ROUND_ROBIN" | "GROUPS_KNOCKOUT" | "BOX_LEAGUE" | "DOUBLE_OUT" | "BEST_OF_THREE" | "CUSTOM";
+export type EntryPolicy = "ORGANISERS" | "APPROVAL" | "OPEN";
+export type EntryStatus = "CONFIRMED" | "PENDING" | "INVITED" | "WAITLISTED";
+
+export interface TournamentTeam {
+  teamId: string;
+  name: string;
+  seed: number;
+  group?: number | null;
+  status?: EntryStatus;
+}
+
+export interface Organiser {
+  name: string;
+  role: "ORGANISER" | "CO_ORGANISER";
+}
+
+/** The public view: no account IDs, player pool, offers or squad changes. */
+export interface Tournament {
+  id: string;
+  name: string;
+  city?: string;
+  format: TournamentFormat;
+  oversPerInnings: number;
+  groups?: number;
+  advance?: number;
+  startsAt?: number | null;
+  teamEntry?: EntryPolicy;
+  playerEntry?: EntryPolicy;
+  maxTeams?: number | null;
+  entryClosesAt?: number | null;
+  organisers?: Organiser[];
+  teams?: TournamentTeam[];
+  started?: boolean;
+}
+
+export interface PointsRow {
+  teamId: string;
+  name: string;
+  played?: number;
+  won?: number;
+  lost?: number;
+  tied?: number;
+  noResult?: number;
+  runsFor?: number;
+  ballsFaced?: number;
+  runsAgainst?: number;
+  ballsBowled?: number;
+}
+
+export interface StatLeader {
+  name: string;
+  team: string;
+  value: number;
+  profileId?: string | null;
+}
+
+export interface KeyStats {
+  mostRuns?: StatLeader[];
+  mostWickets?: StatLeader[];
+  mostSixes?: StatLeader[];
+}
+
+export interface TournamentDetails {
+  tournament: Tournament;
+  fixtures?: Match[];
+  tables?: PointsRow[][];
+  keyStats?: KeyStats;
+  championId?: string | null;
+  /** Value is tenths of an MVP point. */
+  playerOfTournament?: StatLeader | null;
+}

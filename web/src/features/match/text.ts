@@ -18,6 +18,15 @@ const reasonLabel: Record<AbandonReason, StringKey> = {
 /** Overs from balls, as scorers write them: 20, or 16.4 after rain. */
 export const oversOf = (balls: number) => (balls % 6 === 0 ? String(balls / 6) : `${Math.floor(balls / 6)}.${balls % 6}`);
 
+/** "Today", "Yesterday", or the date, for when a finished match was played. */
+export function dayLabel({ s }: ReturnType<typeof useText>, epochMillis: number, now = Date.now()): string {
+  const day = (ms: number) => Math.floor((ms - new Date(ms).getTimezoneOffset() * 60_000) / 86_400_000);
+  const ago = day(now) - day(epochMillis);
+  if (ago === 0) return s("time_today");
+  if (ago === 1) return s("time_yesterday");
+  return new Intl.DateTimeFormat(undefined, { weekday: "short", day: "numeric", month: "short" }).format(epochMillis);
+}
+
 /** Two decimals, as the app's format2(). */
 export const format2 = (value: number) => value.toFixed(2);
 

@@ -3,6 +3,7 @@ import { AppShell } from "@/designsystem/components";
 import { CataloguePage } from "@/features/catalogue/CataloguePage";
 import { MatchPage } from "@/features/match/MatchPage";
 import { NotFoundPage } from "@/features/system/NotFoundPage";
+import { TournamentPage } from "@/features/tournament/TournamentPage";
 import { useText } from "@/i18n";
 import { appTabs } from "./tabs";
 
@@ -26,5 +27,6 @@ export const router = createBrowserRouter([
   },
   // Shared links: the same paths the app and the server's old pages use.
   { path: "/m/:matchId", element: <MatchPage /> },
+  { path: "/t/:tournamentId", element: <TournamentPage /> },
   { path: "*", element: <NotFoundPage /> },
 ]);
