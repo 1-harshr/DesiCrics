@@ -1,7 +1,9 @@
 package com.harsh.desicrics
 
 import com.harsh.desicrics.api.MatchDetails
+import com.harsh.desicrics.live.LiveMatches
 import com.harsh.desicrics.model.DismissalKind
+import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.TournamentDetails
 import com.harsh.desicrics.scoring.BatterCard
@@ -17,6 +19,11 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.websocket.sendSerialized
+import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.CloseReason
+import io.ktor.websocket.close
+import kotlinx.coroutines.flow.onSubscription
 
 /**
  * Pages anyone can open without signing in, for links shared outside the app. Phones with the app open
@@ -26,8 +33,23 @@ fun Route.publicRoutes(
     matches: MatchService,
     tournaments: TournamentService,
     community: CommunityService,
+    live: LiveMatches,
     androidCertFingerprints: List<String> = emptyList(),
 ) {
+    // JSON and the live feed for the web app's shared-link pages (docs/web.md), with account IDs left out.
+    get("/public/matches/{id}") { call.respond(matches.details(call.parameters["id"].orEmpty()).forPublic()) }
+    get("/public/tournaments/{id}") { call.respond(tournaments.details(call.parameters["id"].orEmpty()).forPublic()) }
+    webSocket("/public/matches/{id}/live") {
+        val matchId = call.parameters["id"].orEmpty()
+        try {
+            live.updates(matchId)
+                .onSubscription { emit(matches.details(matchId)) }
+                .collect { sendSerialized(it.forPublic()) }
+        } catch (e: ApiException) {
+            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, e.message))
+        }
+    }
+
     // Livestream overlay: an OBS / Larix browser source polls the JSON and draws a score bar.
     get("/m/{id}/overlay.json") { call.respond(community.overlay(matches.details(call.parameters["id"].orEmpty()))) }
     get("/overlay/{id}") {
@@ -79,6 +101,26 @@ fun Route.publicRoutes(
         )
     }
 }
+
+/** Who created and scores a match are Firebase account IDs, which nobody outside the app needs. */
+internal fun MatchDetails.forPublic(): MatchDetails = copy(match = match.forPublic())
+
+private fun Match.forPublic(): Match = copy(createdBy = "", scorerUid = "")
+
+/**
+ * The tournament as its public page shows it: no account IDs, and none of the entry workings (player pool,
+ * squad offers and changes) that only organisers and entrants see.
+ */
+internal fun TournamentDetails.forPublic(): TournamentDetails = copy(
+    tournament = tournament.copy(
+        createdBy = "",
+        organisers = tournament.organisers.map { it.copy(uid = "") },
+        players = emptyList(),
+        offers = emptyList(),
+        squadChanges = emptyList(),
+    ),
+    fixtures = fixtures.map { it.forPublic() },
+)
 
 /**
  * A read-only scorecard for anyone with the link. A match still in play reloads itself every 15 seconds;
