@@ -21,7 +21,7 @@ The order above is the order features ship in. The work itself runs in parallel:
 |---|---|---|---|
 | **A** Wagon wheel first (7.1) | `phase7/wagon-wheel` | nothing | `MatchScreen`, `ScoringSheets`, `MatchRules` default, rules sheet |
 | **B** Share studio and overlays (7.2) | `phase7/share-studio` | nothing | new `ui/share/`, `ShareCard`, `system/Share`, share entry points |
-| **C** Auction engine and server (7.4, part 1) | `phase7/auction-server` | nothing | new `AuctionEngine` in `core`, migration `V18`, auction routes, auction WebSocket |
+| **C** Auction engine and server (7.4, part 1) | `phase7/auction-server` | nothing | new `AuctionEngine` in `core`, migration `V19`, auction routes, auction WebSocket |
 | **D** Match posters (7.3, part 1) | `phase7/posters-match` | B merged | result, scorecard and player of the match content in `ui/share/` |
 | **E** Tournament posters (7.3, part 2) | `phase7/posters-tournament` | B merged | fixtures, bracket, points table, squad and announcement content in `ui/share/` |
 | **F** Auction app (7.4, part 2) | `phase7/auction-app` | C merged | new auction screens and routes, the tournament screen's entry point |
@@ -66,7 +66,7 @@ The hours are relative estimates, not commitments.
 - **Known conflict points** are resolved when rebasing, not avoided:
   - `strings.xml`: each track adds its strings in its own block, under a `<!-- Phase 7 · track -->` comment.
   - `AppNavigation.kt`: only F adds routes.
-  - Migrations: `V18` belongs to C. Any other track that needs a migration takes the next free number after rebasing.
+  - Migrations: `V19` belongs to C (V18 is the Kotlin public-codes migration). Any other track that needs a migration takes the next free number after rebasing.
   - Screenshot test files: each track adds its own test functions and only regenerates its own images.
   - Colours, corner radii and art come from `DesiTheme` tokens and never as literals, so Phase 8 themes restyle Phase 7 screens without edits.
   - Docs: tracks don't edit `roadmap.md`. Its status ticks are updated on `main` after each merge.
