@@ -316,7 +316,7 @@ fun AppNavigation(
             tabs = listOf(
                 NavTab(stringResource(Res.string.tab_home), DesiIcons.Home, DesiIcons.HomeFilled),
                 NavTab(stringResource(Res.string.tab_feed), DesiIcons.Feed, DesiIcons.FeedFilled),
-                NavTab(stringResource(Res.string.home_tournaments), DesiIcons.Trophy, DesiIcons.TrophyFilled),
+                NavTab(stringResource(Res.string.tab_tournament), DesiIcons.Trophy, DesiIcons.TrophyFilled),
                 NavTab(stringResource(Res.string.tab_me), DesiIcons.Person, DesiIcons.PersonFilled),
             ),
             selected = pager.targetPage,
