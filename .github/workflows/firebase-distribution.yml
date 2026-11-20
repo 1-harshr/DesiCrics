@@ -1,0 +1,65 @@
+name: Firebase App Distribution
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_run_id:
+        description: Run ID of a successful Android release on main (from its Actions URL)
+        required: true
+        type: string
+
+permissions:
+  actions: read
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Download signed APK
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_RUN_ID: ${{ inputs.release_run_id }}
+        run: |
+          if [[ ! "$RELEASE_RUN_ID" =~ ^[0-9]+$ ]]; then
+            echo "::error::Enter the numeric run ID from the Android release Actions URL."
+            exit 1
+          fi
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RELEASE_RUN_ID")
+          if ! jq -e --arg repo "$GITHUB_REPOSITORY" '
+            (.path | split("@")[0]) == ".github/workflows/android-release.yml" and .head_branch == "main"
+            and .head_repository.full_name == $repo and .conclusion == "success"
+          ' <<< "$run" > /dev/null; then
+            echo "::error::Select a successful Android release run from this repository on main."
+            exit 1
+          fi
+
+          artifact="DesiCrics-1.0.$(jq -r '.run_number' <<< "$run")"
+          gh run download "$RELEASE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$artifact" --dir "$RUNNER_TEMP/apk"
+          test -s "$RUNNER_TEMP/apk/$artifact.apk"
+          echo "apk=$RUNNER_TEMP/apk/$artifact.apk" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Distribute to internal testers
+        env:
+          APK: ${{ steps.release.outputs.apk }}
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          : "${GOOGLE_SERVICES_JSON:?Set the GOOGLE_SERVICES_JSON repository secret}"
+          : "${FIREBASE_SERVICE_ACCOUNT:?Set the FIREBASE_SERVICE_ACCOUNT repository secret}"
+          app_id=$(jq -er '
+            [.client[] | select(.client_info.android_client_info.package_name == "com.harsh.desicrics")][0]
+            | .client_info.mobilesdk_app_id | select(type == "string" and length > 0)
+          ' <<< "$GOOGLE_SERVICES_JSON")
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase.json"
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
+          npx --yes firebase-tools@15 appdistribution:distribute "$APK" \
+            --app "$app_id" --groups internal --release-notes "$(basename "$APK" .apk)"

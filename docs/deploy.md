@@ -105,22 +105,22 @@ Render can't build the image itself (no Android SDK), so `.github/workflows/serv
 
 ## Android releases
 
-Once CI passes on `main`, `.github/workflows/android-release.yml` builds the release APK for the deployed server
-(`remoteRelease`), numbered `1.0.<run>` so each one installs over the last. It goes to two places:
+Once CI passes on `main`, **Android release** builds the signed APK for the deployed server (`remoteRelease`).
+The version is `1.0.<run>` so each new build installs over the last. You can also build it from
+GitHub › Actions › Android release › Run workflow. Download the APK from the run's **Artifacts** section.
 
-- **Firebase App Distribution** (Firebase console › Release & Monitor › App Distribution): everyone in the
-  `internal` group (Testers & Groups; the workflow names it by alias) gets an email; they install the Firebase
-  App Tester app once, then each new build from it.
-- **The workflow run** (GitHub › Actions › Android release › the run › Artifacts): a zip with the APK, kept 90 days.
+To send a build to testers, open a successful **Android release** run on `main` that has an APK artifact.
+Copy the number after `/actions/runs/` in its URL. Then go to GitHub › Actions › Firebase App Distribution › Run workflow
+and enter that number in `release_run_id`. Firebase notifies the `internal` tester group when the build is available.
 
-It can also be run by hand (Actions › Android release › Run workflow). Repository secrets it needs:
+Repository secrets for the Android release build and Firebase distribution:
 
 | Secret | What |
 | --- | --- |
 | `GOOGLE_SERVICES_JSON` | `app/androidApp/google-services.json` (CI uses it too) |
 | `RELEASE_KEYSTORE_BASE64` | the release key: `base64 -i app/androidApp/release.keystore` |
 | `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD` | from `app/androidApp/release.keystore.properties` |
-| `FIREBASE_SERVICE_ACCOUNT` | JSON key of a service account with the Firebase App Distribution Admin role (optional; without it the APK is only on the run) |
+| `FIREBASE_SERVICE_ACCOUNT` | JSON key of a service account with the Firebase App Distribution Admin role. Required for the Firebase workflow. |
 
 The release key and its passwords stay out of git. **Back them up**: an APK signed with any other key won't
 install over the existing ones, so testers would have to uninstall first. Its SHA-1 and SHA-256 must be on the
