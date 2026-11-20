@@ -26,6 +26,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.glance.appwidget)
     implementation(libs.glance.material3)
+    implementation(libs.androidx.work.runtime)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)
@@ -101,7 +102,9 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.findByName("release")
-            isMinifyEnabled = false
+            // R8 shrinks and obfuscates; Crashlytics uploads the mapping file so crash reports deobfuscate.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
