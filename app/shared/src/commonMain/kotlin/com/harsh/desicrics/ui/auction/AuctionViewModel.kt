@@ -6,7 +6,6 @@ import com.harsh.desicrics.api.AuctionPlayerRequest
 import com.harsh.desicrics.auction.AuctionEngine
 import com.harsh.desicrics.auction.AuctionSetup
 import com.harsh.desicrics.data.AuctionRepository
-import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.model.AuctionDetails
 import com.harsh.desicrics.model.AuctionError
@@ -80,9 +79,10 @@ class AuctionViewModel(
     private val auctionId: String,
     private val repository: AuctionRepository,
     private val teams: TeamRepository,
-    auth: AuthRepository,
+    /** The signed-in user, to tell organisers and owners from watchers. */
+    myId: String?,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(AuctionUiState(myId = auth.currentUser?.uid))
+    private val _state = MutableStateFlow(AuctionUiState(myId = myId))
     val state: StateFlow<AuctionUiState> = _state
     private val reloads = MutableStateFlow(0)
     private var searchJob: Job? = null

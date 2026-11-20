@@ -100,7 +100,7 @@ val viewModelModule = module {
     viewModel { (tournamentId: String?) -> LeaderboardViewModel(tournamentId, get()) }
     viewModel { (city: String) -> CommunityViewModel(city, get(), get()) }
     viewModel { (tournamentId: String) -> TournamentViewModel(tournamentId, get(), get(), get(), get()) }
-    viewModel { (auctionId: String) -> AuctionViewModel(auctionId, get(), get(), get()) }
+    viewModel { (auctionId: String) -> AuctionViewModel(auctionId, get(), get(), get<AuthRepository>().currentUser?.uid) }
     viewModelOf(::NotificationsViewModel)
     viewModel { (profileId: String, myId: String?) -> PlayerViewModel(profileId, get(), myId) }
 }
