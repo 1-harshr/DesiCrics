@@ -46,6 +46,8 @@ enum class NotificationKind {
     SQUAD_OFFER,
     /** [Notification.playerName] took the team's offer and joined its squad; sent to its admins. */
     SQUAD_JOINED,
+    /** Entry closes within a day and [Notification.value] entries still wait for the organisers. */
+    ENTRY_CLOSING,
     /** The user was placed in [Notification.playerName]'s squad for the tournament. */
     SQUAD_PLACED,
 }

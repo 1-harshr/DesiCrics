@@ -134,6 +134,10 @@
     <string name="scorecard_out_other">out</string>
 
     <!-- Match result -->
+    <plurals name="notification_entry_closing">
+        <item quantity="one">Entries for %1$s close within a day, and %2$d is still waiting for you</item>
+        <item quantity="other">Entries for %1$s close within a day, and %2$d are still waiting for you</item>
+    </plurals>
     <plurals name="pickup_split_hint">
         <item quantity="one">About %1$d player each, mixing roles and past form so the sides are even. You can move anyone after.</item>
         <item quantity="other">About %1$d players each, mixing roles and past form so the sides are even. You can move anyone after.</item>

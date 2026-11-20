@@ -61,14 +61,15 @@ internal fun freshDatabase(): DatabaseConfig {
 
 /**
  * A fresh database per test. Push messages go to [push]; the client can open WebSockets. Online auction clocks
- * tick every [auctionSecondMillis].
+ * tick every [auctionSecondMillis], and entry reminders are looked for every [entryReminderEveryMillis].
  */
 fun apiTest(
     push: PushSender = LoggingPushSender,
     auctionSecondMillis: Long = 1000,
+    entryReminderEveryMillis: Long = 15 * 60 * 1000L,
     block: suspend ApplicationTestBuilder.(HttpClient) -> Unit,
 ) = testApplication {
-    val config = ServerConfig(database = freshDatabase(), auctionSecondMillis = auctionSecondMillis)
+    val config = ServerConfig(database = freshDatabase(), auctionSecondMillis = auctionSecondMillis, entryReminderEveryMillis = entryReminderEveryMillis)
     application { module(config, fakeTokens, push) }
     block(
         createClient {

@@ -241,6 +241,11 @@ interface TournamentStore {
     /** False if that team has already asked. */
     suspend fun addOffer(tournamentId: String, profileId: String, teamId: String, offeredBy: String, at: Long): Boolean
     suspend fun removeOffer(tournamentId: String, profileId: String, teamId: String)
+    /**
+     * Tournaments whose entry closes after [from] and by [until], not yet reminded, marked reminded as
+     * they're returned, so each is reminded once.
+     */
+    suspend fun claimReminders(from: Long, until: Long): List<String>
     /** Notes a squad change made after the start. */
     suspend fun addSquadChange(tournamentId: String, teamId: String, profileId: String, added: Boolean, by: String, at: Long)
     suspend fun addOrganiser(tournamentId: String, uid: String, role: OrganiserRole)

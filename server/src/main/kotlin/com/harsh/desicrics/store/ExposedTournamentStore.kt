@@ -31,6 +31,7 @@ import org.jetbrains.exposed.v1.core.greater
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.isNull
+import org.jetbrains.exposed.v1.core.lessEq
 import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -227,6 +228,8 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
                 it[maxPlayers] = settings.maxPlayers
                 it[entryClosesAt] = settings.entryClosesAt
                 it[poolMode] = settings.poolMode
+                // A new closing time gets its own reminder.
+                it[entryReminded] = false
             }
         }
     }
@@ -308,6 +311,14 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
         true
     } catch (e: Exception) {
         if (e.isUniqueViolation()) false else throw e
+    }
+
+    override suspend fun claimReminders(from: Long, until: Long): List<String> = db.query {
+        val due = (TournamentsTable.started eq false) and (TournamentsTable.entryReminded eq false) and
+            (TournamentsTable.entryClosesAt greater from) and (TournamentsTable.entryClosesAt lessEq until)
+        val ids = TournamentsTable.select(TournamentsTable.id).where { due }.map { it[TournamentsTable.id] }
+        if (ids.isNotEmpty()) TournamentsTable.update({ TournamentsTable.id inList ids }) { it[entryReminded] = true }
+        ids
     }
 
     override suspend fun addSquadChange(tournamentId: String, teamId: String, profileId: String, added: Boolean, by: String, at: Long) {

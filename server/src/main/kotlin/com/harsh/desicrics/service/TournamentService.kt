@@ -52,7 +52,8 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 /** What [TournamentService] tells people: the entry's [name] (a team or a player) and whether it's a "team" or "player". */
-typealias TournamentNotice = suspend (uids: Set<String>, kind: NotificationKind, tournamentId: String, tournamentName: String, name: String, detail: String) -> Unit
+typealias TournamentNotice =
+    suspend (uids: Set<String>, kind: NotificationKind, tournamentId: String, tournamentName: String, name: String, detail: String, value: Int?) -> Unit
 
 /**
  * Tournaments: entering teams and players, making fixtures with [TournamentEngine], and working out tables, stats and
@@ -70,7 +71,7 @@ class TournamentService(
     /** Tells followers when a fixture moves. */
     private val onRescheduled: suspend (Match) -> Unit = {},
     /** Tells organisers about entries, and entrants what became of them; see [com.harsh.desicrics.live.Notifier.tournamentNotice]. */
-    private val notify: TournamentNotice = { _, _, _, _, _, _ -> },
+    private val notify: TournamentNotice = { _, _, _, _, _, _, _ -> },
     /** A player is confirmed in the pool, waiting for a team: the tournament's auction takes them too. */
     private val onPoolJoined: suspend (tournamentId: String, profileId: String) -> Unit = { _, _ -> },
     private val clock: () -> Long = System::currentTimeMillis,
@@ -161,6 +162,19 @@ class TournamentService(
             }
         }
         return details(tournamentId)
+    }
+
+    /**
+     * A day before entry closes, tells the organisers how many entries still wait for them, once per closing
+     * time. Run every few minutes; tournaments with nothing waiting are passed over quietly.
+     */
+    suspend fun remindClosing() {
+        val now = clock()
+        for (id in tournaments.claimReminders(now, now + DAY_MILLIS)) {
+            val t = tournaments.get(id) ?: continue
+            val waiting = t.teams.count { it.status == EntryStatus.PENDING } + t.players.count { it.status == EntryStatus.PENDING }
+            if (waiting > 0) tell(t.organiserIds(), NotificationKind.ENTRY_CLOSING, t, t.name, TEAM, value = waiting)
+        }
     }
 
     /** Who can enter, how many, and until when. Fixed once the tournament starts. Raising a limit lets waiting entries in. */
@@ -602,8 +616,8 @@ class TournamentService(
         }
     }
 
-    private suspend fun tell(uids: Set<String>, kind: NotificationKind, tournament: Tournament, name: String, detail: String) {
-        if (uids.isNotEmpty()) notify(uids, kind, tournament.id, tournament.name, name, detail)
+    private suspend fun tell(uids: Set<String>, kind: NotificationKind, tournament: Tournament, name: String, detail: String, value: Int? = null) {
+        if (uids.isNotEmpty()) notify(uids, kind, tournament.id, tournament.name, name, detail, value)
     }
 
     /** The caller runs [teamId], which is entered, and the tournament hasn't started. */
@@ -627,6 +641,7 @@ class TournamentService(
     private companion object {
         const val TEAM = "team"
         const val PLAYER = "player"
+        const val DAY_MILLIS = 24 * 60 * 60 * 1000L
         /** The most tournaments open to join listed at once. */
         const val OPEN_PAGE = 30
     }

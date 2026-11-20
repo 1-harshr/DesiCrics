@@ -219,6 +219,7 @@ private fun NotificationRow(notification: Notification, onClick: () -> Unit) {
             NotificationKind.ENTRY_INVITED -> DesiIcons.Mail to colors.brand
             NotificationKind.ENTRY_PROMOTED -> DesiIcons.Clock to colors.brand
             NotificationKind.SQUAD_OFFER, NotificationKind.SQUAD_JOINED -> DesiIcons.Teams to colors.brand
+            NotificationKind.ENTRY_CLOSING -> DesiIcons.Clock to colors.event.extra
         }
         IconTile(icon, tint = tint, container = tint.copy(alpha = 0.12f))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -257,6 +258,7 @@ fun notificationText(n: Notification): String = when (n.kind) {
     NotificationKind.ENTRY_PROMOTED -> stringResource(Res.string.notification_entry_promoted, n.matchTitle)
     NotificationKind.SQUAD_OFFER -> stringResource(Res.string.notification_squad_offer, n.playerName.orEmpty(), n.matchTitle)
     NotificationKind.SQUAD_JOINED -> stringResource(Res.string.notification_squad_joined, n.playerName.orEmpty(), n.matchTitle)
+    NotificationKind.ENTRY_CLOSING -> pluralStringResource(Res.plurals.notification_entry_closing, n.value ?: 0, n.matchTitle, n.value ?: 0)
 }
 
 @Composable

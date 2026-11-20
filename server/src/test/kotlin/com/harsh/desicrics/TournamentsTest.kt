@@ -554,4 +554,27 @@ class TournamentsTest {
         assertEquals(listOf("Kabir" to true, "Dev" to false), changed.squadChanges.map { it.name to it.added })
         assertTrue(changed.squadChanges.all { it.teamId == two.id })
     }
+
+    @Test
+    fun organisersAreRemindedOnceBeforeEntryCloses() = apiTest(entryReminderEveryMillis = 100) { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev", name = "Dev")
+        val devs = client.team("dev", "Dev XI")
+        val now = System.currentTimeMillis()
+        val soon = client.tournament("asha", CreateTournamentRequest("Soon Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5, entryClosesAt = now + 3_600_000)).tournament
+        val later = client.tournament("asha", CreateTournamentRequest("Later Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5, entryClosesAt = now + 3 * 86_400_000L)).tournament
+        client.enter("dev", soon.id, devs.id)
+        client.enter("dev", later.id, devs.id)
+
+        var closing = emptyList<Notification>()
+        var tries = 0
+        while (closing.isEmpty() && tries++ < 50) {
+            kotlinx.coroutines.delay(100)
+            closing = client.inbox("asha").filter { it.kind == NotificationKind.ENTRY_CLOSING }
+        }
+        assertEquals(listOf(soon.id to 1), closing.map { it.tournamentId to it.value })
+        // Once, not every time the check runs.
+        kotlinx.coroutines.delay(400)
+        assertEquals(1, client.inbox("asha").count { it.kind == NotificationKind.ENTRY_CLOSING })
+    }
 }

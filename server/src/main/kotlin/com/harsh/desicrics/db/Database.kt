@@ -220,6 +220,7 @@ object TournamentsTable : Table("tournaments") {
     val maxPlayers = integer("max_players").nullable()
     val entryClosesAt = long("entry_closes_at").nullable()
     val poolMode = enumerationByName("pool_mode", 10, PoolMode::class)
+    val entryReminded = bool("entry_reminded")
     val started = bool("started")
     val createdBy = varchar("created_by", 128)
     val createdAt = long("created_at")

@@ -145,12 +145,23 @@ class Notifier(
      * team's admins or the player). [name] is the team or player; [detail] says which. Tapping it opens
      * the tournament.
      */
-    suspend fun tournamentNotice(uids: Set<String>, kind: NotificationKind, tournamentId: String, tournamentName: String, name: String, detail: String) {
+    suspend fun tournamentNotice(
+        uids: Set<String>,
+        kind: NotificationKind,
+        tournamentId: String,
+        tournamentName: String,
+        name: String,
+        detail: String,
+        value: Int? = null,
+    ) {
         if (uids.isEmpty()) return
         val at = clock()
         social.addNotifications(
             uids.associateWith {
-                Notification(UUID.randomUUID().toString(), kind, matchId = "", matchTitle = tournamentName, playerName = name, detail = detail, createdAt = at, tournamentId = tournamentId)
+                Notification(
+                    UUID.randomUUID().toString(), kind, matchId = "", matchTitle = tournamentName, playerName = name, value = value, detail = detail,
+                    createdAt = at, tournamentId = tournamentId,
+                )
             },
         )
         val tokens = social.pushTokens(uids).values.flatten()
@@ -164,6 +175,7 @@ class Notifier(
             NotificationKind.SQUAD_PLACED -> "You're in $name's squad for $tournamentName"
             NotificationKind.ENTRY_INVITED -> if (team) "$name is invited to $tournamentName" else "You're invited to play in $tournamentName"
             NotificationKind.ENTRY_WITHDRAWN -> "$name left $tournamentName"
+            NotificationKind.ENTRY_CLOSING -> "Entries for $tournamentName close within a day; $value waiting for you"
             NotificationKind.SQUAD_OFFER -> "$name want you in their squad for $tournamentName"
             NotificationKind.SQUAD_JOINED -> "$name joined your squad for $tournamentName"
             NotificationKind.ENTRY_PROMOTED -> "A place opened in $tournamentName" + if (team) " for $name" else ""

@@ -56,6 +56,8 @@ import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.pingPeriod
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -108,6 +110,12 @@ fun Application.module(
     val account = AccountService(players, teamStore, ExposedSupportStore(database))
     launch { matches.backfillInningsScores() }
     launch { auctions.resumeClocks() }
+    launch {
+        while (isActive) {
+            runCatching { tournaments.remindClosing() }.onFailure { environment.log.warn("Entry reminders failed", it) }
+            delay(config.entryReminderEveryMillis)
+        }
+    }
 
     install(CallLogging)
     install(WebSockets) {
