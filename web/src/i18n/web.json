@@ -1,13 +1,18 @@
 {
-  "web_nav_home": "Home",
-  "web_nav_matches": "Matches",
-  "web_nav_teams": "Teams",
-  "web_nav_tournaments": "Tournaments",
-  "web_nav_me": "You",
   "web_brand": "DesiCrics",
   "web_catalogue_title": "Crease on the web",
   "web_catalogue_body": "Every design-system component, in the current theme.",
   "web_not_found_title": "This page isn't here",
   "web_not_found_body": "The link may be old or typed wrong.",
-  "web_not_found_action": "Go home"
+  "web_not_found_action": "Go home",
+  "web_catalogue_theme": "Theme",
+  "web_theme_system": "System",
+  "web_theme_light": "Light",
+  "web_theme_dark": "Dark",
+  "web_catalogue_buttons": "Buttons",
+  "web_catalogue_matches": "Match cards",
+  "web_catalogue_scoring": "Scoring",
+  "web_catalogue_lists": "Lists and tags",
+  "web_catalogue_stats": "Stats",
+  "web_catalogue_feedback": "Empty, error and offline"
 }

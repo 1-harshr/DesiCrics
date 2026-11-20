@@ -1,0 +1,64 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: 0 var(--space-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font: 600 15px/20px var(--font-body);
+  cursor: pointer;
+  transition: background-color var(--motion-quick) var(--ease-standard), transform var(--motion-quick) var(--ease-standard);
+  text-decoration: none;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.button:active:not(:disabled) { transform: scale(0.98); }
+.button:disabled { cursor: default; }
+.button > svg { flex: none; }
+.full { width: 100%; }
+
+.primary { background: var(--brand); color: var(--on-brand); }
+.primary:hover:not(:disabled) { background: color-mix(in srgb, var(--brand) 88%, var(--ink)); }
+.primary:disabled { background: color-mix(in srgb, var(--brand) 45%, var(--bg)); }
+
+.tonal { background: var(--sunk); color: var(--ink); }
+.tonal .lead { color: var(--brand); }
+.tonal:hover:not(:disabled) { background: color-mix(in srgb, var(--sunk) 80%, var(--line)); }
+
+.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.ghost .lead { color: var(--brand); }
+.ghost:hover:not(:disabled) { background: var(--sunk); }
+
+.hero { background: #fff; color: var(--brand-strong); }
+.hero:hover { background: #eef5f0; }
+.heroSecondary { background: rgb(255 255 255 / 0.16); color: var(--on-brand-strong); }
+.heroSecondary:hover { background: rgb(255 255 255 / 0.24); }
+
+.iconButton {
+  display: inline-grid;
+  place-items: center;
+  width: var(--touch);
+  height: var(--touch);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.iconButton:hover { background: color-mix(in srgb, currentColor 10%, transparent); }
+.frosted { background: rgb(255 255 255 / 0.16); color: var(--on-brand-strong); }
+.frosted:hover { background: rgb(255 255 255 / 0.26); }
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
