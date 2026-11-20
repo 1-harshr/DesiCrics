@@ -23,27 +23,11 @@ export class ApiError extends Error {
   }
 }
 
-/** Gives the signed-in user's Firebase ID token, or null when signed out. Set by the auth layer. */
-let tokenProvider: () => Promise<string | null> = async () => null;
-
-export function setTokenProvider(provider: () => Promise<string | null>) {
-  tokenProvider = provider;
-}
-
-export async function api<T>(path: string, init: { method?: string; body?: unknown; signal?: AbortSignal } = {}): Promise<T> {
-  const token = await tokenProvider();
-  const headers: Record<string, string> = {};
-  if (token) headers.Authorization = `Bearer ${token}`;
-  if (init.body !== undefined) headers["Content-Type"] = "application/json";
-
+/** GETs JSON from the server's public, read-only API. The web app never signs in or changes anything. */
+export async function api<T>(path: string, init: { signal?: AbortSignal } = {}): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${baseUrl}${path}`, {
-      method: init.method ?? "GET",
-      headers,
-      body: init.body === undefined ? undefined : JSON.stringify(init.body),
-      signal: init.signal,
-    });
+    response = await fetch(`${baseUrl}${path}`, { signal: init.signal });
   } catch (e) {
     if (e instanceof DOMException && e.name === "AbortError") throw e;
     throw new ApiError(0, "Network unreachable");
@@ -52,7 +36,6 @@ export async function api<T>(path: string, init: { method?: string; body?: unkno
     const body = (await response.json().catch(() => null)) as ApiErrorBody | null;
     throw new ApiError(response.status, body?.message ?? response.statusText);
   }
-  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
 

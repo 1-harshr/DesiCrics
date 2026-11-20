@@ -34,8 +34,6 @@ import com.harsh.desicrics.store.ExposedSupportStore
 import com.harsh.desicrics.store.ExposedTeamStore
 import com.harsh.desicrics.store.ExposedTournamentStore
 import com.harsh.desicrics.store.ExposedUserStore
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -121,13 +119,10 @@ fun Application.module(
     }
 
     install(CallLogging)
+    // The web app only reads the public routes, so plain GETs are all it needs.
     if (config.webOrigins.isNotEmpty()) {
         install(CORS) {
             config.webOrigins.forEach { allowHost(it.substringAfter("://"), schemes = listOf(it.substringBefore("://"))) }
-            allowHeader(HttpHeaders.Authorization)
-            allowHeader(HttpHeaders.ContentType)
-            allowMethod(HttpMethod.Put)
-            allowMethod(HttpMethod.Delete)
         }
     }
     install(WebSockets) {

@@ -55,8 +55,8 @@ export function CataloguePage() {
         <HeroChips chips={[{ icon: "location_on", text: "Mumbai" }, { icon: "groups", text: "11" }, { icon: "verified", text: "Admin" }]} />
         <HeroStats stats={[{ value: "24", label: s("stats_matches") }, { value: "612", label: s("stats_runs") }, { value: "31", label: s("stats_wickets") }]} />
         <HeroActions>
-          <HeroButton icon="person_add">{s("home_start_action")}</HeroButton>
-          <HeroSecondaryButton icon="share">{s("common_cancel")}</HeroSecondaryButton>
+          <HeroButton icon="dynamic_feed">{s("feed_all")}</HeroButton>
+          <HeroSecondaryButton icon="share">{s("feed_refresh")}</HeroSecondaryButton>
         </HeroActions>
       </Hero>
 
@@ -75,9 +75,9 @@ export function CataloguePage() {
         <section>
           <SectionHeader icon="sports_cricket" title={s("web_catalogue_buttons")} />
           <div className={styles.stack}>
-            <PrimaryButton full trailingIcon="arrow_forward">{s("home_start_action")}</PrimaryButton>
-            <PrimaryButton full loading>{s("home_start_action")}</PrimaryButton>
-            <TonalButton full icon="swap_horiz">{s("home_take_over")}</TonalButton>
+            <PrimaryButton full trailingIcon="arrow_forward">{s("feed_all")}</PrimaryButton>
+            <PrimaryButton full loading>{s("feed_all")}</PrimaryButton>
+            <TonalButton full icon="refresh">{s("feed_refresh")}</TonalButton>
             <GhostButton full icon="share">{s("common_cancel")}</GhostButton>
           </div>
 
