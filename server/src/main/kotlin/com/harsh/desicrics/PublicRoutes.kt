@@ -139,8 +139,9 @@ internal fun tournamentPage(details: TournamentDetails): String {
     val body = buildString {
         append("<h1>${t.name.escapeHtml()}</h1><p class=\"muted\">${listOf(t.city, "${t.oversPerInnings} overs").filter { it.isNotBlank() }.joinToString(" · ").escapeHtml()}</p>")
         details.championId?.let { append("<p class=\"code\">🏆 ${names[it].orEmpty().escapeHtml()}</p>") }
-        if (t.takesTeams || t.takesPlayers) {
-            val who = listOfNotNull("teams".takeIf { t.takesTeams }, "players".takeIf { t.takesPlayers }).joinToString(" and ")
+        val now = System.currentTimeMillis()
+        if (t.takesTeams(now) || t.takesPlayers(now)) {
+            val who = listOfNotNull("teams".takeIf { t.takesTeams(now) }, "players".takeIf { t.takesPlayers(now) }).joinToString(" and ")
             append("<div class=\"card\"><h2>Entries are open</h2><p>This tournament is taking $who. Open this link on your phone with the DesiCrics app to enter.</p></div>")
         }
         details.tables.forEachIndexed { group, table ->

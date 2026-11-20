@@ -9,7 +9,6 @@ import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.StartFixtureRequest
 import com.harsh.desicrics.data.api.ApiConfig
 import com.harsh.desicrics.data.api.DesiCricsApi
-import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.TournamentDetails
 import com.harsh.desicrics.model.TournamentSummary
 
@@ -34,8 +33,7 @@ class TournamentRepository(private val api: DesiCricsApi, private val config: Ap
 
     suspend fun review(id: String, teamId: String, confirm: Boolean): TournamentDetails = api.reviewEntry(id, teamId, confirm)
 
-    suspend fun setEntry(id: String, teamEntry: EntryPolicy, playerEntry: EntryPolicy): TournamentDetails =
-        api.setEntry(id, EntrySettingsRequest(teamEntry, playerEntry))
+    suspend fun setEntry(id: String, settings: EntrySettingsRequest): TournamentDetails = api.setEntry(id, settings)
 
     /** With no [profileId], the caller joins as a player; otherwise an organiser or team admin adds someone. */
     suspend fun addPlayer(id: String, profileId: String? = null, teamId: String? = null, invite: Boolean = false): TournamentDetails =

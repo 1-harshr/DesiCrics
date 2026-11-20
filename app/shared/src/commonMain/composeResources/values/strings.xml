@@ -134,6 +134,14 @@
     <string name="scorecard_out_other">out</string>
 
     <!-- Match result -->
+    <plurals name="entry_up_to_teams">
+        <item quantity="one">Up to %1$d team</item>
+        <item quantity="other">Up to %1$d teams</item>
+    </plurals>
+    <plurals name="entry_up_to_players">
+        <item quantity="one">Up to %1$d player</item>
+        <item quantity="other">Up to %1$d players</item>
+    </plurals>
     <plurals name="match_result_won_by_runs">
         <item quantity="one">%1$s won by %2$d run</item>
         <item quantity="other">%1$s won by %2$d runs</item>
@@ -806,6 +814,18 @@
     <string name="entry_mode_add">Add now</string>
     <string name="entry_mode_invite">Send an invite</string>
     <string name="entry_mode_add_hint">They're in straight away.</string>
+    <string name="entry_limits">Limits</string>
+    <string name="entry_limits_hint">Leave blank for no limit. Anyone asking once it's full joins a waiting list and moves up when a place opens.</string>
+    <string name="entry_max_teams">Most teams</string>
+    <string name="entry_max_players">Most players joining on their own</string>
+    <string name="entry_limits_invalid">Teams can be limited to 2–64, and players to 1–500.</string>
+    <string name="entry_closes">Entries close</string>
+    <string name="entry_closes_never">Open until the tournament starts</string>
+    <string name="entry_closes_clear">Clear</string>
+    <string name="entry_closes_on">Closes %1$s</string>
+    <string name="entry_waitlisted_tag">Waiting list</string>
+    <string name="entry_card_waitlisted">You're on the waiting list</string>
+    <string name="entry_card_waitlisted_hint">The tournament is full. You'll move up when a place opens.</string>
     <string name="entry_mode_invite_hint">They're in once they accept. Only people on the app can accept.</string>
     <string name="tournament_create_action">Create tournament</string>
     <string name="tournament_create_failed">Couldn't create the tournament. Check the details and your connection.</string>
@@ -1258,6 +1278,7 @@
     <string name="notification_entry_invited_team">%1$s is invited to %2$s</string>
     <string name="notification_entry_invited_player">You're invited to play in %1$s</string>
     <string name="notification_entry_withdrawn">%1$s left %2$s</string>
+    <string name="notification_entry_promoted">A place opened in %1$s. The organisers will confirm your entry.</string>
 
     <!-- Phase 7 · wagon wheel -->
     <string name="scoring_field_description">Where the next shot went. Tap a part of the field, then the runs.</string>

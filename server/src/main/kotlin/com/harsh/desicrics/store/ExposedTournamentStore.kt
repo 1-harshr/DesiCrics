@@ -8,7 +8,7 @@ import com.harsh.desicrics.db.TournamentPlayersTable
 import com.harsh.desicrics.db.TournamentTeamsTable
 import com.harsh.desicrics.db.TournamentsTable
 import com.harsh.desicrics.db.query
-import com.harsh.desicrics.model.EntryPolicy
+import com.harsh.desicrics.api.EntrySettingsRequest
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.Organiser
 import com.harsh.desicrics.model.OrganiserRole
@@ -49,6 +49,9 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
                 it[startsAt] = tournament.startsAt
                 it[teamEntry] = tournament.teamEntry
                 it[playerEntry] = tournament.playerEntry
+                it[maxTeams] = tournament.maxTeams
+                it[maxPlayers] = tournament.maxPlayers
+                it[entryClosesAt] = tournament.entryClosesAt
                 it[started] = false
                 it[createdBy] = tournament.createdBy
                 it[createdAt] = tournament.createdAt
@@ -105,6 +108,9 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
             startsAt = row[TournamentsTable.startsAt],
             teamEntry = row[TournamentsTable.teamEntry],
             playerEntry = row[TournamentsTable.playerEntry],
+            maxTeams = row[TournamentsTable.maxTeams],
+            maxPlayers = row[TournamentsTable.maxPlayers],
+            entryClosesAt = row[TournamentsTable.entryClosesAt],
             organisers = organisers,
             teams = teams,
             players = players,
@@ -167,11 +173,14 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
         }
     }
 
-    override suspend fun setEntry(tournamentId: String, teamEntry: EntryPolicy, playerEntry: EntryPolicy) {
+    override suspend fun setEntry(tournamentId: String, settings: EntrySettingsRequest) {
         db.query {
             TournamentsTable.update({ TournamentsTable.id eq tournamentId }) {
-                it[this.teamEntry] = teamEntry
-                it[this.playerEntry] = playerEntry
+                it[teamEntry] = settings.teamEntry
+                it[playerEntry] = settings.playerEntry
+                it[maxTeams] = settings.maxTeams
+                it[maxPlayers] = settings.maxPlayers
+                it[entryClosesAt] = settings.entryClosesAt
             }
         }
     }

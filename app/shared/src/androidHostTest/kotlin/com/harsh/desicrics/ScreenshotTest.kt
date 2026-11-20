@@ -474,7 +474,7 @@ class ScreenshotTest {
         )
         return Tournament(
             "x", "Andheri Premier League", "Mumbai", TournamentFormat.ROUND_ROBIN, 8, createdBy = "org",
-            teamEntry = EntryPolicy.APPROVAL, playerEntry = EntryPolicy.OPEN,
+            teamEntry = EntryPolicy.APPROVAL, playerEntry = EntryPolicy.OPEN, maxTeams = 8,
             organisers = listOf(Organiser("org", "Harsh", OrganiserRole.ORGANISER)), teams = teams, players = players,
         )
     }

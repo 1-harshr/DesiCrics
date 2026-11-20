@@ -45,6 +45,9 @@ data class CreateTournamentRequest(
     val startsAt: Long? = null,
     val teamEntry: EntryPolicy = EntryPolicy.APPROVAL,
     val playerEntry: EntryPolicy = EntryPolicy.APPROVAL,
+    val maxTeams: Int? = null,
+    val maxPlayers: Int? = null,
+    val entryClosesAt: Long? = null,
 ) {
     fun validate(): TournamentError? = when {
         name.isBlank() -> TournamentError.NAME_MISSING
@@ -56,7 +59,7 @@ data class CreateTournamentRequest(
         format != TournamentFormat.GROUPS_KNOCKOUT && groups != 1 -> TournamentError.GROUPS_INVALID
         advance !in ADVANCE -> TournamentError.ADVANCE_INVALID
         format == TournamentFormat.GROUPS_KNOCKOUT && advance == 0 -> TournamentError.ADVANCE_INVALID
-        else -> null
+        else -> EntrySettingsRequest(teamEntry, playerEntry, maxTeams, maxPlayers, entryClosesAt).validate()
     }
 
     companion object {
@@ -66,8 +69,26 @@ data class CreateTournamentRequest(
     }
 }
 
+/** Who can enter, how many, and until when; nulls mean no limit and no closing time. */
 @Serializable
-data class EntrySettingsRequest(val teamEntry: EntryPolicy, val playerEntry: EntryPolicy)
+data class EntrySettingsRequest(
+    val teamEntry: EntryPolicy,
+    val playerEntry: EntryPolicy,
+    val maxTeams: Int? = null,
+    val maxPlayers: Int? = null,
+    val entryClosesAt: Long? = null,
+) {
+    fun validate(): TournamentError? = when {
+        maxTeams != null && maxTeams !in 2..MAX_TEAMS -> TournamentError.LIMIT_INVALID
+        maxPlayers != null && maxPlayers !in 1..MAX_PLAYERS -> TournamentError.LIMIT_INVALID
+        else -> null
+    }
+
+    companion object {
+        const val MAX_TEAMS = 64
+        const val MAX_PLAYERS = 500
+    }
+}
 
 /**
  * Enters a saved team. Organisers' entries are confirmed, or with [invite] wait for the team's admins to
@@ -129,4 +150,5 @@ enum class TournamentError(val message: String) {
     GROUPS_INVALID("Group tournaments have 2 to 8 groups; other formats have one"),
     ADVANCE_INVALID("Pick how many teams go through: 1, 2, 4 or 8"),
     TOO_FEW_TEAMS("Not enough teams for this format yet"),
+    LIMIT_INVALID("Teams can be limited to 2–64, and players to 1–500"),
 }

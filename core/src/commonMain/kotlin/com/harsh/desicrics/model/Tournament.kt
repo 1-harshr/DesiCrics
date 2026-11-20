@@ -48,6 +48,8 @@ enum class EntryStatus {
     PENDING,
     /** An organiser asked them; waiting for the team's admin or the player to accept. */
     INVITED,
+    /** Asked when the tournament was full; moves up, in order, when a place opens. */
+    WAITLISTED,
 }
 
 /** Who can enter a tournament, set separately for teams and for players. */
@@ -104,6 +106,12 @@ data class Tournament(
     val teamEntry: EntryPolicy = EntryPolicy.ORGANISERS,
     /** Who can join as a player on their own, into the pool. */
     val playerEntry: EntryPolicy = EntryPolicy.ORGANISERS,
+    /** The most teams; anyone asking after that waits on a list. Null for no limit. */
+    val maxTeams: Int? = null,
+    /** The most players entering on their own, the same way. */
+    val maxPlayers: Int? = null,
+    /** Epoch millis after which nobody can ask to enter. Organisers still can add entries. */
+    val entryClosesAt: Long? = null,
     val organisers: List<Organiser> = emptyList(),
     val teams: List<TournamentTeam> = emptyList(),
     /** The pool and every squad. */
@@ -124,15 +132,23 @@ data class Tournament(
         get() = confirmedTeams.size.let { if (format == TournamentFormat.BEST_OF_THREE) it == 2 else it >= teamsNeeded }
 
     /** Best of three is between exactly two teams, so it takes no more once two are in. */
-    val full: Boolean get() = format == TournamentFormat.BEST_OF_THREE && teams.size >= 2
+    val full: Boolean get() = format == TournamentFormat.BEST_OF_THREE && teams.count { it.status != EntryStatus.WAITLISTED } >= 2
 
     fun isOrganiser(uid: String?): Boolean = organisers.any { it.uid == uid }
 
-    /** Teams can ask or join themselves, so it's worth inviting them. */
-    val takesTeams: Boolean get() = !started && !full && teamEntry != EntryPolicy.ORGANISERS
+    fun entryClosed(now: Long): Boolean = entryClosesAt?.let { now >= it } == true
+
+    /** Teams can ask or join themselves, so it's worth inviting them. When full, they join the waiting list. */
+    fun takesTeams(now: Long): Boolean = !started && !full && !entryClosed(now) && teamEntry != EntryPolicy.ORGANISERS
 
     /** Players can ask or join the pool themselves. */
-    val takesPlayers: Boolean get() = !started && playerEntry != EntryPolicy.ORGANISERS
+    fun takesPlayers(now: Long): Boolean = !started && !entryClosed(now) && playerEntry != EntryPolicy.ORGANISERS
+
+    /** Every team place is taken, by confirmed, waiting or invited teams. */
+    val teamsFull: Boolean get() = maxTeams?.let { max -> teams.count { it.status != EntryStatus.WAITLISTED } >= max } == true
+
+    /** Every place for players entering on their own is taken. */
+    val playersFull: Boolean get() = maxPlayers?.let { max -> players.count { it.fromPool && it.status != EntryStatus.WAITLISTED } >= max } == true
 
     /** Players who entered on their own and aren't in a squad yet. */
     val pool: List<TournamentPlayer> get() = players.filter { it.teamId == null }

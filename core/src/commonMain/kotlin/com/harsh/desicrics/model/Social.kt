@@ -40,6 +40,8 @@ enum class NotificationKind {
     ENTRY_INVITED,
     /** A team or player left the tournament before it started; sent to its organisers. */
     ENTRY_WITHDRAWN,
+    /** A place opened and the waiting team or player moved up, to wait for an organiser. */
+    ENTRY_PROMOTED,
     /** The user was placed in [Notification.playerName]'s squad for the tournament. */
     SQUAD_PLACED,
 }

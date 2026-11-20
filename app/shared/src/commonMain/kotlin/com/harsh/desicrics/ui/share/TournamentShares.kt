@@ -1,5 +1,6 @@
 package com.harsh.desicrics.ui.share
 
+import com.harsh.desicrics.util.nowMillis
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import com.harsh.desicrics.model.FixtureInfo
@@ -532,7 +533,7 @@ class AnnouncementShare(private val details: TournamentDetails) : ShareContent {
             format = stringResource(t.format.label),
             overs = oversText(t.oversPerInnings),
             teams = t.confirmedTeams.size,
-            entriesOpen = t.takesTeams || t.takesPlayers,
+            entriesOpen = t.takesTeams(nowMillis()) || t.takesPlayers(nowMillis()),
             organisers = t.organisers.map { it.name }.filter { it.isNotBlank() }.joinToString().ifEmpty { null },
         )
     }

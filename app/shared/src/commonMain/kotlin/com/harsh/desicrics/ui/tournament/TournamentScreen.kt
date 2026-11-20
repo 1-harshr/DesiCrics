@@ -109,6 +109,7 @@ import com.harsh.desicrics.ui.text.pickerMoment
 import com.harsh.desicrics.ui.text.formatDayAndTime
 import com.harsh.desicrics.ui.text.oversText
 import com.harsh.desicrics.util.format2
+import com.harsh.desicrics.util.nowMillis
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -223,7 +224,7 @@ fun TournamentScreen(
         }
         is TournamentSheet.Schedule -> ScheduleSheet(current.match.scheduledAt, onSave = { at -> viewModel.schedule(current.match.id, at); close() }, onDismiss = close)
         TournamentSheet.EntrySettings -> state.details?.let { details ->
-            EntrySettingsSheet(details.tournament, onSave = { teams, players -> viewModel.setEntry(teams, players); close() }, onDismiss = close)
+            EntrySettingsSheet(details.tournament, onSave = { viewModel.setEntry(it); close() }, onDismiss = close)
         }
         is TournamentSheet.AddPlayer -> {
             LaunchedEffect(current.teamId) { viewModel.loadSquadSource(current.teamId?.takeIf(state::runs)) }
@@ -245,11 +246,11 @@ fun TournamentScreen(
                 SheetOption(stringResource(Res.string.entry_invite_teams), stringResource(Res.string.entry_invite_teams_hint)) {
                     inviteTeams?.let(share)
                     close()
-                }.takeIf { state.details?.tournament?.takesTeams == true },
+                }.takeIf { state.details?.tournament?.takesTeams(nowMillis()) == true },
                 SheetOption(stringResource(Res.string.entry_invite_players), stringResource(Res.string.entry_invite_players_hint)) {
                     invitePlayers?.let(share)
                     close()
-                }.takeIf { state.details?.tournament?.takesPlayers == true },
+                }.takeIf { state.details?.tournament?.takesPlayers(nowMillis()) == true },
                 SheetOption(stringResource(Res.string.match_share_link), stringResource(Res.string.poster_share_link_hint)) {
                     shareText?.let(share)
                     close()
@@ -345,7 +346,7 @@ internal fun TournamentContent(
         val tabs = TournamentTab.entries.filter {
             when (it) {
                 TournamentTab.TABLE -> details.tables.isNotEmpty()
-                TournamentTab.PLAYERS -> state.isOrganiser || t.players.isNotEmpty() || t.takesPlayers
+                TournamentTab.PLAYERS -> state.isOrganiser || t.players.isNotEmpty() || t.takesPlayers(nowMillis())
                 else -> true
             }
         }
@@ -588,8 +589,15 @@ private fun EntryRow(
         subtitle = team.group?.let { stringResource(Res.string.tournament_group, groupName(it)) },
         leading = { Avatar(team.name, size = 40) },
         // Nothing to show on the right leaves room for the chevron that says the row opens the team.
-        trailing = if (!canReview && !pending && !invited && onWithdraw == null) null else ({
-            if (canReview && invited) {
+        trailing = if (!canReview && team.status == EntryStatus.CONFIRMED && onWithdraw == null) null else ({
+            if (canReview && team.status == EntryStatus.WAITLISTED) {
+                Tag(stringResource(Res.string.entry_waitlisted_tag), tone = TagTone.NEUTRAL, icon = DesiIcons.Clock)
+                TextButton(onClick = { onReview(team.teamId, true) }) {
+                    Text(stringResource(Res.string.tournament_confirm), style = DesiTheme.type.button, color = DesiTheme.colors.brand)
+                }
+            } else if (team.status == EntryStatus.WAITLISTED) {
+                Tag(stringResource(Res.string.entry_waitlisted_tag), tone = TagTone.NEUTRAL, icon = DesiIcons.Clock)
+            } else if (canReview && invited) {
                 TextButton(onClick = { onReview(team.teamId, false) }) {
                     Text(stringResource(Res.string.entry_cancel_invite), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
                 }

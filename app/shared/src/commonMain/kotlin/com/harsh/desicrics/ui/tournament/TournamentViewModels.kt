@@ -3,12 +3,12 @@ package com.harsh.desicrics.ui.tournament
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.api.CreateTournamentRequest
+import com.harsh.desicrics.api.EntrySettingsRequest
 import com.harsh.desicrics.data.AuctionRepository
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.data.TournamentRepository
 import com.harsh.desicrics.model.AuctionDetails
-import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
@@ -19,6 +19,7 @@ import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.model.TournamentTeam
 import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.ui.teams.attempt
+import com.harsh.desicrics.util.nowMillis
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -97,10 +98,10 @@ data class TournamentUiState(
     val myEntry: TournamentPlayer? get() = details?.tournament?.entryOf(myId)
 
     /** Someone who isn't an organiser can ask to enter a team they run. */
-    val canEnterTeam: Boolean get() = !isOrganiser && details?.tournament?.takesTeams == true && registrable.isNotEmpty()
+    val canEnterTeam: Boolean get() = !isOrganiser && details?.tournament?.takesTeams(nowMillis()) == true && registrable.isNotEmpty()
 
     /** Anyone not in yet can join as a player while players can enter. */
-    val canJoinAsPlayer: Boolean get() = myEntry == null && details?.tournament?.takesPlayers == true
+    val canJoinAsPlayer: Boolean get() = myEntry == null && details?.tournament?.takesPlayers(nowMillis()) == true
 
     fun runs(teamId: String): Boolean = myTeams.any { it.id == teamId && it.myRole == TeamRole.ADMIN }
 
@@ -204,7 +205,7 @@ class TournamentViewModel(
 
     fun addOrganiser(profileId: String) = act { repository.addOrganiser(tournamentId, profileId) }
 
-    fun setEntry(teamEntry: EntryPolicy, playerEntry: EntryPolicy) = act { repository.setEntry(tournamentId, teamEntry, playerEntry) }
+    fun setEntry(settings: EntrySettingsRequest) = act { repository.setEntry(tournamentId, settings) }
 
     fun joinAsPlayer() = act { repository.addPlayer(tournamentId) }
 

@@ -92,6 +92,9 @@ class TournamentService(
             startsAt = request.startsAt,
             teamEntry = request.teamEntry,
             playerEntry = request.playerEntry,
+            maxTeams = request.maxTeams,
+            maxPlayers = request.maxPlayers,
+            entryClosesAt = request.entryClosesAt,
             organisers = listOf(Organiser(user.uid, "", OrganiserRole.ORGANISER)),
         )
         tournaments.create(tournament)
@@ -116,11 +119,13 @@ class TournamentService(
         )
     }
 
-    /** Who can enter, for teams and for players. Fixed once the tournament starts. */
+    /** Who can enter, how many, and until when. Fixed once the tournament starts. Raising a limit lets waiting entries in. */
     suspend fun setEntry(user: FirebasePrincipal, tournamentId: String, request: EntrySettingsRequest): TournamentDetails {
+        request.validate()?.let { throw ApiException(HttpStatusCode.BadRequest, it.message) }
         val tournament = requireOrganiser(user, tournamentId)
         if (tournament.started) throw ApiException(HttpStatusCode.Conflict, "The tournament has started; entries are closed")
-        tournaments.setEntry(tournamentId, request.teamEntry, request.playerEntry)
+        tournaments.setEntry(tournamentId, request)
+        promote(tournamentId)
         return details(tournamentId)
     }
 
@@ -140,13 +145,16 @@ class TournamentService(
             invite -> throw ApiException(HttpStatusCode.Forbidden, "Only organisers send invites")
             team.roleOf(user.uid) != TeamRole.ADMIN -> throw ApiException(HttpStatusCode.Forbidden, "Only the team's admins can enter it")
             tournament.teamEntry == EntryPolicy.ORGANISERS -> throw ApiException(HttpStatusCode.Forbidden, "Only organisers add teams to this tournament")
+            tournament.entryClosed(clock()) -> throw ApiException(HttpStatusCode.Conflict, "Entries for this tournament have closed")
+            tournament.teamsFull -> EntryStatus.WAITLISTED
             tournament.teamEntry == EntryPolicy.OPEN -> EntryStatus.CONFIRMED
             else -> EntryStatus.PENDING
         }
         val entry = TournamentTeam(teamId, team.name, seed = tournament.teams.size + 1, status = status)
         if (!tournaments.addTeam(tournamentId, entry)) throw ApiException(HttpStatusCode.Conflict, "That team is already in")
-        if (status == EntryStatus.CONFIRMED) fillSquad(user, tournamentId, team)
+        if (status == EntryStatus.CONFIRMED) fillSquad(user.uid, tournamentId, team)
         when {
+            status == EntryStatus.WAITLISTED -> Unit
             invite -> tell(team.admins() - user.uid, NotificationKind.ENTRY_INVITED, tournament, team.name, TEAM)
             organiser -> tell(team.admins() - user.uid, NotificationKind.ENTRY_CONFIRMED, tournament, team.name, TEAM)
             status == EntryStatus.PENDING -> tell(tournament.organiserIds() - user.uid, NotificationKind.ENTRY_REQUEST, tournament, team.name, TEAM)
@@ -163,7 +171,7 @@ class TournamentService(
         if (confirm) {
             tournaments.setTeamStatus(tournamentId, teamId, EntryStatus.CONFIRMED)
             if (entry.status != EntryStatus.CONFIRMED && team != null) {
-                fillSquad(user, tournamentId, team)
+                fillSquad(user.uid, tournamentId, team)
                 tell(team.admins() - user.uid, NotificationKind.ENTRY_CONFIRMED, tournament, team.name, TEAM)
             }
         } else {
@@ -171,6 +179,7 @@ class TournamentService(
             if (entry.status == EntryStatus.PENDING && team != null) {
                 tell(team.admins() - user.uid, NotificationKind.ENTRY_REJECTED, tournament, team.name, TEAM)
             }
+            promote(tournamentId)
         }
         return details(tournamentId)
     }
@@ -182,6 +191,7 @@ class TournamentService(
         val team = requireTeamAdmin(user, tournament, teamId)
         tournaments.removeTeam(tournamentId, teamId)
         tell(tournament.organiserIds() - user.uid, NotificationKind.ENTRY_WITHDRAWN, tournament, team.name, TEAM)
+        promote(tournamentId)
         return details(tournamentId)
     }
 
@@ -191,7 +201,7 @@ class TournamentService(
         val team = requireTeamAdmin(user, tournament, teamId)
         if (tournament.teams.first { it.teamId == teamId }.status != EntryStatus.INVITED) throw ApiException(HttpStatusCode.Conflict, "There's no invite to accept")
         tournaments.setTeamStatus(tournamentId, teamId, EntryStatus.CONFIRMED)
-        fillSquad(user, tournamentId, team)
+        fillSquad(user.uid, tournamentId, team)
         tell(tournament.organiserIds() - user.uid, NotificationKind.ENTRY_JOINED, tournament, team.name, TEAM)
         return details(tournamentId)
     }
@@ -233,10 +243,12 @@ class TournamentService(
             request.invite -> throw ApiException(HttpStatusCode.Forbidden, "Only organisers send invites")
             request.profileId == null && squadTeam == null -> {
                 if (users.get(user.uid) == null) throw ApiException(HttpStatusCode.Conflict, "Set up your profile first")
-                when (tournament.playerEntry) {
-                    EntryPolicy.ORGANISERS -> throw ApiException(HttpStatusCode.Forbidden, "Only organisers add players to this tournament")
-                    EntryPolicy.APPROVAL -> EntryStatus.PENDING
-                    EntryPolicy.OPEN -> EntryStatus.CONFIRMED
+                when {
+                    tournament.playerEntry == EntryPolicy.ORGANISERS -> throw ApiException(HttpStatusCode.Forbidden, "Only organisers add players to this tournament")
+                    tournament.entryClosed(clock()) -> throw ApiException(HttpStatusCode.Conflict, "Entries for this tournament have closed")
+                    tournament.playersFull -> EntryStatus.WAITLISTED
+                    tournament.playerEntry == EntryPolicy.APPROVAL -> EntryStatus.PENDING
+                    else -> EntryStatus.CONFIRMED
                 }
             }
             squadTeam != null && squadTeam.roleOf(user.uid) == TeamRole.ADMIN -> {
@@ -252,6 +264,7 @@ class TournamentService(
             throw ApiException(HttpStatusCode.Conflict, if (where != null) "${person.name} is already in $where's squad" else "${person.name} is already in the tournament")
         }
         when {
+            status == EntryStatus.WAITLISTED -> Unit
             status == EntryStatus.INVITED -> tell(setOf(profileId), NotificationKind.ENTRY_INVITED, tournament, person.name, PLAYER)
             profileId != user.uid && organiser && squadTeam != null ->
                 tell(setOf(profileId), NotificationKind.SQUAD_PLACED, tournament, squadTeam.name, PLAYER)
@@ -304,6 +317,7 @@ class TournamentService(
             }
             else -> throw ApiException(HttpStatusCode.Forbidden, "Only organisers, the player or their team's admins can do that")
         }
+        if (!tournament.started) promote(tournamentId)
         return details(tournamentId)
     }
 
@@ -453,8 +467,45 @@ class TournamentService(
         return StatLeader(name, best.value.second, best.value.first, best.key)
     }
 
-    private suspend fun fillSquad(user: FirebasePrincipal, tournamentId: String, team: SavedTeam) {
-        tournaments.fillSquad(tournamentId, team.id, team.members.map { it.player.profileId }, user.uid, clock())
+    private suspend fun fillSquad(addedBy: String, tournamentId: String, team: SavedTeam) {
+        tournaments.fillSquad(tournamentId, team.id, team.members.map { it.player.profileId }, addedBy, clock())
+    }
+
+    /**
+     * Moves waiting entries up, oldest first, while there's room: straight in where entry is open (and they're
+     * told), otherwise on to the organisers' list to confirm (and both hear).
+     */
+    private suspend fun promote(tournamentId: String) {
+        while (true) {
+            val t = tournament(tournamentId)
+            if (t.started) return
+            val team = t.teams.firstOrNull { it.status == EntryStatus.WAITLISTED }?.takeIf { !t.teamsFull }
+            val player = t.players.firstOrNull { it.status == EntryStatus.WAITLISTED }?.takeIf { !t.playersFull }
+            if (team == null && player == null) return
+            if (team != null) {
+                val open = t.teamEntry == EntryPolicy.OPEN
+                tournaments.setTeamStatus(tournamentId, team.teamId, if (open) EntryStatus.CONFIRMED else EntryStatus.PENDING)
+                val saved = teams.get(team.teamId) ?: continue
+                if (open) {
+                    fillSquad(t.createdBy, tournamentId, saved)
+                    tell(saved.admins(), NotificationKind.ENTRY_CONFIRMED, t, team.name, TEAM)
+                } else {
+                    tell(saved.admins(), NotificationKind.ENTRY_PROMOTED, t, team.name, TEAM)
+                    tell(t.organiserIds(), NotificationKind.ENTRY_REQUEST, t, team.name, TEAM)
+                }
+            }
+            if (player != null) {
+                val open = t.playerEntry == EntryPolicy.OPEN
+                val id = player.player.profileId
+                tournaments.setPlayer(tournamentId, id, null, if (open) EntryStatus.CONFIRMED else EntryStatus.PENDING)
+                if (open) {
+                    tell(setOf(id), NotificationKind.ENTRY_CONFIRMED, t, player.player.name, PLAYER)
+                } else {
+                    tell(setOf(id), NotificationKind.ENTRY_PROMOTED, t, player.player.name, PLAYER)
+                    tell(t.organiserIds(), NotificationKind.ENTRY_REQUEST, t, player.player.name, PLAYER)
+                }
+            }
+        }
     }
 
     private suspend fun tell(uids: Set<String>, kind: NotificationKind, tournament: Tournament, name: String, detail: String) {

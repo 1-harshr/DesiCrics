@@ -6,7 +6,10 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import com.harsh.desicrics.designsystem.component.Avatar
 import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.component.DesiSheet
@@ -31,6 +35,7 @@ import com.harsh.desicrics.designsystem.component.TagTone
 import com.harsh.desicrics.designsystem.component.TonalButton
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.api.EntrySettingsRequest
 import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.Tournament
@@ -38,7 +43,11 @@ import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.social.PlayerLine
+import com.harsh.desicrics.ui.text.epochMillisAt
+import com.harsh.desicrics.ui.text.formatDayAndTime
 import com.harsh.desicrics.ui.text.label
+import com.harsh.desicrics.ui.text.pickerMoment
+import com.harsh.desicrics.util.nowMillis
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -85,21 +94,68 @@ private fun EntryChoice(title: String, selected: EntryPolicy, hint: StringResour
     }
 }
 
-/** The organisers' sheet for changing who can enter, until the tournament starts. */
+/**
+ * The organisers' sheet for who can enter, how many, and until when, until the tournament starts. Picking
+ * a closing day swaps the sheet to a calendar; entry closes at the end of that day.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun EntrySettingsSheet(tournament: Tournament, onSave: (EntryPolicy, EntryPolicy) -> Unit, onDismiss: () -> Unit) {
+internal fun EntrySettingsSheet(tournament: Tournament, onSave: (EntrySettingsRequest) -> Unit, onDismiss: () -> Unit) {
     var teams by remember { mutableStateOf(tournament.teamEntry) }
     var players by remember { mutableStateOf(tournament.playerEntry) }
+    var maxTeams by remember { mutableStateOf(tournament.maxTeams?.toString().orEmpty()) }
+    var maxPlayers by remember { mutableStateOf(tournament.maxPlayers?.toString().orEmpty()) }
+    var closesAt by remember { mutableStateOf(tournament.entryClosesAt) }
+    var picking by remember { mutableStateOf(false) }
     DesiSheet(stringResource(Res.string.entry_title), onDismiss) {
+        if (picking) {
+            val date = rememberDatePickerState(initialSelectedDateMillis = closesAt?.let { pickerMoment(it).dayUtcMillis })
+            DatePicker(date, title = null, headline = null, showModeToggle = false)
+            PrimaryButton(
+                stringResource(Res.string.teams_save_action),
+                onClick = {
+                    closesAt = date.selectedDateMillis?.let { epochMillisAt(it, 23, 59) }
+                    picking = false
+                },
+                enabled = date.selectedDateMillis != null,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            return@DesiSheet
+        }
         EntrySettings(teams, players, onChange = { t, p -> teams = t; players = p })
-        PrimaryButton(stringResource(Res.string.teams_save_action), onClick = { onSave(teams, players) }, modifier = Modifier.fillMaxWidth())
+        SectionHeader(stringResource(Res.string.entry_limits), icon = DesiIcons.Teams)
+        Text(stringResource(Res.string.entry_limits_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        val number = KeyboardOptions(keyboardType = KeyboardType.Number)
+        DesiTextField(maxTeams, { maxTeams = it.filter(Char::isDigit).take(3) }, stringResource(Res.string.entry_max_teams), keyboardOptions = number)
+        DesiTextField(maxPlayers, { maxPlayers = it.filter(Char::isDigit).take(3) }, stringResource(Res.string.entry_max_players), keyboardOptions = number)
+        ListCard {
+            ListRow(
+                title = stringResource(Res.string.entry_closes),
+                subtitle = closesAt?.let { formatDayAndTime(it) } ?: stringResource(Res.string.entry_closes_never),
+                leading = { IconTile(DesiIcons.Calendar) },
+                trailing = if (closesAt == null) null else ({
+                    TextButton(onClick = { closesAt = null }) {
+                        Text(stringResource(Res.string.entry_closes_clear), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
+                    }
+                }),
+                onClick = { picking = true },
+            )
+        }
+        val settings = EntrySettingsRequest(teams, players, maxTeams.toIntOrNull(), maxPlayers.toIntOrNull(), closesAt)
+        val invalid = settings.validate() != null
+        if (invalid) Text(stringResource(Res.string.entry_limits_invalid), style = DesiTheme.type.caption, color = DesiTheme.colors.event.wicket)
+        PrimaryButton(stringResource(Res.string.teams_save_action), onClick = { onSave(settings) }, enabled = !invalid, modifier = Modifier.fillMaxWidth())
     }
 }
 
-/** "Teams: On approval · Players: Open", for the organisers' settings row. */
+/** "Teams: On approval · Players: Open · Up to 8 teams · Closes Sat 12 Dec", for the organisers' settings row. */
 @Composable
-internal fun entrySummary(t: Tournament): String =
-    stringResource(Res.string.entry_summary, stringResource(t.teamEntry.label), stringResource(t.playerEntry.label))
+internal fun entrySummary(t: Tournament): String = listOfNotNull(
+    stringResource(Res.string.entry_summary, stringResource(t.teamEntry.label), stringResource(t.playerEntry.label)),
+    t.maxTeams?.let { pluralStringResource(Res.plurals.entry_up_to_teams, it, it) },
+    t.maxPlayers?.let { pluralStringResource(Res.plurals.entry_up_to_players, it, it) },
+    t.entryClosesAt?.let { stringResource(Res.string.entry_closes_on, formatDayAndTime(it)) },
+).joinToString(" · ")
 
 /** What people do about their entries; the screen wires each to the view model. */
 internal class EntryActions(
@@ -139,6 +195,7 @@ internal fun EntryCard(state: TournamentUiState, actions: EntryActions, onEnterT
                         },
                     )
                     me.status == EntryStatus.PENDING -> Res.string.entry_card_asked to stringResource(Res.string.entry_card_asked_hint)
+                    me.status == EntryStatus.WAITLISTED -> Res.string.entry_card_waitlisted to stringResource(Res.string.entry_card_waitlisted_hint)
                     team != null -> Res.string.entry_card_in to stringResource(Res.string.entry_card_in_squad, team)
                     else -> Res.string.entry_card_in to stringResource(Res.string.entry_card_in_pool)
                 }
@@ -199,7 +256,7 @@ internal fun ColumnScope.Players(
         TonalButton(stringResource(Res.string.entry_add_player), onClick = { onSheet(TournamentSheet.AddPlayer(null)) }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.PersonAdd)
     }
     if (t.players.isEmpty()) {
-        EmptyState(DesiIcons.Teams, stringResource(if (t.takesPlayers) Res.string.entry_no_players_open else Res.string.entry_no_players))
+        EmptyState(DesiIcons.Teams, stringResource(if (t.takesPlayers(nowMillis())) Res.string.entry_no_players_open else Res.string.entry_no_players))
     }
     val waiting = t.players.filter { it.status != EntryStatus.CONFIRMED }
     if (waiting.isNotEmpty()) {
@@ -209,6 +266,8 @@ internal fun ColumnScope.Players(
                 PlayerEntryRow(entry, i > 0, onOpenPlayer) {
                     val invited = entry.status == EntryStatus.INVITED
                     when {
+                        entry.status == EntryStatus.WAITLISTED && !organiser ->
+                            Tag(stringResource(Res.string.entry_waitlisted_tag), tone = TagTone.NEUTRAL, icon = DesiIcons.Clock)
                         organiser && invited -> TextButton(onClick = { onRemove(entry.player.profileId) }) {
                             Text(stringResource(Res.string.entry_cancel_invite), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
                         }

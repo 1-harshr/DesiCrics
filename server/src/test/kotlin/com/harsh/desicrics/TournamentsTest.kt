@@ -414,4 +414,46 @@ class TournamentsTest {
         val started = client.post("/tournaments/${cup.id}/start") { bearerAuth("test-asha") }.body<TournamentDetails>().tournament
         assertEquals(listOf("Team 1", "Team 2"), started.teams.map { it.name })
     }
+
+    @Test
+    fun fullTournamentsKeepAWaitingListAndEntriesClose() = apiTest { client ->
+        for ((uid, name) in listOf("asha" to "Asha", "dev" to "Dev", "kabir" to "Kabir", "ravi" to "Ravi", "neel" to "Neel", "isha" to "Isha", "om" to "Om")) {
+            client.setUpProfile(uid, name = name)
+        }
+        val devs = client.team("dev", "Dev XI")
+        val kabirs = client.team("kabir", "Kabir XI")
+        val ravis = client.team("ravi", "Ravi XI")
+        val cup = client.tournament(
+            "asha",
+            CreateTournamentRequest(
+                "Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5,
+                teamEntry = EntryPolicy.OPEN, playerEntry = EntryPolicy.APPROVAL, maxTeams = 2, maxPlayers = 1,
+            ),
+        ).tournament
+        client.enter("dev", cup.id, devs.id)
+        client.enter("kabir", cup.id, kabirs.id)
+        val full = client.enter("ravi", cup.id, ravis.id).body<TournamentDetails>().tournament
+        assertEquals(EntryStatus.WAITLISTED, full.teams.single { it.teamId == ravis.id }.status)
+
+        // Dev withdraws, so Ravi's team moves up and, entry being open, is straight in.
+        val moved = client.delete("/tournaments/${cup.id}/teams/${devs.id}") { bearerAuth("test-dev") }.body<TournamentDetails>().tournament
+        assertEquals(EntryStatus.CONFIRMED, moved.teams.single { it.teamId == ravis.id }.status)
+        assertEquals(listOf("ravi"), moved.squad(ravis.id).map { it.player.profileId })
+        assertEquals(listOf(NotificationKind.ENTRY_CONFIRMED), client.inbox("ravi").map { it.kind })
+
+        // One player place: Neel's request takes it and Isha waits; turning Neel down moves her up to be confirmed.
+        client.addPlayer("neel", cup.id)
+        assertEquals(EntryStatus.WAITLISTED, client.addPlayer("isha", cup.id).body<TournamentDetails>().tournament.entryOf("isha")!!.status)
+        val next = client.delete("/tournaments/${cup.id}/players/neel") { bearerAuth("test-asha") }.body<TournamentDetails>().tournament
+        assertEquals(EntryStatus.PENDING, next.entryOf("isha")!!.status)
+        assertEquals(listOf(NotificationKind.ENTRY_PROMOTED), client.inbox("isha").map { it.kind })
+        assertEquals(NotificationKind.ENTRY_REQUEST, client.inbox("asha").first().kind)
+
+        // Raising the limit lets the next one in; closing entry stops anyone new asking.
+        val invalid = EntrySettingsRequest(EntryPolicy.OPEN, EntryPolicy.APPROVAL, maxTeams = 1)
+        assertEquals(HttpStatusCode.BadRequest, client.put("/tournaments/${cup.id}/entry") { bearerAuth("test-asha"); jsonBody(invalid) }.status)
+        val closed = EntrySettingsRequest(EntryPolicy.OPEN, EntryPolicy.APPROVAL, maxTeams = 2, maxPlayers = 1, entryClosesAt = 1)
+        client.put("/tournaments/${cup.id}/entry") { bearerAuth("test-asha"); jsonBody(closed) }
+        assertEquals(HttpStatusCode.Conflict, client.addPlayer("om", cup.id).status)
+    }
 }

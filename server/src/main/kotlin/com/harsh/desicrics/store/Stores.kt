@@ -1,5 +1,6 @@
 package com.harsh.desicrics.store
 
+import com.harsh.desicrics.api.EntrySettingsRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.SupportRequest
 import com.harsh.desicrics.model.AuctionEvent
@@ -8,7 +9,6 @@ import com.harsh.desicrics.model.AuctionStatus
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DirectoryEntry
 import com.harsh.desicrics.model.DirectoryKind
-import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.Match
@@ -221,7 +221,7 @@ interface TournamentStore {
     suspend fun setTeamStatus(tournamentId: String, teamId: String, status: EntryStatus)
     /** Removes the team and its squad; players who entered on their own go back to the pool. */
     suspend fun removeTeam(tournamentId: String, teamId: String)
-    suspend fun setEntry(tournamentId: String, teamEntry: EntryPolicy, playerEntry: EntryPolicy)
+    suspend fun setEntry(tournamentId: String, settings: EntrySettingsRequest)
     /** False if the player is already in the tournament, in the pool or a squad. */
     suspend fun addPlayer(tournamentId: String, profileId: String, teamId: String?, status: EntryStatus, fromPool: Boolean, addedBy: String, at: Long): Boolean
     /**
