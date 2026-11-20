@@ -65,6 +65,25 @@ data class TeamSummary(
     val code: String = "",
 )
 
+/** A team as anyone may see it on the web: its players and matches, without codes or join requests. */
+@Serializable
+data class PublicTeamPage(
+    val team: SavedTeam,
+    /** The latest, newest first. */
+    val matches: List<Match> = emptyList(),
+    /** Every completed match the team has played. */
+    val record: WinLoss = WinLoss(),
+    /** Against each saved team it has played, most played first. */
+    val against: List<RecordAgainst> = emptyList(),
+)
+
+/** Completed matches and how they ended. Abandoned matches count as played but neither won, lost nor tied. */
+@Serializable
+data class WinLoss(val played: Int = 0, val won: Int = 0, val lost: Int = 0, val tied: Int = 0)
+
+@Serializable
+data class RecordAgainst(val opponentId: String, val opponentName: String, val record: WinLoss)
+
 /** How two saved teams have done against each other in completed matches. */
 @Serializable
 data class HeadToHead(

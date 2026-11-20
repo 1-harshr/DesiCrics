@@ -1,0 +1,83 @@
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+a.card, button.card { display: block; width: 100%; text-align: left; transition: border-color var(--motion-quick) var(--ease-standard); }
+a.card:hover, button.card:hover { border-color: color-mix(in srgb, var(--brand) 40%, var(--line)); }
+
+.liveDot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--event-wicket);
+  flex: none;
+}
+.liveDot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--event-wicket);
+  animation: pulse 1.6s var(--ease-standard) infinite;
+}
+@keyframes pulse {
+  from { transform: scale(1); opacity: 0.8; }
+  to { transform: scale(2.6); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .liveDot::after { animation: none; opacity: 0; } }
+
+.liveBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--event-wicket);
+  font: 600 12px/16px var(--font-body);
+  letter-spacing: 0.1em;
+}
+
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--brand-soft);
+  color: var(--brand);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ringed { box-shadow: 0 0 0 3px #fff; }
+
+.sectionLabel {
+  color: var(--muted);
+  font: 600 12px/16px var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Match card */
+.matchTop { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); min-height: 20px; }
+.matchMeta { color: var(--muted); font: 400 13px/18px var(--font-body); text-align: right; }
+.teams { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-3); }
+.side { min-width: 0; }
+.sideName { display: flex; align-items: center; gap: var(--space-1); font: 600 17px/24px var(--font-body); }
+.sideNameText { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sideName svg { color: var(--brand); flex: none; }
+.sideScore { margin-top: var(--space-1); font: 700 32px/36px var(--font-display); font-variant-numeric: tabular-nums; }
+.sideNote { color: var(--muted); font: 400 13px/18px var(--font-body); }
+.dim .sideName, .dim .sideScore { color: var(--muted); }
+.footer { margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--line); font: 400 14px/20px var(--font-body); }
+.resultStrip {
+  margin: var(--space-3) calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
+  padding: var(--space-3) var(--space-4);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--brand-soft);
+  color: var(--brand);
+  font: 600 14px/20px var(--font-body);
+}
+.resultNeutral { background: var(--sunk); color: var(--ink); }
