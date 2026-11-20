@@ -21,7 +21,9 @@ import com.harsh.desicrics.ui.auction.AuctionUiState
 import com.harsh.desicrics.ui.auction.AuctionViewModel
 import androidx.lifecycle.viewModelScope
 import io.ktor.client.HttpClient
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.job
+import kotlinx.coroutines.runBlocking
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -63,7 +65,8 @@ class AuctionViewModelTest {
 
     @AfterTest
     fun tearDown() {
-        created.forEach { it.viewModelScope.cancel() }
+        // Waits for the feed to wind down too: its last step comes back to Main from the network's thread.
+        runBlocking { created.forEach { it.viewModelScope.coroutineContext.job.cancelAndJoin() } }
         Dispatchers.resetMain()
     }
 
