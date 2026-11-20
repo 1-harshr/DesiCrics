@@ -91,6 +91,8 @@ import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.components.formatPublicCode
 import com.harsh.desicrics.ui.match.OptionsSheet
 import com.harsh.desicrics.ui.match.SheetOption
+import com.harsh.desicrics.ui.share.ShareStudio
+import com.harsh.desicrics.ui.share.SquadShare
 import com.harsh.desicrics.ui.system.rememberImagePicker
 import com.harsh.desicrics.ui.system.rememberShareText
 import com.harsh.desicrics.ui.text.label
@@ -106,6 +108,7 @@ private sealed interface TeamSheet {
     data object Rename : TeamSheet
     data class Member(val member: TeamMember) : TeamSheet
     data class ConfirmRemove(val member: TeamMember) : TeamSheet
+    data object Squad : TeamSheet
 }
 
 @Composable
@@ -144,6 +147,7 @@ fun TeamScreen(
         onDeclineRequest = viewModel::declineJoinRequest,
         onChangeLogo = pickLogo,
         onCompare = viewModel::compareWith,
+        onShareSquad = { sheet = TeamSheet.Squad },
         onLeave = { viewModel.leave(onBack) },
         onRetry = viewModel::retry,
     )
@@ -210,6 +214,11 @@ fun TeamScreen(
                 onDismiss = close,
             )
         }
+        TeamSheet.Squad -> ShareStudio(
+            remember(team) { listOf(SquadShare(team)) },
+            onDismiss = close,
+            title = stringResource(Res.string.share_squad_title),
+        )
         is TeamSheet.ConfirmRemove -> DesiSheet(
             stringResource(Res.string.team_confirm_remove, current.member.player.name, team.name),
             close,
@@ -234,6 +243,7 @@ fun TeamContent(
     onMember: (TeamMember) -> Unit,
     onCompare: (String) -> Unit,
     onLeave: () -> Unit,
+    onShareSquad: () -> Unit = {},
     onFollow: () -> Unit = {},
     onToggleJoinRequest: () -> Unit = {},
     onAcceptRequest: (profileId: String) -> Unit = {},
@@ -288,6 +298,7 @@ fun TeamContent(
             title = team.name,
             onBack = onBack,
             actions = {
+                if (team.members.isNotEmpty()) HeroIconButton(DesiIcons.Share, stringResource(Res.string.share_squad_action), onShareSquad)
                 if (state.myRole != null) HeroIconButton(DesiIcons.Settings, stringResource(Res.string.team_settings), { settings = true })
             },
             hero = {
