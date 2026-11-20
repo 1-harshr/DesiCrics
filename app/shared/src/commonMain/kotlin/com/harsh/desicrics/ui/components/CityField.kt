@@ -1,6 +1,8 @@
 package com.harsh.desicrics.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
@@ -52,6 +54,7 @@ fun CityField(
 ) {
     var focused by remember { mutableStateOf(false) }
     var suggestions by remember { mutableStateOf(emptyList<CitySuggestion>()) }
+    val suggestionsInView = remember { BringIntoViewRequester() }
     LaunchedEffect(value, focused) {
         val query = value.trim()
         if (!focused || query.length < MIN_QUERY) {
@@ -83,7 +86,9 @@ fun CityField(
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = imeAction),
         )
         if (focused && shown.isNotEmpty()) {
-            CitySuggestions(shown, onPick = {
+            // Fields low on a screen would leave the list under the keyboard.
+            LaunchedEffect(shown) { suggestionsInView.bringIntoView() }
+            CitySuggestions(shown, Modifier.bringIntoViewRequester(suggestionsInView), onPick = {
                 onValueChange(it.name)
                 suggestions = emptyList()
             })
@@ -92,8 +97,8 @@ fun CityField(
 }
 
 @Composable
-internal fun CitySuggestions(suggestions: List<CitySuggestion>, onPick: (CitySuggestion) -> Unit) {
-    ListCard {
+internal fun CitySuggestions(suggestions: List<CitySuggestion>, modifier: Modifier = Modifier, onPick: (CitySuggestion) -> Unit) {
+    ListCard(modifier) {
         suggestions.forEachIndexed { index, city ->
             ListRow(
                 city.name,

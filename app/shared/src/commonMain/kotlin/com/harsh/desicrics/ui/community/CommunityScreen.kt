@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.community
+import androidx.compose.foundation.layout.imePadding
 import com.harsh.desicrics.ui.components.CityField
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.component.ErrorState
@@ -102,7 +103,7 @@ fun CommunityScreen(
 
     DesiScaffold(title = stringResource(Res.string.community_title), onBack = onBack) { padding ->
         Column(
-            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = space.screen, vertical = space.s4),
+            Modifier.fillMaxSize().padding(padding).imePadding().verticalScroll(rememberScrollState()).padding(horizontal = space.screen, vertical = space.s4),
             verticalArrangement = Arrangement.spacedBy(space.s3),
         ) {
             CityField(

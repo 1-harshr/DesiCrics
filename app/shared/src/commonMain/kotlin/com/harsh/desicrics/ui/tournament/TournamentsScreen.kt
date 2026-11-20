@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.tournament
+import androidx.compose.foundation.layout.imePadding
 import com.harsh.desicrics.ui.components.CityField
 import com.harsh.desicrics.designsystem.component.LocalNavBarClearance
 import com.harsh.desicrics.designsystem.component.ErrorBanner
@@ -103,7 +104,7 @@ fun TournamentsContent(
     val space = DesiTheme.space
     DesiScaffold(title = stringResource(Res.string.tournaments_title), onBack = onBack) { padding ->
         LazyColumn(
-            Modifier.fillMaxSize().padding(padding),
+            Modifier.fillMaxSize().padding(padding).imePadding(),
             contentPadding = PaddingValues(start = space.screen, top = space.s4, end = space.screen, bottom = space.s4 + LocalNavBarClearance.current),
             verticalArrangement = Arrangement.spacedBy(space.s3),
         ) {
