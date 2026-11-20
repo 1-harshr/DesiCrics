@@ -73,8 +73,8 @@ only members or organisers see in the app.
 | ✅ `GET /public/matches/{id}`, `GET /public/tournaments/{id}` | W1 |
 | ✅ `/public/matches/{id}/live` WebSocket | W1 |
 | ✅ The proxy serves the web app to browsers loading a page, and `/health` for uptime monitors | W1 |
-| Public match lists (live, recent, upcoming, by city), tournament lists, search | W2 |
-| Public team and player pages, player stats | W2 |
+| ✅ Public match lists (live, recent, upcoming, by city), tournament lists, search | W2 |
+| ✅ Public team and player pages, player stats | W2 |
 | Public auction feed for watching | W3 |
 
 ---
@@ -117,11 +117,11 @@ scorecard in the browser with `:core`.
 
 **Goal:** someone with no link can find a match, a team or a player and follow along.
 
-- ⬜ Home: live now, then recent results and upcoming fixtures, filtered by city
-- ⬜ Tournaments: ongoing, upcoming and finished, by city
-- ⬜ Search across matches, teams, players and tournaments
-- ⬜ Team page: squad, recent results, record against other teams
-- ⬜ Player page: career, season and format stats, form, recent matches
+- ✅ Home: live now, upcoming fixtures and recent results, filtered by city, with older results a page at a time
+- ✅ Tournaments: under way, coming up and finished, by city
+- ✅ Search across teams, players and matches (the server's search doesn't cover tournaments yet)
+- 🟡 Team page: squad and latest matches with won and lost. Record against each other team is still to do
+- 🟡 Player page: career stats by match length, form, badges, teams and recent matches. No season filter yet
 
 **Exit:** a parent searches for their child's team, opens it, and follows its live match.
 
