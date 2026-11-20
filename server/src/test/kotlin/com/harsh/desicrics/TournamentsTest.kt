@@ -13,6 +13,7 @@ import com.harsh.desicrics.api.AddTournamentPlayerRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.EnterTeamRequest
 import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.api.PickupTeamsRequest
 import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.ReviewEntryRequest
@@ -513,5 +514,23 @@ class TournamentsTest {
         client.put("/tournaments/${cup.id}/entry") { bearerAuth("test-asha"); jsonBody(EntrySettingsRequest(EntryPolicy.APPROVAL, EntryPolicy.OPEN)) }
         client.place("asha", cup.id, "kabir", null)
         assertEquals(HttpStatusCode.Conflict, ask("ravi", ravis.id).status)
+    }
+
+    @Test
+    fun organisersMakePickupTeamsFromThePool() = apiTest { client ->
+        val people = listOf("dev", "kabir", "ravi", "neel")
+        client.setUpProfile("asha")
+        people.forEach { client.setUpProfile(it, name = it.replaceFirstChar(Char::uppercase)) }
+        val cup = client.tournament("asha", CreateTournamentRequest("Sunday Pickup", format = TournamentFormat.ROUND_ROBIN, oversPerInnings = 5, playerEntry = EntryPolicy.OPEN)).tournament
+        people.forEach { client.addPlayer(it, cup.id) }
+        suspend fun pickup(uid: String, request: PickupTeamsRequest) = client.post("/tournaments/${cup.id}/pickup") { bearerAuth("test-$uid"); jsonBody(request) }
+
+        assertEquals(HttpStatusCode.Forbidden, pickup("dev", PickupTeamsRequest(listOf("Reds", "Blues"))).status)
+        assertEquals(HttpStatusCode.BadRequest, pickup("asha", PickupTeamsRequest(listOf("Reds", "reds"))).status)
+        val made = pickup("asha", PickupTeamsRequest(listOf("Reds", "Blues"))).body<TournamentDetails>().tournament
+        assertEquals(listOf("Reds", "Blues"), made.confirmedTeams.map { it.name })
+        assertTrue(made.pool.isEmpty())
+        assertEquals(listOf(2, 2), made.confirmedTeams.map { made.squad(it.teamId).size })
+        assertEquals(listOf(NotificationKind.SQUAD_PLACED), client.inbox("dev").map { it.kind })
     }
 }

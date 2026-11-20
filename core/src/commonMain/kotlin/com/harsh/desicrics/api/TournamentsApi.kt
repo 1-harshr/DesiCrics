@@ -18,6 +18,7 @@ import kotlinx.serialization.Serializable
 //   GET    /tournaments/open?city=                 → List<TournamentSummary> taking teams or players, soonest first
 //   POST   /tournaments                            CreateTournamentRequest → TournamentDetails
 //   GET    /tournaments/{id}                       → TournamentDetails
+//   POST   /tournaments/{id}/pickup                PickupTeamsRequest → TournamentDetails (organisers, before it starts)
 //   PUT    /tournaments/{id}/entry                 EntrySettingsRequest → TournamentDetails (organisers, before it starts)
 //   POST   /tournaments/{id}/teams                 EnterTeamRequest → TournamentDetails (organisers, or a team admin as teamEntry allows)
 //   PUT    /tournaments/{id}/teams/{teamId}        ReviewEntryRequest → TournamentDetails (organisers)
@@ -115,6 +116,25 @@ data class AddTournamentPlayerRequest(val profileId: String? = null, val teamId:
 @Serializable
 data class SquadOfferRequest(val teamId: String)
 
+/**
+ * Teams an organiser makes for the tournament, for players who came on their own: one per name. With
+ * [split], the app shares the pool out between them evenly; otherwise the organiser places players.
+ */
+@Serializable
+data class PickupTeamsRequest(val names: List<String>, val split: Boolean = true) {
+    fun validate(): TournamentError? = when {
+        names.size !in 2..MAX_TEAMS -> TournamentError.PICKUP_INVALID
+        names.any { it.isBlank() || it.trim().length > MAX_NAME } -> TournamentError.PICKUP_INVALID
+        names.map { it.trim().lowercase() }.toSet().size != names.size -> TournamentError.PICKUP_INVALID
+        else -> null
+    }
+
+    companion object {
+        const val MAX_TEAMS = 16
+        const val MAX_NAME = 60
+    }
+}
+
 /** Confirms a waiting player, and puts them in [teamId]'s squad, or back in the pool when it's null. */
 @Serializable
 data class PlacePlayerRequest(val teamId: String? = null)
@@ -160,5 +180,6 @@ enum class TournamentError(val message: String) {
     GROUPS_INVALID("Group tournaments have 2 to 8 groups; other formats have one"),
     ADVANCE_INVALID("Pick how many teams go through: 1, 2, 4 or 8"),
     TOO_FEW_TEAMS("Not enough teams for this format yet"),
+    PICKUP_INVALID("Give 2 to 16 teams, each with its own name"),
     LIMIT_INVALID("Teams can be limited to 2–64, and players to 1–500"),
 }

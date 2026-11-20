@@ -4,6 +4,7 @@ import com.harsh.desicrics.api.EndBeforeStartRequest
 import com.harsh.desicrics.api.AddOrganiserRequest
 import com.harsh.desicrics.api.AddTournamentPlayerRequest
 import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.api.PickupTeamsRequest
 import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.CustomFixtureRequest
@@ -20,6 +21,7 @@ import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.NotificationKind
 import com.harsh.desicrics.model.Organiser
+import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.PoolMode
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.OrganiserRole
@@ -41,6 +43,7 @@ import com.harsh.desicrics.store.TeamStore
 import com.harsh.desicrics.store.TournamentStore
 import com.harsh.desicrics.store.UserStore
 import com.harsh.desicrics.tournament.PlannedFixture
+import com.harsh.desicrics.tournament.SquadSplit
 import com.harsh.desicrics.tournament.TournamentEngine
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.sync.Mutex
@@ -124,6 +127,40 @@ class TournamentService(
             championId = if (tournament.started) TournamentEngine.champion(tournament, fixtures) else null,
             playerOfTournament = playerOfTournament(tournamentId),
         )
+    }
+
+    /**
+     * Makes teams for players who came on their own, run by the organiser, and enters them. With
+     * [PickupTeamsRequest.split] the pool is shared out evenly by [SquadSplit]: strength is career runs, plus
+     * 20 a wicket.
+     */
+    suspend fun pickup(user: FirebasePrincipal, tournamentId: String, request: PickupTeamsRequest): TournamentDetails {
+        request.validate()?.let { throw ApiException(HttpStatusCode.BadRequest, it.message) }
+        val tournament = requireOrganiser(user, tournamentId)
+        if (tournament.started) throw ApiException(HttpStatusCode.Conflict, "The tournament has started; its teams are fixed")
+        if (tournament.format == TournamentFormat.BEST_OF_THREE && tournament.teams.size + request.names.size > 2) {
+            throw ApiException(HttpStatusCode.Conflict, "Best of three is between two teams")
+        }
+        val made = request.names.mapIndexed { i, name ->
+            val id = UUID.randomUUID().toString()
+            withFreshCode { code ->
+                val team = SavedTeam(id, name.trim(), tournament.city, user.uid, members = emptyList(), joinCode = code, code = newPublicCode())
+                teams.create(team, adminId = user.uid, at = clock()).takeIf { it }
+            }
+            tournaments.addTeam(tournamentId, TournamentTeam(id, name.trim(), seed = tournament.teams.size + i + 1, status = EntryStatus.CONFIRMED))
+            id to name.trim()
+        }
+        if (request.split) {
+            val pool = tournament.pool.filter { it.status == EntryStatus.CONFIRMED }.map { it.player }
+            val careers = stats.forProfiles(pool.map { it.profileId }).groupBy { it.profileId }
+            val strength = { p: PlayerSummary -> careers[p.profileId].orEmpty().sumOf { it.runs + 20 * it.wickets } }
+            val names = made.toMap()
+            for ((profileId, teamId) in SquadSplit.split(pool, made.map { it.first }, strength)) {
+                tournaments.setPlayer(tournamentId, profileId, teamId, EntryStatus.CONFIRMED)
+                tell(setOf(profileId) - user.uid, NotificationKind.SQUAD_PLACED, tournament, names.getValue(teamId), PLAYER)
+            }
+        }
+        return details(tournamentId)
     }
 
     /** Who can enter, how many, and until when. Fixed once the tournament starts. Raising a limit lets waiting entries in. */

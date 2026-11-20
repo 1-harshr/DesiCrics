@@ -18,8 +18,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.harsh.desicrics.designsystem.component.Avatar
+import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiCard
 import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.DesiTextField
@@ -36,6 +38,7 @@ import com.harsh.desicrics.designsystem.component.TonalButton
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.api.PickupTeamsRequest
 import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.PoolMode
@@ -314,6 +317,9 @@ internal fun ColumnScope.Players(
         }
     }
     val pool = t.pool.filter { it.status == EntryStatus.CONFIRMED }
+    if (organiser && !t.started && pool.size >= 2) {
+        TonalButton(stringResource(Res.string.pickup_action), onClick = { onSheet(TournamentSheet.Pickup) }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Teams)
+    }
     if (pool.isNotEmpty()) {
         val teamsPick = t.poolMode == PoolMode.TEAMS
         // While teams pick, a team's admin asks players; with more than one team they pick which in a sheet.
@@ -487,5 +493,45 @@ internal fun AskPlayerSheet(state: TournamentUiState, entry: TournamentPlayer, o
                 )
             }
         }
+    }
+}
+
+/**
+ * Pick-up tournaments: the organiser names some teams for the players who came on their own, and has the
+ * app share them out evenly or places them by hand afterwards.
+ */
+@Composable
+internal fun PickupSheet(poolSize: Int, onMake: (names: List<String>, split: Boolean) -> Unit, onDismiss: () -> Unit) {
+    var count by remember { mutableStateOf(2) }
+    var names by remember { mutableStateOf(List(PickupTeamsRequest.MAX_TEAMS) { "" }) }
+    var split by remember { mutableStateOf(true) }
+    val defaults = List(PickupTeamsRequest.MAX_TEAMS) { stringResource(Res.string.pickup_default_name, ('A' + it).toString()) }
+    DesiSheet(stringResource(Res.string.pickup_action), onDismiss, fullHeight = true) {
+        Text(stringResource(Res.string.pickup_teams), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
+        ChoiceChips((2..minOf(8, poolSize)).toList(), selected = count, label = { "$it" }, onSelect = { count = it })
+        repeat(count) { i ->
+            DesiTextField(
+                names[i],
+                { value -> names = names.toMutableList().also { it[i] = value.take(PickupTeamsRequest.MAX_NAME) } },
+                stringResource(Res.string.pickup_team_name, i + 1),
+                placeholder = defaults[i],
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+            )
+        }
+        SegmentedControl(
+            listOf(true, false),
+            selected = split,
+            label = { stringResource(if (it) Res.string.pickup_split else Res.string.pickup_by_hand) },
+            onSelect = { split = it },
+        )
+        Text(
+            if (split) pluralStringResource(Res.plurals.pickup_split_hint, poolSize / count, poolSize / count)
+            else stringResource(Res.string.pickup_by_hand_hint),
+            style = DesiTheme.type.caption,
+            color = DesiTheme.colors.muted,
+        )
+        val chosen = List(count) { names[it].trim().ifEmpty { defaults[it] } }
+        val valid = PickupTeamsRequest(chosen, split).validate() == null
+        PrimaryButton(stringResource(Res.string.pickup_make), onClick = { onMake(chosen, split) }, enabled = valid, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Teams)
     }
 }

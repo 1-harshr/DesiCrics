@@ -7,6 +7,7 @@ import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.CustomFixtureRequest
 import com.harsh.desicrics.api.EnterTeamRequest
 import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.api.PickupTeamsRequest
 import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.ReviewEntryRequest
 import com.harsh.desicrics.api.ScheduleRequest
@@ -44,6 +45,7 @@ fun Route.tournamentRoutes(tournaments: TournamentService) {
             delete("/teams/{teamId}") {
                 call.respond(tournaments.removeTeam(call.user, call.parameters["id"].orEmpty(), call.parameters["teamId"].orEmpty()))
             }
+            post("/pickup") { call.respond(tournaments.pickup(call.user, call.parameters["id"].orEmpty(), call.receive<PickupTeamsRequest>())) }
             put("/entry") { call.respond(tournaments.setEntry(call.user, call.parameters["id"].orEmpty(), call.receive<EntrySettingsRequest>())) }
             route("/players") {
                 post { call.respond(tournaments.addPlayer(call.user, call.parameters["id"].orEmpty(), call.receive<AddTournamentPlayerRequest>())) }

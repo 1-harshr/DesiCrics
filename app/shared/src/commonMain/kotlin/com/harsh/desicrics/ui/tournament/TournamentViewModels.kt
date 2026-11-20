@@ -249,6 +249,8 @@ class TournamentViewModel(
 
     fun addOrganiser(profileId: String) = act { repository.addOrganiser(tournamentId, profileId) }
 
+    fun pickup(names: List<String>, split: Boolean) = act { repository.pickup(tournamentId, names, split) }
+
     fun setEntry(settings: EntrySettingsRequest) = act { repository.setEntry(tournamentId, settings) }
 
     fun joinAsPlayer() = act { repository.addPlayer(tournamentId) }

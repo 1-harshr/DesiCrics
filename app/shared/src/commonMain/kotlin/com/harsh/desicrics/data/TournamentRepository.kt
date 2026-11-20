@@ -4,6 +4,7 @@ import com.harsh.desicrics.api.EndBeforeStartRequest
 import com.harsh.desicrics.api.AddTournamentPlayerRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.api.PickupTeamsRequest
 import com.harsh.desicrics.api.CustomFixtureRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.StartFixtureRequest
@@ -43,6 +44,9 @@ class TournamentRepository(private val api: DesiCricsApi, private val config: Ap
     suspend fun removeOffer(id: String, profileId: String, teamId: String): TournamentDetails = api.removeSquadOffer(id, profileId, teamId)
 
     suspend fun review(id: String, teamId: String, confirm: Boolean): TournamentDetails = api.reviewEntry(id, teamId, confirm)
+
+    /** Teams made from the pool, shared out evenly when [split]. */
+    suspend fun pickup(id: String, names: List<String>, split: Boolean): TournamentDetails = api.pickupTeams(id, PickupTeamsRequest(names, split))
 
     suspend fun setEntry(id: String, settings: EntrySettingsRequest): TournamentDetails = api.setEntry(id, settings)
 
