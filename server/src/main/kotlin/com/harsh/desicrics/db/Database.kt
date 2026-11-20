@@ -18,6 +18,7 @@ import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.NotificationKind
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Stage
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.TournamentFormat
 import com.harsh.desicrics.api.SupportCategory
 import com.harsh.desicrics.model.PlayerRole
@@ -212,7 +213,8 @@ object TournamentsTable : Table("tournaments") {
     val groupCount = integer("group_count")
     val advance = integer("advance")
     val startsAt = long("starts_at").nullable()
-    val registrationOpen = bool("registration_open")
+    val teamEntry = enumerationByName("team_entry", 10, EntryPolicy::class)
+    val playerEntry = enumerationByName("player_entry", 10, EntryPolicy::class)
     val started = bool("started")
     val createdBy = varchar("created_by", 128)
     val createdAt = long("created_at")
@@ -233,6 +235,18 @@ object TournamentTeamsTable : Table("tournament_teams") {
     val groupNo = integer("group_no").nullable()
     val status = enumerationByName("status", 10, EntryStatus::class)
     override val primaryKey = PrimaryKey(tournamentId, teamId)
+}
+
+/** The pool (no team) and every squad; one row per player per tournament. */
+object TournamentPlayersTable : Table("tournament_players") {
+    val tournamentId = reference("tournament_id", TournamentsTable.id, onDelete = ReferenceOption.CASCADE)
+    val playerId = reference("player_id", PlayersTable.id)
+    val teamId = reference("team_id", TeamsTable.id).nullable()
+    val status = enumerationByName("status", 10, EntryStatus::class)
+    val fromPool = bool("from_pool")
+    val addedBy = varchar("added_by", 128)
+    val addedAt = long("added_at")
+    override val primaryKey = PrimaryKey(tournamentId, playerId)
 }
 
 object AuctionsTable : Table("auctions") {
@@ -309,6 +323,7 @@ object NotificationsTable : Table("notifications") {
     val createdAt = long("created_at")
     val readAt = long("read_at").nullable()
     val teamId = varchar("team_id", 36).nullable()
+    val tournamentId = varchar("tournament_id", 36).nullable()
     override val primaryKey = PrimaryKey(id)
 }
 

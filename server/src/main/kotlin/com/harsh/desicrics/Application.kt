@@ -85,7 +85,8 @@ fun Application.module(
     val notifier = Notifier(socialStore, pushSender)
     val statsStore = ExposedStatsStore(database)
     val tournaments = TournamentService(
-        ExposedTournamentStore(database), matchStore, matches, teamStore, players, users, statsStore, onRescheduled = notifier::rescheduled,
+        ExposedTournamentStore(database), matchStore, matches, teamStore, players, users, statsStore,
+        onRescheduled = notifier::rescheduled, notify = notifier::tournamentNotice,
     )
     // The live feed first, so watchers see a ball before anything slower runs.
     matches.listen(live)

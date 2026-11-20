@@ -44,6 +44,30 @@ data class Organiser(val uid: String, val name: String, val role: OrganiserRole)
 @Serializable
 enum class EntryStatus { CONFIRMED, PENDING }
 
+/** Who can enter a tournament, set separately for teams and for players. */
+@Serializable
+enum class EntryPolicy {
+    /** Only organisers add entries. */
+    ORGANISERS,
+    /** Anyone can ask; an organiser confirms or rejects. */
+    APPROVAL,
+    /** Anyone is in straight away. */
+    OPEN,
+}
+
+/**
+ * A player in a tournament: in the pool while [teamId] is null, otherwise in that team's squad. A player is
+ * in one squad per tournament. [fromPool] players entered on their own, so they go back to the pool if
+ * their team leaves; the rest came in with their team and leave with it.
+ */
+@Serializable
+data class TournamentPlayer(
+    val player: PlayerSummary,
+    val teamId: String? = null,
+    val status: EntryStatus = EntryStatus.CONFIRMED,
+    val fromPool: Boolean = false,
+)
+
 /** A saved team entered in a tournament. Lower [seed] is stronger. */
 @Serializable
 data class TournamentTeam(
@@ -70,10 +94,14 @@ data class Tournament(
     val createdBy: String,
     val createdAt: Long = 0,
     val startsAt: Long? = null,
-    /** Team admins can enter their own team, pending an organiser's say-so. */
-    val registrationOpen: Boolean = false,
+    /** Who can enter a team: its admins can ask, or join outright, unless only organisers add teams. */
+    val teamEntry: EntryPolicy = EntryPolicy.ORGANISERS,
+    /** Who can join as a player on their own, into the pool. */
+    val playerEntry: EntryPolicy = EntryPolicy.ORGANISERS,
     val organisers: List<Organiser> = emptyList(),
     val teams: List<TournamentTeam> = emptyList(),
+    /** The pool and every squad. */
+    val players: List<TournamentPlayer> = emptyList(),
     /** Fixtures have been made; the team list is fixed from then on. */
     val started: Boolean = false,
 ) {
@@ -93,6 +121,19 @@ data class Tournament(
     val full: Boolean get() = format == TournamentFormat.BEST_OF_THREE && teams.size >= 2
 
     fun isOrganiser(uid: String?): Boolean = organisers.any { it.uid == uid }
+
+    /** Teams can ask or join themselves, so it's worth inviting them. */
+    val takesTeams: Boolean get() = !started && !full && teamEntry != EntryPolicy.ORGANISERS
+
+    /** Players can ask or join the pool themselves. */
+    val takesPlayers: Boolean get() = !started && playerEntry != EntryPolicy.ORGANISERS
+
+    /** Players who entered on their own and aren't in a squad yet. */
+    val pool: List<TournamentPlayer> get() = players.filter { it.teamId == null }
+
+    fun squad(teamId: String): List<TournamentPlayer> = players.filter { it.teamId == teamId }
+
+    fun entryOf(profileId: String?): TournamentPlayer? = players.firstOrNull { it.player.profileId == profileId }
 }
 
 /** One team's line in a points table. Two points for a win, one for a tie. */

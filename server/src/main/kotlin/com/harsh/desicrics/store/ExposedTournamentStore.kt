@@ -4,13 +4,16 @@ import com.harsh.desicrics.db.PlayersTable
 import com.harsh.desicrics.db.TeamMembersTable
 import com.harsh.desicrics.db.TeamsTable
 import com.harsh.desicrics.db.TournamentOrganisersTable
+import com.harsh.desicrics.db.TournamentPlayersTable
 import com.harsh.desicrics.db.TournamentTeamsTable
 import com.harsh.desicrics.db.TournamentsTable
 import com.harsh.desicrics.db.query
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.Organiser
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Tournament
+import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.model.TournamentTeam
 import kotlinx.serialization.json.Json
@@ -19,6 +22,7 @@ import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
@@ -42,7 +46,8 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
                 it[groupCount] = tournament.groups
                 it[advance] = tournament.advance
                 it[startsAt] = tournament.startsAt
-                it[registrationOpen] = tournament.registrationOpen
+                it[teamEntry] = tournament.teamEntry
+                it[playerEntry] = tournament.playerEntry
                 it[started] = false
                 it[createdBy] = tournament.createdBy
                 it[createdAt] = tournament.createdAt
@@ -74,6 +79,17 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
                     status = it[TournamentTeamsTable.status],
                 )
             }
+        val entries = TournamentPlayersTable.selectAll().where { TournamentPlayersTable.tournamentId eq tournamentId }
+            .orderBy(TournamentPlayersTable.addedAt).toList()
+        val summaries = playerSummaries(entries.map { it[TournamentPlayersTable.playerId] })
+        val players = entries.mapNotNull {
+            TournamentPlayer(
+                player = summaries[it[TournamentPlayersTable.playerId]] ?: return@mapNotNull null,
+                teamId = it[TournamentPlayersTable.teamId],
+                status = it[TournamentPlayersTable.status],
+                fromPool = it[TournamentPlayersTable.fromPool],
+            )
+        }
         Tournament(
             id = row[TournamentsTable.id],
             name = row[TournamentsTable.name],
@@ -86,9 +102,11 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
             createdBy = row[TournamentsTable.createdBy],
             createdAt = row[TournamentsTable.createdAt],
             startsAt = row[TournamentsTable.startsAt],
-            registrationOpen = row[TournamentsTable.registrationOpen],
+            teamEntry = row[TournamentsTable.teamEntry],
+            playerEntry = row[TournamentsTable.playerEntry],
             organisers = organisers,
             teams = teams,
+            players = players,
             started = row[TournamentsTable.started],
         )
     }
@@ -101,7 +119,10 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
         val entered = if (myTeams.isEmpty()) emptySet() else TournamentTeamsTable.select(TournamentTeamsTable.tournamentId)
             .where { TournamentTeamsTable.teamId inList myTeams }
             .map { it[TournamentTeamsTable.tournamentId] }.toSet()
-        val ids = organised + entered
+        val joined = TournamentPlayersTable.select(TournamentPlayersTable.tournamentId)
+            .where { TournamentPlayersTable.playerId eq uid }
+            .map { it[TournamentPlayersTable.tournamentId] }.toSet()
+        val ids = organised + entered + joined
         if (ids.isEmpty()) return@query emptyList()
         val counts = TournamentTeamsTable.selectAll()
             .where { (TournamentTeamsTable.tournamentId inList ids) and (TournamentTeamsTable.status eq EntryStatus.CONFIRMED) }
@@ -138,6 +159,80 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
     override suspend fun removeTeam(tournamentId: String, teamId: String) {
         db.query {
             TournamentTeamsTable.deleteWhere { (TournamentTeamsTable.tournamentId eq tournamentId) and (TournamentTeamsTable.teamId eq teamId) }
+            val inSquad = (TournamentPlayersTable.tournamentId eq tournamentId) and (TournamentPlayersTable.teamId eq teamId)
+            // Players who entered on their own go back to the pool; the rest came with the team.
+            TournamentPlayersTable.update({ inSquad and (TournamentPlayersTable.fromPool eq true) }) { it[this.teamId] = null }
+            TournamentPlayersTable.deleteWhere { inSquad }
+        }
+    }
+
+    override suspend fun setEntry(tournamentId: String, teamEntry: EntryPolicy, playerEntry: EntryPolicy) {
+        db.query {
+            TournamentsTable.update({ TournamentsTable.id eq tournamentId }) {
+                it[this.teamEntry] = teamEntry
+                it[this.playerEntry] = playerEntry
+            }
+        }
+    }
+
+    override suspend fun addPlayer(tournamentId: String, profileId: String, teamId: String?, status: EntryStatus, fromPool: Boolean, addedBy: String, at: Long): Boolean = try {
+        db.query {
+            TournamentPlayersTable.insert {
+                it[this.tournamentId] = tournamentId
+                it[playerId] = profileId
+                it[this.teamId] = teamId
+                it[this.status] = status
+                it[this.fromPool] = fromPool
+                it[this.addedBy] = addedBy
+                it[addedAt] = at
+            }
+        }
+        true
+    } catch (e: Exception) {
+        if (e.isUniqueViolation()) false else throw e
+    }
+
+    override suspend fun fillSquad(tournamentId: String, teamId: String, profileIds: Collection<String>, addedBy: String, at: Long) {
+        db.query {
+            val existing = TournamentPlayersTable.selectAll()
+                .where { (TournamentPlayersTable.tournamentId eq tournamentId) and (TournamentPlayersTable.playerId inList profileIds) }
+                .associate { it[TournamentPlayersTable.playerId] to it[TournamentPlayersTable.teamId] }
+            // Members waiting in the pool join their team; members already in another squad stay there.
+            val pooled = existing.filterValues { it == null }.keys
+            if (pooled.isNotEmpty()) {
+                TournamentPlayersTable.update({
+                    (TournamentPlayersTable.tournamentId eq tournamentId) and (TournamentPlayersTable.playerId inList pooled) and TournamentPlayersTable.teamId.isNull()
+                }) {
+                    it[this.teamId] = teamId
+                    it[status] = EntryStatus.CONFIRMED
+                }
+            }
+            for (profileId in profileIds.filter { it !in existing }) {
+                TournamentPlayersTable.insert {
+                    it[this.tournamentId] = tournamentId
+                    it[playerId] = profileId
+                    it[this.teamId] = teamId
+                    it[status] = EntryStatus.CONFIRMED
+                    it[fromPool] = false
+                    it[this.addedBy] = addedBy
+                    it[addedAt] = at
+                }
+            }
+        }
+    }
+
+    override suspend fun setPlayer(tournamentId: String, profileId: String, teamId: String?, status: EntryStatus) {
+        db.query {
+            TournamentPlayersTable.update({ (TournamentPlayersTable.tournamentId eq tournamentId) and (TournamentPlayersTable.playerId eq profileId) }) {
+                it[this.teamId] = teamId
+                it[this.status] = status
+            }
+        }
+    }
+
+    override suspend fun removePlayer(tournamentId: String, profileId: String) {
+        db.query {
+            TournamentPlayersTable.deleteWhere { (TournamentPlayersTable.tournamentId eq tournamentId) and (playerId eq profileId) }
         }
     }
 
@@ -162,6 +257,7 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
         }
         // Entries nobody confirmed don't play.
         TournamentTeamsTable.deleteWhere { (TournamentTeamsTable.tournamentId eq tournamentId) and (status eq EntryStatus.PENDING) }
+        TournamentPlayersTable.deleteWhere { (TournamentPlayersTable.tournamentId eq tournamentId) and (status eq EntryStatus.PENDING) }
         true
     }
 }

@@ -8,6 +8,7 @@ import com.harsh.desicrics.model.AuctionStatus
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DirectoryEntry
 import com.harsh.desicrics.model.DirectoryKind
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.FollowType
 import com.harsh.desicrics.model.Match
@@ -213,14 +214,26 @@ interface TournamentStore {
     suspend fun create(tournament: Tournament)
     /** With its organisers (named) and entered teams. */
     suspend fun get(tournamentId: String): Tournament?
-    /** Tournaments [uid] organises, or that a team they belong to is in. */
+    /** Tournaments [uid] organises, plays in, or that a team they belong to is in. */
     suspend fun forUser(uid: String): List<TournamentSummary>
     /** False if the team was already entered. */
     suspend fun addTeam(tournamentId: String, team: TournamentTeam): Boolean
     suspend fun setTeamStatus(tournamentId: String, teamId: String, status: EntryStatus)
+    /** Removes the team and its squad; players who entered on their own go back to the pool. */
     suspend fun removeTeam(tournamentId: String, teamId: String)
+    suspend fun setEntry(tournamentId: String, teamEntry: EntryPolicy, playerEntry: EntryPolicy)
+    /** False if the player is already in the tournament, in the pool or a squad. */
+    suspend fun addPlayer(tournamentId: String, profileId: String, teamId: String?, status: EntryStatus, fromPool: Boolean, addedBy: String, at: Long): Boolean
+    /**
+     * Puts [profileIds] in [teamId]'s squad: new players are added, pool players move in, and anyone already
+     * in another squad is left where they are.
+     */
+    suspend fun fillSquad(tournamentId: String, teamId: String, profileIds: Collection<String>, addedBy: String, at: Long)
+    /** Moves a player to [teamId]'s squad, or the pool when it's null. */
+    suspend fun setPlayer(tournamentId: String, profileId: String, teamId: String?, status: EntryStatus)
+    suspend fun removePlayer(tournamentId: String, profileId: String)
     suspend fun addOrganiser(tournamentId: String, uid: String, role: OrganiserRole)
-    /** Fixes the teams' groups and marks the tournament started. False if it already was. */
+    /** Fixes the teams' groups, drops unconfirmed teams and players, and marks it started. False if it already was. */
     suspend fun markStarted(tournamentId: String, teams: List<TournamentTeam>): Boolean
 }
 

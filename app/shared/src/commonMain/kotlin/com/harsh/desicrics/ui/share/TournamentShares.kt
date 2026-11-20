@@ -532,7 +532,7 @@ class AnnouncementShare(private val details: TournamentDetails) : ShareContent {
             format = stringResource(t.format.label),
             overs = oversText(t.oversPerInnings),
             teams = t.confirmedTeams.size,
-            entriesOpen = t.registrationOpen && !t.started,
+            entriesOpen = t.takesTeams || t.takesPlayers,
             organisers = t.organisers.map { it.name }.filter { it.isNotBlank() }.joinToString().ifEmpty { null },
         )
     }

@@ -12,7 +12,10 @@ import com.harsh.desicrics.model.AuctionDetails
 import com.harsh.desicrics.model.AuctionSettings
 import com.harsh.desicrics.api.AddMemberRequest
 import com.harsh.desicrics.api.AddOrganiserRequest
+import com.harsh.desicrics.api.AddTournamentPlayerRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
+import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.DirectoryRequest
 import com.harsh.desicrics.api.LookingForRequest
 import com.harsh.desicrics.api.RespondRequest
@@ -274,6 +277,18 @@ class DesiCricsApi(
 
     suspend fun reviewEntry(id: String, teamId: String, confirm: Boolean): TournamentDetails =
         call { put("$baseUrl/tournaments/$id/teams/$teamId") { it(); json(ReviewEntryRequest(confirm)) } }.body()
+
+    suspend fun setEntry(id: String, request: EntrySettingsRequest): TournamentDetails =
+        call { put("$baseUrl/tournaments/$id/entry") { it(); json(request) } }.body()
+
+    suspend fun addTournamentPlayer(id: String, request: AddTournamentPlayerRequest): TournamentDetails =
+        call { post("$baseUrl/tournaments/$id/players") { it(); json(request) } }.body()
+
+    suspend fun placeTournamentPlayer(id: String, profileId: String, teamId: String?): TournamentDetails =
+        call { put("$baseUrl/tournaments/$id/players/$profileId") { it(); json(PlacePlayerRequest(teamId)) } }.body()
+
+    suspend fun removeTournamentPlayer(id: String, profileId: String): TournamentDetails =
+        call { delete("$baseUrl/tournaments/$id/players/$profileId", it) }.body()
 
     suspend fun addOrganiser(id: String, profileId: String): TournamentDetails =
         call { post("$baseUrl/tournaments/$id/organisers") { it(); json(AddOrganiserRequest(profileId)) } }.body()

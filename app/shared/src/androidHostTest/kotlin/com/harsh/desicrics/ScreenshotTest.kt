@@ -56,6 +56,11 @@ import com.harsh.desicrics.model.Tournament
 import com.harsh.desicrics.model.TournamentDetails
 import com.harsh.desicrics.model.TournamentFormat
 import com.harsh.desicrics.model.TournamentTeam
+import com.harsh.desicrics.model.TournamentPlayer
+import com.harsh.desicrics.model.EntryPolicy
+import com.harsh.desicrics.model.EntryStatus
+import com.harsh.desicrics.model.Organiser
+import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Wicket
 import com.harsh.desicrics.model.Player
 import com.harsh.desicrics.scoring.ScoringEngine
@@ -452,6 +457,56 @@ class ScreenshotTest {
             TournamentUiState(myId = "me", loading = false, details = TournamentDetails(Tournament("x", "Andheri Premier League", "Mumbai", TournamentFormat.ROUND_ROBIN, 8, createdBy = "me", teams = teams))),
             {}, {}, {}, {}, {}, {}, { _, _ -> },
             initialTab = TournamentTab.TEAMS,
+        )
+    }
+
+    /** A league taking teams on approval and players openly, with its pool, a waiting player and two squads. */
+    private fun entryTournament(): Tournament {
+        val teams = listOf("Andheri Strikers", "Powai XI").mapIndexed { i, n -> TournamentTeam("t$i", n, i + 1) } +
+            TournamentTeam("t2", "Bandra Blasters", 3, status = EntryStatus.PENDING)
+        fun p(id: String, name: String, role: PlayerRole) = PlayerSummary(id, name, role = role)
+        val players = listOf(
+            TournamentPlayer(p("p1", "Rohan Iyer", PlayerRole.BATTER), "t0"),
+            TournamentPlayer(p("p2", "Aarav Shah", PlayerRole.BOWLER), "t0"),
+            TournamentPlayer(p("p3", "Esha Rao", PlayerRole.ALL_ROUNDER), "t1"),
+            TournamentPlayer(p("p4", "Kabir Mehta", PlayerRole.WICKET_KEEPER), fromPool = true),
+            TournamentPlayer(p("p5", "Neel Joshi", PlayerRole.BOWLER), status = EntryStatus.PENDING, fromPool = true),
+        )
+        return Tournament(
+            "x", "Andheri Premier League", "Mumbai", TournamentFormat.ROUND_ROBIN, 8, createdBy = "org",
+            teamEntry = EntryPolicy.APPROVAL, playerEntry = EntryPolicy.OPEN,
+            organisers = listOf(Organiser("org", "Harsh", OrganiserRole.ORGANISER)), teams = teams, players = players,
+        )
+    }
+
+    @Test
+    fun tournamentPlayersForOrganisers() = shoot("tournament_players") {
+        TournamentContent(
+            TournamentUiState(myId = "org", loading = false, details = TournamentDetails(entryTournament())),
+            {}, {}, {}, {}, {}, {}, { _, _ -> },
+            initialTab = TournamentTab.PLAYERS,
+        )
+    }
+
+    @Test
+    fun tournamentTeamsForOrganisers() = shoot("tournament_entry_settings") {
+        TournamentContent(
+            TournamentUiState(myId = "org", loading = false, details = TournamentDetails(entryTournament())),
+            {}, {}, {}, {}, {}, {}, { _, _ -> },
+            initialTab = TournamentTab.TEAMS,
+        )
+    }
+
+    @Test
+    fun tournamentEntryCardForVisitors() = shoot("tournament_entry_card") {
+        TournamentContent(
+            TournamentUiState(
+                myId = "me",
+                loading = false,
+                details = TournamentDetails(entryTournament()),
+                myTeams = listOf(TeamSummary("t9", "Juhu Kings", "Mumbai", 11, myRole = TeamRole.ADMIN)),
+            ),
+            {}, {}, {}, {}, {}, {}, { _, _ -> },
         )
     }
 }

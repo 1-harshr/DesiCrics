@@ -2,9 +2,12 @@ package com.harsh.desicrics
 import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.api.AddOrganiserRequest
+import com.harsh.desicrics.api.AddTournamentPlayerRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.CustomFixtureRequest
 import com.harsh.desicrics.api.EnterTeamRequest
+import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.ReviewEntryRequest
 import com.harsh.desicrics.api.ScheduleRequest
 import com.harsh.desicrics.api.StartFixtureRequest
@@ -32,6 +35,17 @@ fun Route.tournamentRoutes(tournaments: TournamentService) {
             }
             delete("/teams/{teamId}") {
                 call.respond(tournaments.removeTeam(call.user, call.parameters["id"].orEmpty(), call.parameters["teamId"].orEmpty()))
+            }
+            put("/entry") { call.respond(tournaments.setEntry(call.user, call.parameters["id"].orEmpty(), call.receive<EntrySettingsRequest>())) }
+            route("/players") {
+                post { call.respond(tournaments.addPlayer(call.user, call.parameters["id"].orEmpty(), call.receive<AddTournamentPlayerRequest>())) }
+                put("/{profileId}") {
+                    val request = call.receive<PlacePlayerRequest>()
+                    call.respond(tournaments.placePlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty(), request))
+                }
+                delete("/{profileId}") {
+                    call.respond(tournaments.removePlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty()))
+                }
             }
             post("/organisers") { call.respond(tournaments.addOrganiser(call.user, call.parameters["id"].orEmpty(), call.receive<AddOrganiserRequest>())) }
             post("/start") { call.respond(tournaments.start(call.user, call.parameters["id"].orEmpty())) }

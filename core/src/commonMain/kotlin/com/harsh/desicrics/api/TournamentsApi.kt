@@ -2,6 +2,7 @@ package com.harsh.desicrics.api
 import com.harsh.desicrics.model.AbandonReason
 import com.harsh.desicrics.model.MatchEnding
 
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Stage
@@ -15,9 +16,14 @@ import kotlinx.serialization.Serializable
 //   GET    /tournaments/mine                       → List<TournamentSummary> (organised, or a team entered)
 //   POST   /tournaments                            CreateTournamentRequest → TournamentDetails
 //   GET    /tournaments/{id}                       → TournamentDetails
-//   POST   /tournaments/{id}/teams                 EnterTeamRequest → TournamentDetails (organisers, or a team admin while registration is open)
+//   PUT    /tournaments/{id}/entry                 EntrySettingsRequest → TournamentDetails (organisers, before it starts)
+//   POST   /tournaments/{id}/teams                 EnterTeamRequest → TournamentDetails (organisers, or a team admin as teamEntry allows)
 //   PUT    /tournaments/{id}/teams/{teamId}        ReviewEntryRequest → TournamentDetails (organisers)
 //   DELETE /tournaments/{id}/teams/{teamId}        → TournamentDetails (organisers, before it starts)
+//   POST   /tournaments/{id}/players               AddTournamentPlayerRequest → TournamentDetails (yourself as playerEntry allows;
+//                                                  organisers anyone; team admins their team's members, into its squad)
+//   PUT    /tournaments/{id}/players/{profileId}   PlacePlayerRequest → TournamentDetails (organisers)
+//   DELETE /tournaments/{id}/players/{profileId}   → TournamentDetails (organisers; the player; their team's admins before it starts)
 //   POST   /tournaments/{id}/organisers            AddOrganiserRequest → TournamentDetails (organisers)
 //   POST   /tournaments/{id}/start                 → TournamentDetails with the first fixtures (organisers)
 //   POST   /tournaments/{id}/fixtures              CustomFixtureRequest → TournamentDetails (organisers)
@@ -35,7 +41,8 @@ data class CreateTournamentRequest(
     val groups: Int = 1,
     val advance: Int = 0,
     val startsAt: Long? = null,
-    val registrationOpen: Boolean = false,
+    val teamEntry: EntryPolicy = EntryPolicy.APPROVAL,
+    val playerEntry: EntryPolicy = EntryPolicy.APPROVAL,
 ) {
     fun validate(): TournamentError? = when {
         name.isBlank() -> TournamentError.NAME_MISSING
@@ -57,9 +64,23 @@ data class CreateTournamentRequest(
     }
 }
 
-/** Enters a saved team. Organisers' entries are confirmed; a team admin's own entry waits for review. */
+@Serializable
+data class EntrySettingsRequest(val teamEntry: EntryPolicy, val playerEntry: EntryPolicy)
+
+/** Enters a saved team. Organisers' entries are confirmed; a team admin's waits for review unless entry is open. */
 @Serializable
 data class EnterTeamRequest(val teamId: String)
+
+/**
+ * Adds a player to a tournament: with no [profileId], the caller joins the pool themselves. Organisers add
+ * anyone, to the pool or straight into [teamId]'s squad; a team's admins add its members to its squad.
+ */
+@Serializable
+data class AddTournamentPlayerRequest(val profileId: String? = null, val teamId: String? = null)
+
+/** Confirms a waiting player, and puts them in [teamId]'s squad, or back in the pool when it's null. */
+@Serializable
+data class PlacePlayerRequest(val teamId: String? = null)
 
 @Serializable
 data class ReviewEntryRequest(val confirm: Boolean)

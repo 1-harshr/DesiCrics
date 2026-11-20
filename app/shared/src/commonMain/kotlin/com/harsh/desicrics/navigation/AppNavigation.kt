@@ -264,7 +264,12 @@ fun AppNavigation(
                 }
             }
             entry<NotificationsRoute> {
-                NotificationsScreen(onOpenMatch = { backStack.add(MatchRoute(it)) }, onBack = back, onOpenTeam = { backStack.add(TeamRoute(it)) })
+                NotificationsScreen(
+                    onOpenMatch = { backStack.add(MatchRoute(it)) },
+                    onBack = back,
+                    onOpenTeam = { backStack.add(TeamRoute(it)) },
+                    onOpenTournament = { backStack.add(TournamentRoute(it)) },
+                )
             }
             entry<PlayerRoute> { route ->
                 PlayerScreen(

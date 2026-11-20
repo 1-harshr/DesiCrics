@@ -8,10 +8,13 @@ import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.data.TournamentRepository
 import com.harsh.desicrics.model.AuctionDetails
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.PlayerSummary
+import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.model.TournamentDetails
+import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.ui.teams.attempt
 import kotlinx.coroutines.Job
@@ -77,13 +80,27 @@ data class TournamentUiState(
     /** Organisers find other people's teams by name or code. */
     val teamQuery: String = "",
     val teamResults: List<TeamSummary> = emptyList(),
-    val organiserQuery: String = "",
-    val organiserResults: List<PlayerSummary> = emptyList(),
+    /** People search, for adding an organiser or a player. */
+    val peopleQuery: String = "",
+    val peopleResults: List<PlayerSummary> = emptyList(),
+    /** A team the caller runs, loaded to add its members to its squad. */
+    val squadSource: SavedTeam? = null,
     /** The tournament's player auction, once loaded; null when it has none. */
     val auction: AuctionDetails? = null,
     val auctionSaving: Boolean = false,
 ) {
     val isOrganiser: Boolean get() = details?.tournament?.isOrganiser(myId) == true
+
+    /** The caller's own place in the tournament as a player, if they have one. */
+    val myEntry: TournamentPlayer? get() = details?.tournament?.entryOf(myId)
+
+    /** Someone who isn't an organiser can ask to enter a team they run. */
+    val canEnterTeam: Boolean get() = !isOrganiser && details?.tournament?.takesTeams == true && registrable.isNotEmpty()
+
+    /** Anyone not in yet can join as a player while players can enter. */
+    val canJoinAsPlayer: Boolean get() = myEntry == null && details?.tournament?.takesPlayers == true
+
+    fun runs(teamId: String): Boolean = myTeams.any { it.id == teamId && it.myRole == TeamRole.ADMIN }
 
     /**
      * Teams that aren't in yet. Organisers can enter any team, so they also get what they searched for;
@@ -167,6 +184,26 @@ class TournamentViewModel(
 
     fun addOrganiser(profileId: String) = act { repository.addOrganiser(tournamentId, profileId) }
 
+    fun setEntry(teamEntry: EntryPolicy, playerEntry: EntryPolicy) = act { repository.setEntry(tournamentId, teamEntry, playerEntry) }
+
+    fun joinAsPlayer() = act { repository.addPlayer(tournamentId) }
+
+    /** An organiser adds anyone (to the pool, or a squad); a team's admin adds its members to its squad. */
+    fun addPlayer(profileId: String, teamId: String? = null) = act { repository.addPlayer(tournamentId, profileId, teamId) }
+
+    fun placePlayer(profileId: String, teamId: String?) = act { repository.placePlayer(tournamentId, profileId, teamId) }
+
+    fun removePlayer(profileId: String) = act { repository.removePlayer(tournamentId, profileId) }
+
+    /** Loads a team the caller runs, so they can add its members to its squad. */
+    fun loadSquadSource(teamId: String?) {
+        _state.update { it.copy(squadSource = null) }
+        if (teamId == null) return
+        viewModelScope.launch {
+            attempt { teams.team(teamId) }.getOrNull()?.let { team -> _state.update { it.copy(squadSource = team) } }
+        }
+    }
+
     fun schedule(matchId: String, at: Long?) {
         viewModelScope.launch {
             if (attempt { repository.schedule(matchId, at) }.isFailure) _state.update { it.copy(actionFailed = true) }
@@ -188,17 +225,17 @@ class TournamentViewModel(
         }
     }
 
-    fun searchOrganiser(query: String) {
-        _state.update { it.copy(organiserQuery = query) }
+    fun searchPeople(query: String) {
+        _state.update { it.copy(peopleQuery = query) }
         searchJob?.cancel()
         if (query.trim().length < 2) {
-            _state.update { it.copy(organiserResults = emptyList()) }
+            _state.update { it.copy(peopleResults = emptyList()) }
             return
         }
         searchJob = viewModelScope.launch {
             delay(300)
             val results = attempt { teams.search(query) }.getOrDefault(emptyList())
-            _state.update { it.copy(organiserResults = results) }
+            _state.update { it.copy(peopleResults = results) }
         }
     }
 

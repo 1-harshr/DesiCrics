@@ -54,6 +54,7 @@ import com.harsh.desicrics.designsystem.component.NumberStepper
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.TournamentFormat
 import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.resources.*
@@ -164,7 +165,8 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
     var wideRun by rememberSaveable { mutableStateOf(true) }
     var noBallRun by rememberSaveable { mutableStateOf(true) }
     val rules = preset.rules!!.let { it.copy(widePenalty = if (wideRun) it.widePenalty else 0, noBallPenalty = if (noBallRun) it.noBallPenalty else 0) }
-    var registration by rememberSaveable { mutableStateOf(false) }
+    var teamEntry by rememberSaveable { mutableStateOf(EntryPolicy.APPROVAL) }
+    var playerEntry by rememberSaveable { mutableStateOf(EntryPolicy.APPROVAL) }
     val advanceOptions = when (format) {
         TournamentFormat.ROUND_ROBIN -> listOf(0, 2, 4)
         TournamentFormat.GROUPS_KNOCKOUT -> listOf(1, 2, 4)
@@ -220,14 +222,8 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
             wideRun = it.widePenalty > 0
             noBallRun = it.noBallPenalty > 0
         })
-        SectionHeader(stringResource(Res.string.tournament_registration), icon = DesiIcons.PersonAdd)
-        Text(stringResource(Res.string.tournament_registration_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
-        SegmentedControl(
-            options = listOf(false, true),
-            selected = registration,
-            label = { stringResource(if (it) Res.string.rules_on else Res.string.rules_mode_off) },
-            onSelect = { registration = it },
-        )
+        SectionHeader(stringResource(Res.string.entry_title), icon = DesiIcons.PersonAdd)
+        EntrySettings(teamEntry, playerEntry, onChange = { teams, players -> teamEntry = teams; playerEntry = players })
         if (failed) ErrorBanner(stringResource(Res.string.tournament_create_failed))
         PrimaryButton(
             stringResource(Res.string.tournament_create_action),
@@ -241,7 +237,8 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
                         rules = rules,
                         groups = if (format == TournamentFormat.GROUPS_KNOCKOUT) groups else 1,
                         advance = if (advanceOptions.isEmpty()) 0 else advance,
-                        registrationOpen = registration,
+                        teamEntry = teamEntry,
+                        playerEntry = playerEntry,
                     ),
                 )
             },

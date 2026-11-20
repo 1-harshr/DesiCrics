@@ -18,6 +18,7 @@ import com.harsh.desicrics.model.MarginUnit
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.MatchStatus
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.Organiser
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.PointsRow
@@ -176,7 +177,7 @@ class TournamentPosterScreenshotTest {
     private val announced = TournamentDetails(
         Tournament(
             "apl", "Andheri Premier League", "Mumbai", TournamentFormat.GROUPS_KNOCKOUT, 8, groups = 2, advance = 2,
-            createdBy = "u1", startsAt = saturday + 7 * 24 * 60 * 60_000L, registrationOpen = true, organisers = organisers, teams = teams.take(6),
+            createdBy = "u1", startsAt = saturday + 7 * 24 * 60 * 60_000L, teamEntry = EntryPolicy.APPROVAL, organisers = organisers, teams = teams.take(6),
         ),
     )
 

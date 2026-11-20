@@ -9,8 +9,11 @@ import com.harsh.desicrics.model.MatchResult
 import com.harsh.desicrics.model.AbandonReason
 import com.harsh.desicrics.model.MatchEnding
 import com.harsh.desicrics.api.EndBeforeStartRequest
+import com.harsh.desicrics.api.AddTournamentPlayerRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.EnterTeamRequest
+import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.ReviewEntryRequest
 import com.harsh.desicrics.api.ScheduleRequest
@@ -18,8 +21,10 @@ import com.harsh.desicrics.api.SquadPlayer
 import com.harsh.desicrics.api.SquadRequest
 import com.harsh.desicrics.api.StartFixtureRequest
 import com.harsh.desicrics.api.TeamRequest
+import com.harsh.desicrics.api.AddMemberRequest
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchStatus
@@ -59,6 +64,14 @@ class TournamentsTest {
 
     private suspend fun HttpClient.enter(uid: String, tournamentId: String, teamId: String) =
         post("/tournaments/$tournamentId/teams") { bearerAuth("test-$uid"); jsonBody(EnterTeamRequest(teamId)) }
+
+    private suspend fun HttpClient.addPlayer(uid: String, tournamentId: String, request: AddTournamentPlayerRequest = AddTournamentPlayerRequest()) =
+        post("/tournaments/$tournamentId/players") { bearerAuth("test-$uid"); jsonBody(request) }
+
+    private suspend fun HttpClient.place(uid: String, tournamentId: String, profileId: String, teamId: String?) =
+        put("/tournaments/$tournamentId/players/$profileId") { bearerAuth("test-$uid"); jsonBody(PlacePlayerRequest(teamId)) }
+
+    private suspend fun HttpClient.inbox(uid: String): List<Notification> = get("/notifications") { bearerAuth("test-$uid") }.body()
 
     /**
      * Starts [fixture] with two-player squads and plays it out in three balls: side A makes 4 and is bowled,
@@ -139,10 +152,13 @@ class TournamentsTest {
         client.setUpProfile("asha")
         client.setUpProfile("dev", name = "Dev")
         val devs = client.team("dev", "Dev XI")
-        val closed = client.tournament("asha", CreateTournamentRequest("Closed Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5))
+        val closed = client.tournament(
+            "asha",
+            CreateTournamentRequest("Closed Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5, teamEntry = EntryPolicy.ORGANISERS),
+        )
         assertEquals(HttpStatusCode.Forbidden, client.enter("dev", closed.tournament.id, devs.id).status)
 
-        val open = client.tournament("asha", CreateTournamentRequest("Open Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5, registrationOpen = true))
+        val open = client.tournament("asha", CreateTournamentRequest("Open Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5, teamEntry = EntryPolicy.APPROVAL))
         val pending = client.enter("dev", open.tournament.id, devs.id).body<TournamentDetails>()
         assertEquals(EntryStatus.PENDING, pending.tournament.teams.single().status)
         assertEquals(listOf("Open Cup"), client.get("/tournaments/mine") { bearerAuth("test-dev") }.body<List<TournamentSummary>>().map { it.name })
@@ -153,6 +169,12 @@ class TournamentsTest {
             jsonBody(ReviewEntryRequest(confirm = true))
         }.body<TournamentDetails>()
         assertEquals(EntryStatus.CONFIRMED, reviewed.tournament.teams.single().status)
+        // Confirmed, the team's members make up its squad.
+        assertEquals(listOf("dev"), reviewed.tournament.squad(devs.id).map { it.player.profileId })
+        // Asha heard about the request, and Dev about the answer.
+        assertEquals(listOf(NotificationKind.ENTRY_REQUEST), client.inbox("asha").map { it.kind })
+        assertEquals(listOf(NotificationKind.ENTRY_CONFIRMED), client.inbox("dev").map { it.kind })
+        assertEquals(open.tournament.id, client.inbox("dev").single().tournamentId)
         // One team isn't enough for a knockout.
         assertEquals(HttpStatusCode.Conflict, client.post("/tournaments/${open.tournament.id}/start") { bearerAuth("test-asha") }.status)
     }
@@ -250,5 +272,105 @@ class TournamentsTest {
         val table = client.details(league.tournament.id).tables.single()
         val rained = table.filter { it.teamId == fixture.teamA.teamId || it.teamId == fixture.teamB.teamId }
         assertTrue(rained.all { it.points == 1 && it.played == 1 && it.noResult == 1 && it.ballsFaced == 0 })
+    }
+
+    @Test
+    fun organisersChangeWhoCanEnterUntilTheStart() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev", name = "Dev")
+        val teams = (1..2).map { client.team("asha", "Team $it") }
+        val devs = client.team("dev", "Dev XI")
+        val cup = client.tournament(
+            "asha",
+            CreateTournamentRequest("Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5, teamEntry = EntryPolicy.ORGANISERS, playerEntry = EntryPolicy.ORGANISERS),
+        ).tournament
+        assertEquals(HttpStatusCode.Forbidden, client.addPlayer("dev", cup.id).status)
+        val settings = EntrySettingsRequest(teamEntry = EntryPolicy.OPEN, playerEntry = EntryPolicy.APPROVAL)
+        assertEquals(HttpStatusCode.Forbidden, client.put("/tournaments/${cup.id}/entry") { bearerAuth("test-dev"); jsonBody(settings) }.status)
+        val opened = client.put("/tournaments/${cup.id}/entry") { bearerAuth("test-asha"); jsonBody(settings) }.body<TournamentDetails>().tournament
+        assertEquals(EntryPolicy.OPEN to EntryPolicy.APPROVAL, opened.teamEntry to opened.playerEntry)
+        assertTrue(client.get("/t/${cup.id}").bodyAsText().contains("taking teams and players"))
+
+        // Open entry: Dev's team is in straight away, and Asha hears it joined.
+        val joined = client.enter("dev", cup.id, devs.id).body<TournamentDetails>().tournament
+        assertEquals(EntryStatus.CONFIRMED, joined.teams.single().status)
+        assertEquals(listOf(NotificationKind.ENTRY_JOINED), client.inbox("asha").map { it.kind })
+
+        teams.forEach { client.enter("asha", cup.id, it.id) }
+        client.post("/tournaments/${cup.id}/start") { bearerAuth("test-asha") }
+        assertEquals(HttpStatusCode.Conflict, client.put("/tournaments/${cup.id}/entry") { bearerAuth("test-asha"); jsonBody(settings) }.status)
+    }
+
+    @Test
+    fun playersJoinThePoolAndOrganisersPlaceThem() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev", name = "Dev")
+        client.setUpProfile("kabir", name = "Kabir")
+        client.setUpProfile("ravi", name = "Ravi")
+        val strikers = client.team("asha", "Strikers")
+        val royals = client.team("ravi", "Royals")
+        val cup = client.tournament("asha", CreateTournamentRequest("Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5, playerEntry = EntryPolicy.APPROVAL)).tournament
+        client.enter("asha", cup.id, strikers.id)
+        client.enter("asha", cup.id, royals.id)
+
+        // Dev asks to join; Asha hears, and puts him in the Strikers' squad.
+        val asked = client.addPlayer("dev", cup.id).body<TournamentDetails>().tournament
+        assertEquals(EntryStatus.PENDING, asked.entryOf("dev")!!.status)
+        assertEquals(HttpStatusCode.Conflict, client.addPlayer("dev", cup.id).status)
+        assertEquals(NotificationKind.ENTRY_REQUEST, client.inbox("asha").first().kind)
+        assertEquals(HttpStatusCode.Forbidden, client.place("dev", cup.id, "dev", strikers.id).status)
+        val placed = client.place("asha", cup.id, "dev", strikers.id).body<TournamentDetails>().tournament
+        assertEquals(listOf("asha", "dev"), placed.squad(strikers.id).map { it.player.profileId })
+        assertEquals(listOf(NotificationKind.SQUAD_PLACED), client.inbox("dev").map { it.kind })
+        assertEquals("Strikers", client.inbox("dev").single().playerName)
+
+        // One squad per tournament: Ravi can't put Dev in the Royals too, and can only add his own members.
+        client.post("/teams/${royals.id}/members") { bearerAuth("test-ravi"); jsonBody(AddMemberRequest(profileId = "dev")) }
+        val twice = client.addPlayer("ravi", cup.id, AddTournamentPlayerRequest("dev", royals.id))
+        assertEquals(HttpStatusCode.Conflict, twice.status)
+        assertTrue(twice.bodyAsText().contains("Strikers"))
+        assertEquals(HttpStatusCode.Forbidden, client.addPlayer("ravi", cup.id, AddTournamentPlayerRequest("kabir", royals.id)).status)
+
+        // Kabir joins and is turned down; the Strikers leaving sends Dev back to the pool, and Asha with them.
+        client.addPlayer("kabir", cup.id)
+        client.delete("/tournaments/${cup.id}/players/kabir") { bearerAuth("test-asha") }
+        assertEquals(listOf(NotificationKind.ENTRY_REJECTED), client.inbox("kabir").map { it.kind })
+        val left = client.delete("/tournaments/${cup.id}/teams/${strikers.id}") { bearerAuth("test-asha") }.body<TournamentDetails>().tournament
+        assertEquals(listOf("dev"), left.pool.map { it.player.profileId })
+        assertNull(left.entryOf("asha"))
+        assertNull(left.entryOf("kabir"))
+        // Dev's tournaments now include the cup, as a player.
+        assertEquals(listOf("Cup"), client.get("/tournaments/mine") { bearerAuth("test-dev") }.body<List<TournamentSummary>>().map { it.name })
+    }
+
+    @Test
+    fun fixturesOnlyFieldSquadPlayers() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev", name = "Dev")
+        client.setUpProfile("kabir", name = "Kabir")
+        val one = client.team("asha", "Team 1")
+        val two = client.team("dev", "Team 2")
+        client.post("/teams/${two.id}/members") { bearerAuth("test-dev"); jsonBody(AddMemberRequest(profileId = "kabir")) }
+        val series = client.tournament("asha", CreateTournamentRequest("Series", format = TournamentFormat.BEST_OF_THREE, oversPerInnings = 5)).tournament
+        client.enter("asha", series.id, one.id)
+        client.enter("asha", series.id, two.id)
+        // Kabir waits in the pool and never gets a squad; it's dropped when the series starts if still waiting.
+        client.delete("/tournaments/${series.id}/players/kabir") { bearerAuth("test-dev") }
+        client.addPlayer("kabir", series.id)
+        val fixture = client.post("/tournaments/${series.id}/start") { bearerAuth("test-asha") }.body<TournamentDetails>().fixtures.single()
+        assertNull(client.details(series.id).tournament.entryOf("kabir"))
+
+        fun start(b: List<SquadPlayer>) = StartFixtureRequest(
+            SquadRequest("Team 1", listOf(SquadPlayer("Asha", "asha"), SquadPlayer("Guest")), teamId = one.id),
+            SquadRequest("Team 2", b, teamId = two.id),
+            TeamSide.A,
+            TossDecision.BAT,
+        )
+        val outsider = client.post("/matches/${fixture.id}/start") { bearerAuth("test-asha"); jsonBody(start(listOf(SquadPlayer("Dev", "dev"), SquadPlayer("Kabir", "kabir")))) }
+        assertEquals(HttpStatusCode.BadRequest, outsider.status)
+        assertTrue(outsider.bodyAsText().contains("Kabir"))
+        // Guests can stand in.
+        val started = client.post("/matches/${fixture.id}/start") { bearerAuth("test-asha"); jsonBody(start(listOf(SquadPlayer("Dev", "dev"), SquadPlayer("Guest 2")))) }
+        assertEquals(HttpStatusCode.OK, started.status)
     }
 }
