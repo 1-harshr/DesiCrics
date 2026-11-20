@@ -102,3 +102,33 @@ Render can't build the image itself (no Android SDK), so `.github/workflows/serv
 1. Open `https://<host>/` and check it answers "DesiCrics API".
 2. Check `https://<host>/.well-known/assetlinks.json` lists the app's fingerprint.
 3. Sign in on a phone with the app built for that host, score a ball, and open the match link in a browser.
+
+## Android releases
+
+Once CI passes on `main`, `.github/workflows/android-release.yml` builds the release APK for the deployed server
+(`remoteRelease`), numbered `1.0.<run>` so each one installs over the last. It goes to two places:
+
+- **Firebase App Distribution** (Firebase console › Release & Monitor › App Distribution): everyone in the
+  `testers` group gets an email; they install the Firebase App Tester app once, then each new build from it.
+- **The workflow run** (GitHub › Actions › Android release › the run › Artifacts): a zip with the APK, kept 90 days.
+
+It can also be run by hand (Actions › Android release › Run workflow). Repository secrets it needs:
+
+| Secret | What |
+| --- | --- |
+| `GOOGLE_SERVICES_JSON` | `app/androidApp/google-services.json` (CI uses it too) |
+| `RELEASE_KEYSTORE_BASE64` | the release key: `base64 -i app/androidApp/release.keystore` |
+| `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD` | from `app/androidApp/release.keystore.properties` |
+| `FIREBASE_SERVICE_ACCOUNT` | JSON key of a service account with the Firebase App Distribution Admin role (optional; without it the APK is only on the run) |
+
+The release key and its passwords stay out of git. **Back them up**: an APK signed with any other key won't
+install over the existing ones, so testers would have to uninstall first. Its SHA-1 and SHA-256 must be on the
+Android app in Firebase (Project settings › Your apps) for Google and phone sign-in, and its SHA-256 in the
+server's `ANDROID_SHA256_FINGERPRINTS` for app links. To build the same APK locally:
+
+```bash
+set -a; . app/androidApp/release.keystore.properties; set +a
+./gradlew :app:androidApp:assembleRemoteRelease -Pdesicrics.releaseKeystore=$PWD/app/androidApp/release.keystore \
+  -Pdesicrics.releaseKeystorePassword=$RELEASE_KEYSTORE_PASSWORD -Pdesicrics.releaseKeyAlias=$RELEASE_KEY_ALIAS \
+  -Pdesicrics.releaseKeyPassword=$RELEASE_KEY_PASSWORD
+```

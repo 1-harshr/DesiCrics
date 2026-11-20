@@ -43,8 +43,9 @@ android {
         applicationId = "com.harsh.desicrics"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        // CI numbers each release build (see .github/workflows/android-release.yml) so it installs over the last.
+        versionCode = providers.gradleProperty("desicrics.versionCode").map { it.toInt() }.getOrElse(1)
+        versionName = providers.gradleProperty("desicrics.versionName").getOrElse("1.0")
     }
     // Which Ktor server the app calls, independent of debug or release. `local` calls the server on this
     // computer (Docker), which `adb reverse tcp:8080 tcp:8080` forwards; `remote` calls the proxy Worker
@@ -87,9 +88,19 @@ android {
             keyAlias = "desicrics-debug"
             keyPassword = "android"
         }
+        // The release key lives outside git. CI passes it in from repository secrets; locally, pass the same
+        // -Pdesicrics.release* properties. Without them release builds come out unsigned.
+        val releaseKey = providers.gradleProperty("desicrics.releaseKeystore").orNull
+        if (releaseKey != null) create("release") {
+            storeFile = file(releaseKey)
+            storePassword = providers.gradleProperty("desicrics.releaseKeystorePassword").get()
+            keyAlias = providers.gradleProperty("desicrics.releaseKeyAlias").get()
+            keyPassword = providers.gradleProperty("desicrics.releaseKeyPassword").get()
+        }
     }
     buildTypes {
         release {
+            signingConfig = signingConfigs.findByName("release")
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
