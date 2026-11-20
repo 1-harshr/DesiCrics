@@ -142,7 +142,7 @@ fun MinimalTablePoster(poster: TablePoster, format: ShareFormat) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Eyebrow(poster.tournament, quiet, modifier = Modifier.weight(1f))
-            poster.page?.let { Text(stringResource(Res.string.poster_page, it.number, it.count), style = type.label, color = quiet) }
+            poster.page?.let { Text(stringResource(Res.string.share_page, it.number, it.count), style = type.label, color = quiet) }
         }
         Text(stringResource(Res.string.poster_content_table), style = type.titleLg.sized(if (post) 28 else 52, if (post) 32 else 56), color = ink)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
@@ -204,12 +204,12 @@ fun SpotlightPoster(poster: PlayerPoster, format: ShareFormat) {
             Eyebrow(poster.tournament, share.gold)
             if (post) {
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    TeamMark(poster.name, 104.dp, share.gold, share.onGold, ring = onGreen)
+                    PosterAvatar(poster.name, null, 104.dp, share.gold, share.onGold, ring = onGreen)
                     Column(Modifier.weight(1f)) { SpotlightName(poster, post) }
                 }
             } else {
                 Spacer(Modifier.weight(0.4f))
-                TeamMark(poster.name, 168.dp, share.gold, share.onGold, ring = onGreen)
+                PosterAvatar(poster.name, null, 168.dp, share.gold, share.onGold, ring = onGreen)
                 Spacer(Modifier.height(4.dp))
                 SpotlightName(poster, post)
                 Spacer(Modifier.weight(0.6f))
@@ -244,7 +244,10 @@ private fun SpotlightName(poster: PlayerPoster, post: Boolean) {
     }
 }
 
-/** Overlay: white type for the user's own photo of the player, MVP points as the big number. */
+/**
+ * Overlay: white type for the user's own photo of the player, MVP points as the big number. Unlike the
+ * match overlays it sits at the foot of the picture, leaving the top for the player's face.
+ */
 @Composable
 fun PlayerOverlayPoster(poster: PlayerPoster, format: ShareFormat) {
     val type = DesiTheme.type
@@ -260,16 +263,7 @@ fun PlayerOverlayPoster(poster: PlayerPoster, format: ShareFormat) {
         if (poster.team.isNotBlank()) Text(poster.team, style = type.bodyStrong.sized(16, 22).overlay(0.85f), maxLines = 1, overflow = TextOverflow.Ellipsis)
         Text(lead.value, style = type.scoreXl.sized(if (post) 72 else 110).overlay(), maxLines = 1)
         Text(lead.label.uppercase(), style = type.label.sized(16, 20).overlay(0.85f))
-        if (poster.stats.size > 1) {
-            Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
-                poster.stats.drop(1).forEach { stat ->
-                    Column {
-                        Text(stat.label.uppercase(), style = type.label.overlay(0.85f))
-                        Text(stat.value, style = type.scoreMd.sized(30, 34).overlay())
-                    }
-                }
-            }
-        }
+        if (poster.stats.size > 1) OverlayStats(poster.stats.drop(1))
         Row(Modifier.padding(top = if (post) 8.dp else 16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(painterResource(DesiIllustrations.BallMark), contentDescription = null, tint = share.overlayInk, modifier = Modifier.size(22.dp))
             Text(stringResource(Res.string.app_name).uppercase(), style = type.label.sized(13, 16).overlay())

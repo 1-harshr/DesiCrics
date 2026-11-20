@@ -44,22 +44,22 @@ fun tournamentShareContents(details: TournamentDetails, zone: TimeZone = TimeZon
     else listOfNotNull(fixtures, table, bracket, player, announcement)
 }
 
-/** Templates for one look of a poster that may run over several pages of [perPage] items each. */
+/**
+ * A template for one look of a poster that may run over several pages of [perPage] items each, spread
+ * evenly so seven fixtures make pages of four and three rather than six and one.
+ */
 private fun paged(
     key: String,
     name: StringResource,
     kind: TemplateKind,
     items: Int,
     perPage: Int,
-    draw: @Composable (format: ShareFormat, range: IntRange, page: SharePage?) -> Unit,
-): List<ShareTemplate> {
+    draw: @Composable (format: ShareFormat, range: IntRange, page: PosterPage?) -> Unit,
+): ShareTemplate {
     val count = maxOf(1, (items + perPage - 1) / perPage)
-    // Spread the items evenly, so seven fixtures make pages of four and three, not six and one.
     val size = maxOf(1, (items + count - 1) / count)
-    return (0 until count).map { i ->
-        val page = if (count > 1) SharePage(i + 1, count) else null
-        val range = i * size until minOf(items, (i + 1) * size)
-        ShareTemplate(if (page == null) key else "$key-${i + 1}", name, kind, page = page) { draw(it, range, page) }
+    return ShareTemplate.paged(key, name, kind, pages = { count }) { format, i ->
+        draw(format, i * size until minOf(items, (i + 1) * size), if (count > 1) PosterPage(i + 1, count) else null)
     }
 }
 
@@ -104,7 +104,7 @@ data class FixturesPoster(
     val round: String?,
     val city: String,
     val fixtures: List<PosterFixture>,
-    val page: SharePage?,
+    val page: PosterPage?,
 )
 
 class FixturesShare(private val tournament: Tournament, private val matchday: Matchday) : ShareContent {
@@ -115,14 +115,15 @@ class FixturesShare(private val tournament: Tournament, private val matchday: Ma
 
     private val count = matchday.fixtures.size
 
-    override val templates: List<ShareTemplate> =
-        paged("matchday", Res.string.poster_template_matchday, TemplateKind.OPAQUE, count, MATCHDAY_PER_PAGE) { f, r, p -> MatchdayCardPoster(poster(r, p), f) } +
-            paged("broadcast", Res.string.poster_template_broadcast_list, TemplateKind.OPAQUE, count, LIST_PER_PAGE) { f, r, p -> BroadcastListPoster(poster(r, p), f) } +
-            paged("minimal", Res.string.poster_template_minimal_list, TemplateKind.OPAQUE, count, LIST_PER_PAGE) { f, r, p -> MinimalListPoster(poster(r, p), f) } +
-            paged("versus", Res.string.poster_template_versus, TemplateKind.OPAQUE, count, VERSUS_PER_PAGE) { f, r, p -> VersusTilesPoster(poster(r, p), f) }
+    override val templates: List<ShareTemplate> = listOf(
+        paged("matchday", Res.string.poster_template_matchday, TemplateKind.OPAQUE, count, MATCHDAY_PER_PAGE) { f, r, p -> MatchdayCardPoster(poster(r, p), f) },
+        paged("broadcast", Res.string.poster_template_broadcast_list, TemplateKind.OPAQUE, count, LIST_PER_PAGE) { f, r, p -> BroadcastListPoster(poster(r, p), f) },
+        paged("minimal", Res.string.poster_template_minimal_list, TemplateKind.OPAQUE, count, LIST_PER_PAGE) { f, r, p -> MinimalListPoster(poster(r, p), f) },
+        paged("versus", Res.string.poster_template_versus, TemplateKind.OPAQUE, count, VERSUS_PER_PAGE) { f, r, p -> VersusTilesPoster(poster(r, p), f) },
+    )
 
     @Composable
-    private fun poster(range: IntRange, page: SharePage?): FixturesPoster {
+    private fun poster(range: IntRange, page: PosterPage?): FixturesPoster {
         return FixturesPoster(
             tournament = tournament.name,
             day = matchday.day?.let { posterDay(it) },
@@ -214,7 +215,7 @@ data class BracketSlot(val teamA: String?, val teamB: String?, val scoreA: Strin
 data class BracketStage(val name: String, val slots: List<BracketSlot>)
 
 @Immutable
-data class BracketPoster(val tournament: String, val stages: List<BracketStage>, val champion: String?, val page: SharePage?)
+data class BracketPoster(val tournament: String, val stages: List<BracketStage>, val champion: String?, val page: PosterPage?)
 
 /** The innings score of [side] in a finished [match], e.g. "27/1". */
 internal fun Match.scoreOf(side: TeamSide): String? =
@@ -241,15 +242,15 @@ class BracketShare(private val details: TournamentDetails, private val rounds: L
     private val final: Match? = details.fixtures.firstOrNull { it.fixture?.stage == Stage.FINAL }
 
     override val templates: List<ShareTemplate> =
-        paged("bracket", Res.string.poster_template_bracket, TemplateKind.OPAQUE, pages.size, 1) { f, r, p -> BracketTreePoster(poster(r.first, p), f) } +
-            listOfNotNull(
-                final?.let { match ->
-                    ShareTemplate("road", Res.string.poster_template_road, TemplateKind.OPAQUE) { f -> RoadToFinalPoster(roadPoster(match), f) }
-                },
-            )
+        listOfNotNull(
+            paged("bracket", Res.string.poster_template_bracket, TemplateKind.OPAQUE, pages.size, 1) { f, r, p -> BracketTreePoster(poster(r.first, p), f) },
+            final?.let { match ->
+                ShareTemplate("road", Res.string.poster_template_road, TemplateKind.OPAQUE) { f -> RoadToFinalPoster(roadPoster(match), f) }
+            },
+        )
 
     @Composable
-    private fun poster(index: Int, page: SharePage?) = BracketPoster(
+    private fun poster(index: Int, page: PosterPage?) = BracketPoster(
         tournament = details.tournament.name,
         stages = pages[index].map { (round, range) ->
             val info = FixtureInfo(details.tournament.id, round.stage, round.round, 1)
@@ -369,7 +370,7 @@ data class TableLine(
 )
 
 @Immutable
-data class TablePoster(val tournament: String, val lines: List<TableLine>, val advance: Int, val page: SharePage?)
+data class TablePoster(val tournament: String, val lines: List<TableLine>, val advance: Int, val page: PosterPage?)
 
 class TableShare(private val details: TournamentDetails) : ShareContent {
     override val key = "table"
@@ -429,12 +430,13 @@ class TableShare(private val details: TournamentDetails) : ShareContent {
         turn()
     }
 
-    override val templates: List<ShareTemplate> =
-        paged("table", Res.string.poster_template_table, TemplateKind.OPAQUE, pages.size, 1) { f, r, p -> TablePosterCard(poster(r.first, p), f) } +
-            paged("minimal-table", Res.string.poster_template_minimal_table, TemplateKind.OPAQUE, pages.size, 1) { f, r, p -> MinimalTablePoster(poster(r.first, p), f) }
+    override val templates: List<ShareTemplate> = listOf(
+        paged("table", Res.string.poster_template_table, TemplateKind.OPAQUE, pages.size, 1) { f, r, p -> TablePosterCard(poster(r.first, p), f) },
+        paged("minimal-table", Res.string.poster_template_minimal_table, TemplateKind.OPAQUE, pages.size, 1) { f, r, p -> MinimalTablePoster(poster(r.first, p), f) },
+    )
 
     @Composable
-    private fun poster(index: Int, page: SharePage?) = TablePoster(
+    private fun poster(index: Int, page: PosterPage?) = TablePoster(
         tournament = details.tournament.name,
         lines = pages[index].map { line -> line.group?.let { line.copy(group = stringResource(Res.string.tournament_group, it)) } ?: line },
         advance = if (lines.count { it.group == null } > advance) advance else 0,

@@ -77,7 +77,7 @@ fun MatchdayCardPoster(poster: FixturesPoster, format: ShareFormat) {
                     poster.fixtures.forEach { MatchdayRow(it) }
                 }
             }
-            PosterFooter(onGreen, poster.city)
+            PosterFooter(onGreen, caption = poster.city.ifBlank { null })
         }
     }
 }
@@ -94,11 +94,11 @@ private fun MatchdayRow(fixture: PosterFixture) {
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            TeamMark(fixture.teamA, 40.dp, onGreen, colors.brandStrong)
+            PosterAvatar(fixture.teamA, null, 40.dp, onGreen, colors.brandStrong)
             Text(fixture.teamA, style = type.titleMd.sized(16, 19), color = onGreen, maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
             VersusDisc(28)
             Text(fixture.teamB, style = type.titleMd.sized(16, 19), color = onGreen, maxLines = 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End, modifier = Modifier.weight(1f))
-            TeamMark(fixture.teamB, 40.dp, onGreen, colors.brandStrong)
+            PosterAvatar(fixture.teamB, null, 40.dp, onGreen, colors.brandStrong)
         }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
             Text(fixture.whenLine().uppercase(), style = type.label.sized(12, 16), color = share.gold, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -119,7 +119,7 @@ private fun MatchdayTile(fixture: PosterFixture, modifier: Modifier) {
     ) {
         listOf(fixture.teamA, fixture.teamB).forEach { team ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TeamMark(team, 24.dp, onGreen, colors.brandStrong)
+                PosterAvatar(team, null, 24.dp, onGreen, colors.brandStrong)
                 Text(team, style = type.titleMd.sized(13, 16), color = onGreen, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
@@ -156,7 +156,7 @@ fun BroadcastListPoster(poster: FixturesPoster, format: ShareFormat) {
                 }
                 Row(Modifier.weight(1f).background(colors.ink.copy(alpha = 0.55f)).padding(horizontal = 14.dp, vertical = 8.dp)) {
                     Text(poster.tournament.uppercase(), style = type.label.sized(13, 16), color = onGreen, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                    poster.page?.let { Text(stringResource(Res.string.poster_page, it.number, it.count), style = type.label.sized(13, 16), color = share.gold) }
+                    poster.page?.let { Text(stringResource(Res.string.share_page, it.number, it.count), style = type.label.sized(13, 16), color = share.gold) }
                 }
             }
             Column(Modifier.padding(horizontal = 20.dp, vertical = if (post) 6.dp else 20.dp), verticalArrangement = Arrangement.spacedBy(if (post) 0.dp else 4.dp)) {
@@ -175,7 +175,7 @@ fun BroadcastListPoster(poster: FixturesPoster, format: ShareFormat) {
             Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(if (post) 3.dp else 6.dp, Alignment.CenterVertically)) {
                 poster.fixtures.forEach { BroadcastFixtureRow(it, post) }
             }
-            PosterFooter(onGreen, poster.city, Modifier.padding(horizontal = 20.dp, vertical = if (post) 12.dp else 24.dp))
+            PosterFooter(onGreen, caption = poster.city.ifBlank { null }, modifier = Modifier.padding(horizontal = 20.dp, vertical = if (post) 12.dp else 24.dp))
         }
     }
 }
@@ -223,12 +223,12 @@ fun MinimalListPoster(poster: FixturesPoster, format: ShareFormat) {
     val post = format == ShareFormat.POST
     val heading = listOfNotNull(poster.day, poster.round).joinToString(" · ")
     Column(
-        Modifier.fillMaxSize().background(share.paper).padding(horizontal = if (post) 28.dp else 32.dp, vertical = if (post) 24.dp else 40.dp),
-        verticalArrangement = Arrangement.spacedBy(if (post) 8.dp else 14.dp),
+        Modifier.fillMaxSize().background(share.paper).padding(horizontal = if (post) 28.dp else 32.dp, vertical = if (post) 24.dp else 32.dp),
+        verticalArrangement = Arrangement.spacedBy(if (post) 8.dp else 12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Eyebrow(poster.tournament, quiet, modifier = Modifier.weight(1f))
-            poster.page?.let { Text(stringResource(Res.string.poster_page, it.number, it.count), style = type.label, color = quiet) }
+            poster.page?.let { Text(stringResource(Res.string.share_page, it.number, it.count), style = type.label, color = quiet) }
         }
         if (post) {
             Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -237,19 +237,19 @@ fun MinimalListPoster(poster: FixturesPoster, format: ShareFormat) {
             }
         } else {
             Column {
-                Text(stringResource(Res.string.poster_content_fixtures), style = type.titleLg.sized(52, 56), color = ink)
+                Text(stringResource(Res.string.poster_content_fixtures), style = type.titleLg.sized(46, 50), color = ink)
                 Text(heading, style = type.bodyStrong.sized(18, 24), color = quiet, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
             poster.fixtures.forEachIndexed { i, fixture ->
                 if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(ink.copy(alpha = 0.15f)))
-                Row(Modifier.padding(vertical = if (post) 5.dp else 10.dp), verticalAlignment = Alignment.Top) {
+                Row(Modifier.padding(vertical = if (post) 5.dp else 8.dp), verticalAlignment = Alignment.Top) {
                     Column(Modifier.width(if (post) 50.dp else 72.dp)) {
                         Text(fixture.time ?: "", style = type.data.sized(if (post) 13 else 15, 22), color = quiet)
                         if (!post) Text(fixture.stage, style = type.body.sized(12, 16), color = quiet, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
-                    MinimalTeams(fixture, if (post) 15 else 18, lines = if (post) 1 else 2)
+                    MinimalTeams(fixture, if (post) 15 else 17, lines = if (post) 1 else 2)
                 }
             }
         }
@@ -272,7 +272,7 @@ private fun MinimalTeams(fixture: PosterFixture, size: Int, lines: Int) {
             withStyle(SpanStyle(color = ink.copy(alpha = 0.5f), fontWeight = FontWeight.Normal)) { append(" $v ") }
             append(fixture.teamB)
         },
-        style = DesiTheme.type.bodyStrong.sized(size, size + 6),
+        style = DesiTheme.type.bodyStrong.sized(size, size + 5),
         color = ink,
         maxLines = lines,
         overflow = TextOverflow.Ellipsis,
@@ -331,7 +331,7 @@ fun VersusTilesPoster(poster: FixturesPoster, format: ShareFormat) {
                 if (missing > 0) Spacer(Modifier.weight(missing / 2f))
             }
         }
-        PosterFooter(onGreen, poster.city)
+        PosterFooter(onGreen, caption = poster.city.ifBlank { null })
     }
 }
 
@@ -371,12 +371,12 @@ private fun RowScope.VersusHalf(name: String, small: Boolean, modifier: Modifier
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(posterInitials(name), style = type.scoreXl.sized(if (small) 34 else 46), color = onGreen, maxLines = 1)
+        Text(initialsOf(name), style = type.scoreXl.sized(if (small) 34 else 42), color = onGreen, maxLines = 1)
         Text(
             name.uppercase(),
             style = type.titleMd.sized(if (small) 11 else 14, if (small) 13 else 17),
             color = onGreen.copy(alpha = 0.9f),
-            maxLines = if (small) 1 else 2,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
         )

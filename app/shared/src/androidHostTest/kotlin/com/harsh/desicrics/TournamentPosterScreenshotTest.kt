@@ -182,12 +182,19 @@ class TournamentPosterScreenshotTest {
 
     private fun content(details: TournamentDetails, key: String) = tournamentShareContents(details).first { it.key == key }
 
+    /** Every page of each of [content]'s templates in [format]. */
     private fun shootTemplates(name: String, content: ShareContent, format: ShareFormat = ShareFormat.STORY) =
-        content.templates.forEach { template ->
-            shoot("${name}_${template.key}_${format.name.lowercase()}") {
-                Box(Modifier.width(ShareFormat.DESIGN_WIDTH)) { TemplatePreview(template, format, ShareLook.Default) }
+        content.templates.filter { format in it.formats }.forEach { template ->
+            val pages = template.pages(format)
+            repeat(pages) { page ->
+                val suffix = if (pages > 1) "_p${page + 1}" else ""
+                shoot("${name}_${template.key}_${format.name.lowercase()}$suffix") {
+                    Box(Modifier.width(ShareFormat.DESIGN_WIDTH)) { TemplatePreview(template, format, ShareLook.Default, page = page) }
+                }
             }
         }
+
+    private fun ShareContent.pages() = templates.associate { it.key to it.pages(ShareFormat.STORY) }
 
     @Test
     fun contentsFollowTheTournament() {
@@ -195,16 +202,13 @@ class TournamentPosterScreenshotTest {
         assertEquals(listOf("fixtures", "table", "announcement"), tournamentShareContents(league).map { it.key })
         assertEquals(listOf("fixtures", "bracket", "announcement"), tournamentShareContents(knockoutLive).map { it.key })
         assertEquals(listOf("player-of-tournament", "bracket", "announcement"), tournamentShareContents(knockout).map { it.key })
-        // Six fixtures: matchday cards and versus tiles take four a page, the lists six.
-        assertEquals(
-            listOf("matchday-1", "matchday-2", "broadcast", "minimal", "versus-1", "versus-2"),
-            content(league, "fixtures").templates.map { it.key },
-        )
-        // Twelve lines (two headings, ten teams) make two pages of each table.
-        assertEquals(listOf("table-1", "table-2", "minimal-table-1", "minimal-table-2"), content(league, "table").templates.map { it.key })
+        // Six fixtures: matchday cards and versus tiles take four a page (so two pages of three), the lists six.
+        assertEquals(mapOf("matchday" to 2, "broadcast" to 1, "minimal" to 1, "versus" to 2), content(league, "fixtures").pages())
+        // Twelve lines (two headings, ten teams) make a page per group.
+        assertEquals(mapOf("table" to 2, "minimal-table" to 2), content(league, "table").pages())
         // The road to the final only once there's a final.
-        assertEquals(listOf("bracket"), content(knockoutLive, "bracket").templates.map { it.key })
-        assertEquals(listOf("bracket", "road"), content(knockout, "bracket").templates.map { it.key })
+        assertEquals(mapOf("bracket" to 1), content(knockoutLive, "bracket").pages())
+        assertEquals(mapOf("bracket" to 1, "road" to 1), content(knockout, "bracket").pages())
     }
 
     @Test fun fixtures() = shootTemplates("fixtures", content(league, "fixtures"))

@@ -247,7 +247,7 @@ private fun RoadColumn(side: RoadSide, post: Boolean, modifier: Modifier) {
     val type = DesiTheme.type
     val onDark = colors.onBrandStrong
     Column(modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(if (post) 4.dp else 8.dp)) {
-        TeamMark(side.team, if (post) 36.dp else 68.dp, colors.brandStrong, onDark, ring = share.gold)
+        PosterAvatar(side.team, null, if (post) 36.dp else 68.dp, colors.brandStrong, onDark, ring = share.gold)
         Text(side.team.uppercase(), style = type.titleMd.sized(if (post) 14 else 18, if (post) 17 else 22), color = onDark, maxLines = if (post) 1 else 2, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.Center)
         side.league?.let { Text(it, style = type.caption, color = onDark.copy(alpha = 0.7f), maxLines = 1, overflow = TextOverflow.Ellipsis) }
         RoadSteps(side.steps.takeLast(if (post) 2 else 4), post)
@@ -260,15 +260,21 @@ private fun ColumnScope.RoadSteps(steps: List<RoadStep>, post: Boolean) {
     val share = colors.share
     val type = DesiTheme.type
     val onDark = colors.onBrandStrong
-    Column(Modifier.weight(1f).fillMaxWidth().padding(top = if (post) 0.dp else 8.dp), verticalArrangement = Arrangement.spacedBy(if (post) 4.dp else 8.dp)) {
+    Column(
+        Modifier.weight(1f).fillMaxWidth().padding(top = if (post) 0.dp else 8.dp),
+        verticalArrangement = Arrangement.spacedBy(if (post) 4.dp else 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         steps.forEach { step ->
             Column(
                 Modifier.fillMaxWidth().clip(DesiTheme.radius.sm).background(onDark.copy(alpha = 0.07f)).padding(horizontal = 10.dp, vertical = if (post) 3.dp else 8.dp),
             ) {
                 Text(step.stage.uppercase(), style = type.label.sized(if (post) 9 else 11, if (post) 11 else 14), color = share.gold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(step.line, style = type.bodyStrong.sized(if (post) 11 else 14, if (post) 14 else 18), color = onDark, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(step.line, style = type.bodyStrong.sized(if (post) 11 else 14, if (post) 14 else 18), color = onDark, maxLines = if (post) 1 else 2, overflow = TextOverflow.Ellipsis)
                 if (!post) step.score?.let { Text(it, style = type.data.sized(12, 16), color = onDark.copy(alpha = 0.7f), maxLines = 1) }
             }
         }
+        // The path carries on down to where the two meet at the final.
+        Box(Modifier.weight(1f).width(2.dp).background(share.gold))
     }
 }

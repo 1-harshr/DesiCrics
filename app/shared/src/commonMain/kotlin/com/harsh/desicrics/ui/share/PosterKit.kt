@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,26 +64,6 @@ internal fun posterTime(epochMillis: Long): String =
 internal fun posterDateTime(epochMillis: Long): String =
     stringResource(Res.string.poster_day_time, posterDay(local(epochMillis).date), posterTime(epochMillis))
 
-/** First letters of the first and last words: "Andheri Strikers" is "AS", "Royals" is "R". */
-internal fun posterInitials(name: String): String {
-    val words = name.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
-    return listOfNotNull(words.firstOrNull(), words.drop(1).lastOrNull()).mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString("")
-}
-
-/**
- * A team's mark: a disc with its initials (teams have no logos in tournaments yet), optionally ringed.
- */
-@Composable
-internal fun TeamMark(name: String, size: Dp, container: Color, ink: Color, ring: Color? = null, textSize: Int = (size.value * 0.4f).toInt()) {
-    Box(
-        Modifier.size(size).clip(DesiTheme.radius.full).background(container)
-            .then(if (ring != null) Modifier.border(2.dp, ring, DesiTheme.radius.full) else Modifier),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(posterInitials(name), style = DesiTheme.type.scoreMd.sized(textSize), color = ink, maxLines = 1)
-    }
-}
-
 /** Mown stripes, like a ground on TV, over whatever's behind. */
 @Composable
 internal fun Stripes(ink: Color, bands: Int = 6, alpha: Float = 0.05f) {
@@ -92,25 +73,16 @@ internal fun Stripes(ink: Color, bands: Int = 6, alpha: Float = 0.05f) {
     }
 }
 
+/** Page [number] (from 1) of [count], for a poster split over several pictures. */
+@Immutable
+data class PosterPage(val number: Int, val count: Int)
+
 /** "2/3" in a small pill. */
 @Composable
-internal fun PageBadge(page: SharePage?, ink: Color, container: Color) {
+internal fun PageBadge(page: PosterPage?, ink: Color, container: Color) {
     page ?: return
     Box(Modifier.clip(DesiTheme.radius.full).background(container).padding(horizontal = 10.dp, vertical = 3.dp)) {
-        Text(stringResource(Res.string.poster_page, page.number, page.count), style = DesiTheme.type.label.sized(12, 16), color = ink)
-    }
-}
-
-/** The foot of a poster: the ball mark and DesiCrics, then [trailing] small (the city) on the right. */
-@Composable
-internal fun PosterFooter(ink: Color, trailing: String? = null, modifier: Modifier = Modifier) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Icon(painterResource(DesiIllustrations.BallMark), contentDescription = null, tint = ink, modifier = Modifier.size(18.dp))
-        Text(stringResource(Res.string.app_name).uppercase(), style = DesiTheme.type.label.sized(12, 16), color = ink)
-        if (!trailing.isNullOrBlank()) {
-            Box(Modifier.weight(1f))
-            Text(trailing.uppercase(), style = DesiTheme.type.label.sized(12, 16), color = ink.copy(alpha = 0.75f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        }
+        Text(stringResource(Res.string.share_page, page.number, page.count), style = DesiTheme.type.label.sized(12, 16), color = ink)
     }
 }
 
