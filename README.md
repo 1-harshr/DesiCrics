@@ -1,6 +1,10 @@
-# DesiCrics
+<p align="center">
+  <img src="design/icons/play_store_icon_512.png" width="120" alt="DesiCrics app icon">
+</p>
 
-**Score, follow and run amateur cricket, from gully games to weekend leagues.**
+<h1 align="center">DesiCrics</h1>
+
+<p align="center"><b>Score, follow and run amateur cricket, from gully games to weekend leagues.</b></p>
 
 Local cricket in India runs on WhatsApp groups and paper scorebooks. Scores get lost, stats never add up
 across seasons, and nobody outside the ground can follow the game. DesiCrics puts it all in one place:
