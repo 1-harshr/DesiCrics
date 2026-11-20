@@ -189,7 +189,7 @@ fun HomeContent(
                     BallSpinner()
                 }
             }
-            feed.mine.isEmpty() && !state.loadFailed -> item { EmptyMatches() }
+            feed.mine.isEmpty() -> item { EmptyMatches() }
         }
         feedSection(Res.string.home_section_mine, feed.mine, currentUid, onOpenMatch, first = true)
         item {

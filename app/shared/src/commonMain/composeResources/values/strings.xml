@@ -1086,6 +1086,7 @@
     <string name="insights_top_wickets">Most wickets</string>
     <string name="tab_home">Home</string>
     <string name="tab_feed">Feed</string>
+    <string name="tab_tournament">Tournament</string>
     <string name="tab_me">Me</string>
     <string name="feed_all">All matches</string>
     <string name="feed_more">Load more matches</string>
