@@ -29,6 +29,7 @@ import com.harsh.desicrics.designsystem.component.FullScreenLoading
 import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.data.ThemePreference
 import com.harsh.desicrics.navigation.AppNavigation
 import com.harsh.desicrics.resources.Res
 import com.harsh.desicrics.resources.common_try_again
@@ -42,6 +43,7 @@ import com.harsh.desicrics.navigation.JoinTeamRoute
 import com.harsh.desicrics.navigation.routeFor
 import com.harsh.desicrics.ui.signin.SignInScreen
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -50,7 +52,8 @@ import org.koin.compose.viewmodel.koinViewModel
  */
 @Composable
 fun App(link: String? = null, onLinkHandled: () -> Unit = {}) {
-    DesiTheme(reduceMotion = rememberReduceMotion()) {
+    val theme by koinInject<ThemePreference>().theme.collectAsStateWithLifecycle()
+    DesiTheme(theme, reduceMotion = rememberReduceMotion()) {
         Surface(Modifier.fillMaxSize(), color = DesiTheme.colors.bg) {
             val session = koinViewModel<SessionViewModel>()
             val state by session.state.collectAsStateWithLifecycle()

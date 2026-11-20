@@ -2,6 +2,10 @@ package com.harsh.desicrics.designsystem.icon
 
 import com.harsh.desicrics.designsystem.resources.Res
 import com.harsh.desicrics.designsystem.resources.ic_add
+import com.harsh.desicrics.designsystem.resources.ic_gavel
+import com.harsh.desicrics.designsystem.resources.ic_undo
+import com.harsh.desicrics.designsystem.resources.ic_pause
+import com.harsh.desicrics.designsystem.resources.ic_timer
 import com.harsh.desicrics.designsystem.resources.ic_expand_less
 import com.harsh.desicrics.designsystem.resources.ic_play_arrow
 import com.harsh.desicrics.designsystem.resources.ic_event_busy
@@ -60,11 +64,13 @@ import com.harsh.desicrics.designsystem.resources.ic_groups
 import com.harsh.desicrics.designsystem.resources.ic_location_on
 import com.harsh.desicrics.designsystem.resources.ic_mic
 import com.harsh.desicrics.designsystem.resources.ic_more_horiz
+import com.harsh.desicrics.designsystem.resources.ic_content_copy
 import com.harsh.desicrics.designsystem.resources.ic_notifications
 import com.harsh.desicrics.designsystem.resources.ic_person
 import com.harsh.desicrics.designsystem.resources.ic_remove
 import com.harsh.desicrics.designsystem.resources.ic_search
 import com.harsh.desicrics.designsystem.resources.ic_share
+import com.harsh.desicrics.designsystem.resources.ic_download
 import com.harsh.desicrics.designsystem.resources.ic_sports_baseball
 import com.harsh.desicrics.designsystem.resources.ic_sports_cricket
 import com.harsh.desicrics.designsystem.resources.ic_sync
@@ -94,6 +100,8 @@ object DesiIcons {
     val Search: DrawableResource = Res.drawable.ic_search
     val Notifications: DrawableResource = Res.drawable.ic_notifications
     val Share: DrawableResource = Res.drawable.ic_share
+    val Download: DrawableResource = Res.drawable.ic_download
+    val Copy: DrawableResource = Res.drawable.ic_content_copy
     val Teams: DrawableResource = Res.drawable.ic_groups
     val Mic: DrawableResource = Res.drawable.ic_mic
     val ChevronRight: DrawableResource = Res.drawable.ic_chevron_right
@@ -156,6 +164,12 @@ object DesiIcons {
     val Bat: DrawableResource = Res.drawable.ic_cricket_bat
     val Ball: DrawableResource = Res.drawable.ic_sports_baseball
     val Glove: DrawableResource = Res.drawable.ic_front_hand
+
+    // Player auctions: the auction itself, taking back a bid, pausing the room, and the lot's clock.
+    val Auction: DrawableResource = Res.drawable.ic_gavel
+    val Undo: DrawableResource = Res.drawable.ic_undo
+    val Pause: DrawableResource = Res.drawable.ic_pause
+    val Timer: DrawableResource = Res.drawable.ic_timer
 }
 
 /** Illustrations (multi-colour, not tinted). Draw with `Image(painterResource(...))`. */

@@ -2,8 +2,10 @@ package com.harsh.desicrics.api
 import com.harsh.desicrics.model.AbandonReason
 import com.harsh.desicrics.model.MatchEnding
 
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.OrganiserRole
+import com.harsh.desicrics.model.PoolMode
 import com.harsh.desicrics.model.Stage
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
@@ -13,11 +15,23 @@ import kotlinx.serialization.Serializable
 // Tournaments.
 //
 //   GET    /tournaments/mine                       → List<TournamentSummary> (organised, or a team entered)
+//   GET    /tournaments/open?city=                 → List<TournamentSummary> taking teams or players, soonest first
 //   POST   /tournaments                            CreateTournamentRequest → TournamentDetails
 //   GET    /tournaments/{id}                       → TournamentDetails
-//   POST   /tournaments/{id}/teams                 EnterTeamRequest → TournamentDetails (organisers, or a team admin while registration is open)
+//   POST   /tournaments/{id}/pickup                PickupTeamsRequest → TournamentDetails (organisers, before it starts)
+//   PUT    /tournaments/{id}/entry                 EntrySettingsRequest → TournamentDetails (organisers, before it starts)
+//   POST   /tournaments/{id}/teams                 EnterTeamRequest → TournamentDetails (organisers, or a team admin as teamEntry allows)
 //   PUT    /tournaments/{id}/teams/{teamId}        ReviewEntryRequest → TournamentDetails (organisers)
-//   DELETE /tournaments/{id}/teams/{teamId}        → TournamentDetails (organisers, before it starts)
+//   POST   /tournaments/{id}/teams/{teamId}/accept → TournamentDetails (the team's admins, for an invite)
+//   DELETE /tournaments/{id}/teams/{teamId}        → TournamentDetails (organisers; the team's admins withdraw; before it starts)
+//   POST   /tournaments/{id}/players               AddTournamentPlayerRequest → TournamentDetails (yourself as playerEntry allows;
+//                                                  organisers anyone; team admins their team's members, into its squad)
+//   PUT    /tournaments/{id}/players/{profileId}   PlacePlayerRequest → TournamentDetails (organisers)
+//   POST   /tournaments/{id}/players/{profileId}/accept → TournamentDetails (the player, for an invite)
+//   POST   /tournaments/{id}/players/{profileId}/offers           SquadOfferRequest → TournamentDetails (a team's admin, in TEAMS pool mode)
+//   POST   /tournaments/{id}/players/{profileId}/offers/{teamId}/accept → TournamentDetails (the player)
+//   DELETE /tournaments/{id}/players/{profileId}/offers/{teamId}  → TournamentDetails (the player declines, or the team's admin takes it back)
+//   DELETE /tournaments/{id}/players/{profileId}   → TournamentDetails (organisers; the player; their team's admins before it starts)
 //   POST   /tournaments/{id}/organisers            AddOrganiserRequest → TournamentDetails (organisers)
 //   POST   /tournaments/{id}/start                 → TournamentDetails with the first fixtures (organisers)
 //   POST   /tournaments/{id}/fixtures              CustomFixtureRequest → TournamentDetails (organisers)
@@ -35,7 +49,12 @@ data class CreateTournamentRequest(
     val groups: Int = 1,
     val advance: Int = 0,
     val startsAt: Long? = null,
-    val registrationOpen: Boolean = false,
+    val teamEntry: EntryPolicy = EntryPolicy.APPROVAL,
+    val playerEntry: EntryPolicy = EntryPolicy.APPROVAL,
+    val maxTeams: Int? = null,
+    val maxPlayers: Int? = null,
+    val entryClosesAt: Long? = null,
+    val poolMode: PoolMode = PoolMode.ORGANISERS,
 ) {
     fun validate(): TournamentError? = when {
         name.isBlank() -> TournamentError.NAME_MISSING
@@ -47,7 +66,7 @@ data class CreateTournamentRequest(
         format != TournamentFormat.GROUPS_KNOCKOUT && groups != 1 -> TournamentError.GROUPS_INVALID
         advance !in ADVANCE -> TournamentError.ADVANCE_INVALID
         format == TournamentFormat.GROUPS_KNOCKOUT && advance == 0 -> TournamentError.ADVANCE_INVALID
-        else -> null
+        else -> EntrySettingsRequest(teamEntry, playerEntry, maxTeams, maxPlayers, entryClosesAt).validate()
     }
 
     companion object {
@@ -57,9 +76,68 @@ data class CreateTournamentRequest(
     }
 }
 
-/** Enters a saved team. Organisers' entries are confirmed; a team admin's own entry waits for review. */
+/** Who can enter, how many, and until when; nulls mean no limit and no closing time. */
 @Serializable
-data class EnterTeamRequest(val teamId: String)
+data class EntrySettingsRequest(
+    val teamEntry: EntryPolicy,
+    val playerEntry: EntryPolicy,
+    val maxTeams: Int? = null,
+    val maxPlayers: Int? = null,
+    val entryClosesAt: Long? = null,
+    val poolMode: PoolMode = PoolMode.ORGANISERS,
+) {
+    fun validate(): TournamentError? = when {
+        maxTeams != null && maxTeams !in 2..MAX_TEAMS -> TournamentError.LIMIT_INVALID
+        maxPlayers != null && maxPlayers !in 1..MAX_PLAYERS -> TournamentError.LIMIT_INVALID
+        else -> null
+    }
+
+    companion object {
+        const val MAX_TEAMS = 64
+        const val MAX_PLAYERS = 500
+    }
+}
+
+/**
+ * Enters a saved team. Organisers' entries are confirmed, or with [invite] wait for the team's admins to
+ * accept; a team admin's waits for review unless entry is open.
+ */
+@Serializable
+data class EnterTeamRequest(val teamId: String, val invite: Boolean = false)
+
+/**
+ * Adds a player to a tournament: with no [profileId], the caller joins the pool themselves. Organisers add
+ * anyone, to the pool or straight into [teamId]'s squad, or with [invite] ask them to accept; a team's
+ * admins add its members to its squad.
+ */
+@Serializable
+data class AddTournamentPlayerRequest(val profileId: String? = null, val teamId: String? = null, val invite: Boolean = false)
+
+@Serializable
+data class SquadOfferRequest(val teamId: String)
+
+/**
+ * Teams an organiser makes for the tournament, for players who came on their own: one per name. With
+ * [split], the app shares the pool out between them evenly; otherwise the organiser places players.
+ */
+@Serializable
+data class PickupTeamsRequest(val names: List<String>, val split: Boolean = true) {
+    fun validate(): TournamentError? = when {
+        names.size !in 2..MAX_TEAMS -> TournamentError.PICKUP_INVALID
+        names.any { it.isBlank() || it.trim().length > MAX_NAME } -> TournamentError.PICKUP_INVALID
+        names.map { it.trim().lowercase() }.toSet().size != names.size -> TournamentError.PICKUP_INVALID
+        else -> null
+    }
+
+    companion object {
+        const val MAX_TEAMS = 16
+        const val MAX_NAME = 60
+    }
+}
+
+/** Confirms a waiting player, and puts them in [teamId]'s squad, or back in the pool when it's null. */
+@Serializable
+data class PlacePlayerRequest(val teamId: String? = null)
 
 @Serializable
 data class ReviewEntryRequest(val confirm: Boolean)
@@ -102,4 +180,6 @@ enum class TournamentError(val message: String) {
     GROUPS_INVALID("Group tournaments have 2 to 8 groups; other formats have one"),
     ADVANCE_INVALID("Pick how many teams go through: 1, 2, 4 or 8"),
     TOO_FEW_TEAMS("Not enough teams for this format yet"),
+    PICKUP_INVALID("Give 2 to 16 teams, each with its own name"),
+    LIMIT_INVALID("Teams can be limited to 2–64, and players to 1–500"),
 }

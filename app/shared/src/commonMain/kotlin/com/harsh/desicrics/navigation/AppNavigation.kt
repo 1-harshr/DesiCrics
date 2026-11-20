@@ -45,6 +45,10 @@ import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.model.UserProfile
 import com.harsh.desicrics.ui.system.RegisterForPush
 import org.koin.compose.koinInject
+import com.harsh.desicrics.ui.auction.AuctionPoster
+import com.harsh.desicrics.ui.auction.AuctionScreen
+import com.harsh.desicrics.ui.share.ShareStudio
+import com.harsh.desicrics.ui.share.auctionShareContents
 import com.harsh.desicrics.ui.community.CommunityScreen
 import com.harsh.desicrics.ui.home.HomeScreen
 import com.harsh.desicrics.ui.match.MatchScreen
@@ -89,6 +93,8 @@ import kotlinx.serialization.modules.subclass
 @Serializable data object CommunityRoute : NavKey
 /** Opened from a join link or QR code: the teams list with the join sheet filled in. */
 @Serializable data class JoinTeamRoute(val code: String) : NavKey
+/** A tournament's player auction: its setup, the live room (hall or online) and the results. */
+@Serializable data class AuctionRoute(val auctionId: String) : NavKey
 
 /** Lets the back stack be saved and restored (process death, rotation) without reflection. */
 private val RouteSerialization = SavedStateConfiguration {
@@ -111,6 +117,7 @@ private val RouteSerialization = SavedStateConfiguration {
             subclass(CompareRoute::class)
             subclass(LeaderboardRoute::class)
             subclass(CommunityRoute::class)
+            subclass(AuctionRoute::class)
         }
     }
 }
@@ -235,7 +242,7 @@ fun AppNavigation(
             }
             entry<TournamentsRoute> {
                 // The Tournaments tab's root, like Feed and Me, has no back arrow.
-                TournamentsScreen(onOpen = { backStack.add(TournamentRoute(it)) }, onBack = if (backStack.size > 1) back else null)
+                TournamentsScreen(city = profile.city, onOpen = { backStack.add(TournamentRoute(it)) }, onBack = if (backStack.size > 1) back else null)
             }
             entry<TournamentRoute> { route ->
                 TournamentScreen(
@@ -244,11 +251,25 @@ fun AppNavigation(
                     onOpenPlayer = { backStack.add(PlayerRoute(it)) },
                     onLeaderboard = { backStack.add(LeaderboardRoute(route.tournamentId)) },
                     onOpenTeam = { backStack.add(TeamRoute(it)) },
+                    onOpenAuction = { backStack.add(AuctionRoute(it)) },
                     onBack = back,
                 )
             }
+            entry<AuctionRoute> { route ->
+                // Share on the sold moment or a team's results opens the studio with that poster.
+                var poster by remember { mutableStateOf<AuctionPoster?>(null) }
+                AuctionScreen(route.auctionId, onBack = back, onOpenPlayer = { backStack.add(PlayerRoute(it)) }, onSharePoster = { poster = it })
+                poster?.let { current ->
+                    ShareStudio(remember(current) { auctionShareContents(current) }, onDismiss = { poster = null }, title = stringResource(Res.string.poster_studio_title))
+                }
+            }
             entry<NotificationsRoute> {
-                NotificationsScreen(onOpenMatch = { backStack.add(MatchRoute(it)) }, onBack = back, onOpenTeam = { backStack.add(TeamRoute(it)) })
+                NotificationsScreen(
+                    onOpenMatch = { backStack.add(MatchRoute(it)) },
+                    onBack = back,
+                    onOpenTeam = { backStack.add(TeamRoute(it)) },
+                    onOpenTournament = { backStack.add(TournamentRoute(it)) },
+                )
             }
             entry<PlayerRoute> { route ->
                 PlayerScreen(

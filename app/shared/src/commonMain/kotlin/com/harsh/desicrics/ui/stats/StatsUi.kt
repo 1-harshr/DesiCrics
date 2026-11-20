@@ -55,7 +55,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
-import com.harsh.desicrics.ui.match.ShareImageSheet
+import com.harsh.desicrics.ui.share.SeasonShare
+import com.harsh.desicrics.ui.share.ShareStudio
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -174,45 +175,14 @@ fun CareerSection(
             }
         }
         if (sharing && stats != null) {
-            ShareImageSheet(
-                stringResource(Res.string.stats_share_title),
+            val season = state.filter.season?.let { stringResource(Res.string.share_season_caption, "$it") }
+                ?: stringResource(Res.string.stats_season_all)
+            ShareStudio(
+                remember(name, stats, season) { listOf(SeasonShare(name, stats, season)) },
                 onDismiss = { sharing = false },
-                hint = stringResource(Res.string.stats_share_card_hint),
-                action = stringResource(Res.string.stats_share_action),
-            ) { StatsShareCard(name, stats) }
-        }
-    }
-}
-
-/** A player's numbers as a 9:16 card for WhatsApp status: runs and wickets big, best figures and badges below. */
-@Composable
-private fun StatsShareCard(name: String, stats: CareerStats) {
-    val colors = DesiTheme.colors
-    val onGreen = colors.onBrandStrong
-    Column(
-        Modifier.fillMaxWidth().aspectRatio(9f / 16f).clip(DesiTheme.radius.lg).background(colors.brandStrong).padding(20.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Text(name, style = DesiTheme.type.titleLg, color = onGreen, maxLines = 2)
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            listOf(stats.batting.runs to Res.string.share_card_runs, stats.bowling.wickets to Res.string.share_card_wickets).forEach { (value, label) ->
-                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("$value", style = DesiTheme.type.scoreXl, color = onGreen)
-                    Text(stringResource(label), style = DesiTheme.type.data, color = onGreen.copy(alpha = 0.8f), modifier = Modifier.padding(bottom = 8.dp))
-                }
-            }
-            Text(
-                stringResource(
-                    Res.string.share_card_best,
-                    "${stats.batting.highest}${if (stats.batting.highestNotOut) "*" else ""}",
-                    "${stats.bowling.bestWickets}/${stats.bowling.bestRuns}",
-                ),
-                style = DesiTheme.type.bodyStrong,
-                color = onGreen,
+                title = stringResource(Res.string.stats_share_title),
             )
-            stats.badges.take(3).forEach { Text("🏅 " + stringResource(it.label), style = DesiTheme.type.body, color = onGreen) }
         }
-        Text(stringResource(Res.string.share_card_footer).uppercase(), style = DesiTheme.type.label, color = onGreen.copy(alpha = 0.8f))
     }
 }
 
@@ -624,7 +594,7 @@ private val LeaderboardMetric.label: StringResource
         LeaderboardMetric.CATCHES -> Res.string.metric_catches
     }
 
-private val Badge.label: StringResource
+internal val Badge.label: StringResource
     get() = when (this) {
         Badge.FIRST_FIFTY -> Res.string.badge_first_fifty
         Badge.CENTURY -> Res.string.badge_century

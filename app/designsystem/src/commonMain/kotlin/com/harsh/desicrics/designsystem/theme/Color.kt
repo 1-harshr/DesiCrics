@@ -31,6 +31,46 @@ data class DesiColors(
     val onBrandStrong: Color,
     val event: EventColors,
     val isDark: Boolean,
+    /** Pictures made in the share studio; the same in light and dark so a shared card never changes. */
+    val share: ShareColors = CreaseShareColors,
+)
+
+/**
+ * Colours for share-studio pictures. Overlays are white line art on a transparent background, meant to
+ * sit on the user's own photo, so they get their own ink and shadow rather than the screen's.
+ */
+@Immutable
+data class ShareColors(
+    /** Text and line art on transparent overlays. */
+    val overlayInk: Color,
+    /** The soft shadow under overlay text and lines, so they read on bright photos. */
+    val overlayShadow: Color,
+    /** The two squares of the checkerboard that shows where an overlay is transparent. */
+    val checkerLight: Color,
+    val checkerDark: Color,
+    /** The sample dark photo an overlay can be previewed on: top and bottom of its gradient. */
+    val photoTop: Color,
+    val photoBottom: Color,
+    /** The broadcast template's gold, used beside the brand green. */
+    val gold: Color,
+    /** Text and art on [gold]. */
+    val onGold: Color,
+    /** The minimal template's off-white paper and the ink printed on it. */
+    val paper: Color,
+    val paperInk: Color,
+)
+
+val CreaseShareColors = ShareColors(
+    overlayInk = Color(0xFFFFFFFF),
+    overlayShadow = Color(0x73000000),
+    checkerLight = Color(0xFFF2F2EE),
+    checkerDark = Color(0xFFDADBD4),
+    photoTop = Color(0xFF3A4A5C),
+    photoBottom = Color(0xFF1A1F17),
+    gold = Color(0xFFF2B630),
+    onGold = Color(0xFF231A02),
+    paper = Color(0xFFF4EFE4),
+    paperInk = Color(0xFF1B231D),
 )
 
 val LightDesiColors = DesiColors(

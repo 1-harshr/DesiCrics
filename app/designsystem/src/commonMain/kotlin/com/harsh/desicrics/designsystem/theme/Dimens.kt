@@ -37,6 +37,8 @@ object DesiRadius {
 object DesiSize {
     val touchTarget: Dp = 48.dp
     val scoringTarget: Dp = 64.dp
+    /** The wagon wheel field above the run pad: short and fixed, so on a small phone the pad keeps its size. */
+    val scoringField: Dp = 120.dp
     val button: Dp = 52.dp
     val ballChip: Dp = 32.dp
     val listRow: Dp = 56.dp

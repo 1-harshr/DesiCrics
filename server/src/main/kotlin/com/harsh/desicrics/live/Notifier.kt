@@ -140,6 +140,52 @@ class Notifier(
             .onFailure { log.warn("Push failed", it) }
     }
 
+    /**
+     * Tournament entries: someone asking or joining (to the organisers), or what became of an entry (to the
+     * team's admins or the player). [name] is the team or player; [detail] says which. Tapping it opens
+     * the tournament.
+     */
+    suspend fun tournamentNotice(
+        uids: Set<String>,
+        kind: NotificationKind,
+        tournamentId: String,
+        tournamentName: String,
+        name: String,
+        detail: String,
+        value: Int? = null,
+    ) {
+        if (uids.isEmpty()) return
+        val at = clock()
+        social.addNotifications(
+            uids.associateWith {
+                Notification(
+                    UUID.randomUUID().toString(), kind, matchId = "", matchTitle = tournamentName, playerName = name, value = value, detail = detail,
+                    createdAt = at, tournamentId = tournamentId,
+                )
+            },
+        )
+        val tokens = social.pushTokens(uids).values.flatten()
+        if (tokens.isEmpty()) return
+        val team = detail == "team"
+        val message = when (kind) {
+            NotificationKind.ENTRY_REQUEST -> "$name wants to join $tournamentName"
+            NotificationKind.ENTRY_JOINED -> "$name joined $tournamentName"
+            NotificationKind.ENTRY_CONFIRMED -> if (team) "$name is in $tournamentName" else "You're in $tournamentName"
+            NotificationKind.ENTRY_REJECTED -> if (team) "$tournamentName didn't take $name this time" else "$tournamentName didn't take your entry this time"
+            NotificationKind.SQUAD_PLACED -> "You're in $name's squad for $tournamentName"
+            NotificationKind.ENTRY_INVITED -> if (team) "$name is invited to $tournamentName" else "You're invited to play in $tournamentName"
+            NotificationKind.ENTRY_WITHDRAWN -> "$name left $tournamentName"
+            NotificationKind.ENTRY_CLOSING -> "Entries for $tournamentName close within a day; $value waiting for you"
+            NotificationKind.SQUAD_OFFER -> "$name want you in their squad for $tournamentName"
+            NotificationKind.SQUAD_JOINED -> "$name joined your squad for $tournamentName"
+            NotificationKind.ENTRY_PROMOTED -> "A place opened in $tournamentName" + if (team) " for $name" else ""
+            else -> tournamentName
+        }
+        runCatching { push.send(tokens, "DesiCrics", message, mapOf("tournamentId" to tournamentId)) }
+            .onSuccess { gone -> social.deletePushTokens(gone) }
+            .onFailure { log.warn("Push failed", it) }
+    }
+
     private suspend fun followersOf(match: Match): Set<String> {
         val teams = listOfNotNull(match.teamA.teamId, match.teamB.teamId)
         val players = (match.teamA.players + match.teamB.players).mapNotNull { it.profileId }

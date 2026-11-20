@@ -58,7 +58,7 @@ fun ErrorState(
     val colors = DesiTheme.colors
     val space = DesiTheme.space
     val frame = if (compact) {
-        modifier.fillMaxWidth().clip(DesiTheme.radius.md).background(colors.surface).border(1.dp, colors.line.copy(alpha = 0.7f), DesiTheme.radius.md)
+        modifier.fillMaxWidth().clip(DesiTheme.shapes.medium).background(colors.surface).border(DesiTheme.shapes.border, colors.line.copy(alpha = 0.7f), DesiTheme.shapes.medium)
     } else {
         modifier.fillMaxSize()
     }
@@ -110,7 +110,7 @@ private fun ErrorMark(icon: DrawableResource, diameter: Dp) {
             drawCircle(tone.copy(alpha = 0.35f), radius = 3.dp.toPx(), center = Offset(size.width * 0.12f, size.height * 0.7f))
             drawCircle(tone.copy(alpha = 0.25f), radius = 2.dp.toPx(), center = Offset(size.width * 0.3f, size.height * 0.1f))
         }
-        Box(Modifier.size(diameter * 0.56f).clip(DesiTheme.radius.full).background(tone.copy(alpha = 0.16f)), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(diameter * 0.56f).clip(DesiTheme.shapes.pill).background(tone.copy(alpha = 0.16f)), contentAlignment = Alignment.Center) {
             Icon(painterResource(icon), contentDescription = null, tint = tone, modifier = Modifier.size(diameter * 0.26f))
         }
     }
@@ -136,9 +136,9 @@ fun ErrorBanner(
     Row(
         modifier
             .fillMaxWidth()
-            .clip(DesiTheme.radius.md)
+            .clip(DesiTheme.shapes.medium)
             .background(tone.copy(alpha = 0.08f))
-            .border(1.dp, tone.copy(alpha = 0.22f), DesiTheme.radius.md)
+            .border(DesiTheme.shapes.border, tone.copy(alpha = 0.22f), DesiTheme.shapes.medium)
             .padding(start = DesiTheme.space.s3, end = DesiTheme.space.s2, top = DesiTheme.space.s3, bottom = DesiTheme.space.s3)
             .semantics { liveRegion = LiveRegionMode.Polite },
         verticalAlignment = Alignment.CenterVertically,
@@ -154,7 +154,7 @@ fun ErrorBanner(
                 action,
                 style = DesiTheme.type.button,
                 color = colors.brand,
-                modifier = Modifier.clip(DesiTheme.radius.full).clickable(role = Role.Button, onClick = onAction)
+                modifier = Modifier.clip(DesiTheme.shapes.pill).clickable(role = Role.Button, onClick = onAction)
                     .padding(horizontal = DesiTheme.space.s2, vertical = 6.dp),
             )
         }

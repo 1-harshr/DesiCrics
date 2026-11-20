@@ -98,9 +98,9 @@ fun NumberStepper(
     Row(
         modifier
             .fillMaxWidth()
-            .clip(DesiTheme.radius.lg)
+            .clip(DesiTheme.shapes.large)
             .background(colors.surface)
-            .border(1.dp, colors.line, DesiTheme.radius.lg)
+            .border(DesiTheme.shapes.border, colors.line, DesiTheme.shapes.large)
             .padding(DesiTheme.space.s3),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -119,7 +119,7 @@ private fun StepButton(icon: DrawableResource, label: String, enabled: Boolean, 
     Box(
         Modifier
             .size(DesiTheme.size.touchTarget)
-            .clip(DesiTheme.radius.full)
+            .clip(DesiTheme.shapes.pill)
             .background(if (enabled) colors.brandSoft else colors.sunk)
             .clickable(enabled = enabled, role = Role.Button, onClickLabel = label, onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -134,7 +134,7 @@ fun RemovableChip(text: String, removeLabel: String, onRemove: () -> Unit, modif
     val colors = DesiTheme.colors
     Row(
         modifier
-            .clip(DesiTheme.radius.full)
+            .clip(DesiTheme.shapes.pill)
             .background(colors.brandSoft)
             .padding(start = DesiTheme.space.s3),
         verticalAlignment = Alignment.CenterVertically,
@@ -144,7 +144,7 @@ fun RemovableChip(text: String, removeLabel: String, onRemove: () -> Unit, modif
             Modifier
                 .padding(start = 2.dp)
                 .size(36.dp)
-                .clip(DesiTheme.radius.full)
+                .clip(DesiTheme.shapes.pill)
                 .clickable(role = Role.Button, onClick = onRemove),
             contentAlignment = Alignment.Center,
         ) {

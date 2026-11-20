@@ -26,6 +26,11 @@ Every feature area, what we build, and the phase it lands in. See [roadmap.md](r
 | Directory | Grounds, umpires and scorers by city, added by players. | 6 |
 | Team insights | For team admins: win record batting first, chasing and after the toss, run rate and wickets by phase, dismissal mix, top performers. Free until an organiser plan is priced. | 6 |
 | Stream overlay | Score overlay feed for OBS / Larix livestreams. No video hosting. | 6 |
+| Wagon wheel first | On by default; the scorer taps the field, then the runs ([spec](phase-7.md#71-wagon-wheel-first)). | 7 |
+| Share studio | Every shareable picture in one sheet, with templates: transparent Strava-style overlays plus opaque cards, in 9:16 or 1:1 ([spec](phase-7.md#72-share-studio-and-overlays)). | 7 |
+| Posters | Fixtures, bracket, result, scorecard, points table, squad, player of the match and tournament announcement, with 2–4 templates each ([spec](phase-7.md#73-posters)). | 7 |
+| Player auction | A purse for each team and players sold one at a time, either in a hall (one device on a big screen) or online (owners bid from their own phones) ([spec](phase-7.md#74-player-auction)). | 7 |
+| Themes | Cricket-inspired themes (Red Ball, Floodlights, Gully, Scoreboard, and Crease as Classic), picked in settings and in the share studio ([spec](phase-8.md)). | 8 |
 
 ## MVP points
 

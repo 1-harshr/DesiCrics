@@ -2,11 +2,16 @@ package com.harsh.desicrics
 import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.api.AddOrganiserRequest
+import com.harsh.desicrics.api.AddTournamentPlayerRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.CustomFixtureRequest
 import com.harsh.desicrics.api.EnterTeamRequest
+import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.api.PickupTeamsRequest
+import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.ReviewEntryRequest
 import com.harsh.desicrics.api.ScheduleRequest
+import com.harsh.desicrics.api.SquadOfferRequest
 import com.harsh.desicrics.api.StartFixtureRequest
 import com.harsh.desicrics.service.TournamentService
 import io.ktor.http.HttpStatusCode
@@ -22,16 +27,52 @@ import io.ktor.server.routing.route
 fun Route.tournamentRoutes(tournaments: TournamentService) {
     route("/tournaments") {
         get("/mine") { call.respond(tournaments.mine(call.user)) }
+        get("/open") { call.respond(tournaments.open(call.request.queryParameters["city"].orEmpty())) }
         post { call.respond(HttpStatusCode.Created, tournaments.create(call.user, call.receive<CreateTournamentRequest>())) }
         route("/{id}") {
             get { call.respond(tournaments.details(call.parameters["id"].orEmpty())) }
-            post("/teams") { call.respond(tournaments.enterTeam(call.user, call.parameters["id"].orEmpty(), call.receive<EnterTeamRequest>().teamId)) }
+            post("/teams") {
+                val request = call.receive<EnterTeamRequest>()
+                call.respond(tournaments.enterTeam(call.user, call.parameters["id"].orEmpty(), request.teamId, request.invite))
+            }
+            post("/teams/{teamId}/accept") {
+                call.respond(tournaments.acceptTeam(call.user, call.parameters["id"].orEmpty(), call.parameters["teamId"].orEmpty()))
+            }
             put("/teams/{teamId}") {
                 val review = call.receive<ReviewEntryRequest>()
                 call.respond(tournaments.review(call.user, call.parameters["id"].orEmpty(), call.parameters["teamId"].orEmpty(), review.confirm))
             }
             delete("/teams/{teamId}") {
                 call.respond(tournaments.removeTeam(call.user, call.parameters["id"].orEmpty(), call.parameters["teamId"].orEmpty()))
+            }
+            post("/pickup") { call.respond(tournaments.pickup(call.user, call.parameters["id"].orEmpty(), call.receive<PickupTeamsRequest>())) }
+            put("/entry") { call.respond(tournaments.setEntry(call.user, call.parameters["id"].orEmpty(), call.receive<EntrySettingsRequest>())) }
+            route("/players") {
+                post { call.respond(tournaments.addPlayer(call.user, call.parameters["id"].orEmpty(), call.receive<AddTournamentPlayerRequest>())) }
+                put("/{profileId}") {
+                    val request = call.receive<PlacePlayerRequest>()
+                    call.respond(tournaments.placePlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty(), request))
+                }
+                route("/{profileId}/offers") {
+                    post {
+                        val request = call.receive<SquadOfferRequest>()
+                        call.respond(tournaments.offer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty(), request.teamId))
+                    }
+                    post("/{teamId}/accept") {
+                        val p = call.parameters
+                        call.respond(tournaments.acceptOffer(call.user, p["id"].orEmpty(), p["profileId"].orEmpty(), p["teamId"].orEmpty()))
+                    }
+                    delete("/{teamId}") {
+                        val p = call.parameters
+                        call.respond(tournaments.removeOffer(call.user, p["id"].orEmpty(), p["profileId"].orEmpty(), p["teamId"].orEmpty()))
+                    }
+                }
+                post("/{profileId}/accept") {
+                    call.respond(tournaments.acceptPlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty()))
+                }
+                delete("/{profileId}") {
+                    call.respond(tournaments.removePlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty()))
+                }
             }
             post("/organisers") { call.respond(tournaments.addOrganiser(call.user, call.parameters["id"].orEmpty(), call.receive<AddOrganiserRequest>())) }
             post("/start") { call.respond(tournaments.start(call.user, call.parameters["id"].orEmpty())) }

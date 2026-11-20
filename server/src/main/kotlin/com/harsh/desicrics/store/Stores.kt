@@ -1,7 +1,11 @@
 package com.harsh.desicrics.store
 
+import com.harsh.desicrics.api.EntrySettingsRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.SupportRequest
+import com.harsh.desicrics.model.AuctionEvent
+import com.harsh.desicrics.model.AuctionSettings
+import com.harsh.desicrics.model.AuctionStatus
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DirectoryEntry
 import com.harsh.desicrics.model.DirectoryKind
@@ -210,14 +214,42 @@ interface TournamentStore {
     suspend fun create(tournament: Tournament)
     /** With its organisers (named) and entered teams. */
     suspend fun get(tournamentId: String): Tournament?
-    /** Tournaments [uid] organises, or that a team they belong to is in. */
+    /** Tournaments [uid] organises, plays in, or that a team they belong to is in. */
     suspend fun forUser(uid: String): List<TournamentSummary>
+    /**
+     * Tournaments that haven't started and take teams or players before [now], in [city] (any case) unless
+     * it's blank; soonest start first, then newest.
+     */
+    suspend fun open(city: String, now: Long, limit: Int): List<TournamentSummary>
     /** False if the team was already entered. */
     suspend fun addTeam(tournamentId: String, team: TournamentTeam): Boolean
     suspend fun setTeamStatus(tournamentId: String, teamId: String, status: EntryStatus)
+    /** Removes the team and its squad; players who entered on their own go back to the pool. */
     suspend fun removeTeam(tournamentId: String, teamId: String)
+    suspend fun setEntry(tournamentId: String, settings: EntrySettingsRequest)
+    /** False if the player is already in the tournament, in the pool or a squad. */
+    suspend fun addPlayer(tournamentId: String, profileId: String, teamId: String?, status: EntryStatus, fromPool: Boolean, addedBy: String, at: Long): Boolean
+    /**
+     * Puts [profileIds] in [teamId]'s squad: new players are added, pool players move in, and anyone already
+     * in another squad is left where they are.
+     */
+    suspend fun fillSquad(tournamentId: String, teamId: String, profileIds: Collection<String>, addedBy: String, at: Long)
+    /** Moves a player to [teamId]'s squad (dropping their offers), or the pool when it's null. */
+    suspend fun setPlayer(tournamentId: String, profileId: String, teamId: String?, status: EntryStatus)
+    /** Also drops any squad offers to them. */
+    suspend fun removePlayer(tournamentId: String, profileId: String)
+    /** False if that team has already asked. */
+    suspend fun addOffer(tournamentId: String, profileId: String, teamId: String, offeredBy: String, at: Long): Boolean
+    suspend fun removeOffer(tournamentId: String, profileId: String, teamId: String)
+    /**
+     * Tournaments whose entry closes after [from] and by [until], not yet reminded, marked reminded as
+     * they're returned, so each is reminded once.
+     */
+    suspend fun claimReminders(from: Long, until: Long): List<String>
+    /** Notes a squad change made after the start. */
+    suspend fun addSquadChange(tournamentId: String, teamId: String, profileId: String, added: Boolean, by: String, at: Long)
     suspend fun addOrganiser(tournamentId: String, uid: String, role: OrganiserRole)
-    /** Fixes the teams' groups and marks the tournament started. False if it already was. */
+    /** Fixes the teams' groups, drops unconfirmed teams and players, and marks it started. False if it already was. */
     suspend fun markStarted(tournamentId: String, teams: List<TournamentTeam>): Boolean
 }
 
@@ -267,4 +299,37 @@ interface CommunityStore {
 
     /** Saved teams based in [city] (any case). */
     suspend fun teamIdsInCity(city: String): List<String>
+}
+
+/** Player auctions: one per tournament, its pool, and its append-only event log. Rows come back raw; the service attaches people. */
+interface AuctionStore {
+    data class AuctionRow(
+        val id: String, val tournamentId: String, val tournamentName: String, val settings: AuctionSettings,
+        val status: AuctionStatus, val createdBy: String, val createdAt: Long,
+    )
+    data class PlayerRow(
+        val profileId: String, val basePrice: Int, val category: String?, val requested: Boolean,
+        val retainedBy: String?, val retainedPrice: Int?, val addedAt: Long,
+    )
+
+    /** False if the tournament already has an auction. */
+    suspend fun create(auction: AuctionRow): Boolean
+    suspend fun get(auctionId: String): AuctionRow?
+    suspend fun idForTournament(tournamentId: String): String?
+    suspend fun updateSettings(auctionId: String, settings: AuctionSettings)
+    /** Auctions in any of [statuses], e.g. live ones whose clock needs restarting. */
+    suspend fun idsWithStatus(statuses: Collection<AuctionStatus>): List<String>
+
+    /** The pool, oldest first. */
+    suspend fun players(auctionId: String): List<PlayerRow>
+    /** False if they're already in the pool. */
+    suspend fun addPlayer(auctionId: String, player: PlayerRow): Boolean
+    suspend fun updatePlayer(auctionId: String, player: PlayerRow)
+    /** False if they weren't in the pool. */
+    suspend fun removePlayer(auctionId: String, profileId: String): Boolean
+
+    /** In order. */
+    suspend fun events(auctionId: String): List<AuctionEvent>
+    /** Appends [event] and sets the auction's [status] in one transaction. False if [AuctionEvent.seq] is taken. */
+    suspend fun addEvent(auctionId: String, event: AuctionEvent, status: AuctionStatus, by: String?, at: Long): Boolean
 }

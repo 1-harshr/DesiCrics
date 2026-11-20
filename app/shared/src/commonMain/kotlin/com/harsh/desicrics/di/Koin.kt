@@ -1,16 +1,19 @@
 package com.harsh.desicrics.di
 
+import com.harsh.desicrics.data.AuctionRepository
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.CommunityRepository
 import com.harsh.desicrics.data.MatchRepository
 import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.data.StatsRepository
 import com.harsh.desicrics.data.TeamRepository
+import com.harsh.desicrics.data.ThemePreference
 import com.harsh.desicrics.data.TournamentRepository
 import com.harsh.desicrics.data.UserRepository
 import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.data.api.IdTokenProvider
 import com.harsh.desicrics.session.SessionViewModel
+import com.harsh.desicrics.ui.auction.AuctionViewModel
 import com.harsh.desicrics.ui.community.CommunityViewModel
 import com.harsh.desicrics.ui.home.HomeViewModel
 import com.harsh.desicrics.ui.match.MatchViewModel
@@ -31,6 +34,7 @@ import com.harsh.desicrics.ui.tournament.TournamentsViewModel
 import com.harsh.desicrics.ui.teams.TeamsViewModel
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
+import com.russhwolf.settings.Settings
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -74,6 +78,8 @@ val dataModule = module {
     singleOf(::TournamentRepository)
     singleOf(::StatsRepository)
     singleOf(::CommunityRepository)
+    singleOf(::AuctionRepository)
+    single { ThemePreference(Settings()) }
 }
 
 val viewModelModule = module {
@@ -88,12 +94,13 @@ val viewModelModule = module {
     viewModelOf(::ProfileViewModel)
     viewModel { (teamId: String) -> TeamViewModel(teamId, get(), get(), get()) }
     viewModelOf(::SearchViewModel)
-    viewModelOf(::TournamentsViewModel)
+    viewModel { (city: String) -> TournamentsViewModel(city, get()) }
     viewModel { (profileId: String) -> CareerViewModel(profileId, get()) }
     viewModel { (profileId: String) -> CompareViewModel(profileId, get(), get()) }
     viewModel { (tournamentId: String?) -> LeaderboardViewModel(tournamentId, get()) }
     viewModel { (city: String) -> CommunityViewModel(city, get(), get()) }
-    viewModel { (tournamentId: String) -> TournamentViewModel(tournamentId, get(), get(), get()) }
+    viewModel { (tournamentId: String) -> TournamentViewModel(tournamentId, get(), get(), get(), get()) }
+    viewModel { (auctionId: String) -> AuctionViewModel(auctionId, get(), get(), get<AuthRepository>().currentUser?.uid) }
     viewModelOf(::NotificationsViewModel)
     viewModel { (profileId: String, myId: String?) -> PlayerViewModel(profileId, get(), myId) }
 }

@@ -46,7 +46,7 @@ fun PrimaryButton(
         onClick = onClick,
         enabled = enabled && !loading,
         modifier = modifier.heightIn(min = DesiTheme.size.button),
-        shape = DesiTheme.radius.md,
+        shape = DesiTheme.shapes.medium,
         contentPadding = ButtonPadding,
         colors = ButtonDefaults.buttonColors(
             containerColor = colors.brand,
@@ -91,7 +91,7 @@ fun TonalButton(
         onClick = onClick,
         enabled = enabled && !loading,
         modifier = modifier.heightIn(min = DesiTheme.size.button),
-        shape = DesiTheme.radius.md,
+        shape = DesiTheme.shapes.medium,
         contentPadding = ButtonPadding,
         colors = ButtonDefaults.buttonColors(
             containerColor = colors.sunk,
@@ -131,9 +131,9 @@ fun GhostButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier.heightIn(min = DesiTheme.size.button),
-        shape = DesiTheme.radius.md,
+        shape = DesiTheme.shapes.medium,
         contentPadding = ButtonPadding,
-        border = BorderStroke(1.5.dp, colors.line),
+        border = BorderStroke(DesiTheme.shapes.borderControl, colors.line),
         colors = ButtonDefaults.outlinedButtonColors(contentColor = colors.ink, disabledContentColor = colors.muted),
     ) {
         if (leadingIcon != null) {
@@ -156,9 +156,9 @@ fun PillButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
         style = DesiTheme.type.label,
         color = if (selected) colors.onBrand else colors.brand,
         modifier = modifier
-            .clip(DesiTheme.radius.full)
+            .clip(DesiTheme.shapes.pill)
             .background(if (selected) colors.brand else colors.surface)
-            .border(1.dp, colors.brand, DesiTheme.radius.full)
+            .border(DesiTheme.shapes.border, colors.brand, DesiTheme.shapes.pill)
             .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
             .padding(horizontal = DesiTheme.space.s4, vertical = DesiTheme.space.s2),
     )

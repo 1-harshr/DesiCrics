@@ -60,7 +60,7 @@ data class NewMatchFormState(
     val overs: Int = 10,
     val tossWinner: TeamSide = TeamSide.A,
     val tossDecision: TossDecision = TossDecision.BAT,
-    val rules: MatchRules = MatchRules(),
+    val rules: MatchRules = MatchRules.Relaxed,
     val saving: Boolean = false,
     val error: NewMatchError? = null,
     /** The caller's saved teams, loaded when they first open the team picker. */

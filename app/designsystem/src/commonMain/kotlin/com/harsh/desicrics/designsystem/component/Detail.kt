@@ -32,7 +32,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,11 +45,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
@@ -65,13 +63,13 @@ import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.resources.Res
 import com.harsh.desicrics.designsystem.resources.ds_back
 import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.designsystem.theme.SurfaceArea
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private val BarHeight = 56.dp
 private val CollapseAfter = 40.dp
-private val HeroShape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)
 
 /**
  * The frame of an inside page about one thing (a team, a player, a tournament): a green [hero] with the
@@ -90,6 +88,8 @@ fun HeroScaffold(
 ) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
+    // The hero's bottom corners round like a sheet's; its top runs under the status bar.
+    val heroShape = DesiTheme.shapes.large.copy(topStart = ZeroCornerSize, topEnd = ZeroCornerSize)
     val scroll = rememberScrollState()
     val density = LocalDensity.current
     // The bar turns solid, with the title, as soon as the name starts to slide under it. Short pages
@@ -104,7 +104,7 @@ fun HeroScaffold(
                 Column(
                     Modifier
                         .fillMaxWidth()
-                        .clip(HeroShape)
+                        .clip(heroShape)
                         .heroBackground()
                         .statusBarsPadding()
                         .padding(top = BarHeight)
@@ -141,21 +141,18 @@ fun HeroScaffold(
     }
 }
 
-/** The hero's deep green, lighter towards the bottom, with a faint pitch circle in the top corner. */
+/**
+ * The hero's deep green, lighter towards the bottom, with the theme's [DesiTheme.surface] texture on top
+ * (Classic: a faint pitch circle in the top corner).
+ */
 @Composable
 fun Modifier.heroBackground(): Modifier {
     val colors = DesiTheme.colors
     val top = colors.brandStrong
     val bottom = lerp(colors.brandStrong, colors.brand, if (colors.isDark) 0.25f else 0.45f)
-    val ring = colors.onBrandStrong.copy(alpha = 0.07f)
     return this
         .background(Brush.linearGradient(listOf(top, bottom), start = Offset.Zero, end = Offset(0f, Float.POSITIVE_INFINITY)))
-        .drawBehind {
-            val centre = Offset(size.width * 0.92f, size.height * 0.05f)
-            drawCircle(ring, radius = size.width * 0.42f, center = centre, style = Stroke(width = 2.dp.toPx()))
-            drawCircle(ring, radius = size.width * 0.28f, center = centre, style = Stroke(width = 2.dp.toPx()))
-            drawCircle(ring.copy(alpha = 0.05f), radius = size.width * 0.14f, center = centre)
-        }
+        .themeSurface(SurfaceArea.Hero)
 }
 
 /** A round, see-through button for the hero and its bar (back, share, settings). */
@@ -165,7 +162,7 @@ fun HeroIconButton(icon: DrawableResource, contentDescription: String, onClick: 
     Box(
         modifier
             .size(40.dp)
-            .clip(DesiTheme.radius.full)
+            .clip(DesiTheme.shapes.pill)
             .background(colors.onBrandStrong.copy(alpha = 0.14f))
             .clickable(role = Role.Button, onClick = onClick),
         contentAlignment = Alignment.Center,
@@ -188,7 +185,7 @@ fun HeroIdentity(
 ) {
     val colors = DesiTheme.colors
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s4)) {
-        Box(Modifier.clip(DesiTheme.radius.full).border(3.dp, colors.onBrandStrong.copy(alpha = 0.9f), DesiTheme.radius.full).padding(3.dp)) {
+        Box(Modifier.clip(DesiTheme.shapes.pill).border(3.dp, colors.onBrandStrong.copy(alpha = 0.9f), DesiTheme.shapes.pill).padding(3.dp)) {
             avatar()
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -211,7 +208,7 @@ fun HeroChips(chips: List<HeroChip>, modifier: Modifier = Modifier) {
     FlowRow(modifier, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2), verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
         visible.forEach { chip ->
             Row(
-                Modifier.clip(DesiTheme.radius.full).background(colors.onBrandStrong.copy(alpha = 0.12f)).padding(horizontal = DesiTheme.space.s3, vertical = 6.dp),
+                Modifier.clip(DesiTheme.shapes.pill).background(colors.onBrandStrong.copy(alpha = 0.12f)).padding(horizontal = DesiTheme.space.s3, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
@@ -231,7 +228,7 @@ fun HeroStats(stats: List<StatItem>, modifier: Modifier = Modifier) {
     if (stats.isEmpty()) return
     val colors = DesiTheme.colors
     Row(
-        modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(DesiTheme.radius.md)
+        modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(DesiTheme.shapes.medium)
             .background(colors.onBrandStrong.copy(alpha = 0.1f)).padding(vertical = DesiTheme.space.s3),
     ) {
         stats.forEachIndexed { index, stat ->
@@ -256,7 +253,7 @@ fun HeroButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
     Row(
         modifier
             .heightIn(min = 44.dp)
-            .clip(DesiTheme.radius.full)
+            .clip(DesiTheme.shapes.pill)
             .background(container)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = DesiTheme.space.s4),
@@ -290,7 +287,7 @@ fun SectionHeader(
         )
         if (action != null && onAction != null) {
             Row(
-                Modifier.clip(DesiTheme.radius.full).clickable(role = Role.Button, onClick = onAction).padding(horizontal = DesiTheme.space.s2, vertical = 6.dp),
+                Modifier.clip(DesiTheme.shapes.pill).clickable(role = Role.Button, onClick = onAction).padding(horizontal = DesiTheme.space.s2, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(action, style = DesiTheme.type.button, color = colors.brand)
@@ -309,7 +306,7 @@ fun IconTile(
     tint: Color = DesiTheme.colors.brand,
     container: Color = DesiTheme.colors.brandSoft,
 ) {
-    Box(modifier.size(size).clip(RoundedCornerShape(size * 0.3f)).background(container), contentAlignment = Alignment.Center) {
+    Box(modifier.size(size).clip(DesiTheme.shapes.tile).background(container), contentAlignment = Alignment.Center) {
         Icon(painterResource(icon), null, tint = tint, modifier = Modifier.size(size * 0.55f))
     }
 }
@@ -320,9 +317,9 @@ fun ActionTile(icon: DrawableResource, label: String, onClick: () -> Unit, modif
     val colors = DesiTheme.colors
     Column(
         modifier
-            .clip(DesiTheme.radius.md)
+            .clip(DesiTheme.shapes.medium)
             .background(colors.surface)
-            .border(1.dp, colors.line.copy(alpha = 0.7f), DesiTheme.radius.md)
+            .border(DesiTheme.shapes.border, colors.line.copy(alpha = 0.7f), DesiTheme.shapes.medium)
             .clickable(role = Role.Button, onClick = onClick)
             .padding(horizontal = DesiTheme.space.s2, vertical = DesiTheme.space.s4),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -338,7 +335,7 @@ fun ActionTile(icon: DrawableResource, label: String, onClick: () -> Unit, modif
 fun ListCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     val colors = DesiTheme.colors
     Column(
-        modifier.fillMaxWidth().clip(DesiTheme.radius.md).background(colors.surface).border(1.dp, colors.line.copy(alpha = 0.7f), DesiTheme.radius.md),
+        modifier.fillMaxWidth().clip(DesiTheme.shapes.medium).background(colors.surface).border(DesiTheme.shapes.border, colors.line.copy(alpha = 0.7f), DesiTheme.shapes.medium),
         content = content,
     )
 }
@@ -398,7 +395,7 @@ fun Tag(text: String, modifier: Modifier = Modifier, tone: TagTone = TagTone.NEU
         TagTone.DANGER -> colors.event.wicket.copy(alpha = 0.12f) to colors.event.wicket
     }
     Row(
-        modifier.clip(DesiTheme.radius.full).background(container).padding(horizontal = 10.dp, vertical = 4.dp),
+        modifier.clip(DesiTheme.shapes.pill).background(container).padding(horizontal = 10.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -421,9 +418,9 @@ fun StatGrid(stats: List<StatItem>, modifier: Modifier = Modifier, columns: Int 
                 row.forEach { (index, stat) ->
                     val highlight = index < featured
                     Column(
-                        Modifier.weight(1f).fillMaxHeight().clip(DesiTheme.radius.md)
+                        Modifier.weight(1f).fillMaxHeight().clip(DesiTheme.shapes.medium)
                             .background(if (highlight) colors.brandSoft else colors.surface)
-                            .border(1.dp, if (highlight) Color.Transparent else colors.line.copy(alpha = 0.7f), DesiTheme.radius.md)
+                            .border(DesiTheme.shapes.border, if (highlight) Color.Transparent else colors.line.copy(alpha = 0.7f), DesiTheme.shapes.medium)
                             .padding(horizontal = space.s3, vertical = space.s3),
                         verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.Bottom),
                     ) {
@@ -448,8 +445,8 @@ fun EmptyState(
 ) {
     val colors = DesiTheme.colors
     Column(
-        modifier.fillMaxWidth().clip(DesiTheme.radius.md).background(colors.surface)
-            .border(1.dp, colors.line.copy(alpha = 0.7f), DesiTheme.radius.md).padding(DesiTheme.space.s6),
+        modifier.fillMaxWidth().clip(DesiTheme.shapes.medium).background(colors.surface)
+            .border(DesiTheme.shapes.border, colors.line.copy(alpha = 0.7f), DesiTheme.shapes.medium).padding(DesiTheme.space.s6),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2),
     ) {
@@ -469,7 +466,7 @@ fun RankBadge(rank: Int, modifier: Modifier = Modifier, size: Dp = 32.dp) {
         2, 3 -> colors.brandSoft to colors.brand
         else -> colors.sunk to colors.muted
     }
-    Box(modifier.size(size).clip(DesiTheme.radius.full).background(container), contentAlignment = Alignment.Center) {
+    Box(modifier.size(size).clip(DesiTheme.shapes.pill).background(container), contentAlignment = Alignment.Center) {
         Text("$rank", style = DesiTheme.type.bodyStrong, color = content)
     }
 }
@@ -508,9 +505,9 @@ fun <T> FilterRow(
             Row(
                 Modifier
                     .heightIn(min = 40.dp)
-                    .clip(DesiTheme.radius.full)
+                    .clip(DesiTheme.shapes.pill)
                     .background(if (isSelected) colors.ink else colors.surface)
-                    .border(1.dp, if (isSelected) colors.ink else colors.line, DesiTheme.radius.full)
+                    .border(DesiTheme.shapes.border, if (isSelected) colors.ink else colors.line, DesiTheme.shapes.pill)
                     .clickable(role = Role.Tab) { onSelect(option) }
                     .padding(horizontal = DesiTheme.space.s4),
                 verticalAlignment = Alignment.CenterVertically,
@@ -534,9 +531,9 @@ fun PickerPill(text: String, onClick: () -> Unit, modifier: Modifier = Modifier,
     Row(
         modifier
             .heightIn(min = 36.dp)
-            .clip(DesiTheme.radius.full)
+            .clip(DesiTheme.shapes.pill)
             .background(colors.surface)
-            .border(1.dp, colors.line, DesiTheme.radius.full)
+            .border(DesiTheme.shapes.border, colors.line, DesiTheme.shapes.pill)
             .clickable(role = Role.DropdownList, onClick = onClick)
             .padding(start = DesiTheme.space.s3, end = DesiTheme.space.s2),
         verticalAlignment = Alignment.CenterVertically,

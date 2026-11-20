@@ -23,6 +23,7 @@ import com.harsh.desicrics.live.Notifier
 import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.Delivery
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.DirectoryKind
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
@@ -319,7 +320,7 @@ private class DemoSeed(private val database: Database, private val forUids: List
             organiser.principal,
             CreateTournamentRequest(
                 "Winter Box League", PUNE, TournamentFormat.BOX_LEAGUE, 6, MatchRules.Gully,
-                startsAt = at(nextSaturday().plusWeeks(2), 18, 0), registrationOpen = true,
+                startsAt = at(nextSaturday().plusWeeks(2), 18, 0), teamEntry = EntryPolicy.APPROVAL,
             ),
         ).tournament.id
         pune.drop(4).take(3).forEach { tournaments.enterTeam(organiser.principal, id, it.id) }

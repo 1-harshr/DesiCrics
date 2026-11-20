@@ -34,33 +34,41 @@ data class DesiTypography(
     val data: TextStyle,
 )
 
+/** Barlow Condensed: Classic's display face for scores and titles. */
 @Composable
-private fun displayFamily() = FontFamily(
+fun barlowCondensedFamily(): FontFamily = FontFamily(
     Font(Res.font.barlow_condensed_semibold, FontWeight.SemiBold),
     Font(Res.font.barlow_condensed_bold, FontWeight.Bold),
 )
 
+/** Figtree: the body and UI face. */
 @Composable
-private fun bodyFamily() = FontFamily(
+fun figtreeFamily(): FontFamily = FontFamily(
     Font(Res.font.figtree_variable, FontWeight.Normal),
     Font(Res.font.figtree_variable, FontWeight.Medium),
     Font(Res.font.figtree_variable, FontWeight.SemiBold),
     Font(Res.font.figtree_variable, FontWeight.Bold),
 )
 
+/** JetBrains Mono: overs, run rates and table figures. */
 @Composable
-private fun monoFamily() = FontFamily(
+fun jetBrainsMonoFamily(): FontFamily = FontFamily(
     Font(Res.font.jetbrains_mono_variable, FontWeight.Medium),
 )
 
 /** Lines sit centred in their line height, so fixed line heights keep list rows even. */
 private val Centered = LineHeightStyle(LineHeightStyle.Alignment.Center, LineHeightStyle.Trim.None)
 
+/** Classic's type scale: Barlow Condensed, Figtree and JetBrains Mono. */
 @Composable
-fun desiTypography(): DesiTypography {
-    val display = displayFamily()
-    val body = bodyFamily()
-    val mono = monoFamily()
+fun desiTypography(): DesiTypography = desiTypography(barlowCondensedFamily(), figtreeFamily(), jetBrainsMonoFamily())
+
+/**
+ * The Crease type scale set in other faces. A theme swaps [display] (scores and titles) and optionally
+ * [body]; sizes, line heights and tabular figures stay the same so layouts don't move between themes.
+ * [display] needs SemiBold and Bold; [body] Normal and SemiBold; [mono] Medium.
+ */
+fun desiTypography(display: FontFamily, body: FontFamily, mono: FontFamily): DesiTypography {
     fun style(family: FontFamily, size: Int, lineHeight: Int, weight: FontWeight, tabular: Boolean = false) = TextStyle(
         fontFamily = family,
         fontSize = size.sp,

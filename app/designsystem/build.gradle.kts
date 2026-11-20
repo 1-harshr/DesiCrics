@@ -20,6 +20,8 @@ kotlin {
         androidResources {
             enable = true
         }
+        // Token checks (contrast) run on the JVM: :app:designsystem:testAndroidHostTest.
+        withHostTest {}
     }
     sourceSets {
         androidMain.dependencies {
@@ -32,6 +34,9 @@ kotlin {
             api(libs.compose.ui)
             api(libs.compose.components.resources)
             api(libs.compose.uiToolingPreview)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
         }
     }
 }

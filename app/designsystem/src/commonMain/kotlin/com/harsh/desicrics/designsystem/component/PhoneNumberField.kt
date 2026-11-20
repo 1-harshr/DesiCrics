@@ -93,16 +93,16 @@ fun PhoneNumberField(
                     Modifier
                         .fillMaxWidth()
                         .height(64.dp)
-                        .clip(DesiTheme.radius.lg)
+                        .clip(DesiTheme.shapes.large)
                         .background(if (focused) colors.surface else colors.sunk)
-                        .border(if (focused || error != null) 2.dp else 1.dp, outline, DesiTheme.radius.lg)
+                        .border(if (focused || error != null) DesiTheme.shapes.borderFocus else DesiTheme.shapes.border, outline, DesiTheme.shapes.large)
                         .padding(start = DesiTheme.space.s2, end = DesiTheme.space.s4),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     // Country pill
                     Row(
                         Modifier
-                            .clip(DesiTheme.radius.md)
+                            .clip(DesiTheme.shapes.medium)
                             .background(colors.brandSoft)
                             .padding(horizontal = DesiTheme.space.s3, vertical = DesiTheme.space.s2),
                         verticalAlignment = Alignment.CenterVertically,

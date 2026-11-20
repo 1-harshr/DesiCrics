@@ -59,9 +59,17 @@ internal fun freshDatabase(): DatabaseConfig {
     return DatabaseConfig(url = "$postgres?currentSchema=$schema", user = "desicrics", password = "desicrics", maxPoolSize = 2)
 }
 
-/** A fresh database per test. Push messages go to [push]; the client can open WebSockets. */
-fun apiTest(push: PushSender = LoggingPushSender, block: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
-    val config = ServerConfig(database = freshDatabase())
+/**
+ * A fresh database per test. Push messages go to [push]; the client can open WebSockets. Online auction clocks
+ * tick every [auctionSecondMillis], and entry reminders are looked for every [entryReminderEveryMillis].
+ */
+fun apiTest(
+    push: PushSender = LoggingPushSender,
+    auctionSecondMillis: Long = 1000,
+    entryReminderEveryMillis: Long = 15 * 60 * 1000L,
+    block: suspend ApplicationTestBuilder.(HttpClient) -> Unit,
+) = testApplication {
+    val config = ServerConfig(database = freshDatabase(), auctionSecondMillis = auctionSecondMillis, entryReminderEveryMillis = entryReminderEveryMillis)
     application { module(config, fakeTokens, push) }
     block(
         createClient {

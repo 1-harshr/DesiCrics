@@ -134,6 +134,22 @@
     <string name="scorecard_out_other">out</string>
 
     <!-- Match result -->
+    <plurals name="notification_entry_closing">
+        <item quantity="one">Entries for %1$s close within a day, and %2$d is still waiting for you</item>
+        <item quantity="other">Entries for %1$s close within a day, and %2$d are still waiting for you</item>
+    </plurals>
+    <plurals name="pickup_split_hint">
+        <item quantity="one">About %1$d player each, mixing roles and past form so the sides are even. You can move anyone after.</item>
+        <item quantity="other">About %1$d players each, mixing roles and past form so the sides are even. You can move anyone after.</item>
+    </plurals>
+    <plurals name="entry_up_to_teams">
+        <item quantity="one">Up to %1$d team</item>
+        <item quantity="other">Up to %1$d teams</item>
+    </plurals>
+    <plurals name="entry_up_to_players">
+        <item quantity="one">Up to %1$d player</item>
+        <item quantity="other">Up to %1$d players</item>
+    </plurals>
     <plurals name="match_result_won_by_runs">
         <item quantity="one">%1$s won by %2$d run</item>
         <item quantity="other">%1$s won by %2$d runs</item>
@@ -708,9 +724,8 @@
     <string name="match_share_link">Share link</string>
     <string name="match_share_link_hint">Anyone can follow along live, in the app or a browser.</string>
     <string name="match_share_link_text">Follow %1$s live on DesiCrics: %2$s</string>
-    <string name="match_share_card">Share scorecard image</string>
-    <string name="match_share_card_hint">A picture of the score, sized for WhatsApp status.</string>
-    <string name="match_share_card_title">Share the score</string>
+    <string name="match_share_card">Share a picture</string>
+    <string name="match_share_card_hint">Cards and story overlays for the result and every player.</string>
     <string name="share_card_footer">Scored on DesiCrics</string>
     <string name="team_view_player">View player</string>
     <string name="team_view_player_hint">Their matches, teams and stats.</string>
@@ -748,13 +763,107 @@
     <string name="tournament_groups_more">More groups</string>
     <string name="tournament_advance">Teams through to the playoffs</string>
     <string name="tournament_advance_none">None</string>
-    <string name="tournament_registration">Let team admins register</string>
-    <string name="tournament_registration_hint">Their entries wait for you to confirm them.</string>
+    <string name="entry_title">Who can enter</string>
+    <string name="entry_teams">Teams</string>
+    <string name="entry_players">Players on their own</string>
+    <string name="entry_organisers">Organisers</string>
+    <string name="entry_approval">On approval</string>
+    <string name="entry_open">Open</string>
+    <string name="entry_teams_organisers_hint">Only organisers add teams.</string>
+    <string name="entry_teams_approval_hint">Team admins ask to enter, and you confirm each one.</string>
+    <string name="entry_teams_open_hint">Team admins enter their team straight away.</string>
+    <string name="entry_players_organisers_hint">Only organisers add players.</string>
+    <string name="entry_players_approval_hint">Players ask to join, and you confirm them and pick their team.</string>
+    <string name="entry_players_open_hint">Players join straight away, and you pick their team.</string>
+    <string name="entry_summary">Teams: %1$s · Players: %2$s</string>
+    <string name="entry_card_open">Entries are open</string>
+    <string name="entry_card_open_both">Enter a team you run, or join as a player and the organisers will pick your team.</string>
+    <string name="entry_card_open_teams">Enter a team you run.</string>
+    <string name="entry_card_open_players">Join as a player, and the organisers will pick your team.</string>
+    <string name="entry_card_asked">You've asked to join</string>
+    <string name="entry_card_asked_hint">An organiser will confirm your entry.</string>
+    <string name="entry_card_in">You're in</string>
+    <string name="entry_card_in_squad">You're in %1$s's squad.</string>
+    <string name="entry_card_in_pool">An organiser will pick your team.</string>
+    <string name="entry_join_player">Join as a player</string>
+    <string name="entry_add_player">Add a player</string>
+    <string name="entry_no_players">No players yet.</string>
+    <string name="entry_no_players_open">No players yet. Share an invite so players can join.</string>
+    <string name="entry_waiting">Waiting (%1$d)</string>
+    <string name="entry_pool">Without a team (%1$d)</string>
+    <string name="entry_pool_hint">Pick a team for each of them before the tournament starts.</string>
+    <string name="entry_pick_team">Pick team</string>
+    <string name="entry_squad">%1$s (%2$d)</string>
+    <string name="entry_squad_add">Add</string>
+    <string name="entry_squad_empty">Plays from all of the team's members.</string>
+    <string name="entry_move">Move</string>
+    <string name="entry_squads_locked">The tournament has started, so only organisers can change squads now.</string>
+    <string name="entry_place_title">Pick a team for %1$s</string>
+    <string name="entry_current">Now</string>
+    <string name="entry_back_to_pool">Back to players without a team</string>
+    <string name="entry_add_to_squad">Add to %1$s</string>
+    <string name="entry_from_team">From the team</string>
+    <string name="entry_all_members_in">Everyone in your team is already in.</string>
+    <string name="entry_invite_teams">Invite teams</string>
+    <string name="entry_invite_teams_hint">A link for team admins to enter their team</string>
+    <string name="entry_invite_teams_text">Enter your team for %1$s on DesiCrics: %2$s</string>
+    <string name="entry_invite_players">Invite players</string>
+    <string name="entry_invite_players_hint">A link for players to join on their own</string>
+    <string name="entry_invite_players_text">Join %1$s as a player on DesiCrics: %2$s</string>
+    <string name="entry_card_invited">You're invited</string>
+    <string name="entry_card_invited_hint">The organisers want you to play. Accept to join as a player.</string>
+    <string name="entry_card_team_invited">Your team is invited</string>
+    <string name="entry_card_team_invited_hint">The organisers invited %1$s. Accept to enter.</string>
+    <string name="entry_accept">Accept</string>
+    <string name="entry_leave">Leave the tournament</string>
+    <string name="entry_withdraw">Withdraw</string>
+    <string name="entry_cancel_invite">Cancel invite</string>
+    <string name="entry_invited_tag">Invited</string>
+    <string name="entry_mode_add">Add now</string>
+    <string name="entry_mode_invite">Send an invite</string>
+    <string name="entry_mode_add_hint">They're in straight away.</string>
+    <string name="entry_pool_mode">Who picks a team for players on their own</string>
+    <string name="entry_pool_mode_teams">Teams</string>
+    <string name="entry_pool_mode_organisers_hint">You put each player in a team.</string>
+    <string name="entry_pool_mode_teams_hint">Team admins ask players to join, and each player picks one team. You can still place anyone.</string>
+    <string name="entry_pool_mode_teams_short">Teams pick players</string>
+    <string name="entry_pool_teams_hint">Team admins ask the players they want, and each player picks one team.</string>
+    <string name="entry_ask">Ask</string>
+    <string name="entry_ask_title">Ask %1$s to join</string>
+    <string name="entry_asked_tag">Asked</string>
+    <string name="entry_take_back">Take back</string>
+    <string name="entry_card_offers">Teams want you</string>
+    <string name="entry_card_offers_hint">Pick the team you'd like to play for.</string>
+    <string name="pickup_action">Make teams from these players</string>
+    <string name="pickup_teams">How many teams</string>
+    <string name="pickup_team_name">Team %1$d</string>
+    <string name="pickup_default_name">Team %1$s</string>
+    <string name="pickup_split">Split them evenly</string>
+    <string name="pickup_by_hand">I'll place them</string>
+    <string name="pickup_by_hand_hint">The teams start empty, and you pick a team for each player.</string>
+    <string name="pickup_make">Make teams</string>
+    <string name="entry_changes">Changes since the start</string>
+    <string name="entry_change_in">%1$s came in · %2$s</string>
+    <string name="entry_change_out">%1$s left · %2$s</string>
+    <string name="entry_limits">Limits</string>
+    <string name="entry_limits_hint">Leave blank for no limit. Anyone asking once it's full joins a waiting list and moves up when a place opens.</string>
+    <string name="entry_max_teams">Most teams</string>
+    <string name="entry_max_players">Most players joining on their own</string>
+    <string name="entry_limits_invalid">Teams can be limited to 2–64, and players to 1–500.</string>
+    <string name="entry_closes">Entries close</string>
+    <string name="entry_closes_never">Open until the tournament starts</string>
+    <string name="entry_closes_clear">Clear</string>
+    <string name="entry_closes_on">Closes %1$s</string>
+    <string name="entry_waitlisted_tag">Waiting list</string>
+    <string name="entry_card_waitlisted">You're on the waiting list</string>
+    <string name="entry_card_waitlisted_hint">The tournament is full. You'll move up when a place opens.</string>
+    <string name="entry_mode_invite_hint">They're in once they accept. Only people on the app can accept.</string>
     <string name="tournament_create_action">Create tournament</string>
     <string name="tournament_create_failed">Couldn't create the tournament. Check the details and your connection.</string>
     <string name="tournament_tab_fixtures">Fixtures</string>
     <string name="tournament_tab_table">Table</string>
     <string name="tournament_tab_teams">Teams</string>
+    <string name="tournament_tab_players">Players</string>
     <string name="tournament_tab_stats">Stats</string>
     <string name="tournament_champion">Champions: %1$s</string>
     <string name="tournament_not_started">Add teams, then start the tournament to make the fixtures.</string>
@@ -893,12 +1002,9 @@
     <string name="team_logo_change">Change logo</string>
     <string name="stats_share">Share my stats card</string>
     <string name="stats_share_other">Share their stats card</string>
-    <string name="stats_share_action">Share stats card</string>
-    <string name="stats_share_card_hint">A picture of the numbers, sized for WhatsApp status.</string>
     <string name="stats_share_title">Share the stats</string>
     <string name="share_card_runs">runs</string>
     <string name="share_card_wickets">wickets</string>
-    <string name="share_card_best">Best %1$s · %2$s</string>
 
     <!-- Community: looking for, rankings, directory, stream overlay -->
     <string name="home_community">Community</string>
@@ -1035,6 +1141,13 @@
     <string name="teams_search">Search teams by name or code</string>
     <string name="teams_no_match">No teams match that.</string>
     <string name="tournaments_empty_title">No tournaments yet</string>
+    <string name="tournaments_open">Open to join</string>
+    <string name="tournaments_open_anywhere">Leave blank to see tournaments anywhere.</string>
+    <string name="tournaments_open_none">No tournaments are taking entries here right now.</string>
+    <string name="tournaments_taking_both">Taking teams and players</string>
+    <string name="tournaments_taking_teams">Taking teams</string>
+    <string name="tournaments_taking_players">Taking players</string>
+    <string name="tournaments_starts">Starts %1$s</string>
     <string name="tournaments_yours">Your tournaments</string>
     <string name="tournaments_create_body">Fixtures, points table and stats, all in one place.</string>
     <string name="stats_matches">Matches</string>
@@ -1194,4 +1307,362 @@
     <string name="team_join_decline">Decline</string>
     <string name="notification_join_request">%1$s wants to join %2$s</string>
     <string name="notification_join_accepted">You're in %1$s</string>
+    <string name="notification_entry_request">%1$s wants to join %2$s</string>
+    <string name="notification_entry_joined">%1$s joined %2$s</string>
+    <string name="notification_entry_confirmed_team">%1$s is in %2$s</string>
+    <string name="notification_entry_rejected_team">%1$s didn't take %2$s this time</string>
+    <string name="notification_entry_rejected_player">%1$s didn't take your entry this time</string>
+    <string name="notification_squad_placed">You're in %1$s's squad for %2$s</string>
+    <string name="notification_entry_invited_team">%1$s is invited to %2$s</string>
+    <string name="notification_entry_invited_player">You're invited to play in %1$s</string>
+    <string name="notification_entry_withdrawn">%1$s left %2$s</string>
+    <string name="notification_squad_offer">%1$s want you in their squad for %2$s</string>
+    <string name="notification_squad_joined">%1$s joined your squad for %2$s</string>
+    <string name="notification_entry_promoted">A place opened in %1$s. The organisers will confirm your entry.</string>
+
+    <!-- Phase 7 · wagon wheel -->
+    <string name="scoring_field_description">Where the next shot went. Tap a part of the field, then the runs.</string>
+
+    <!-- Phase 8 · themes -->
+    <string name="profile_theme">Theme</string>
+    <string name="profile_theme_hint">How the app looks on this phone. Scoring works the same in every theme, and a four, six or wicket keeps its colour's meaning.</string>
+
+    <!-- Phase 7 · share studio -->
+    <string name="share_studio_title">Share a picture</string>
+    <string name="share_format_story">Story 9:16</string>
+    <string name="share_format_post">Post 1:1</string>
+    <string name="share_template_classic">Classic</string>
+    <string name="share_template_broadcast">Broadcast</string>
+    <string name="share_template_minimal">Minimal</string>
+    <string name="share_template_overlay">Overlay</string>
+    <string name="share_content_result">Result</string>
+    <string name="share_content_score">Score</string>
+    <string name="share_content_batting">Batting · %1$s</string>
+    <string name="share_content_bowling">Bowling · %1$s</string>
+    <string name="share_content_season">Season</string>
+    <string name="share_action">Share</string>
+    <string name="share_save">Save</string>
+    <string name="share_saved">Saved to your gallery.</string>
+    <string name="share_save_failed">Couldn't save the picture. Check there's space on your phone and try again.</string>
+    <string name="share_copy">Copy</string>
+    <string name="share_copied">Copied. Paste it into a chat or post.</string>
+    <string name="share_copy_failed">Couldn't copy the picture. Try Share or Save instead.</string>
+    <string name="share_overlay_note">Best on Instagram stories: add it over your own photo. WhatsApp turns the clear parts black.</string>
+    <string name="share_preview_on_photo">Preview on a photo</string>
+    <string name="share_overs_detail">(%1$s ov)</string>
+    <string name="share_balls_detail">(%1$d)</string>
+    <string name="share_maidens">Maidens</string>
+    <string name="share_wickets_label">Wickets</string>
+    <string name="share_wicket_line">%1$s · %2$s</string>
+    <string name="share_form">Form</string>
+    <string name="share_season_caption">%1$s season</string>
+    <string name="share_result_action">Share the result</string>
+    <string name="share_scorecard_hint">Tap a player to share their innings or spell.</string>
+    <string name="share_player_action">Share %1$s's figures</string>
+
+    <!-- Phase 7 · match posters -->
+    <string name="share_page">%1$d/%2$d</string>
+    <string name="share_pages_note">Share and Save send all %1$d pages together.</string>
+    <string name="share_template_big_score">Big score</string>
+    <string name="share_template_full_card">Full card</string>
+    <string name="share_template_top_performers">Top performers</string>
+    <string name="share_template_spotlight">Spotlight</string>
+    <string name="share_template_team_sheet">Team sheet</string>
+    <string name="share_template_player_grid">Player grid</string>
+    <string name="share_content_scorecard">Scorecard</string>
+    <string name="share_content_player_of_the_match">Player of the match</string>
+    <string name="share_content_squad">Squad</string>
+    <string name="share_scorecard_action">Share the scorecard</string>
+    <string name="share_squad_action">Share the squad</string>
+    <string name="share_squad_title">Share the squad</string>
+    <string name="poster_result">Result</string>
+    <string name="poster_scorecard">Scorecard</string>
+    <string name="poster_top_performers">Top performers</string>
+    <string name="poster_player_of_the_match">Player of the match</string>
+    <string name="poster_squad">Squad</string>
+    <string name="poster_versus">v</string>
+    <string name="poster_extras">Extras %1$d</string>
+    <string name="poster_continued">%1$s, continued</string>
+    <plurals name="poster_player_count">
+        <item quantity="one">%1$d player</item>
+        <item quantity="other">%1$d players</item>
+    </plurals>
+    <!-- Phase 7 · tournament posters -->
+    <string name="poster_content_fixtures">Fixtures</string>
+    <string name="poster_content_bracket">Knockouts</string>
+    <string name="poster_content_table">Points table</string>
+    <string name="poster_content_announcement">Announcement</string>
+    <string name="poster_template_matchday">Matchday card</string>
+    <string name="poster_template_broadcast_list">Broadcast list</string>
+    <string name="poster_template_minimal_list">Minimal list</string>
+    <string name="poster_template_versus">Versus tiles</string>
+    <string name="poster_template_bracket">Bracket</string>
+    <string name="poster_template_road">Road to the final</string>
+    <string name="poster_template_table">Table</string>
+    <string name="poster_template_minimal_table">Minimal table</string>
+    <string name="poster_template_spotlight">Spotlight</string>
+    <string name="poster_template_hero">Hero</string>
+    <string name="poster_matchday">Matchday</string>
+    <string name="poster_matchday_number">Matchday %1$d</string>
+    <string name="poster_vs">vs</string>
+    <string name="poster_vs_short">v</string>
+    <string name="poster_time_tbc">TBC</string>
+    <string name="poster_tbd">To be decided</string>
+    <string name="poster_road_beat">Beat %1$s</string>
+    <string name="poster_road_lost_to">Lost to %1$s</string>
+    <string name="poster_road_league">%1$s in the league · %2$d pts</string>
+    <string name="poster_road_league_group">%1$s in Group %2$s · %3$d pts</string>
+    <string name="poster_ordinal_st">%1$dst</string>
+    <string name="poster_ordinal_nd">%1$dnd</string>
+    <string name="poster_ordinal_rd">%1$drd</string>
+    <string name="poster_ordinal_th">%1$dth</string>
+    <string name="poster_day">%1$s %2$d %3$s</string>
+    <string name="poster_day_time">%1$s · %2$s</string>
+    <string-array name="poster_weekdays">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    <string-array name="poster_months">
+        <item>Jan</item>
+        <item>Feb</item>
+        <item>Mar</item>
+        <item>Apr</item>
+        <item>May</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Aug</item>
+        <item>Sep</item>
+        <item>Oct</item>
+        <item>Nov</item>
+        <item>Dec</item>
+    </string-array>
+    <string name="poster_table_cutoff">Above the line: through to the next round</string>
+    <string name="poster_entries_open">Entries open</string>
+    <string name="poster_starts">Starts</string>
+    <string name="poster_where">Where</string>
+    <string name="poster_dates_soon">Dates soon</string>
+    <string name="poster_organised_by">Organised by %1$s</string>
+    <string name="poster_share_action">Share a poster</string>
+    <string name="poster_share_hint">Fixtures, the table, the knockouts and more, as pictures for WhatsApp and Instagram.</string>
+    <string name="poster_share_link_hint">Anyone can follow the fixtures and table, in the app or a browser.</string>
+    <string name="poster_studio_title">Share a poster</string>
+
+    <!-- Phase 7 · auction -->
+    <string name="auction_title">Player auction</string>
+    <string name="auction_back">Back</string>
+    <string name="auction_points">%1$d %2$s</string>
+    <string name="auction_status_setup">Setting up</string>
+    <string name="auction_status_live">Live</string>
+    <string name="auction_status_paused">Paused</string>
+    <string name="auction_status_finished">Finished</string>
+    <string name="auction_mode_hall">Hall</string>
+    <string name="auction_mode_online">Online</string>
+    <string name="auction_mode_hall_hint">Everyone's in one room. You run it on one screen, ideally on a TV, and tap the team that bid.</string>
+    <string name="auction_mode_online_hint">Team owners bid from their own phones against a countdown.</string>
+    <string name="auction_order_category">By category</string>
+    <string name="auction_order_random">Random</string>
+    <string name="auction_load_failed_title">Couldn't open the auction</string>
+    <string name="auction_action_failed">That didn't go through. Check your connection and try again.</string>
+    <string name="auction_offline">Reconnecting. The room may be a moment behind.</string>
+    <string name="auction_card_create_hint">Fill squads IPL-style: every team gets a purse of points and bids for players one at a time.</string>
+    <string name="auction_card_create">Set up an auction</string>
+    <string name="auction_card_open">Open the auction</string>
+    <string name="auction_card_watch">Open the auction room</string>
+    <string name="auction_card_results">See the results</string>
+    <string name="auction_card_ask">Ask to be in the auction</string>
+    <string name="auction_card_requested">You've asked to be in the auction. Waiting for the organiser.</string>
+    <string name="auction_card_withdraw">Withdraw</string>
+    <string name="auction_card_in_pool">You're in the player pool</string>
+    <string name="auction_card_summary">%1$s · %2$s · %3$d teams</string>
+    <string name="auction_setup_title">Auction setup</string>
+    <string name="auction_rules">Rules</string>
+    <string name="auction_rules_edit">Edit</string>
+    <string name="auction_rule_mode">Mode</string>
+    <string name="auction_rule_purse">Purse per team</string>
+    <string name="auction_rule_base">Base price</string>
+    <string name="auction_rule_squad">Squad size</string>
+    <string name="auction_rule_squad_value">%1$d–%2$d players</string>
+    <string name="auction_rule_steps">Bid steps</string>
+    <string name="auction_rule_order">Order</string>
+    <string name="auction_rule_unsold">Unsold round</string>
+    <string name="auction_rule_on">On</string>
+    <string name="auction_rule_off">Off</string>
+    <string name="auction_rule_clock">Clock</string>
+    <string name="auction_rule_clock_value">%1$d s, then %2$d s after a bid</string>
+    <string name="auction_step_upto">+%1$d up to %2$d</string>
+    <string name="auction_step_then">then +%1$d</string>
+    <string name="auction_step_always">+%1$d</string>
+    <string name="auction_teams">Teams</string>
+    <string name="auction_team_purse_line">%1$s to spend · %2$d retained</string>
+    <string name="auction_teams_none">Confirm at least two teams in the tournament to hold an auction.</string>
+    <string name="auction_requests">Asking to join</string>
+    <string name="auction_accept">Accept</string>
+    <string name="auction_decline">Decline</string>
+    <string name="auction_pool">Player pool</string>
+    <string name="auction_pool_add">Add players</string>
+    <string name="auction_pool_empty">No players yet. Add them by name, player code, or as new players.</string>
+    <string name="auction_player_line_base">Base %1$s</string>
+    <string name="auction_player_retained">Kept by %1$s · %2$s</string>
+    <string name="auction_player_placeholder">Not on DesiCrics yet</string>
+    <string name="auction_start">Start the auction</string>
+    <string name="auction_start_hint">Once it starts the rules are fixed. You can still add players.</string>
+    <string name="auction_waiting_title">The auction hasn't started</string>
+    <string name="auction_waiting_body">The organiser is still setting it up. Come back when it goes live to watch or bid.</string>
+    <string name="auction_you_bid_for">You bid for %1$s</string>
+    <string name="auction_settings_title">Auction rules</string>
+    <string name="auction_settings_label">Points are called</string>
+    <string name="auction_settings_label_hint">Like pts, ₹ lakh or coins. No real money moves through the app.</string>
+    <string name="auction_settings_base_hint">Each player's starting price, unless you set their own</string>
+    <string name="auction_settings_min">Fewest players</string>
+    <string name="auction_settings_max">Most players</string>
+    <string name="auction_settings_step">Step</string>
+    <string name="auction_settings_until">Until the bid is</string>
+    <string name="auction_settings_then">Then step</string>
+    <string name="auction_settings_categories">Categories, in the order they come up</string>
+    <string name="auction_settings_categories_hint">Separate them with commas.</string>
+    <string name="auction_settings_unsold">Bring unsold players back at the end</string>
+    <string name="auction_settings_lot_seconds">Seconds per player</string>
+    <string name="auction_settings_bid_seconds">Seconds after a bid</string>
+    <string name="auction_settings_save">Save rules</string>
+    <string name="auction_add_search">Search by name or player code</string>
+    <string name="auction_add_search_empty">Nobody found. Add them as a new player below.</string>
+    <string name="auction_add_added">In the pool</string>
+    <string name="auction_add_new_title">New player</string>
+    <string name="auction_add_new_hint">For someone who isn't on DesiCrics yet. They can claim the profile later.</string>
+    <string name="auction_add_name">Name</string>
+    <string name="auction_add_phone">Phone (optional)</string>
+    <string name="auction_add_new_action">Add %1$s</string>
+    <string name="auction_add_done">Done</string>
+    <string name="auction_player_category">Category</string>
+    <string name="auction_player_none">None</string>
+    <string name="auction_player_retain">Retained by</string>
+    <string name="auction_player_nobody">Nobody</string>
+    <string name="auction_player_retain_price">Retention price</string>
+    <string name="auction_player_save">Save</string>
+    <string name="auction_player_remove">Take out of the pool</string>
+    <string name="auction_round_unsold">Unsold round</string>
+    <string name="auction_up_now">Up now</string>
+    <string name="auction_current_bid">Current bid</string>
+    <string name="auction_base_price">Base price</string>
+    <string name="auction_no_bids">No bids yet</string>
+    <string name="auction_leading">%1$s leads</string>
+    <string name="auction_next_bid">Next bid %1$s</string>
+    <string name="auction_waiting_next">Waiting for the next player</string>
+    <string name="auction_up_next">Up next: %1$s</string>
+    <string name="auction_nobody_left">Everyone has been up.</string>
+    <string name="auction_sold_big">SOLD!</string>
+    <string name="auction_sold_to">to %1$s</string>
+    <string name="auction_sold_to_for">to %1$s for %2$s</string>
+    <string name="auction_unsold">Unsold</string>
+    <string name="auction_unsold_body">Nobody bid for %1$s.</string>
+    <string name="auction_paused_title">Paused</string>
+    <string name="auction_paused_body">The organiser has paused the auction. Bidding picks up where it left off.</string>
+    <string name="auction_bid_action">Bid %1$s</string>
+    <string name="auction_bid_for">Bidding for</string>
+    <string name="auction_bid_wait">Wait for the next player to come up.</string>
+    <string name="auction_you_lead">You have the highest bid</string>
+    <string name="auction_your_purse">Purse left</string>
+    <string name="auction_max_bid">Max bid</string>
+    <string name="auction_squad">Squad</string>
+    <string name="auction_squad_value">%1$d/%2$d</string>
+    <string name="auction_seconds_left">%1$d seconds left</string>
+    <string name="auction_purses">Purses</string>
+    <string name="auction_team_line">%1$d/%2$d players · max bid %3$s</string>
+    <string name="auction_team_short">%1$s left · %2$d/%3$d</string>
+    <string name="auction_team_leading">Leading</string>
+    <string name="auction_team_full">Full</string>
+    <string name="auction_team_cant_afford">Can't afford</string>
+    <string name="auction_recent_sales">Latest sales</string>
+    <string name="auction_reverse">Reverse</string>
+    <string name="auction_reverse_title">Reverse %1$s's sale?</string>
+    <string name="auction_reverse_body">%1$s gets %2$s back, and %3$s can come up again.</string>
+    <string name="auction_reverse_action">Reverse the sale</string>
+    <string name="auction_keep">Keep it</string>
+    <string name="auction_next_named">Next: %1$s</string>
+    <string name="auction_pick">Pick a player</string>
+    <string name="auction_pick_title">Who comes up next?</string>
+    <string name="auction_pause">Pause</string>
+    <string name="auction_resume">Resume</string>
+    <string name="auction_undo">Undo</string>
+    <string name="auction_sell">Sold</string>
+    <string name="auction_close_lot">End bidding now</string>
+    <string name="auction_finish">Finish the auction</string>
+    <string name="auction_finish_short">Finish</string>
+    <string name="auction_finish_title">Finish the auction?</string>
+    <string name="auction_finish_body">Sold players join their teams' squads, and the auction can't be reopened.</string>
+    <string name="auction_keep_going">Keep going</string>
+    <string name="auction_hall_tap_hint">Tap the team that bid</string>
+    <string name="auction_share">Share</string>
+    <string name="auction_tap_to_close">Tap anywhere to close</string>
+    <string name="auction_results_title">Auction results</string>
+    <string name="auction_summary_sold">Players sold</string>
+    <string name="auction_summary_spent">Spent in all</string>
+    <string name="auction_summary_unsold">Unsold</string>
+    <string name="auction_summary_team">%1$s spent · %2$s left</string>
+    <string name="auction_summary_retained">Retained</string>
+    <string name="auction_summary_unsold_title">Unsold players</string>
+    <string name="auction_summary_joined">Sold players are now in their teams' squads, ready to pick for fixtures.</string>
+    <string name="auction_summary_no_players">No players</string>
+    <string name="auction_error_purse">Set a purse between 1 and 10,000,000.</string>
+    <string name="auction_error_label">Give the points a short name, like pts or ₹ lakh.</string>
+    <string name="auction_error_base_price">The base price has to fit in the purse.</string>
+    <string name="auction_error_squad">Squads can have up to 30 players, and the fewest can't be more than the most.</string>
+    <string name="auction_error_purse_too_small">The purse can't buy the fewest players at the base price.</string>
+    <string name="auction_error_steps">Each bid step needs to be at least 1, and fit in the purse.</string>
+    <string name="auction_error_categories">Give each category a different, short name.</string>
+    <string name="auction_error_timer">The clock runs 5 to 120 seconds per player, and 3 to 60 after a bid.</string>
+    <string name="auction_error_retained">Retained players have to fit in their team's purse and squad.</string>
+    <string name="auction_error_too_few_teams">An auction needs at least two confirmed teams.</string>
+    <string name="auction_error_no_players">Add players to the pool first.</string>
+    <string name="auction_error_not_started">The auction hasn't started.</string>
+    <string name="auction_error_already_started">The auction has already started.</string>
+    <string name="auction_error_finished">The auction is over.</string>
+    <string name="auction_error_paused">The auction is paused.</string>
+    <string name="auction_error_not_paused">The auction isn't paused.</string>
+    <string name="auction_error_lot_open">Finish with the player who's up first.</string>
+    <string name="auction_error_no_lot">Nobody is up for bidding.</string>
+    <string name="auction_error_not_available">That player isn't waiting to come up.</string>
+    <string name="auction_error_wrong_player">That player isn't the one up for bidding.</string>
+    <string name="auction_error_team_unknown">That team isn't in the auction.</string>
+    <string name="auction_error_team_full">Your squad is full.</string>
+    <string name="auction_error_already_leading">You have the highest bid.</string>
+    <string name="auction_error_bid_too_low">That bid is too low.</string>
+    <string name="auction_error_bid_too_high">That's more than you can spend and still fill your squad.</string>
+    <string name="auction_error_no_bids">Nobody has bid. Mark the player unsold instead.</string>
+    <string name="auction_error_not_highest">That isn't the highest bid.</string>
+    <string name="auction_error_nothing_to_undo">There's nothing to undo.</string>
+    <string name="auction_error_not_sold">That player wasn't sold in the auction.</string>
+    <plurals name="auction_players_count">
+        <item quantity="one">%1$d player</item>
+        <item quantity="other">%1$d players</item>
+    </plurals>
+    <plurals name="auction_players_left">
+        <item quantity="one">%1$d player to go</item>
+        <item quantity="other">%1$d players to go</item>
+    </plurals>
+    <plurals name="auction_finish_waiting">
+        <item quantity="one">%1$d player hasn't been up yet.</item>
+        <item quantity="other">%1$d players haven't been up yet.</item>
+    </plurals>
+
+    <!-- Phase 7 · auction posters -->
+    <string name="share_content_sold">Sold!</string>
+    <string name="share_content_team_after_auction">Team after auction</string>
+    <string name="share_template_stamp">Stamp</string>
+    <string name="poster_auction_tag">Player auction</string>
+    <string name="poster_auction_sold">SOLD!</string>
+    <string name="poster_auction_sold_to">Sold to</string>
+    <string name="poster_auction_to_team">To %1$s</string>
+    <string name="poster_auction_price">Price</string>
+    <string name="poster_auction_base">Base price %1$s</string>
+    <string name="poster_auction_after">After the auction</string>
+    <string name="poster_auction_spent">%1$s spent</string>
+    <string name="poster_auction_left">%1$s left</string>
+    <string name="poster_auction_retained">Retained</string>
+    <string name="poster_auction_retained_short">Kept</string>
 </resources>

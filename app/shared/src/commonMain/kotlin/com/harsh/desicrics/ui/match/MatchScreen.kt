@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -65,8 +66,12 @@ import com.harsh.desicrics.designsystem.component.PadKeyStyle
 import com.harsh.desicrics.designsystem.component.RunPad
 import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.SegmentedControl
+import com.harsh.desicrics.designsystem.component.WagonWheel
+import com.harsh.desicrics.designsystem.component.TonalButton
+import com.harsh.desicrics.designsystem.component.themeSurface
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.designsystem.theme.SurfaceArea
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
@@ -88,6 +93,10 @@ import com.harsh.desicrics.scoring.MatchState
 import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.scoring.bowlerRuleBreak
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
+import com.harsh.desicrics.ui.share.ResultShare
+import com.harsh.desicrics.ui.share.ScorecardShare
+import com.harsh.desicrics.ui.share.ShareStudio
+import com.harsh.desicrics.ui.share.matchShareContents
 import com.harsh.desicrics.ui.system.rememberShareText
 import com.harsh.desicrics.ui.system.rememberSpeechInput
 import com.harsh.desicrics.ui.text.label
@@ -205,7 +214,8 @@ private sealed interface ScoringSheet {
     /** Where a scoring shot went, for the wagon wheel. */
     data class Zone(val runs: Int) : ScoringSheet
     data object Share : ScoringSheet
-    data object ShareCard : ScoringSheet
+    /** The share studio, opened on [initial] (a content key) or on the score. */
+    data class ShareCard(val initial: String? = null) : ScoringSheet
 }
 
 /**
@@ -252,8 +262,17 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
         )
     }
     val crease = tab == MatchTab.LIVE && !state.isComplete
+    // With the wagon wheel on, the scorer taps where the ball went and then the runs. A zone stays armed
+    // until a ball is recorded or undone (either moves nextSeq on), or the same zone is tapped again.
+    val wagonWheel = ui.match?.rules?.wagonWheel == true
+    var armed by remember(ui.nextSeq) { mutableStateOf<FieldZone?>(null) }
+    // Dots, extras and wickets take no zone. Runs with none armed ask for one, with a Skip.
     val scoreRuns: (Int) -> Unit = { runs ->
-        if (ui.match?.rules?.wagonWheel == true && runs > 0) sheet = ScoringSheet.Zone(runs) else actions.onRuns(runs, null)
+        when {
+            !wagonWheel || runs == 0 -> actions.onRuns(runs, null)
+            armed != null -> actions.onRuns(runs, armed)
+            else -> sheet = ScoringSheet.Zone(runs)
+        }
     }
     // Voice scoring. Anything unclear opens a sheet or asks again; nothing ambiguous is recorded straight from speech.
     var misheard by remember { mutableStateOf(false) }
@@ -272,7 +291,14 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     // While the pad is up the screen is tight, so the header shrinks and the crease card tightens; the keys
     // keep their full size. Followers and the other tabs get the roomy layout.
     val compact = ui.isScorer && crease
-    Scoreboard(state, actions.onBack, onShare = { sheet = ScoringSheet.Share }, onOptions = if (ui.canEdit) ({ sheet = ScoringSheet.MatchOptions }) else null, compact = compact)
+    Scoreboard(
+        state,
+        actions.onBack,
+        onShare = { sheet = ScoringSheet.Share },
+        onOptions = if (ui.isScorer && !state.isComplete) ({ sheet = ScoringSheet.MatchOptions }) else null,
+        optionsEnabled = ui.canEdit,
+        compact = compact,
+    )
     Row(
         Modifier.padding(horizontal = DesiTheme.space.screen, vertical = if (compact) DesiTheme.space.s2 else DesiTheme.space.s3),
         verticalAlignment = Alignment.CenterVertically,
@@ -346,6 +372,12 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
                 if (state.isComplete && result != null) {
                     ResultBanner(state.match, result)
                     MatchMvp(state)
+                    TonalButton(
+                        stringResource(Res.string.share_result_action),
+                        onClick = { sheet = ScoringSheet.ShareCard(ResultShare.KEY) },
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = DesiIcons.Share,
+                    )
                 } else if (!ui.isScorer) {
                     Text(stringResource(Res.string.match_not_your_match), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
                 }
@@ -362,10 +394,18 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
             }
             MatchTab.SCORECARD -> {
                 state.innings.forEach {
-                    InningsScorecard(it)
+                    InningsScorecard(it, onShare = { key -> sheet = ScoringSheet.ShareCard(key) })
                     InningsWagonWheel(it)
                 }
                 MatchMvp(state)
+                if (state.isComplete) {
+                    TonalButton(
+                        stringResource(Res.string.share_scorecard_action),
+                        onClick = { sheet = ScoringSheet.ShareCard(ScorecardShare.KEY) },
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = DesiIcons.Share,
+                    )
+                }
             }
             // Latest innings first, so the over in progress is at the top.
             MatchTab.OVERS -> state.innings.asReversed().forEach { InningsOvers(it, showTitle = state.innings.size > 1) }
@@ -373,7 +413,11 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     }
     // The pad only shows with the live view, so the scorecard gets the whole screen.
     if (ui.isScorer && !state.isComplete && tab == MatchTab.LIVE) {
-        ScoringPad(ui, actions, askUndo, misheard, scoreRuns, nudged = nudges > 0, onBlockedKey = onBlockedKey, onSheet = { sheet = it })
+        ScoringPad(
+            ui, actions, askUndo, misheard, scoreRuns, nudged = nudges > 0, onBlockedKey = onBlockedKey, onSheet = { sheet = it },
+            armed = armed,
+            onZone = if (wagonWheel) ({ zone -> armed = zone.takeIf { it != armed } }) else null,
+        )
     }
 
     var autoOpened by remember { mutableStateOf<Pair<ScoringSheet, Int>?>(null) }
@@ -422,7 +466,14 @@ private fun ScoringHaptics(ui: MatchUiState) {
  * it in two rows for while the scorer's pad is up, dropping the live badge and first-innings line.
  */
 @Composable
-private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Unit, onOptions: (() -> Unit)?, compact: Boolean = false) {
+private fun Scoreboard(
+    state: MatchState,
+    onBack: () -> Unit,
+    onShare: () -> Unit,
+    onOptions: (() -> Unit)?,
+    optionsEnabled: Boolean = true,
+    compact: Boolean = false,
+) {
     val colors = DesiTheme.colors
     val onGreen = colors.onBrandStrong
     val innings = state.current
@@ -437,7 +488,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
     }.joinToString(" · ")
     if (compact) {
         Column(
-            Modifier.fillMaxWidth().background(colors.brandStrong)
+            Modifier.fillMaxWidth().background(colors.brandStrong).themeSurface(SurfaceArea.Scoreboard)
                 .padding(start = DesiTheme.space.screen, end = DesiTheme.space.screen, bottom = DesiTheme.space.s3),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -456,7 +507,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
                     Icon(painterResource(DesiIcons.Share), stringResource(Res.string.match_share), tint = onGreen)
                 }
                 if (onOptions != null) {
-                    IconButton(onClick = onOptions, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
+                    IconButton(onClick = onOptions, enabled = optionsEnabled, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
                         Icon(painterResource(DesiIcons.More), stringResource(Res.string.match_options), tint = onGreen)
                     }
                 }
@@ -484,7 +535,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
         return
     }
     Column(
-        Modifier.fillMaxWidth().background(colors.brandStrong)
+        Modifier.fillMaxWidth().background(colors.brandStrong).themeSurface(SurfaceArea.Scoreboard)
             .padding(start = DesiTheme.space.screen, end = DesiTheme.space.screen, bottom = DesiTheme.space.s5),
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1),
     ) {
@@ -505,7 +556,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
                 Icon(painterResource(DesiIcons.Share), stringResource(Res.string.match_share), tint = onGreen)
             }
             if (onOptions != null) {
-                IconButton(onClick = onOptions, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
+                IconButton(onClick = onOptions, enabled = optionsEnabled, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
                     Icon(painterResource(DesiIcons.More), stringResource(Res.string.match_options), tint = onGreen)
                 }
             }
@@ -748,6 +799,8 @@ private fun ScoringPad(
     nudged: Boolean,
     onBlockedKey: () -> Unit,
     onSheet: (ScoringSheet) -> Unit,
+    armed: FieldZone? = null,
+    onZone: ((FieldZone) -> Unit)? = null,
 ) {
     val colors = DesiTheme.colors
     val canScore = ui.canScore
@@ -768,6 +821,18 @@ private fun ScoringPad(
             Modifier.windowInsetsPadding(WindowInsets.navigationBars).padding(DesiTheme.space.screen),
             verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3),
         ) {
+            // The field for the wagon wheel: a fixed strip, so on a small phone the crease above gives way
+            // and the keys stay put.
+            if (onZone != null) {
+                WagonWheel(
+                    labels = FieldZone.Clockwise.map { stringResource(it.label) },
+                    modifier = Modifier.height(DesiTheme.size.scoringField),
+                    selected = armed?.let { FieldZone.Clockwise.indexOf(it) },
+                    onSector = { onZone(FieldZone.Clockwise[it]) },
+                    description = stringResource(Res.string.scoring_field_description),
+                    aspectRatio = null,
+                )
+            }
             ui.error?.let { ScoringErrorBanner(it, actions.onDismissError) }
             val hint = when {
                 misheard -> stringResource(Res.string.scoring_voice_unknown)
@@ -946,7 +1011,7 @@ private fun ScoringSheets(
                     onClose()
                 },
                 SheetOption(stringResource(Res.string.match_share_card), stringResource(Res.string.match_share_card_hint)) {
-                    onSheet(ScoringSheet.ShareCard)
+                    onSheet(ScoringSheet.ShareCard())
                 },
                 SheetOption(stringResource(Res.string.match_share_overlay), stringResource(Res.string.match_share_overlay_hint)) {
                     actions.onShareOverlay()
@@ -955,7 +1020,7 @@ private fun ScoringSheets(
             ),
             onDismiss = onClose,
         )
-        ScoringSheet.ShareCard -> ShareCardSheet(state, onDismiss = onClose)
+        is ScoringSheet.ShareCard -> ShareStudio(remember(state) { matchShareContents(state) }, onDismiss = onClose, initial = sheet.initial)
         is ScoringSheet.Zone -> ZoneSheet(
             runs = sheet.runs,
             onPick = { zone ->

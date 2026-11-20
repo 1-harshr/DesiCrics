@@ -6,11 +6,13 @@ import com.harsh.desicrics.auth.TokenVerifier
 import com.harsh.desicrics.db.DatabaseFactory
 import com.harsh.desicrics.service.ApiException
 import com.harsh.desicrics.live.FcmPushSender
+import com.harsh.desicrics.live.LiveAuctions
 import com.harsh.desicrics.live.LiveMatches
 import com.harsh.desicrics.live.LoggingPushSender
 import com.harsh.desicrics.live.Notifier
 import com.harsh.desicrics.live.PushSender
 import com.harsh.desicrics.service.AccountService
+import com.harsh.desicrics.service.AuctionService
 import com.harsh.desicrics.service.CommunityService
 import com.harsh.desicrics.service.ImageService
 import com.harsh.desicrics.service.MatchService
@@ -21,6 +23,7 @@ import com.harsh.desicrics.service.StatsService
 import com.harsh.desicrics.service.TournamentService
 import com.harsh.desicrics.service.TeamService
 import com.harsh.desicrics.service.ProfileService
+import com.harsh.desicrics.store.ExposedAuctionStore
 import com.harsh.desicrics.store.ExposedCommunityStore
 import com.harsh.desicrics.store.ExposedImageStore
 import com.harsh.desicrics.store.ExposedMatchStore
@@ -53,6 +56,8 @@ import io.ktor.server.websocket.WebSockets
 import io.ktor.server.websocket.pingPeriod
 import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -81,8 +86,14 @@ fun Application.module(
     val social = SocialService(socialStore, matchStore, teamStore, players)
     val notifier = Notifier(socialStore, pushSender)
     val statsStore = ExposedStatsStore(database)
+    val liveAuctions = LiveAuctions()
+    val auctions = AuctionService(
+        ExposedAuctionStore(database), ExposedTournamentStore(database), teamStore, players, users, liveAuctions,
+        scope = this, secondMillis = config.auctionSecondMillis,
+    )
     val tournaments = TournamentService(
-        ExposedTournamentStore(database), matchStore, matches, teamStore, players, users, statsStore, onRescheduled = notifier::rescheduled,
+        ExposedTournamentStore(database), matchStore, matches, teamStore, players, users, statsStore,
+        onRescheduled = notifier::rescheduled, notify = notifier::tournamentNotice, onPoolJoined = auctions::addFromTournament,
     )
     // The live feed first, so watchers see a ball before anything slower runs.
     matches.listen(live)
@@ -98,6 +109,13 @@ fun Application.module(
     val playerService = PlayerService(players, users)
     val account = AccountService(players, teamStore, ExposedSupportStore(database))
     launch { matches.backfillInningsScores() }
+    launch { auctions.resumeClocks() }
+    launch {
+        while (isActive) {
+            runCatching { tournaments.remindClosing() }.onFailure { environment.log.warn("Entry reminders failed", it) }
+            delay(config.entryReminderEveryMillis)
+        }
+    }
 
     install(CallLogging)
     install(WebSockets) {
@@ -138,6 +156,7 @@ fun Application.module(
             imageUploadRoutes(images)
             communityRoutes(community)
             statsRoutes(StatsService(statsStore, players, users, teamStore, socialStore))
+            auctionRoutes(auctions, liveAuctions)
         }
     }
 }

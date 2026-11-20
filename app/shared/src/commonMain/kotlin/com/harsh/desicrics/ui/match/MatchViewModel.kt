@@ -22,8 +22,11 @@ import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchEvent
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.SavedTeam
+import com.harsh.desicrics.model.TeamMember
+import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
+import com.harsh.desicrics.model.Tournament
 import com.harsh.desicrics.model.Wicket
 import com.harsh.desicrics.scoring.DeliveryError
 import com.harsh.desicrics.scoring.InningsState
@@ -68,6 +71,18 @@ sealed interface ScoringError {
     data class Rejected(val error: DeliveryError) : ScoringError
     data object SaveFailed : ScoringError
     data object LoadFailed : ScoringError
+}
+
+/**
+ * The team as it plays in [tournament]: its tournament squad, which can include players from the pool who
+ * aren't members. Teams entered before squads existed have none, and pick from all their members.
+ */
+private fun SavedTeam.inSquad(tournament: Tournament?): SavedTeam {
+    val squad = tournament?.squad(id).orEmpty().map { it.player }
+    if (squad.isEmpty()) return this
+    val roles = members.associate { it.player.profileId to it.role }
+    val ids = squad.map { it.profileId }.toSet()
+    return copy(members = squad.map { TeamMember(it, roles[it.profileId] ?: TeamRole.MEMBER) }, lastSquad = lastSquad.filter { it in ids })
 }
 
 /** What starting a scheduled fixture needs: the teams to pick squads from, and whether the caller organises it. */
@@ -288,16 +303,19 @@ class MatchViewModel(
         if (_state.value.fixture != null) return
         _state.update { it.copy(fixture = FixtureSetup(canStart = false, teamA = null, teamB = null)) }
         viewModelScope.launch {
-            val organiser = try {
-                if (tournamentId == null) match.createdBy == uid else tournaments.details(tournamentId).tournament.isOrganiser(uid)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                false
+            val tournament = tournamentId?.let {
+                try {
+                    tournaments.details(it).tournament
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    null
+                }
             }
+            val organiser = if (tournamentId == null) match.createdBy == uid else tournament?.isOrganiser(uid) == true
             suspend fun team(id: String?) = id?.let {
                 try {
-                    teams.team(it)
+                    teams.team(it).inSquad(tournament)
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {

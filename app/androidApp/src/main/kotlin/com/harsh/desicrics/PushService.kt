@@ -76,9 +76,9 @@ class PushService : FirebaseMessagingService() {
 
 
 
-    /** Team news ("wants to join", "you're in") opens the team; everything else opens its match. */
+    /** Tournament and team news open those; everything else opens its match. */
     private fun linkFor(data: Map<String, String>): String? =
-        data["teamId"]?.let { "/team/$it" } ?: data["matchId"]?.let { "/m/$it" }
+        data["tournamentId"]?.let { "/t/$it" } ?: data["teamId"]?.let { "/team/$it" } ?: data["matchId"]?.let { "/m/$it" }
 
     /** Opens [path] through the same link handling as a shared /m/ link. */
     private fun openLink(path: String?, requestCode: Int): PendingIntent {
