@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.ui.text.label
 import com.harsh.desicrics.designsystem.component.HeroChips
 import com.harsh.desicrics.designsystem.component.HeroChip
 
@@ -241,14 +242,6 @@ internal fun resultIcon(result: MatchResult): DrawableResource = when {
     result.isNoResult -> result.reason?.icon ?: DesiIcons.CalledOff
     else -> DesiIcons.Swap
 }
-
-internal val AbandonReason.label: StringResource
-    get() = when (this) {
-        AbandonReason.RAIN -> Res.string.end_reason_rain
-        AbandonReason.BAD_LIGHT -> Res.string.end_reason_light
-        AbandonReason.GROUND -> Res.string.end_reason_ground
-        AbandonReason.OTHER -> Res.string.end_reason_other
-    }
 
 internal val AbandonReason.icon: DrawableResource
     get() = when (this) {

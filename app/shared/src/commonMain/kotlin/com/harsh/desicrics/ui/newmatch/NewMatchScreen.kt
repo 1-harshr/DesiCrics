@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.newmatch
+import com.harsh.desicrics.ui.text.label
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -638,20 +639,6 @@ private fun StartBar(state: NewMatchFormState, label: StringResource, enabled: B
 
 private val TeamSide.label: StringResource
     get() = if (this == TeamSide.A) Res.string.new_match_team_a else Res.string.new_match_team_b
-
-private val MatchSetupError.label: StringResource
-    get() = when (this) {
-        MatchSetupError.TEAM_NAME_MISSING -> Res.string.new_match_error_team_name_missing
-        MatchSetupError.SAME_TEAM_NAMES -> Res.string.new_match_error_same_team_names
-        MatchSetupError.TEAM_NAME_TOO_LONG -> Res.string.new_match_error_team_name_too_long
-        MatchSetupError.TOO_FEW_PLAYERS -> Res.string.new_match_error_too_few_players
-        MatchSetupError.TOO_MANY_PLAYERS -> Res.string.new_match_error_too_many_players
-        MatchSetupError.PLAYER_NAME_INVALID -> Res.string.new_match_error_player_name_invalid
-        MatchSetupError.OVERS_OUT_OF_RANGE -> Res.string.new_match_error_overs
-        MatchSetupError.RULES_INVALID -> Res.string.new_match_error_rules
-        MatchSetupError.PLAYER_TWICE -> Res.string.new_match_error_player_twice
-        MatchSetupError.CAPTAIN_INVALID -> Res.string.new_match_error_captain
-    }
 
 // Previews: sample team and player names only; all labels come from string resources.
 

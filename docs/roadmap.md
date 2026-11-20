@@ -267,10 +267,10 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 **Goal:** someone who only wants to score a match can, in a second, minimal front end with its own screens. It shares view models, repositories and the scoring engine with Full mode, and one switch moves between them. Spec: [simple-mode.md](simple-mode.md).
 
 ### Level 1 · Playable
-- ⬜ App mode (Simple or Full), stored on the phone; existing users stay on Full
-- ⬜ One switch at the root between the two shells, and a test that keeps their screens apart
-- ⬜ An App mode row and sheet in Me → Settings, in both modes
-- ⬜ Simple Home, new match (teams, overs, toss), match screen (runs, extras, wickets, undo, result) and Me
+- ✅ App mode (Simple or Full), stored on the phone; existing users stay on Full
+- ✅ One switch at the root between the two shells, and a test that keeps their screens apart
+- ✅ An App mode row and sheet in Me → Settings, in both modes
+- ✅ Simple Home, new match (teams, overs, toss), match screen (runs, extras, wickets, undo, result) and Me
 
 ### Level 2 · Complete
 - ⬜ Simple scorecard and result sharing; saved teams in Simple new match

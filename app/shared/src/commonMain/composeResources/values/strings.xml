@@ -1665,4 +1665,23 @@
     <string name="poster_auction_left">%1$s left</string>
     <string name="poster_auction_retained">Retained</string>
     <string name="poster_auction_retained_short">Kept</string>
+    <!-- App mode: Simple or Full, picked in Me → Settings in either mode. -->
+    <string name="mode_title">App mode</string>
+    <string name="mode_hint">How much of DesiCrics this phone shows. Your matches and teams are the same in both.</string>
+    <string name="mode_simple">Simple</string>
+    <string name="mode_simple_body">Start a match and score it. Home and Me, nothing else.</string>
+    <string name="mode_full">Full</string>
+    <string name="mode_full_body">Everything: tournaments, the feed, stats, teams and posters.</string>
+
+    <!-- Simple mode's own screens. -->
+    <string name="simple_switch_full_body">Want tournaments, the feed and more?</string>
+    <string name="simple_switch_full">Switch to Full mode</string>
+    <string name="simple_your_matches">Your matches</string>
+    <string name="simple_players_hint">Type a name and press enter. At least 2 a side.</string>
+    <string name="simple_batting">Batting</string>
+    <string name="simple_bowling">Bowling</string>
+    <string name="simple_pick">Pick</string>
+    <string name="simple_this_over">This over</string>
+    <string name="simple_batter_figures">%1$d (%2$d)</string>
+    <string name="simple_bowler_figures">%1$d-%2$d (%3$s)</string>
 </resources>

@@ -1,5 +1,4 @@
 package com.harsh.desicrics.ui.text
-import com.harsh.desicrics.ui.match.label
 import com.harsh.desicrics.model.AbandonReason
 import com.harsh.desicrics.model.MatchEnding
 
@@ -13,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.model.DismissalKind
+import com.harsh.desicrics.model.Delivery
+import com.harsh.desicrics.designsystem.component.Ball
+import com.harsh.desicrics.designsystem.component.BallKind
 import com.harsh.desicrics.model.ExtraType
 import com.harsh.desicrics.model.FieldZone
 import com.harsh.desicrics.model.MarginUnit
@@ -234,4 +236,27 @@ private fun ScoringTextPreview() = DesiTheme(darkTheme = false) {
         PreviewResults.forEach { Text(resultText(PreviewMatch, it), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.brand) }
         Text(stringResource(DeliveryError.OVER_NOT_FINISHED.label), style = DesiTheme.type.body, color = DesiTheme.colors.event.wicket)
     }
+}
+
+/** How a ball looks in the over strip: "4", "W", "2wd", "nb", "1lb", "•". */
+@Composable
+fun ballFor(delivery: Delivery): Ball {
+    if (delivery.wicket != null) return Ball(stringResource(Res.string.scoring_ball_wicket), BallKind.Wicket)
+    val extra = delivery.extra ?: return when (delivery.runsOffBat) {
+        0 -> Ball("•", BallKind.Dot)
+        4 -> Ball("4", BallKind.Four)
+        6 -> Ball("6", BallKind.Six)
+        else -> Ball("${delivery.runsOffBat}", BallKind.Runs)
+    }
+    val (short, runs) = when (extra) {
+        ExtraType.WIDE -> Res.string.scoring_ball_wide to delivery.extraRuns
+        ExtraType.NO_BALL -> Res.string.scoring_ball_no_ball to delivery.runsOffBat + delivery.extraRuns
+        ExtraType.BYE -> Res.string.scoring_ball_bye to delivery.extraRuns
+        ExtraType.LEG_BYE -> Res.string.scoring_ball_leg_bye to delivery.extraRuns
+    }
+    val shortText = stringResource(short)
+    // A plain wide or no-ball is just "wd" / "nb"; anything more shows the total, e.g. "3wd".
+    val label = if (runs <= delivery.extraPenalty && delivery.isWideOrNoBall) shortText
+    else stringResource(Res.string.scoring_ball_extra_with_runs, runs, shortText)
+    return Ball(label, BallKind.Extra)
 }

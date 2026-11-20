@@ -66,7 +66,7 @@ ui/**/*ViewModel.kt screen logic: state and actions, no drawing
 data/               repositories, preferences
 :core               models, API types, scoring engine
 :app:designsystem   Crease components (buttons, cards, run pad, sheets)
-ui/system, ui/text  platform helpers (share, push) and shared wording (results, rule labels)
+ui/system, ui/text, ui/components  platform helpers, shared wording, small shared pieces
 ```
 
 ### 1. One switch, at the root
@@ -97,7 +97,7 @@ Settings that differ by mode belong to the screen that owns them, not to a branc
 ### 4. The boundary is tested
 
 `ModeBoundaryTest` reads the source and fails if:
-- anything in `simple/` imports from `ui/` other than a view model file (`*ViewModel.kt`, `*ViewModels.kt`), `ui/system` or `ui/text`;
+- anything in `simple/` imports from `ui/` other than a view model file (`*ViewModel.kt`, `*ViewModels.kt`), `ui/system`, `ui/text` or `ui/components` (the photo avatar and other small shared pieces);
 - anything in `ui/` or `navigation/` imports from `simple/`;
 - anything outside `shell/` imports both shells.
 

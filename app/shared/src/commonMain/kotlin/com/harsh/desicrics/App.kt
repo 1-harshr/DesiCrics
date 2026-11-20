@@ -30,7 +30,7 @@ import com.harsh.desicrics.designsystem.component.GhostButton
 import com.harsh.desicrics.designsystem.component.PrimaryButton
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.data.ThemePreference
-import com.harsh.desicrics.navigation.AppNavigation
+import com.harsh.desicrics.shell.AppShell
 import com.harsh.desicrics.resources.Res
 import com.harsh.desicrics.resources.common_try_again
 import com.harsh.desicrics.resources.profile_sign_out
@@ -83,7 +83,7 @@ fun App(link: String? = null, onLinkHandled: () -> Unit = {}) {
                 )
                 current == SessionState.Loading -> FullScreenLoading()
                 current == SessionState.SignedOut -> SignInScreen()
-                current is SessionState.SignedIn -> AppNavigation(
+                current is SessionState.SignedIn -> AppShell(
                     current.profile,
                     onSignOut = session::signOut,
                     link = link,
