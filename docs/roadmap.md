@@ -240,11 +240,11 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 **Goal:** a tournament is a place people join: teams and individual players can enter, the organiser decides how open each door is, and everyone hears what happened to their entry. Spec: [tournament-entry.md](tournament-entry.md).
 
 ### Level 1 · Playable
-- ⬜ Entry settings for teams and for players (organisers only, on approval, open), editable until the start
-- ⬜ Player pool: players join on their own; organisers place them in a team's squad
-- ⬜ Tournament squads: one squad per player per tournament, locked at the start; fixtures offer only squad players
-- ⬜ "Invite teams" and "Invite players" links; "Enter your team" and "Join as a player" on the tournament page
-- ⬜ Notifications for requests, confirmations, rejections and placements
+- ✅ Entry settings for teams and for players (organisers only, on approval, open), editable until the start
+- ✅ Player pool: players join on their own; organisers place them in a team's squad
+- ✅ Tournament squads: one squad per player per tournament, locked at the start; fixtures offer only squad players
+- ✅ "Invite teams" and "Invite players" links; "Enter your team" and "Join as a player" on the tournament page
+- ✅ Notifications for requests, confirmations, rejections and placements
 
 ### Level 2 · Complete
 - ⬜ Invites that the team or player accepts; withdrawing an entry
