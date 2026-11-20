@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.TextButton
@@ -42,17 +44,20 @@ import com.harsh.desicrics.api.PickupTeamsRequest
 import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.PoolMode
+import com.harsh.desicrics.model.SquadChange
 import com.harsh.desicrics.model.Tournament
 import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.components.PhotoAvatar
 import com.harsh.desicrics.ui.social.PlayerLine
+import com.harsh.desicrics.ui.text.dayLabel
 import com.harsh.desicrics.ui.text.epochMillisAt
 import com.harsh.desicrics.ui.text.formatDayAndTime
 import com.harsh.desicrics.ui.text.label
 import com.harsh.desicrics.ui.text.pickerMoment
 import com.harsh.desicrics.util.nowMillis
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -382,6 +387,7 @@ internal fun ColumnScope.Players(
                 }
             }
         }
+        SquadChanges(t.squadChanges.filter { it.teamId == team.teamId })
     }
     if (t.started && organiser) Text(stringResource(Res.string.entry_squads_locked), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
 }
@@ -533,5 +539,26 @@ internal fun PickupSheet(poolSize: Int, onMake: (names: List<String>, split: Boo
         val chosen = List(count) { names[it].trim().ifEmpty { defaults[it] } }
         val valid = PickupTeamsRequest(chosen, split).validate() == null
         PrimaryButton(stringResource(Res.string.pickup_make), onClick = { onMake(chosen, split) }, enabled = valid, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Teams)
+    }
+}
+
+/** What organisers changed in a squad after the start: who came in and who left, and when. */
+@Composable
+private fun SquadChanges(changes: List<SquadChange>) {
+    if (changes.isEmpty()) return
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1)) {
+        Text(stringResource(Res.string.entry_changes).uppercase(), style = DesiTheme.type.label, color = DesiTheme.colors.muted)
+        changes.forEach { change ->
+            val line = if (change.added) Res.string.entry_change_in else Res.string.entry_change_out
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+                Icon(
+                    painterResource(if (change.added) DesiIcons.Add else DesiIcons.Remove),
+                    null,
+                    tint = if (change.added) DesiTheme.colors.brand else DesiTheme.colors.muted,
+                    modifier = Modifier.size(DesiTheme.size.iconSmall),
+                )
+                Text(stringResource(line, change.name, dayLabel(change.at)), style = DesiTheme.type.caption, color = DesiTheme.colors.ink)
+            }
+        }
     }
 }

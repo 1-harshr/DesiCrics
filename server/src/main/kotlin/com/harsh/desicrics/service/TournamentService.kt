@@ -309,6 +309,7 @@ class TournamentService(
             throw ApiException(HttpStatusCode.Conflict, if (where != null) "${person.name} is already in $where's squad" else "${person.name} is already in the tournament")
         }
         if (status == EntryStatus.CONFIRMED && squadTeam == null) onPoolJoined(tournamentId, profileId)
+        if (tournament.started && squadTeam != null) tournaments.addSquadChange(tournamentId, squadTeam.id, profileId, added = true, user.uid, clock())
         when {
             status == EntryStatus.WAITLISTED -> Unit
             status == EntryStatus.INVITED -> tell(setOf(profileId), NotificationKind.ENTRY_INVITED, tournament, person.name, PLAYER)
@@ -372,6 +373,10 @@ class TournamentService(
         }
         tournaments.setPlayer(tournamentId, profileId, team?.teamId, EntryStatus.CONFIRMED)
         if (team == null && entry.status != EntryStatus.CONFIRMED) onPoolJoined(tournamentId, profileId)
+        if (tournament.started && team?.teamId != entry.teamId) {
+            entry.teamId?.let { tournaments.addSquadChange(tournamentId, it, profileId, added = false, user.uid, clock()) }
+            team?.let { tournaments.addSquadChange(tournamentId, it.teamId, profileId, added = true, user.uid, clock()) }
+        }
         when {
             team != null && team.teamId != entry.teamId -> tell(setOf(profileId) - user.uid, NotificationKind.SQUAD_PLACED, tournament, team.name, PLAYER)
             entry.status == EntryStatus.PENDING -> tell(setOf(profileId) - user.uid, NotificationKind.ENTRY_CONFIRMED, tournament, entry.player.name, PLAYER)
@@ -392,6 +397,7 @@ class TournamentService(
             organiser || profileId == user.uid -> {
                 if (!organiser && tournament.started) throw ApiException(HttpStatusCode.Conflict, "The tournament has started; ask an organiser")
                 tournaments.removePlayer(tournamentId, profileId)
+                if (tournament.started) entry.teamId?.let { tournaments.addSquadChange(tournamentId, it, profileId, added = false, user.uid, clock()) }
                 if (organiser && entry.status == EntryStatus.PENDING) {
                     tell(setOf(profileId) - user.uid, NotificationKind.ENTRY_REJECTED, tournament, entry.player.name, PLAYER)
                 } else if (!organiser) {

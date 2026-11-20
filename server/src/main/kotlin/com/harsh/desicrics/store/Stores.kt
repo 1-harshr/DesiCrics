@@ -241,6 +241,8 @@ interface TournamentStore {
     /** False if that team has already asked. */
     suspend fun addOffer(tournamentId: String, profileId: String, teamId: String, offeredBy: String, at: Long): Boolean
     suspend fun removeOffer(tournamentId: String, profileId: String, teamId: String)
+    /** Notes a squad change made after the start. */
+    suspend fun addSquadChange(tournamentId: String, teamId: String, profileId: String, added: Boolean, by: String, at: Long)
     suspend fun addOrganiser(tournamentId: String, uid: String, role: OrganiserRole)
     /** Fixes the teams' groups, drops unconfirmed teams and players, and marks it started. False if it already was. */
     suspend fun markStarted(tournamentId: String, teams: List<TournamentTeam>): Boolean

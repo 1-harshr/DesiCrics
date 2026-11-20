@@ -838,6 +838,9 @@
     <string name="pickup_by_hand">I'll place them</string>
     <string name="pickup_by_hand_hint">The teams start empty, and you pick a team for each player.</string>
     <string name="pickup_make">Make teams</string>
+    <string name="entry_changes">Changes since the start</string>
+    <string name="entry_change_in">%1$s came in · %2$s</string>
+    <string name="entry_change_out">%1$s left · %2$s</string>
     <string name="entry_limits">Limits</string>
     <string name="entry_limits_hint">Leave blank for no limit. Anyone asking once it's full joins a waiting list and moves up when a place opens.</string>
     <string name="entry_max_teams">Most teams</string>

@@ -60,6 +60,7 @@ import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.PoolMode
+import com.harsh.desicrics.model.SquadChange
 import com.harsh.desicrics.model.SquadOffer
 import com.harsh.desicrics.model.Organiser
 import com.harsh.desicrics.model.OrganiserRole
@@ -537,6 +538,22 @@ class ScreenshotTest {
         TournamentContent(
             TournamentUiState(myId = "p4", loading = false, details = TournamentDetails(t)),
             {}, {}, {}, {}, {}, {}, { _, _ -> },
+        )
+    }
+
+    @Test
+    fun tournamentSquadChangesAfterTheStart() = shoot("tournament_squad_changes") {
+        val t = entryTournament()
+        val started = t.copy(
+            started = true,
+            teams = t.teams.filter { it.status == EntryStatus.CONFIRMED },
+            players = t.players.filter { it.teamId != null },
+            squadChanges = listOf(SquadChange("p2", "Aarav Shah", "t0", added = false, at = 1_763_000_000_000), SquadChange("p6", "Om Kulkarni", "t0", added = true, at = 1_763_000_000_000)),
+        )
+        TournamentContent(
+            TournamentUiState(myId = "org", loading = false, details = TournamentDetails(started)),
+            {}, {}, {}, {}, {}, {}, { _, _ -> },
+            initialTab = TournamentTab.PLAYERS,
         )
     }
 }

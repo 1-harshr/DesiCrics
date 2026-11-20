@@ -242,6 +242,18 @@ object TournamentTeamsTable : Table("tournament_teams") {
     override val primaryKey = PrimaryKey(tournamentId, teamId)
 }
 
+/** Squad changes after a tournament starts. */
+object TournamentSquadChangesTable : Table("tournament_squad_changes") {
+    val id = varchar("id", 36)
+    val tournamentId = reference("tournament_id", TournamentsTable.id, onDelete = ReferenceOption.CASCADE)
+    val teamId = varchar("team_id", 36)
+    val playerId = varchar("player_id", 128)
+    val added = bool("added")
+    val changedBy = varchar("changed_by", 128)
+    val changedAt = long("changed_at")
+    override val primaryKey = PrimaryKey(id)
+}
+
 /** Teams asking pool players to join their squads. */
 object TournamentSquadOffersTable : Table("tournament_squad_offers") {
     val tournamentId = reference("tournament_id", TournamentsTable.id, onDelete = ReferenceOption.CASCADE)

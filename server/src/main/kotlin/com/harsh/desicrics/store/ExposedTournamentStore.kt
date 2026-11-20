@@ -5,6 +5,7 @@ import com.harsh.desicrics.db.TeamMembersTable
 import com.harsh.desicrics.db.TeamsTable
 import com.harsh.desicrics.db.TournamentOrganisersTable
 import com.harsh.desicrics.db.TournamentPlayersTable
+import com.harsh.desicrics.db.TournamentSquadChangesTable
 import com.harsh.desicrics.db.TournamentSquadOffersTable
 import com.harsh.desicrics.db.TournamentTeamsTable
 import com.harsh.desicrics.db.TournamentsTable
@@ -15,11 +16,13 @@ import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.Organiser
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Tournament
+import com.harsh.desicrics.model.SquadChange
 import com.harsh.desicrics.model.SquadOffer
 import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.model.TournamentTeam
 import kotlinx.serialization.json.Json
+import java.util.UUID
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
@@ -91,7 +94,13 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
             }
         val entries = TournamentPlayersTable.selectAll().where { TournamentPlayersTable.tournamentId eq tournamentId }
             .orderBy(TournamentPlayersTable.addedAt).toList()
-        val summaries = playerSummaries(entries.map { it[TournamentPlayersTable.playerId] })
+        val changeRows = TournamentSquadChangesTable.selectAll().where { TournamentSquadChangesTable.tournamentId eq tournamentId }
+            .orderBy(TournamentSquadChangesTable.changedAt).toList()
+        val summaries = playerSummaries(entries.map { it[TournamentPlayersTable.playerId] } + changeRows.map { it[TournamentSquadChangesTable.playerId] })
+        val changes = changeRows.map {
+            val id = it[TournamentSquadChangesTable.playerId]
+            SquadChange(id, summaries[id]?.name.orEmpty(), it[TournamentSquadChangesTable.teamId], it[TournamentSquadChangesTable.added], it[TournamentSquadChangesTable.changedAt])
+        }
         val players = entries.mapNotNull {
             TournamentPlayer(
                 player = summaries[it[TournamentPlayersTable.playerId]] ?: return@mapNotNull null,
@@ -118,6 +127,7 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
             maxPlayers = row[TournamentsTable.maxPlayers],
             entryClosesAt = row[TournamentsTable.entryClosesAt],
             poolMode = row[TournamentsTable.poolMode],
+            squadChanges = changes,
             offers = TournamentSquadOffersTable.selectAll().where { TournamentSquadOffersTable.tournamentId eq tournamentId }
                 .orderBy(TournamentSquadOffersTable.offeredAt)
                 .map { SquadOffer(it[TournamentSquadOffersTable.playerId], it[TournamentSquadOffersTable.teamId]) },
@@ -298,6 +308,20 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
         true
     } catch (e: Exception) {
         if (e.isUniqueViolation()) false else throw e
+    }
+
+    override suspend fun addSquadChange(tournamentId: String, teamId: String, profileId: String, added: Boolean, by: String, at: Long) {
+        db.query {
+            TournamentSquadChangesTable.insert {
+                it[id] = UUID.randomUUID().toString()
+                it[this.tournamentId] = tournamentId
+                it[this.teamId] = teamId
+                it[playerId] = profileId
+                it[this.added] = added
+                it[changedBy] = by
+                it[changedAt] = at
+            }
+        }
     }
 
     override suspend fun removeOffer(tournamentId: String, profileId: String, teamId: String) {

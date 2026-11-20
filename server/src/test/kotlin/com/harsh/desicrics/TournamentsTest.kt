@@ -533,4 +533,25 @@ class TournamentsTest {
         assertEquals(listOf(2, 2), made.confirmedTeams.map { made.squad(it.teamId).size })
         assertEquals(listOf(NotificationKind.SQUAD_PLACED), client.inbox("dev").map { it.kind })
     }
+
+    @Test
+    fun squadChangesAfterTheStartAreRecorded() = apiTest { client ->
+        for ((uid, name) in listOf("asha" to "Asha", "dev" to "Dev", "kabir" to "Kabir")) client.setUpProfile(uid, name = name)
+        val one = client.team("asha", "Team 1")
+        val two = client.team("dev", "Team 2")
+        val series = client.tournament("asha", CreateTournamentRequest("Series", format = TournamentFormat.BEST_OF_THREE, oversPerInnings = 5)).tournament
+        client.enter("asha", series.id, one.id)
+        client.enter("asha", series.id, two.id)
+        // Before the start, changes aren't history.
+        client.addPlayer("asha", series.id, AddTournamentPlayerRequest("kabir", two.id))
+        client.delete("/tournaments/${series.id}/players/kabir") { bearerAuth("test-asha") }
+        client.post("/tournaments/${series.id}/start") { bearerAuth("test-asha") }
+
+        // Dev can't change his squad now; Asha brings Kabir in for Dev.
+        assertEquals(HttpStatusCode.Conflict, client.addPlayer("dev", series.id, AddTournamentPlayerRequest("dev", two.id)).status)
+        client.addPlayer("asha", series.id, AddTournamentPlayerRequest("kabir", two.id))
+        val changed = client.delete("/tournaments/${series.id}/players/dev") { bearerAuth("test-asha") }.body<TournamentDetails>().tournament
+        assertEquals(listOf("Kabir" to true, "Dev" to false), changed.squadChanges.map { it.name to it.added })
+        assertTrue(changed.squadChanges.all { it.teamId == two.id })
+    }
 }

@@ -71,6 +71,10 @@ enum class PoolMode {
     TEAMS,
 }
 
+/** An organiser [added] a player to, or took them out of, [teamId]'s squad after the tournament started. */
+@Serializable
+data class SquadChange(val profileId: String, val name: String, val teamId: String, val added: Boolean, val at: Long)
+
 /** [teamId] asked the pool player [profileId] to join its squad. */
 @Serializable
 data class SquadOffer(val profileId: String, val teamId: String)
@@ -127,6 +131,8 @@ data class Tournament(
     val poolMode: PoolMode = PoolMode.ORGANISERS,
     /** Teams asking pool players to join, while [poolMode] is [PoolMode.TEAMS]. */
     val offers: List<SquadOffer> = emptyList(),
+    /** Changes to squads after the start, oldest first. */
+    val squadChanges: List<SquadChange> = emptyList(),
     val organisers: List<Organiser> = emptyList(),
     val teams: List<TournamentTeam> = emptyList(),
     /** The pool and every squad. */
