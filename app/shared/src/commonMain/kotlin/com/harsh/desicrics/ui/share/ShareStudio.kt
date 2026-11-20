@@ -42,6 +42,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.harsh.desicrics.designsystem.component.ChoiceChips
 import com.harsh.desicrics.designsystem.component.DesiSheet
 import com.harsh.desicrics.designsystem.component.PrimaryButton
@@ -193,11 +195,15 @@ fun ShareStudioContent(
                         onClick = {
                             scope.launch {
                                 busy = true
-                                val saved = layers.mapIndexed { i, layer ->
-                                    onSave(layer.toImageBitmap(), template.kind.file, if (layers.size > 1) "$fileName-${i + 1}" else fileName)
+                                try {
+                                    val saved = layers.mapIndexed { i, layer ->
+                                        val image = withContext(Dispatchers.Default) { layer.toImageBitmap() }
+                                        onSave(image, template.kind.file, if (layers.size > 1) "$fileName-${i + 1}" else fileName)
+                                    }
+                                    note = if (saved.all { it }) StudioNote.SAVED else StudioNote.SAVE_FAILED
+                                } finally {
+                                    busy = false
                                 }
-                                note = if (saved.all { it }) StudioNote.SAVED else StudioNote.SAVE_FAILED
-                                busy = false
                             }
                         },
                         leadingIcon = DesiIcons.Download,
@@ -209,9 +215,13 @@ fun ShareStudioContent(
                         onClick = {
                             scope.launch {
                                 busy = true
-                                val copied = onCopy(layers[shownPage].toImageBitmap(), template.kind.file)
-                                note = if (copied) StudioNote.COPIED else StudioNote.COPY_FAILED
-                                busy = false
+                                try {
+                                    val image = withContext(Dispatchers.Default) { layers[shownPage].toImageBitmap() }
+                                    val copied = onCopy(image, template.kind.file)
+                                    note = if (copied) StudioNote.COPIED else StudioNote.COPY_FAILED
+                                } finally {
+                                    busy = false
+                                }
                             }
                         },
                         leadingIcon = DesiIcons.Copy,
@@ -224,8 +234,12 @@ fun ShareStudioContent(
                     onClick = {
                         scope.launch {
                             busy = true
-                            onShare(layers.map { it.toImageBitmap() }, template.kind.file, fileName)
-                            busy = false
+                            try {
+                                val images = withContext(Dispatchers.Default) { layers.map { it.toImageBitmap() } }
+                                onShare(images, template.kind.file, fileName)
+                            } finally {
+                                busy = false
+                            }
                         }
                     },
                     leadingIcon = DesiIcons.Share,
