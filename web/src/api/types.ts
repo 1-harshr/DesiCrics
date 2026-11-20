@@ -220,10 +220,28 @@ export interface SavedTeam {
   logoUrl?: string | null;
 }
 
+/** Completed matches and how they ended; abandoned ones count as played only. */
+export interface WinLoss {
+  played?: number;
+  won?: number;
+  lost?: number;
+  tied?: number;
+}
+
+export interface RecordAgainst {
+  opponentId: string;
+  opponentName: string;
+  record: WinLoss;
+}
+
 export interface PublicTeamPage {
   team: SavedTeam;
-  /** Newest first. */
+  /** The latest, newest first. */
   matches?: Match[];
+  /** Every completed match. */
+  record?: WinLoss;
+  /** Against each saved team it has played, most played first. */
+  against?: RecordAgainst[];
 }
 
 export interface PlayerPage {
@@ -243,6 +261,7 @@ export interface SearchResults {
   teams?: TeamSummary[];
   players?: PlayerSummary[];
   matches?: Match[];
+  tournaments?: TournamentSummary[];
 }
 
 export interface TournamentSummary {

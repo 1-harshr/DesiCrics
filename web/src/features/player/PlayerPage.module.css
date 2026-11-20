@@ -2,6 +2,7 @@
 @media (min-width: 1100px) {
   .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+.filters { display: grid; gap: var(--space-2); }
 .stats { margin-top: var(--space-4); }
 .career { display: grid; gap: var(--space-3); }
 .statTitle { margin-top: var(--space-2); font: 600 15px/22px var(--font-body); }

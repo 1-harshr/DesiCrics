@@ -7,7 +7,8 @@ adapted to the web with real URLs, wide-screen layouts, and hover and keyboard s
 It doesn't do anything that changes data: no sign-in, no scoring, no creating or managing matches, teams or
 tournaments. Those stay in the app, and the web app points people there when they want to do more.
 
-Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `web` branch until it merges.
+Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `web` branch until it merges. W2 is the last phase:
+anything more for the web gets planned separately.
 
 ## Who it's for
 
@@ -16,7 +17,6 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `web` branch
    so it comes first.
 2. **Fans browsing.** Family at the boundary, or players on an iPhone, which the Android app doesn't cover,
    looking up live matches, results, a team or a player's stats.
-3. **Spectators on a big screen.** A live scorecard or an auction on a projector or TV at the ground.
 
 ## Decisions
 
@@ -75,7 +75,6 @@ only members or organisers see in the app.
 | ✅ The proxy serves the web app to browsers loading a page, and `/health` for uptime monitors | W1 |
 | ✅ Public match lists (live, recent, upcoming, by city), tournament lists, search | W2 |
 | ✅ Public team and player pages, player stats | W2 |
-| Public auction feed for watching | W3 |
 
 ---
 
@@ -119,10 +118,8 @@ scorecard in the browser with `:core`.
 
 - ✅ Home: live now, upcoming fixtures and recent results, filtered by city, with older results a page at a time
 - ✅ Tournaments: under way, coming up and finished, by city
-- ✅ Search across teams, players and matches (the server's search doesn't cover tournaments yet)
-- 🟡 Team page: squad and latest matches with won and lost. Record against each other team is still to do
-- 🟡 Player page: career stats by match length, form, badges, teams and recent matches. No season filter yet
+- ✅ Search across teams, players, tournaments and matches
+- ✅ Team page: squad, latest matches, its record over every completed match and against each saved team it has played
+- ✅ Player page: career stats by season and match length, form, badges, teams and recent matches
 
 **Exit:** a parent searches for their child's team, opens it, and follows its live match.
-
-**Exit:** a live match and an auction both run on a projector from the web app.

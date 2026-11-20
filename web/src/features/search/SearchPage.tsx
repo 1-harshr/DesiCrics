@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import { api } from "@/api/client";
 import type { SearchResults } from "@/api/types";
-import { Avatar, CardGrid, EmptyState, ErrorState, ListCard, ListRow, Loading, Page, SectionHeader, TextField } from "@/designsystem/components";
+import { Avatar, CardGrid, EmptyState, ErrorState, IconTile, ListCard, ListRow, Loading, Page, SectionHeader, TextField } from "@/designsystem/components";
 import { useDebounced } from "@/features/browse/useCity";
 import { MatchListCard } from "@/features/match/MatchListCard";
 import { playerRoleLabel } from "@/features/player/text";
+import { formatLabel } from "@/features/tournament/text";
 import { useText } from "@/i18n";
 import styles from "./SearchPage.module.css";
 
@@ -26,6 +27,7 @@ export function SearchPage() {
   const teams = results?.teams ?? [];
   const players = results?.players ?? [];
   const matches = results?.matches ?? [];
+  const tournaments = results?.tournaments ?? [];
 
   return (
     <Page wide title={s("search_title")}>
@@ -48,7 +50,7 @@ export function SearchPage() {
         <Loading />
       ) : !results ? (
         <ErrorState compact title={s("error_list_title")} body={s("error_connection_body")} onRetry={() => void query.refetch()} />
-      ) : teams.length + players.length + matches.length === 0 ? (
+      ) : teams.length + players.length + matches.length + tournaments.length === 0 ? (
         <EmptyState icon="search_off" title={s("search_empty")} />
       ) : (
         <>
@@ -59,6 +61,22 @@ export function SearchPage() {
                 <ListCard>
                   {teams.map((t) => (
                     <ListRow key={t.id} to={`/teams/${t.id}`} leading={<Avatar name={t.name} photoUrl={t.logoUrl} />} title={t.name} subtitle={[t.city, p("teams_member_count", t.memberCount, t.memberCount)].filter(Boolean).join(" · ")} />
+                  ))}
+                </ListCard>
+              </section>
+            )}
+            {tournaments.length > 0 && (
+              <section>
+                <SectionHeader icon="emoji_events" title={s("tournaments_title")} />
+                <ListCard>
+                  {tournaments.map((t) => (
+                    <ListRow
+                      key={t.id}
+                      to={`/t/${t.id}`}
+                      leading={<IconTile icon={t.finished ? "emoji_events_filled" : "emoji_events"} />}
+                      title={t.name}
+                      subtitle={[s(formatLabel[t.format]), p("tournaments_team_count", t.teams, t.teams), t.city].filter(Boolean).join(" · ")}
+                    />
                   ))}
                 </ListCard>
               </section>

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
 import { api, ApiError } from "@/api/client";
-import type { Match, PublicTeamPage } from "@/api/types";
+import type { PublicTeamPage } from "@/api/types";
 import { Avatar, CardGrid, EmptyState, ErrorState, Hero, HeroChips, HeroIdentity, HeroStats, HeroTitle, IconButton, ListCard, ListRow, Loading, Page, SectionHeader, Tag } from "@/designsystem/components";
 import { MatchListCard } from "@/features/match/MatchListCard";
 import { useShare } from "@/features/match/useShare";
@@ -34,27 +34,13 @@ export function TeamPage() {
   return <TeamView page={query.data} />;
 }
 
-/** Won, lost and tied among [matches] that are over, from the team's side. */
-function record(teamId: string, matches: Match[]) {
-  let won = 0;
-  let lost = 0;
-  let tied = 0;
-  for (const m of matches) {
-    if (m.status !== "COMPLETED" || !m.result) continue;
-    const side = m.teamA.teamId === teamId ? "A" : "B";
-    if (m.result.winner === side) won++;
-    else if (m.result.winner) lost++;
-    else if (!m.result.ending) tied++;
-  }
-  return { played: matches.filter((m) => m.status === "COMPLETED").length, won, lost, tied };
-}
-
 function TeamView({ page }: { page: PublicTeamPage }) {
   const { s, p } = useText();
   const { share, toast } = useShare();
   const team = page.team;
   const matches = page.matches ?? [];
-  const r = record(team.id, matches);
+  const r = { played: 0, won: 0, lost: 0, tied: 0, ...page.record };
+  const against = page.against ?? [];
   // Admins first, then by name, as on the app's team page.
   const members = [...team.members].sort((a, b) => (a.role === b.role ? a.player.name.localeCompare(b.player.name) : a.role === "ADMIN" ? -1 : 1));
 
@@ -97,6 +83,25 @@ function TeamView({ page }: { page: PublicTeamPage }) {
               />
             ))}
           </ListCard>
+          {against.length > 0 && (
+            <>
+              <SectionHeader icon="swap_horiz" title={s("team_record_against")} />
+              <ListCard>
+                {against.map((a) => {
+                  const rec = { played: 0, won: 0, lost: 0, tied: 0, ...a.record };
+                  return (
+                    <ListRow
+                      key={a.opponentId}
+                      to={`/teams/${a.opponentId}`}
+                      leading={<Avatar name={a.opponentName} />}
+                      title={a.opponentName}
+                      subtitle={s("team_record", rec.played, rec.won, rec.lost, rec.tied)}
+                    />
+                  );
+                })}
+              </ListCard>
+            </>
+          )}
         </section>
         <section>
           <SectionHeader icon="history" title={s("web_team_recent")} />

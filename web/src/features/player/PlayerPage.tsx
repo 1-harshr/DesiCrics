@@ -61,10 +61,15 @@ function PlayerView({ page }: { page: Page_ }) {
   const { s, p } = useText();
   const { share, toast } = useShare();
   const [format, setFormat] = useState<FormatFilter>("ALL");
+  // All time, then this season and the two before, as the app offers.
+  const year = new Date().getFullYear();
+  const seasons = ["all", String(year), String(year - 1), String(year - 2)];
+  const [season, setSeason] = useState("all");
   const player = page.player;
   const stats = useQuery({
-    queryKey: ["public-player-stats", player.profileId, format],
-    queryFn: ({ signal }) => api<CareerStats>(`/public/players/${encodeURIComponent(player.profileId)}/stats?format=${format}`, { signal }),
+    queryKey: ["public-player-stats", player.profileId, format, season],
+    queryFn: ({ signal }) =>
+      api<CareerStats>(`/public/players/${encodeURIComponent(player.profileId)}/stats?format=${format}${season === "all" ? "" : `&season=${season}`}`, { signal }),
     placeholderData: (previous) => previous,
   });
   const career = stats.data;
@@ -93,7 +98,7 @@ function PlayerView({ page }: { page: Page_ }) {
             ...(player.city ? [{ icon: "location_on" as const, text: player.city }] : []),
           ]}
         />
-        {career && format === "ALL" && (career.matches ?? 0) > 0 && (
+        {career && format === "ALL" && season === "all" && (career.matches ?? 0) > 0 && (
           <HeroStats
             stats={[
               { value: String(career.matches ?? 0), label: s("stats_matches") },
@@ -107,7 +112,10 @@ function PlayerView({ page }: { page: Page_ }) {
       <div className={styles.columns}>
         <section>
           <SectionHeader icon="insights" title={s("profile_tab_stats")} />
-          <FilterRow options={FORMATS.map((f) => ({ value: f, label: s(formatFilterLabel[f]) }))} selected={format} onSelect={setFormat} />
+          <div className={styles.filters}>
+            <FilterRow options={seasons.map((y) => ({ value: y, label: y === "all" ? s("stats_season_all") : y }))} selected={season} onSelect={setSeason} />
+            <FilterRow options={FORMATS.map((f) => ({ value: f, label: s(formatFilterLabel[f]) }))} selected={format} onSelect={setFormat} />
+          </div>
           <div className={styles.stats}>
             {!career ? (
               stats.isPending ? <Loading /> : <ErrorState compact title={s("web_player_stats_failed")} body={s("error_connection_body")} onRetry={() => void stats.refetch()} />
