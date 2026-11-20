@@ -85,7 +85,7 @@ function InningsCard({ innings }: { innings: InningsView }) {
       <header className={styles.inningsHead}>
         <div>
           <div className="label muted">{s("scorecard_innings", innings.battingTeam)}</div>
-          <h3 className="title-md">{innings.battingTeam}</h3>
+          <h2 className="title-md">{innings.battingTeam}</h2>
         </div>
         <div className={styles.inningsScore}>
           <span className="score-lg">{innings.scoreText}</span>

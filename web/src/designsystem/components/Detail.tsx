@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from "react";
 import { Link } from "react-router";
 import type { IconName } from "../icons.generated";
 import { LiveDot } from "./Content";
@@ -200,12 +200,33 @@ export function FilterRow<T extends string>({
   );
 }
 
-/** Two to four views of one page, in a pill (Live / Scorecard / Overs). */
+/**
+ * Two to four views of one page, in a pill (Live / Scorecard / Overs). One tab stop for the group; the arrow
+ * keys, Home and End move between tabs, as in the ARIA tabs pattern.
+ */
 export function Tabs<T extends string>({ tabs, selected, onSelect, label }: { tabs: { value: T; label: string }[]; selected: T; onSelect: (value: T) => void; label: string }) {
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    const index = tabs.findIndex((t) => t.value === selected);
+    const next = { ArrowRight: index + 1, ArrowLeft: index - 1, Home: 0, End: tabs.length - 1 }[event.key];
+    if (next == null) return;
+    event.preventDefault();
+    const target = tabs[(next + tabs.length) % tabs.length]!;
+    onSelect(target.value);
+    event.currentTarget.querySelector<HTMLButtonElement>(`[data-tab="${target.value}"]`)?.focus();
+  };
   return (
-    <div className={styles.tabs} role="tablist" aria-label={label}>
+    <div className={styles.tabs} role="tablist" aria-label={label} onKeyDown={onKeyDown}>
       {tabs.map((t) => (
-        <button key={t.value} type="button" role="tab" className={styles.tab} aria-selected={t.value === selected} onClick={() => onSelect(t.value)}>
+        <button
+          key={t.value}
+          type="button"
+          role="tab"
+          data-tab={t.value}
+          className={styles.tab}
+          aria-selected={t.value === selected}
+          tabIndex={t.value === selected ? 0 : -1}
+          onClick={() => onSelect(t.value)}
+        >
           {t.label}
         </button>
       ))}

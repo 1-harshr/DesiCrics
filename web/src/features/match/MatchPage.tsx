@@ -6,6 +6,7 @@ import type { Match } from "@/api/types";
 import type { ScorecardView } from "@/core";
 import { ErrorBanner, ErrorState, Hero, HeroTitle, Icon, IconButton, LiveBadge, Loading, Page, ScoreHeader, SectionHeader, Tabs } from "@/designsystem/components";
 import { stageText } from "@/features/tournament/text";
+import { useMediaQuery, WIDE } from "@/designsystem/useMediaQuery";
 import { useText } from "@/i18n";
 import { LiveTab, OversTab, ScorecardTab, Squads } from "./MatchParts";
 import styles from "./MatchPage.module.css";
@@ -51,6 +52,7 @@ function MatchView({ match, card, isStale, reconnecting, onRetry }: { match: Mat
   const { s, p } = text;
   const { statusText } = useMatchText();
   const { share, toast } = useShare();
+  const wide = useMediaQuery(WIDE);
   const title = s("match_title", match.teamA.name, match.teamB.name);
   const started = match.status !== "SCHEDULED" && card.innings.some((i) => i.legalBalls > 0 || i.runs > 0 || i.batters.length > 0);
   const inPlay = started && !card.isComplete && match.status !== "COMPLETED";
@@ -83,12 +85,12 @@ function MatchView({ match, card, isStale, reconnecting, onRetry }: { match: Mat
         <Hero
           bar={
             <>
-              <HeroTitle>{inPlay ? <span className={styles.heroLive}><LiveBadge /></span> : started ? title : null}</HeroTitle>
+              <HeroTitle>{inPlay && <span className={styles.heroLive}><LiveBadge /></span>}</HeroTitle>
               <IconButton icon="share" label={s("match_share")} frosted onClick={() => share(title)} />
             </>
           }
         >
-          {inPlay && <h1 className={styles.heroTitle}>{title}</h1>}
+          <h1 className={styles.heroTitle}>{title}</h1>
           {started && current ? (
             <div className={styles.heroScore}>
               <ScoreHeader
@@ -99,9 +101,7 @@ function MatchView({ match, card, isStale, reconnecting, onRetry }: { match: Mat
               />
               {firstInnings && <p className={styles.heroLine}>{s("match_first_innings_score", firstInnings.battingTeam, firstInnings.scoreText, firstInnings.oversText)}</p>}
             </div>
-          ) : (
-            !inPlay && <h1 className={styles.heroTitle}>{title}</h1>
-          )}
+          ) : null}
           {(!inPlay || !started) && <p className={styles.heroStatus}>{statusText(match)}</p>}
           {match.venue && <p className={styles.heroLine}>{match.venue}</p>}
           {match.fixture && (
@@ -128,8 +128,8 @@ function MatchView({ match, card, isStale, reconnecting, onRetry }: { match: Mat
             </>
           )
         ) : (
-          <>
-            {/* One column of tabs on phones; side by side from 1100px. */}
+          // One column of tabs on phones and tablets; side by side from 1100px.
+          !wide ? (
             <div className={styles.tabsOnly}>
               <Tabs label={title} tabs={tabs} selected={shown} onSelect={setTab} />
               <div className={styles.tabBody}>
@@ -138,6 +138,7 @@ function MatchView({ match, card, isStale, reconnecting, onRetry }: { match: Mat
                 {shown === "overs" && <OversTab card={card} />}
               </div>
             </div>
+          ) : (
             <div className={styles.columns}>
               <div>
                 {inPlay && current && (
@@ -154,7 +155,7 @@ function MatchView({ match, card, isStale, reconnecting, onRetry }: { match: Mat
                 <OversTab card={card} />
               </div>
             </div>
-          </>
+          )
         )}
         <GetAppBanner />
       </Page>

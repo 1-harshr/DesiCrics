@@ -49,5 +49,6 @@
   "web_team_recent": "Latest matches",
   "web_player_stats_failed": "Stats didn't load",
   "web_team_share": "Share team",
-  "web_player_share": "Share player"
+  "web_player_share": "Share player",
+  "ds_loading": "Loading"
 }

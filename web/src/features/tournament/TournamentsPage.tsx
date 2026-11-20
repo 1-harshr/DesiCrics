@@ -3,7 +3,7 @@ import { api } from "@/api/client";
 import type { TournamentSummary } from "@/api/types";
 import { EmptyState, ErrorState, IconTile, ListCard, ListRow, Loading, Page, SectionHeader } from "@/designsystem/components";
 import { CityField } from "@/features/browse/CityField";
-import { useCity, useDebounced } from "@/features/browse/useCity";
+import { useCity } from "@/features/browse/useCity";
 import { formatDayAndTime } from "@/features/match/text";
 import { useText } from "@/i18n";
 import { formatLabel } from "./text";
@@ -12,8 +12,8 @@ import styles from "./TournamentsPage.module.css";
 /** Tournaments in a city or everywhere: under way, coming up, and finished. */
 export function TournamentsPage() {
   const { s, p } = useText();
-  const [city, setCity] = useCity();
-  const place = useDebounced(city.trim());
+  const { text: city, setText: setCity, settled } = useCity();
+  const place = settled.trim();
   const query = useQuery({
     queryKey: ["public-tournaments", place.toLowerCase()],
     queryFn: ({ signal }) => api<TournamentSummary[]>(`/public/tournaments?city=${encodeURIComponent(place)}`, { signal }),

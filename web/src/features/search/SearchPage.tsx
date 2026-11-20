@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router";
 import { api } from "@/api/client";
 import type { SearchResults } from "@/api/types";
 import { Avatar, CardGrid, EmptyState, ErrorState, IconTile, ListCard, ListRow, Loading, Page, SectionHeader, TextField } from "@/designsystem/components";
-import { useDebounced } from "@/features/browse/useCity";
+import { useAddressText } from "@/features/browse/useCity";
 import { MatchListCard } from "@/features/match/MatchListCard";
 import { playerRoleLabel } from "@/features/player/text";
 import { formatLabel } from "@/features/tournament/text";
@@ -13,9 +12,8 @@ import styles from "./SearchPage.module.css";
 /** Teams, players and matches by name. The words stay in the address, so a search can be shared. */
 export function SearchPage() {
   const { s, p } = useText();
-  const [params, setParams] = useSearchParams();
-  const q = params.get("q") ?? "";
-  const term = useDebounced(q.trim());
+  const { text: q, setText: setQ, settled } = useAddressText("q");
+  const term = settled.trim();
   const ready = term.length >= 2;
   const query = useQuery({
     queryKey: ["public-search", term.toLowerCase()],
@@ -36,7 +34,7 @@ export function SearchPage() {
           type="search"
           icon="search"
           value={q}
-          onChange={(value) => setParams(value ? { q: value } : {}, { replace: true })}
+          onChange={setQ}
           placeholder={s("search_hint")}
           clearLabel={s("web_search_clear")}
           aria-label={s("search_title")}

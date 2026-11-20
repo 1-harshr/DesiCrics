@@ -4,7 +4,7 @@ import { api, ApiError } from "@/api/client";
 import type { Match, TodayFeed } from "@/api/types";
 import { CardGrid, EmptyState, ErrorBanner, ErrorState, GhostButton, Loading, Page, SectionHeader } from "@/designsystem/components";
 import { CityField } from "@/features/browse/CityField";
-import { useCity, useDebounced } from "@/features/browse/useCity";
+import { useCity } from "@/features/browse/useCity";
 import { MatchListCard } from "@/features/match/MatchListCard";
 import { useText } from "@/i18n";
 import styles from "./HomePage.module.css";
@@ -15,8 +15,8 @@ const REFRESH_MS = 30_000;
 /** Everyone's live, upcoming and recent matches, in a city or everywhere. */
 export function HomePage() {
   const { s } = useText();
-  const [city, setCity] = useCity();
-  const place = useDebounced(city.trim());
+  const { text: city, setText: setCity, settled } = useCity();
+  const place = settled.trim();
   const query = useQuery({
     queryKey: ["public-feed", place.toLowerCase()],
     queryFn: ({ signal }) => api<TodayFeed>(`/public/feed?city=${encodeURIComponent(place)}`, { signal }),

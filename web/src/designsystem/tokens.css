@@ -51,6 +51,8 @@
 
   /* Amber for states that aren't failures (offline), as ErrorBanner(warning = true) in the app. */
   --warning: var(--event-extra);
+  /* event.extra as small text on white is 4.1:1; this darker amber reaches 4.5:1. Dark mode needs no change. */
+  --event-extra-text: #8f5a0c;
 
   --font-display: "Barlow Condensed", system-ui, sans-serif;
   --font-body: "Figtree", system-ui, sans-serif;
@@ -104,6 +106,7 @@
     --event-six: #a68bff;
     --event-wicket: #ff6b74;
     --event-extra: #e3ae4c;
+    --event-extra-text: #e3ae4c;
     --event-dot: #6e7a73;
   }
 }
@@ -125,6 +128,7 @@
   --event-six: #a68bff;
   --event-wicket: #ff6b74;
   --event-extra: #e3ae4c;
+  --event-extra-text: #e3ae4c;
   --event-dot: #6e7a73;
 }
 

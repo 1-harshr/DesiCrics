@@ -18,7 +18,7 @@
 .Four { background: var(--event-four); border-color: var(--event-four); color: #fff; }
 .Six { background: var(--event-six); border-color: var(--event-six); color: #fff; }
 .Wicket { background: var(--event-wicket); border-color: var(--event-wicket); color: #fff; }
-.Extra { border-color: var(--event-extra); color: var(--event-extra); }
+.Extra { border-color: var(--event-extra); color: var(--event-extra-text); }
 
 .strip { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 

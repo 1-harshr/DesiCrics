@@ -26,6 +26,7 @@ import {
 import { MatchListCard } from "@/features/match/MatchListCard";
 import { format2 } from "@/features/match/text";
 import { useShare } from "@/features/match/useShare";
+import { useMediaQuery, WIDE } from "@/designsystem/useMediaQuery";
 import { useText, type StringKey } from "@/i18n";
 import { formatLabel, groupName, stageText } from "./text";
 import styles from "./TournamentPage.module.css";
@@ -75,6 +76,7 @@ function TournamentView({ details }: { details: TournamentDetails }) {
   const text = useText();
   const { s, p } = text;
   const { share, toast } = useShare();
+  const wide = useMediaQuery(WIDE);
   const t = details.tournament;
   const fixtures = details.fixtures ?? [];
   const tables = details.tables ?? [];
@@ -160,30 +162,33 @@ function TournamentView({ details }: { details: TournamentDetails }) {
         )}
 
         {/* Tabs on phones and tablets; from 1100px fixtures on the left, table and stats on the right. */}
-        <div className={styles.tabsOnly}>
-          <Tabs label={t.name} tabs={tabs} selected={shown} onSelect={setTab} />
-          <div className={styles.tabBody}>
-            {shown === "fixtures" && fixturesView}
-            {shown === "table" && tablesView}
-            {shown === "teams" && teamsView}
-            {shown === "stats" && statsView}
+        {!wide ? (
+          <div className={styles.tabsOnly}>
+            <Tabs label={t.name} tabs={tabs} selected={shown} onSelect={setTab} />
+            <div className={styles.tabBody}>
+              {shown === "fixtures" && fixturesView}
+              {shown === "table" && tablesView}
+              {shown === "teams" && teamsView}
+              {shown === "stats" && statsView}
+            </div>
           </div>
-        </div>
-        <div className={styles.columns}>
-          <div>{fixturesView}</div>
-          <div>
-            {tables.length > 0 && (
-              <>
-                <SectionHeader icon="leaderboard" title={s("tournament_tab_table")} />
-                {tablesView}
-              </>
-            )}
-            <SectionHeader icon="star" title={s("tournament_tab_stats")} />
-            {statsView}
-            <SectionHeader icon="groups" title={s("tournament_tab_teams")} />
-            {teamsView}
+        ) : (
+          <div className={styles.columns}>
+            <div>{fixturesView}</div>
+            <div>
+              {tables.length > 0 && (
+                <>
+                  <SectionHeader icon="leaderboard" title={s("tournament_tab_table")} />
+                  {tablesView}
+                </>
+              )}
+              <SectionHeader icon="star" title={s("tournament_tab_stats")} />
+              {statsView}
+              <SectionHeader icon="groups" title={s("tournament_tab_teams")} />
+              {teamsView}
+            </div>
           </div>
-        </div>
+        )}
 
         <GetAppBanner />
       </Page>

@@ -23,7 +23,7 @@ export function Card({ to, className, children, ...rest }: HTMLAttributes<HTMLDi
 
 /** Uppercase label for dense spots inside cards. Inside pages use SectionHeader. */
 export function SectionLabel({ children }: { children: ReactNode }) {
-  return <h3 className={styles.sectionLabel}>{children}</h3>;
+  return <h2 className={styles.sectionLabel}>{children}</h2>;
 }
 
 /** The sign for "happening now": a red dot with a pulsing ring. */

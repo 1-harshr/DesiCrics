@@ -29,7 +29,8 @@ export function ErrorState({
       <span className={styles.mark}>
         <Icon name={missing ? "search_off" : "cloud_off"} size={32} />
       </span>
-      <h2 className={styles.title}>{title}</h2>
+      {/* Full screen it's the page's title; on a card it heads a section. */}
+      {compact ? <h2 className={styles.title}>{title}</h2> : <h1 className={styles.title}>{title}</h1>}
       {body && <p className={styles.body}>{body}</p>}
       {(onRetry || action) && (
         <div className={styles.actions}>
@@ -64,8 +65,9 @@ export function ErrorBanner({ title, message, warning, action }: { title?: strin
 }
 
 export function Loading({ label }: { label?: string }) {
+  const { s } = useText();
   return (
-    <div className={styles.loading} role="progressbar" aria-label={label}>
+    <div className={styles.loading} role="progressbar" aria-label={label ?? s("ds_loading")}>
       <span className={styles.spinner} />
     </div>
   );

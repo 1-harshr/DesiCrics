@@ -75,7 +75,7 @@ a.row:hover, button.row:hover { background: var(--sunk); }
 }
 .brand { background: var(--brand-soft); color: var(--brand); }
 .neutral { background: var(--sunk); color: var(--muted); }
-.warn { background: color-mix(in srgb, var(--event-extra) 14%, var(--surface)); color: var(--event-extra); }
+.warn { background: color-mix(in srgb, var(--event-extra) 14%, var(--surface)); color: var(--event-extra-text); }
 .dangerTone { background: color-mix(in srgb, var(--event-wicket) 12%, var(--surface)); color: var(--event-wicket); }
 
 .statGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: var(--space-3); }
