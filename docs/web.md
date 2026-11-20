@@ -67,7 +67,7 @@ In production the proxy serves the web app on the API's own address, so `VITE_AP
 1. In the repository's **Settings → Pages**, verify **Build and deployment → Source** is **GitHub Actions**.
 2. On the API host (Render), add `https://1-harshr.github.io` to `WEB_ORIGINS`, keeping any existing
    comma-separated entries, and redeploy the server. For a custom Pages domain, use that domain's origin.
-3. Select `main` under **Actions → Deploy web to GitHub Pages → Run workflow** to publish the site.
+3. Select `main` under **Actions → Deploy Web → Run workflow** to publish the site.
 
 The site URL is `https://1-harshr.github.io/DesiCrics/` by default. Pages links use paths like
 `/DesiCrics/#/m/<id>` so the static host can serve them on refresh. The frontend reads data from the

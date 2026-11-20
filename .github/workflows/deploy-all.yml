@@ -1,0 +1,24 @@
+name: Deploy All
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  dispatch:
+    name: Start server, Android, and web releases
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Start release workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/release-all.sh

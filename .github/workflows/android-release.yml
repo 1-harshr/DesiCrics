@@ -1,4 +1,4 @@
-name: Firebase App Distribution
+name: Deploy Android
 
 # Keep the workflow path so Android version codes continue from previous releases.
 on:
