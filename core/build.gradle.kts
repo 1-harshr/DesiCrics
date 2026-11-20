@@ -11,7 +11,10 @@ kotlin {
     // For the web app: an ES module with TypeScript definitions, called through WebCore (see docs/web.md).
     js {
         outputModuleName = "desicrics-core"
-        nodejs()
+        nodejs {
+            // Mocha stops a test after 2 s by default; replaying whole 20-over matches takes longer on CI runners.
+            testTask { useMocha { timeout = "30s" } }
+        }
         binaries.library()
         useEsModules()
         generateTypeScriptDefinitions()
