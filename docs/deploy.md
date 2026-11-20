@@ -105,6 +105,15 @@ the server and publishes the image as `ghcr.io/<owner>/desicrics-server`.
 2. Check `https://<host>/.well-known/assetlinks.json` lists the app's fingerprint.
 3. Sign in on a phone with the app built for that host, score a ball, and open the match link in a browser.
 
+## Release server, Android, and web together
+
+Once the manual workflows are on `main`, sign in with `gh auth login` using a GitHub account with
+write access to the repository. From the repo root, run `./scripts/release-all.sh`.
+
+The script starts **Server image**, **Firebase App Distribution**, and **Deploy web to GitHub Pages**
+on `main`. The runs can overlap. Check their results in **Actions**. If a launch fails, the script
+stops and any runs already started continue.
+
 ## Android releases
 
 Go to GitHub › Actions › Firebase App Distribution › Run workflow, select a branch containing
