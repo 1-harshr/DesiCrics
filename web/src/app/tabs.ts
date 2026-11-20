@@ -6,7 +6,6 @@ export function appTabs({ s }: ReturnType<typeof useText>): NavTab[] {
   return [
     { to: "/", label: s("tab_home"), icon: "home", selectedIcon: "home_filled" },
     { to: "/tournaments", label: s("home_tournaments"), icon: "emoji_events", selectedIcon: "emoji_events_filled" },
-    { to: "/leaderboards", label: s("home_leaderboards"), icon: "leaderboard", selectedIcon: "leaderboard" },
     { to: "/search", label: s("home_search"), icon: "search", selectedIcon: "search" },
   ];
 }

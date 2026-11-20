@@ -36,14 +36,14 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `web` branch
 | Icons | SVG generated from the app's Material Symbols vector drawables (`npm run icons`) | The same icon set without downloading it twice; a script keeps them in step |
 | Text | i18next. The app's `strings.xml` is copied to `src/i18n/app.generated.json` (`npm run strings`); web-only text is in `src/i18n/web.json` | Same words as the app and one translation for both. No literal UI text, same rule as the app |
 | Tests | Vitest and Testing Library | |
-| Hosting | Static files behind the existing Cloudflare proxy | One domain: shared `/m`, `/t` and `/join` links open the web app, API paths pass through to the server |
+| Hosting | Static files served by the existing Cloudflare proxy Worker | One domain: a browser loading a page gets the web app, so shared `/m`, `/t` and `/join` links open it; the app's API calls and WebSockets pass through to the server unchanged |
 
 ### Adapting to the web, not copying the phone
 
 - **Below 720px** it looks like the app: bottom navigation and one column.
 - **From 720px** navigation moves to a side rail and content centres at 600px, as on tablets.
-- **From 1100px** pages that have two things to show use two columns: scorecard and over-by-over, tournament
-  table and fixtures, a player's stats and their recent matches.
+- **From 1100px** pages that have two things to show use two columns: scorecard and over-by-over, fixtures
+  and the table, a player's stats and their recent matches.
 - Every link and control has hover and focus states.
 - Pages say "Get the app" once, in a banner that can be dismissed, for anyone who wants to score, follow or
   join.
@@ -58,6 +58,7 @@ npm run dev                     # builds :core with Gradle, then serves http://l
 ```
 
 Run the server with `WEB_ORIGINS=http://localhost:5173 ./gradlew :server:run` so the browser may call it.
+In production the proxy serves the web app on the API's own address, so `VITE_API_URL` is left empty there.
 `npm test` runs Vitest; `npm run build` typechecks and builds to `web/dist`. After changing the app's
 `strings.xml` or drawables, run `npm run strings` or `npm run icons`; CI fails if they're out of step.
 
@@ -71,11 +72,10 @@ only members or organisers see in the app.
 | ✅ CORS for the web app's origins (`WEB_ORIGINS`) | W0 |
 | ✅ `GET /public/matches/{id}`, `GET /public/tournaments/{id}` | W1 |
 | ✅ `/public/matches/{id}/live` WebSocket | W1 |
-| The proxy sends `/m/*`, `/t/*`, `/join/*` and the web app's own paths to the web app instead of the server's HTML pages | W1 |
+| ✅ The proxy serves the web app to browsers loading a page, and `/health` for uptime monitors | W1 |
 | Public match lists (live, recent, upcoming, by city), tournament lists, search | W2 |
 | Public team and player pages, player stats | W2 |
-| Public leaderboards, rankings, directory and "looking for" posts | W3 |
-| Public auction feed for watching | W4 |
+| Public auction feed for watching | W3 |
 
 ---
 
@@ -103,12 +103,13 @@ scorecard in the browser with `:core`.
 **Goal:** a shared match or tournament link opens a live, good-looking page in any browser.
 
 - ✅ Server: public match and tournament JSON, public live feed
-- ⬜ Match page `/m/:id`: score header, Live / Scorecard / Overs tabs, updates every ball; two columns on desktop
-- ⬜ Tournament page `/t/:id`: champion, points tables, fixtures, key stats
-- ⬜ Join page `/join/:code`: how to join the team in the app
-- ⬜ Not found and offline states
-- ⬜ "Get the app" banner
-- ⬜ Hosting and proxy routing
+- ✅ Match page `/m/:id`: score header, Live / Scorecard / Overs tabs, updates every ball; two columns on desktop
+- ✅ Tournament page `/t/:id`: champion, points tables, fixtures, key stats
+- ✅ Join page `/join/:code`: how to join the team in the app
+- ✅ Not found and offline states
+- ✅ "Get the app" banner
+- ✅ Hosting: the proxy Worker serves `web/dist` to browsers loading a page and passes everything else to the
+  server ([deploy.md](deploy.md#the-permanent-address)). Not deployed yet
 
 **Exit:** a match link sent on WhatsApp opens the live scorecard on an iPhone, and it updates ball by ball.
 
@@ -124,18 +125,7 @@ scorecard in the browser with `:core`.
 
 **Exit:** a parent searches for their child's team, opens it, and follows its live match.
 
-## Phase W3 · Stats and community
-
-**Goal:** the numbers and listings people like to look up.
-
-- ⬜ Leaderboards by city, tournament and season
-- ⬜ Team and player rankings by city
-- ⬜ Compare two players
-- ⬜ Directory of grounds, umpires and scorers, and "looking for" posts, to read
-
-**Exit:** the city's top run-scorers and the team rankings open from a link with no app.
-
-## Phase W4 · Big screen
+## Phase W3 · Big screen
 
 **Goal:** the things a browser does better than a phone.
 
