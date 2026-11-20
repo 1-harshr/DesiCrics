@@ -44,6 +44,10 @@ import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.designsystem.theme.DesiThemeSpec
 import com.harsh.desicrics.designsystem.theme.DesiThemes
 import com.harsh.desicrics.data.ThemePreference
+import com.harsh.desicrics.data.AppMode
+import com.harsh.desicrics.data.ModePreference
+import com.harsh.desicrics.shell.AppModeSheet
+import com.harsh.desicrics.shell.label
 import com.harsh.desicrics.model.BattingStyle
 import com.harsh.desicrics.model.BowlingStyle
 import com.harsh.desicrics.model.PlayerRole
@@ -75,7 +79,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 private enum class ProfileTab { ABOUT, STATS, MATCHES, TEAMS }
 
-private enum class SettingsSheet { THEME, CLAIM, SUPPORT, DELETE }
+private enum class SettingsSheet { THEME, MODE, CLAIM, SUPPORT, DELETE }
 
 @Composable
 fun ProfileScreen(
@@ -90,6 +94,8 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val themes = koinInject<ThemePreference>()
+    val modes = koinInject<ModePreference>()
+    val mode by modes.mode.collectAsStateWithLifecycle()
     var sheet by rememberSaveable { mutableStateOf<SettingsSheet?>(null) }
     // Coming back from a team the user left or renamed, or a match they played.
     LifecycleResumeEffect(Unit) {
@@ -116,10 +122,12 @@ fun ProfileScreen(
         },
         stats = { CareerSection(profile.uid, onCompare = onCompare, name = profile.name, onOpenMatch = onOpenMatch, heading = false, isMe = true) },
         onRetry = viewModel::refresh,
+        mode = mode,
     )
     when (sheet) {
         null -> Unit
         SettingsSheet.THEME -> ThemeSheet(onSelect = themes::select, onDismiss = close)
+        SettingsSheet.MODE -> AppModeSheet(mode, onSelect = { close(); modes.select(it) }, onDismiss = close)
         SettingsSheet.CLAIM -> ClaimSheet(state, onClaim = viewModel::claimByCode, onDismiss = close)
         SettingsSheet.SUPPORT -> SupportSheet(state, onSend = { category, message -> viewModel.contactSupport(category, message) }, onDismiss = close)
         SettingsSheet.DELETE -> DeleteAccountSheet(state, onDelete = { viewModel.deleteAccount(onSignOut) }, onDismiss = close)
@@ -139,6 +147,7 @@ private fun ProfileContent(
     onSettings: (SettingsSheet) -> Unit,
     stats: @Composable () -> Unit = {},
     onRetry: () -> Unit = {},
+    mode: AppMode = AppMode.FULL,
 ) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
@@ -187,7 +196,7 @@ private fun ProfileContent(
             ProfileTab.ABOUT -> AboutTab(profile, onEdit, onSignOut, onSettings = {
                 claiming = null
                 onSettings(it)
-            })
+            }, mode = mode)
             ProfileTab.STATS -> stats()
             ProfileTab.MATCHES -> ListTab(state.matches, Res.string.profile_no_matches, state.loadFailed, DesiIcons.History, onRetry) { matches ->
                 Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
@@ -202,7 +211,7 @@ private fun ProfileContent(
 }
 
 @Composable
-private fun AboutTab(profile: UserProfile, onEdit: () -> Unit, onSignOut: () -> Unit, onSettings: (SettingsSheet) -> Unit) {
+private fun AboutTab(profile: UserProfile, onEdit: () -> Unit, onSignOut: () -> Unit, onSettings: (SettingsSheet) -> Unit, mode: AppMode) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
     val empty = stringResource(Res.string.common_empty_value)
@@ -232,6 +241,13 @@ private fun AboutTab(profile: UserProfile, onEdit: () -> Unit, onSignOut: () -> 
                 subtitle = stringResource(DesiTheme.spec.name),
                 leading = { MotifTile(DesiTheme.motifs.ball) },
                 onClick = { onSettings(SettingsSheet.THEME) },
+            )
+            ListRow(
+                stringResource(Res.string.mode_title),
+                subtitle = stringResource(mode.label),
+                leading = { IconTile(DesiIcons.Swap) },
+                divider = true,
+                onClick = { onSettings(SettingsSheet.MODE) },
             )
             ListRow(stringResource(Res.string.profile_claim), leading = { IconTile(DesiIcons.Badge) }, divider = true, onClick = { onSettings(SettingsSheet.CLAIM) })
             ListRow(stringResource(Res.string.profile_support), leading = { IconTile(DesiIcons.Support) }, divider = true, onClick = { onSettings(SettingsSheet.SUPPORT) })

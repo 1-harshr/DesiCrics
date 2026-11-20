@@ -6,7 +6,6 @@ import androidx.compose.material3.TextButton
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.StringResource
 import com.harsh.desicrics.util.format2
-import com.harsh.desicrics.ui.match.label
 import com.harsh.desicrics.model.WinRecord
 import com.harsh.desicrics.model.TeamInsights
 import com.harsh.desicrics.model.PhaseStat

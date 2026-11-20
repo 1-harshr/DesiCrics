@@ -9,6 +9,7 @@ import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.data.StatsRepository
 import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.data.ThemePreference
+import com.harsh.desicrics.data.ModePreference
 import com.harsh.desicrics.data.TournamentRepository
 import com.harsh.desicrics.data.UserRepository
 import com.harsh.desicrics.data.api.DesiCricsApi
@@ -82,6 +83,7 @@ val dataModule = module {
     singleOf(::AuctionRepository)
     singleOf(::CityRepository)
     single { ThemePreference(Settings()) }
+    single { ModePreference(Settings()) }
 }
 
 val viewModelModule = module {
