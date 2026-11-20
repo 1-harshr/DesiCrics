@@ -49,6 +49,8 @@ interface MatchStore {
     suspend fun forPlayer(profileId: String, limit: Int): List<Match>
     /** Matches the saved team played or is due to play, newest first. */
     suspend fun forTeam(teamId: String, limit: Int): List<Match>
+    /** Every completed match the saved team played, without rosters, newest first. */
+    suspend fun completedForTeamSummaries(teamId: String): List<Match>
 
     /** A tournament's fixtures (without rosters), by round. */
     suspend fun forTournament(tournamentId: String): List<Match>
@@ -226,6 +228,8 @@ interface TournamentStore {
     suspend fun open(city: String, now: Long, limit: Int): List<TournamentSummary>
     /** Every tournament in [city] (any case) unless it's blank, newest first, with whether it started and finished. */
     suspend fun browse(city: String, limit: Int): List<TournamentSummary>
+    /** Tournaments whose name contains [query] (any case), newest first, as [browse] describes them. */
+    suspend fun search(query: String, limit: Int): List<TournamentSummary>
     /** False if the team was already entered. */
     suspend fun addTeam(tournamentId: String, team: TournamentTeam): Boolean
     suspend fun setTeamStatus(tournamentId: String, teamId: String, status: EntryStatus)

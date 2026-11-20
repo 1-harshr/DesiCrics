@@ -27,7 +27,10 @@ fun Route.publicBrowseRoutes(social: SocialService, teams: TeamService, tourname
             call.respond(social.publicPage(q["status"], q["before"], q["id"], q["city"].orEmpty()).map { it.forPublic() })
         }
         get("/tournaments") { call.respond(tournaments.browse(call.request.queryParameters["city"].orEmpty())) }
-        get("/search") { call.respond(social.search(call.request.queryParameters["q"].orEmpty()).forPublic()) }
+        get("/search") {
+            val query = call.request.queryParameters["q"].orEmpty()
+            call.respond(social.search(query).forPublic().copy(tournaments = tournaments.search(query)))
+        }
         get("/teams/{id}") { call.respond(teams.publicPage(call.parameters["id"].orEmpty()).forPublic()) }
         get("/players/{id}") { call.respond(social.publicPlayerPage(call.parameters["id"].orEmpty()).forPublic()) }
         get("/players/{id}/stats") {

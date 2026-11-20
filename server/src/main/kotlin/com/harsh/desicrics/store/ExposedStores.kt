@@ -142,6 +142,13 @@ class ExposedMatchStore(private val db: Database) : MatchStore {
             .map { it.toMatch(players = emptyList()) }
     }
 
+    override suspend fun completedForTeamSummaries(teamId: String): List<Match> = db.query {
+        MatchesTable.selectAll()
+            .where { ((MatchesTable.teamAId eq teamId) or (MatchesTable.teamBId eq teamId)) and (MatchesTable.status eq MatchStatus.COMPLETED) }
+            .orderBy(MatchesTable.createdAt to SortOrder.DESC, MatchesTable.id to SortOrder.DESC)
+            .map { it.toMatch(players = emptyList()) }
+    }
+
     override suspend fun forPlayer(profileId: String, limit: Int): List<Match> = db.query {
         val played = MatchPlayersTable.select(MatchPlayersTable.matchId).where { MatchPlayersTable.profileId eq profileId }
         MatchesTable.selectAll()

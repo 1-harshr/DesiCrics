@@ -26,11 +26,13 @@ import com.harsh.desicrics.model.TournamentTeam
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import org.jetbrains.exposed.v1.core.JoinType
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.greater
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.like
 import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.lessEq
@@ -188,20 +190,36 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
     }
 
     override suspend fun browse(city: String, limit: Int): List<TournamentSummary> = db.query {
-        val rows = TournamentsTable.selectAll()
-            .apply { if (city.isNotBlank()) where { TournamentsTable.city.lowerCase() eq city.trim().lowercase() } }
-            .orderBy(TournamentsTable.startsAt to SortOrder.DESC_NULLS_FIRST, TournamentsTable.createdAt to SortOrder.DESC)
-            .limit(limit)
-            .toList()
+        summaries(
+            TournamentsTable.selectAll()
+                .apply { if (city.isNotBlank()) where { TournamentsTable.city.lowerCase() eq city.trim().lowercase() } }
+                .orderBy(TournamentsTable.startsAt to SortOrder.DESC_NULLS_FIRST, TournamentsTable.createdAt to SortOrder.DESC)
+                .limit(limit)
+                .toList(),
+        )
+    }
+
+    override suspend fun search(query: String, limit: Int): List<TournamentSummary> = db.query {
+        summaries(
+            TournamentsTable.selectAll()
+                .where { TournamentsTable.name.lowerCase() like "%${query.trim().lowercase().escapeLike()}%" }
+                .orderBy(TournamentsTable.createdAt, SortOrder.DESC)
+                .limit(limit)
+                .toList(),
+        )
+    }
+
+    /** Public summaries of tournament [rows]: confirmed teams, and whether each has started and finished. */
+    private fun summaries(rows: List<ResultRow>): List<TournamentSummary> {
         val ids = rows.map { it[TournamentsTable.id] }
-        if (ids.isEmpty()) return@query emptyList()
+        if (ids.isEmpty()) return emptyList()
         val counts = TournamentTeamsTable.selectAll()
             .where { (TournamentTeamsTable.tournamentId inList ids) and (TournamentTeamsTable.status eq EntryStatus.CONFIRMED) }
             .groupingBy { it[TournamentTeamsTable.tournamentId] }.eachCount()
         val fixtures = MatchesTable.select(MatchesTable.tournamentId, MatchesTable.status)
             .where { MatchesTable.tournamentId inList ids }
             .groupBy({ it[MatchesTable.tournamentId]!! }, { it[MatchesTable.status] })
-        rows.map {
+        return rows.map {
             val id = it[TournamentsTable.id]
             val started = it[TournamentsTable.started]
             // The next round is made as soon as one ends, so no unfinished fixture left means it's over.
