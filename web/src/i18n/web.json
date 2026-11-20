@@ -25,5 +25,12 @@
   "web_match_tournament_link": "See the tournament",
   "web_tournament_missing_title": "This tournament isn't here",
   "web_tournament_not_started": "The organisers haven't made the fixtures yet.",
-  "web_tournament_enter_in_app": "Entering is done in the DesiCrics app."
+  "web_tournament_enter_in_app": "Entering is done in the DesiCrics app.",
+  "web_join_title": "You're invited to a team",
+  "web_join_body": "Teams are joined in the DesiCrics app, with this code.",
+  "web_join_copy": "Copy code",
+  "web_join_copied": "Code copied",
+  "web_join_step_install": "Get DesiCrics for Android",
+  "web_join_step_open": "Open Teams and tap Join with a code",
+  "web_join_step_enter": "Enter the code"
 }

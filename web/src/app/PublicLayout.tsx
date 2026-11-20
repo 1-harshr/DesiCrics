@@ -4,7 +4,7 @@ import { GhostButton, Icon, PrimaryButton } from "@/designsystem/components";
 import { useText } from "@/i18n";
 import styles from "./PublicLayout.module.css";
 
-const playStoreUrl = import.meta.env.VITE_PLAY_STORE_URL || "https://play.google.com/store/apps/details?id=com.harsh.desicrics";
+export const playStoreUrl = import.meta.env.VITE_PLAY_STORE_URL || "https://play.google.com/store/apps/details?id=com.harsh.desicrics";
 const dismissedKey = "desicrics.getAppDismissed";
 
 function readDismissed(): boolean {

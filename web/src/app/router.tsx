@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet } from "react-router";
 import { AppShell } from "@/designsystem/components";
 import { CataloguePage } from "@/features/catalogue/CataloguePage";
+import { JoinPage } from "@/features/join/JoinPage";
 import { MatchPage } from "@/features/match/MatchPage";
 import { NotFoundPage } from "@/features/system/NotFoundPage";
 import { TournamentPage } from "@/features/tournament/TournamentPage";
@@ -28,5 +29,6 @@ export const router = createBrowserRouter([
   // Shared links: the same paths the app and the server's old pages use.
   { path: "/m/:matchId", element: <MatchPage /> },
   { path: "/t/:tournamentId", element: <TournamentPage /> },
+  { path: "/join/:code", element: <JoinPage /> },
   { path: "*", element: <NotFoundPage /> },
 ]);
