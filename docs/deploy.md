@@ -82,7 +82,8 @@ fly deploy --config fly.toml --dockerfile server/Dockerfile server
 
 Free, but the web service sleeps after about 15 minutes without traffic (the next request waits about a minute) and the free Postgres expires after 30 days. Fine for trying the app with a few people; not for a live Sunday.
 
-Render can't build the image itself (no Android SDK), so `.github/workflows/server-image.yml` builds it on every push to `main` that touches the server and publishes it as `ghcr.io/<owner>/desicrics-server`.
+For each release, select `main` under **Actions → Server image → Run workflow**. The workflow builds
+the server and publishes the image as `ghcr.io/<owner>/desicrics-server`.
 
 1. **Postgres:** New › Postgres, Free, region Singapore (the closest to India). From its Connections section, note the *internal* hostname, database, user and password.
 2. **Image:** run the Server image workflow once (Actions › Server image › Run workflow), then make the package public (GitHub › Packages › desicrics-server › Package settings), or give Render a GitHub token as registry credentials.
@@ -93,7 +94,8 @@ Render can't build the image itself (no Android SDK), so `.github/workflows/serv
    - `FIREBASE_SERVICE_ACCOUNT` as a secret file, for push (optional)
    
    Render sets `PORT`, and the health check path is `/`.
-4. **Redeploys:** copy the service's Deploy Hook URL into the `RENDER_DEPLOY_HOOK` repository secret, so each new image deploys itself.
+4. **Redeploys:** copy the service's Deploy Hook URL into the `RENDER_DEPLOY_HOOK` repository secret
+   so the manually started workflow deploys the image to Render after publishing it.
 5. Set `BACKEND_URL` in `proxy/wrangler.jsonc` to `https://<service>.onrender.com` and deploy the proxy (see [The permanent address](#the-permanent-address)).
 6. **Keep it awake:** in [UptimeRobot](https://uptimerobot.com) (free), add an HTTP(s) monitor for `https://desicrics-api.desicrics-proxy.workers.dev/health` every 5 minutes, which checks the proxy and the server together. The server then never sleeps, and Render's free 750 hours a month cover one service running all month. Without it, the app still copes: it wakes the server as it opens and waits up to 75 s for the first answer.
 
@@ -102,6 +104,15 @@ Render can't build the image itself (no Android SDK), so `.github/workflows/serv
 1. Open `https://<host>/` and check it answers "DesiCrics API".
 2. Check `https://<host>/.well-known/assetlinks.json` lists the app's fingerprint.
 3. Sign in on a phone with the app built for that host, score a ball, and open the match link in a browser.
+
+## Release server, Android, and web together
+
+Once the manual workflows are on `main`, sign in with `gh auth login` using a GitHub account with
+write access to the repository. From the repo root, run `./scripts/release-all.sh`.
+
+The script starts **Server image**, **Firebase App Distribution**, and **Deploy web to GitHub Pages**
+on `main`. The runs can overlap. Check their results in **Actions**. If a launch fails, the script
+stops and any runs already started continue.
 
 ## Android releases
 
