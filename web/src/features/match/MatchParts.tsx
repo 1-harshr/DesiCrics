@@ -1,10 +1,22 @@
 import { useState } from "react";
-import type { Match, Team } from "@/api/types";
+import { Link } from "react-router";
+import type { Match, Player, Team } from "@/api/types";
 import type { InningsView, ScorecardView } from "@/core";
 import { Avatar, Card, EmptyState, Icon, ListCard, ListRow, OverStrip, SectionLabel, Tag } from "@/designsystem/components";
 import { useText, type StringKey } from "@/i18n";
 import styles from "./MatchPage.module.css";
 import { format2, useMatchText } from "./text";
+
+/** A player's name, linking to their page when they're more than a guest typed in for one match. */
+function PlayerName({ player }: { player: Player }) {
+  return player.profileId ? (
+    <Link to={`/players/${player.profileId}`} className={styles.playerLink}>
+      {player.name}
+    </Link>
+  ) : (
+    <>{player.name}</>
+  );
+}
 
 const inningsName = (number: number): StringKey => (number === 1 ? "match_innings_first" : "match_innings_second");
 
@@ -101,7 +113,9 @@ function InningsCard({ innings }: { innings: InningsView }) {
               {innings.batters.map((b) => (
                 <tr key={b.player.id}>
                   <td>
-                    <div className={b.isOut ? undefined : styles.notOut}>{b.player.name}</div>
+                    <div className={b.isOut ? undefined : styles.notOut}>
+                      <PlayerName player={b.player} />
+                    </div>
                     <div className={styles.howOut}>{dismissalText(b)}</div>
                   </td>
                   <td className={styles.strong}>{b.runs}</td>
@@ -137,7 +151,9 @@ function InningsCard({ innings }: { innings: InningsView }) {
             <tbody>
               {innings.bowlers.map((b) => (
                 <tr key={b.player.id}>
-                  <td>{b.player.name}</td>
+                  <td>
+                    <PlayerName player={b.player} />
+                  </td>
                   <td>{b.oversText}</td>
                   <td>{b.maidens}</td>
                   <td>{b.runs}</td>

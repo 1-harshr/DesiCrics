@@ -56,6 +56,7 @@
 .table th:last-child, .table td:last-child { padding-right: var(--space-4); }
 .table th:first-child { font-size: 12px; line-height: 16px; }
 .notOut { font-weight: 600; }
+.playerLink:hover { color: var(--brand); text-decoration: underline; }
 .howOut { color: var(--muted); font: 400 13px/18px var(--font-body); }
 .strong { font-weight: 700; color: var(--ink); }
 .inningsFoot { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--line); font: 400 14px/20px var(--font-body); }

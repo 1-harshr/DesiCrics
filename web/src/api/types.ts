@@ -185,3 +185,130 @@ export interface TournamentDetails {
   /** Value is tenths of an MVP point. */
   playerOfTournament?: StatLeader | null;
 }
+
+export type PlayerRole = "BATTER" | "BOWLER" | "ALL_ROUNDER" | "WICKET_KEEPER";
+export type TeamRole = "ADMIN" | "MEMBER";
+export type FormatFilter = "ALL" | "SHORT" | "T20" | "LONG";
+
+export interface PlayerSummary {
+  profileId: string;
+  name: string;
+  city?: string;
+  role?: PlayerRole | null;
+  isPlaceholder?: boolean;
+  photoUrl?: string | null;
+}
+
+export interface TeamSummary {
+  id: string;
+  name: string;
+  city: string;
+  memberCount: number;
+  logoUrl?: string | null;
+}
+
+export interface TeamMember {
+  player: PlayerSummary;
+  role: TeamRole;
+}
+
+export interface SavedTeam {
+  id: string;
+  name: string;
+  city: string;
+  members: TeamMember[];
+  logoUrl?: string | null;
+}
+
+export interface PublicTeamPage {
+  team: SavedTeam;
+  /** Newest first. */
+  matches?: Match[];
+}
+
+export interface PlayerPage {
+  player: PlayerSummary;
+  teams?: TeamSummary[];
+  matches?: Match[];
+  followers?: number;
+}
+
+export interface TodayFeed {
+  live?: Match[];
+  upcoming?: Match[];
+  recent?: Match[];
+}
+
+export interface SearchResults {
+  teams?: TeamSummary[];
+  players?: PlayerSummary[];
+  matches?: Match[];
+}
+
+export interface TournamentSummary {
+  id: string;
+  name: string;
+  city: string;
+  format: TournamentFormat;
+  teams: number;
+  startsAt?: number | null;
+  started?: boolean;
+  finished?: boolean;
+}
+
+export interface BattingStats {
+  innings?: number;
+  notOuts?: number;
+  runs?: number;
+  balls?: number;
+  fours?: number;
+  sixes?: number;
+  highest?: number;
+  highestNotOut?: boolean;
+  fifties?: number;
+  hundreds?: number;
+}
+
+export interface BowlingStats {
+  innings?: number;
+  balls?: number;
+  runs?: number;
+  wickets?: number;
+  maidens?: number;
+  bestWickets?: number;
+  bestRuns?: number;
+}
+
+export interface FormEntry {
+  matchId: string;
+  playedAt: number;
+  runs: number;
+  notOut: boolean;
+  wickets: number;
+  batted: boolean;
+}
+
+export type Badge =
+  | "FIRST_FIFTY"
+  | "CENTURY"
+  | "FIVE_WICKET_HAUL"
+  | "RUNS_500"
+  | "RUNS_1000"
+  | "WICKETS_25"
+  | "WICKETS_50"
+  | "MATCHES_25"
+  | "MATCHES_50"
+  | "PLAYER_OF_THE_MATCH";
+
+export interface CareerStats {
+  profileId: string;
+  matches?: number;
+  won?: number;
+  batting?: BattingStats;
+  bowling?: BowlingStats;
+  fielding?: { catches?: number; runOuts?: number; stumpings?: number };
+  mvpTenths?: number;
+  playerOfTheMatch?: number;
+  form?: FormEntry[];
+  badges?: Badge[];
+}

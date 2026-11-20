@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router";
-import { GetAppBanner, PublicLayout } from "@/app/PublicLayout";
+import { GetAppBanner } from "@/app/GetApp";
 import { ApiError } from "@/api/client";
 import type { Match } from "@/api/types";
 import type { ScorecardView } from "@/core";
@@ -23,15 +23,15 @@ export function MatchPage() {
 
   if (live.isLoading) {
     return (
-      <PublicLayout>
+      <>
         <Loading />
-      </PublicLayout>
+      </>
     );
   }
   if (!live.details || !live.scorecard) {
     const missing = live.error instanceof ApiError && live.error.isNotFound;
     return (
-      <PublicLayout>
+      <>
         <Page>
           <ErrorState
             missing={missing}
@@ -40,7 +40,7 @@ export function MatchPage() {
             onRetry={missing ? undefined : live.retry}
           />
         </Page>
-      </PublicLayout>
+      </>
     );
   }
   return <MatchView match={live.details.match} card={live.scorecard} isStale={live.isStale} reconnecting={live.reconnecting} onRetry={live.retry} />;
@@ -78,7 +78,7 @@ function MatchView({ match, card, isStale, reconnecting, onRetry }: { match: Mat
   const firstInnings = card.innings.length > 1 ? card.innings[0] : undefined;
 
   return (
-    <PublicLayout>
+    <>
       <Page wide>
         <Hero
           bar={
@@ -159,6 +159,6 @@ function MatchView({ match, card, isStale, reconnecting, onRetry }: { match: Mat
         <GetAppBanner />
       </Page>
       {toast}
-    </PublicLayout>
+    </>
   );
 }

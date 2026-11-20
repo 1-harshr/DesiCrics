@@ -1,8 +1,8 @@
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { GhostButton, Icon, PrimaryButton } from "@/designsystem/components";
 import { useText } from "@/i18n";
-import styles from "./PublicLayout.module.css";
+import styles from "./GetApp.module.css";
 
 export const playStoreUrl = import.meta.env.VITE_PLAY_STORE_URL || "https://play.google.com/store/apps/details?id=com.harsh.desicrics";
 const dismissedKey = "desicrics.getAppDismissed";
@@ -45,22 +45,19 @@ export function GetAppBanner() {
   );
 }
 
-/** Frame for pages opened from a shared link: no tabs, just the brand back to the home page. */
-export function PublicLayout({ children }: { children: ReactNode }) {
+/** The bar above every page: the brand on phones (the rail has it from 720px) and a way to the app. */
+export function TopBar() {
   const { s } = useText();
   return (
-    <div className={styles.frame}>
-      <header className={styles.top}>
-        <Link to="/" className={styles.brand}>
-          <img src="/icon.svg" alt="" />
-          <span>{s("web_brand")}</span>
-        </Link>
-        <a href={playStoreUrl} target="_blank" rel="noreferrer" className={styles.topLink}>
-          {s("web_get_app_action")}
-          <Icon name="north_east" size={18} />
-        </a>
-      </header>
-      {children}
-    </div>
+    <header className={styles.top}>
+      <Link to="/" className={styles.brand}>
+        <img src="/icon.svg" alt="" />
+        <span>{s("web_brand")}</span>
+      </Link>
+      <a href={playStoreUrl} target="_blank" rel="noreferrer" className={styles.topLink}>
+        {s("web_get_app_action")}
+        <Icon name="north_east" size={18} />
+      </a>
+    </header>
   );
 }

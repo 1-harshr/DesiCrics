@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router";
-import { playStoreUrl, PublicLayout } from "@/app/PublicLayout";
+import { playStoreUrl } from "@/app/GetApp";
 import { Card, IconTile, Page, PrimaryButton, TonalButton } from "@/designsystem/components";
 import { useText } from "@/i18n";
 import styles from "./JoinPage.module.css";
@@ -25,7 +25,7 @@ export function JoinPage() {
   };
 
   return (
-    <PublicLayout>
+    <>
       <Page>
         <Card className={styles.card}>
           <IconTile icon="group_add" />
@@ -47,6 +47,6 @@ export function JoinPage() {
           </PrimaryButton>
         </Card>
       </Page>
-    </PublicLayout>
+    </>
   );
 }

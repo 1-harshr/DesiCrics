@@ -32,5 +32,22 @@
   "web_join_copied": "Code copied",
   "web_join_step_install": "Get DesiCrics for Android",
   "web_join_step_open": "Open Teams and tap Join with a code",
-  "web_join_step_enter": "Enter the code"
+  "web_join_step_enter": "Enter the code",
+  "web_city_label": "City",
+  "web_city_placeholder": "All cities",
+  "web_city_clear": "Show every city",
+  "web_home_title": "Cricket, live",
+  "web_home_empty_body": "Try another city, or clear it to see matches everywhere.",
+  "web_tournaments_live": "Under way",
+  "web_tournaments_upcoming": "Coming up",
+  "web_tournaments_finished": "Finished",
+  "web_tournaments_empty_body": "Try another city, or clear it to see tournaments everywhere.",
+  "web_search_prompt": "Type at least two letters.",
+  "web_search_clear": "Clear search",
+  "web_team_missing_title": "This team isn't here",
+  "web_player_missing_title": "This player isn't here",
+  "web_team_recent": "Latest matches",
+  "web_player_stats_failed": "Stats didn't load",
+  "web_team_share": "Share team",
+  "web_player_share": "Share player"
 }

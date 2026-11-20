@@ -1,6 +1,16 @@
 // Tournament wording, as the app's ui/tournament/TournamentLabels.kt.
-import type { FixtureInfo } from "@/api/types";
-import type { useText } from "@/i18n";
+import type { FixtureInfo, TournamentFormat } from "@/api/types";
+import type { StringKey, useText } from "@/i18n";
+
+export const formatLabel: Record<TournamentFormat, StringKey> = {
+  KNOCKOUT: "format_knockout",
+  ROUND_ROBIN: "format_round_robin",
+  GROUPS_KNOCKOUT: "format_groups_knockout",
+  BOX_LEAGUE: "format_box_league",
+  DOUBLE_OUT: "format_double_out",
+  BEST_OF_THREE: "format_best_of_three",
+  CUSTOM: "format_custom",
+};
 
 /** Groups are lettered: 0 is "A". */
 export const groupName = (group: number) => String.fromCharCode(65 + group);

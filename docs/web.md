@@ -125,14 +125,4 @@ scorecard in the browser with `:core`.
 
 **Exit:** a parent searches for their child's team, opens it, and follows its live match.
 
-## Phase W3 · Big screen
-
-**Goal:** the things a browser does better than a phone.
-
-- ⬜ Big-screen scorecard for a projector or TV, readable from across the ground
-- ⬜ Auction hall to watch, with the player up, bids and purses
-- ⬜ Stream overlay moved from the server's page into the web app
-- ⬜ Themes from Phase 8
-- ⬜ Installable (web app manifest)
-
 **Exit:** a live match and an auction both run on a projector from the web app.

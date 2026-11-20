@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useParams } from "react-router";
-import { GetAppBanner, PublicLayout } from "@/app/PublicLayout";
+import { GetAppBanner } from "@/app/GetApp";
 import { api, ApiError } from "@/api/client";
-import type { Match, PointsRow, StatLeader, TournamentDetails, TournamentFormat } from "@/api/types";
+import type { Match, PointsRow, StatLeader, TournamentDetails } from "@/api/types";
 import {
   Avatar,
   Card,
@@ -27,21 +27,12 @@ import { MatchListCard } from "@/features/match/MatchListCard";
 import { format2 } from "@/features/match/text";
 import { useShare } from "@/features/match/useShare";
 import { useText, type StringKey } from "@/i18n";
-import { groupName, stageText } from "./text";
+import { formatLabel, groupName, stageText } from "./text";
 import styles from "./TournamentPage.module.css";
 
 /** Refreshes this often while a fixture is live, so tables and results keep up. */
 const LIVE_REFRESH_MS = 30_000;
 
-const formatLabel: Record<TournamentFormat, StringKey> = {
-  KNOCKOUT: "format_knockout",
-  ROUND_ROBIN: "format_round_robin",
-  GROUPS_KNOCKOUT: "format_groups_knockout",
-  BOX_LEAGUE: "format_box_league",
-  DOUBLE_OUT: "format_double_out",
-  BEST_OF_THREE: "format_best_of_three",
-  CUSTOM: "format_custom",
-};
 
 type Tab = "fixtures" | "table" | "teams" | "stats";
 
@@ -57,15 +48,15 @@ export function TournamentPage() {
 
   if (query.isPending) {
     return (
-      <PublicLayout>
+      <>
         <Loading />
-      </PublicLayout>
+      </>
     );
   }
   if (!query.data) {
     const missing = query.error instanceof ApiError && query.error.isNotFound;
     return (
-      <PublicLayout>
+      <>
         <Page>
           <ErrorState
             missing={missing}
@@ -74,7 +65,7 @@ export function TournamentPage() {
             onRetry={missing ? undefined : () => void query.refetch()}
           />
         </Page>
-      </PublicLayout>
+      </>
     );
   }
   return <TournamentView details={query.data} />;
@@ -108,14 +99,14 @@ function TournamentView({ details }: { details: TournamentDetails }) {
       {confirmed.length === 0 ? (
         <EmptyState icon="groups" title={s("new_match_no_teams")} />
       ) : (
-        confirmed.map((team) => <ListRow key={team.teamId} leading={<Avatar name={team.name} size={40} />} title={team.name} subtitle={team.group != null && (t.groups ?? 1) > 1 ? s("tournament_group", groupName(team.group)) : undefined} />)
+        confirmed.map((team) => <ListRow key={team.teamId} to={`/teams/${team.teamId}`} leading={<Avatar name={team.name} size={40} />} title={team.name} subtitle={team.group != null && (t.groups ?? 1) > 1 ? s("tournament_group", groupName(team.group)) : undefined} />)
       )}
     </ListCard>
   );
   const statsView = <Stats details={details} />;
 
   return (
-    <PublicLayout>
+    <>
       <Page wide>
         <Hero
           bar={
@@ -197,7 +188,7 @@ function TournamentView({ details }: { details: TournamentDetails }) {
         <GetAppBanner />
       </Page>
       {toast}
-    </PublicLayout>
+    </>
   );
 }
 
@@ -346,6 +337,7 @@ function Stats({ details }: { details: TournamentDetails }) {
               {leaders.map((leader, index) => (
                 <ListRow
                   key={`${leader.name}-${index}`}
+                  to={leader.profileId ? `/players/${leader.profileId}` : undefined}
                   leading={<Avatar name={leader.name} size={40} />}
                   title={leader.name}
                   subtitle={leader.team}

@@ -1,0 +1,3 @@
+.filter { max-width: 420px; }
+.banner { margin-top: var(--space-4); }
+.more { display: flex; justify-content: center; margin-top: var(--space-4); }
