@@ -68,8 +68,10 @@ import com.harsh.desicrics.designsystem.component.SectionHeader
 import com.harsh.desicrics.designsystem.component.SegmentedControl
 import com.harsh.desicrics.designsystem.component.WagonWheel
 import com.harsh.desicrics.designsystem.component.TonalButton
+import com.harsh.desicrics.designsystem.component.themeSurface
 import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
+import com.harsh.desicrics.designsystem.theme.SurfaceArea
 import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.ExtraType
@@ -463,7 +465,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
     }.joinToString(" · ")
     if (compact) {
         Column(
-            Modifier.fillMaxWidth().background(colors.brandStrong)
+            Modifier.fillMaxWidth().background(colors.brandStrong).themeSurface(SurfaceArea.Scoreboard)
                 .padding(start = DesiTheme.space.screen, end = DesiTheme.space.screen, bottom = DesiTheme.space.s3),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -510,7 +512,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
         return
     }
     Column(
-        Modifier.fillMaxWidth().background(colors.brandStrong)
+        Modifier.fillMaxWidth().background(colors.brandStrong).themeSurface(SurfaceArea.Scoreboard)
             .padding(start = DesiTheme.space.screen, end = DesiTheme.space.screen, bottom = DesiTheme.space.s5),
         verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s1),
     ) {

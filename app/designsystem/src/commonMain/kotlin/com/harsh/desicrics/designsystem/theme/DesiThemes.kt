@@ -6,6 +6,8 @@ object DesiThemes {
 
     val all: List<DesiThemeSpec> = listOf(
         ClassicTheme,
+        FloodlightsTheme,
+        GullyTheme,
     )
 
     /** The theme saved as [id], or [default] when nothing is saved or that theme no longer ships. */
