@@ -44,3 +44,6 @@ app/androidApp/release/
 
 # Wrangler state for the proxy Worker
 .wrangler/
+
+# Release signing passwords (see docs/deploy.md)
+*.keystore.properties
