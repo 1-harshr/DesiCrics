@@ -125,6 +125,8 @@ internal sealed interface TournamentSheet {
     /** Add a player to the pool ([teamId] null) or to a team's squad. */
     data class AddPlayer(val teamId: String?) : TournamentSheet
     data class PlacePlayer(val entry: TournamentPlayer) : TournamentSheet
+    /** A team's admin asks a pool player to join one of their teams. */
+    data class AskPlayer(val entry: TournamentPlayer) : TournamentSheet
     data object AddOrganiser : TournamentSheet
     data object AddFixture : TournamentSheet
     data class Schedule(val match: Match) : TournamentSheet
@@ -185,6 +187,10 @@ fun TournamentScreen(
             withdrawTeam = viewModel::withdrawTeam,
             confirmPlayer = { viewModel.placePlayer(it, null) },
             removePlayer = viewModel::removePlayer,
+            offer = viewModel::offer,
+            withdrawOffer = viewModel::withdrawOffer,
+            acceptOffer = viewModel::acceptOffer,
+            declineOffer = viewModel::declineOffer,
         ),
     )
     when (val current = sheet) {
@@ -239,6 +245,13 @@ fun TournamentScreen(
         is TournamentSheet.PlacePlayer -> state.details?.let { details ->
             PlacePlayerSheet(details.tournament, current.entry, onPlace = { viewModel.placePlayer(current.entry.player.profileId, it); close() }, onDismiss = close)
         }
+        is TournamentSheet.AskPlayer -> AskPlayerSheet(
+            state,
+            current.entry,
+            onAsk = { viewModel.offer(current.entry.player.profileId, it); close() },
+            onTakeBack = { viewModel.withdrawOffer(current.entry.player.profileId, it); close() },
+            onDismiss = close,
+        )
         TournamentSheet.Share -> OptionsSheet(
             title = stringResource(Res.string.tournament_share),
             options = listOfNotNull(

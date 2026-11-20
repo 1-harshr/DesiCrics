@@ -125,6 +125,16 @@ data class TournamentUiState(
 
     fun runs(teamId: String): Boolean = myTeams.any { it.id == teamId && it.myRole == TeamRole.ADMIN }
 
+    /** Confirmed teams the caller runs, which can ask pool players to join while teams pick. */
+    val myEnteredTeams: List<TournamentTeam> get() = details?.tournament?.confirmedTeams.orEmpty().filter { runs(it.teamId) }
+
+    /** Teams asking the caller to join their squad. */
+    val offersToMe: List<TournamentTeam>
+        get() {
+            val t = details?.tournament ?: return emptyList()
+            return t.offers.filter { it.profileId == myId }.mapNotNull { offer -> t.teams.firstOrNull { it.teamId == offer.teamId } }
+        }
+
     /** Teams the caller runs that an organiser invited, waiting for them to accept. */
     val myInvites: List<TournamentTeam> get() = details?.tournament?.teams.orEmpty().filter { it.status == EntryStatus.INVITED && runs(it.teamId) }
 
@@ -209,6 +219,20 @@ class TournamentViewModel(
     fun acceptInvite() {
         val me = _state.value.myId ?: return
         act { repository.acceptPlayerInvite(tournamentId, me) }
+    }
+
+    fun offer(profileId: String, teamId: String) = act { repository.offer(tournamentId, profileId, teamId) }
+
+    fun withdrawOffer(profileId: String, teamId: String) = act { repository.removeOffer(tournamentId, profileId, teamId) }
+
+    fun acceptOffer(teamId: String) {
+        val me = _state.value.myId ?: return
+        act { repository.acceptOffer(tournamentId, me, teamId) }
+    }
+
+    fun declineOffer(teamId: String) {
+        val me = _state.value.myId ?: return
+        act { repository.removeOffer(tournamentId, me, teamId) }
     }
 
     /** The caller leaves the tournament as a player, or turns down an invite. */

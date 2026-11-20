@@ -59,6 +59,8 @@ import com.harsh.desicrics.model.TournamentTeam
 import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
+import com.harsh.desicrics.model.PoolMode
+import com.harsh.desicrics.model.SquadOffer
 import com.harsh.desicrics.model.Organiser
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Wicket
@@ -525,6 +527,15 @@ class ScreenshotTest {
                 details = TournamentDetails(t.copy(teams = t.teams + TournamentTeam("t9", "Juhu Kings", 4, status = EntryStatus.INVITED))),
                 myTeams = listOf(TeamSummary("t9", "Juhu Kings", "Mumbai", 11, myRole = TeamRole.ADMIN)),
             ),
+            {}, {}, {}, {}, {}, {}, { _, _ -> },
+        )
+    }
+
+    @Test
+    fun tournamentOffersForAPoolPlayer() = shoot("tournament_squad_offers") {
+        val t = entryTournament().copy(poolMode = PoolMode.TEAMS, offers = listOf(SquadOffer("p4", "t0"), SquadOffer("p4", "t1")))
+        TournamentContent(
+            TournamentUiState(myId = "p4", loading = false, details = TournamentDetails(t)),
             {}, {}, {}, {}, {}, {}, { _, _ -> },
         )
     }

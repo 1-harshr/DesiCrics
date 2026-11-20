@@ -814,6 +814,18 @@
     <string name="entry_mode_add">Add now</string>
     <string name="entry_mode_invite">Send an invite</string>
     <string name="entry_mode_add_hint">They're in straight away.</string>
+    <string name="entry_pool_mode">Who picks a team for players on their own</string>
+    <string name="entry_pool_mode_teams">Teams</string>
+    <string name="entry_pool_mode_organisers_hint">You put each player in a team.</string>
+    <string name="entry_pool_mode_teams_hint">Team admins ask players to join, and each player picks one team. You can still place anyone.</string>
+    <string name="entry_pool_mode_teams_short">Teams pick players</string>
+    <string name="entry_pool_teams_hint">Team admins ask the players they want, and each player picks one team.</string>
+    <string name="entry_ask">Ask</string>
+    <string name="entry_ask_title">Ask %1$s to join</string>
+    <string name="entry_asked_tag">Asked</string>
+    <string name="entry_take_back">Take back</string>
+    <string name="entry_card_offers">Teams want you</string>
+    <string name="entry_card_offers_hint">Pick the team you'd like to play for.</string>
     <string name="entry_limits">Limits</string>
     <string name="entry_limits_hint">Leave blank for no limit. Anyone asking once it's full joins a waiting list and moves up when a place opens.</string>
     <string name="entry_max_teams">Most teams</string>
@@ -1285,6 +1297,8 @@
     <string name="notification_entry_invited_team">%1$s is invited to %2$s</string>
     <string name="notification_entry_invited_player">You're invited to play in %1$s</string>
     <string name="notification_entry_withdrawn">%1$s left %2$s</string>
+    <string name="notification_squad_offer">%1$s want you in their squad for %2$s</string>
+    <string name="notification_squad_joined">%1$s joined your squad for %2$s</string>
     <string name="notification_entry_promoted">A place opened in %1$s. The organisers will confirm your entry.</string>
 
     <!-- Phase 7 · wagon wheel -->

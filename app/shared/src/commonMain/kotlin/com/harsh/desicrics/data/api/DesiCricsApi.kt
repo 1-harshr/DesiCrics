@@ -16,6 +16,7 @@ import com.harsh.desicrics.api.AddTournamentPlayerRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.EntrySettingsRequest
 import com.harsh.desicrics.api.PlacePlayerRequest
+import com.harsh.desicrics.api.SquadOfferRequest
 import com.harsh.desicrics.api.DirectoryRequest
 import com.harsh.desicrics.api.LookingForRequest
 import com.harsh.desicrics.api.RespondRequest
@@ -281,6 +282,15 @@ class DesiCricsApi(
     suspend fun acceptTeamInvite(id: String, teamId: String): TournamentDetails = call { post("$baseUrl/tournaments/$id/teams/$teamId/accept", it) }.body()
 
     suspend fun withdrawTeam(id: String, teamId: String): TournamentDetails = call { delete("$baseUrl/tournaments/$id/teams/$teamId", it) }.body()
+
+    suspend fun offerSquadPlace(id: String, profileId: String, teamId: String): TournamentDetails =
+        call { post("$baseUrl/tournaments/$id/players/$profileId/offers") { it(); json(SquadOfferRequest(teamId)) } }.body()
+
+    suspend fun acceptSquadOffer(id: String, profileId: String, teamId: String): TournamentDetails =
+        call { post("$baseUrl/tournaments/$id/players/$profileId/offers/$teamId/accept", it) }.body()
+
+    suspend fun removeSquadOffer(id: String, profileId: String, teamId: String): TournamentDetails =
+        call { delete("$baseUrl/tournaments/$id/players/$profileId/offers/$teamId", it) }.body()
 
     suspend fun acceptPlayerInvite(id: String, profileId: String): TournamentDetails =
         call { post("$baseUrl/tournaments/$id/players/$profileId/accept", it) }.body()

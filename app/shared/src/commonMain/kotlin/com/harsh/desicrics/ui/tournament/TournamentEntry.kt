@@ -38,6 +38,7 @@ import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.api.EntrySettingsRequest
 import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
+import com.harsh.desicrics.model.PoolMode
 import com.harsh.desicrics.model.Tournament
 import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.resources.*
@@ -106,6 +107,7 @@ internal fun EntrySettingsSheet(tournament: Tournament, onSave: (EntrySettingsRe
     var maxTeams by remember { mutableStateOf(tournament.maxTeams?.toString().orEmpty()) }
     var maxPlayers by remember { mutableStateOf(tournament.maxPlayers?.toString().orEmpty()) }
     var closesAt by remember { mutableStateOf(tournament.entryClosesAt) }
+    var poolMode by remember { mutableStateOf(tournament.poolMode) }
     var picking by remember { mutableStateOf(false) }
     DesiSheet(stringResource(Res.string.entry_title), onDismiss) {
         if (picking) {
@@ -123,6 +125,20 @@ internal fun EntrySettingsSheet(tournament: Tournament, onSave: (EntrySettingsRe
             return@DesiSheet
         }
         EntrySettings(teams, players, onChange = { t, p -> teams = t; players = p })
+        Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+            Text(stringResource(Res.string.entry_pool_mode), style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
+            SegmentedControl(
+                PoolMode.entries,
+                selected = poolMode,
+                label = { stringResource(if (it == PoolMode.TEAMS) Res.string.entry_pool_mode_teams else Res.string.entry_organisers) },
+                onSelect = { poolMode = it },
+            )
+            Text(
+                stringResource(if (poolMode == PoolMode.TEAMS) Res.string.entry_pool_mode_teams_hint else Res.string.entry_pool_mode_organisers_hint),
+                style = DesiTheme.type.caption,
+                color = DesiTheme.colors.muted,
+            )
+        }
         SectionHeader(stringResource(Res.string.entry_limits), icon = DesiIcons.Teams)
         Text(stringResource(Res.string.entry_limits_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         val number = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -141,7 +157,7 @@ internal fun EntrySettingsSheet(tournament: Tournament, onSave: (EntrySettingsRe
                 onClick = { picking = true },
             )
         }
-        val settings = EntrySettingsRequest(teams, players, maxTeams.toIntOrNull(), maxPlayers.toIntOrNull(), closesAt)
+        val settings = EntrySettingsRequest(teams, players, maxTeams.toIntOrNull(), maxPlayers.toIntOrNull(), closesAt, poolMode)
         val invalid = settings.validate() != null
         if (invalid) Text(stringResource(Res.string.entry_limits_invalid), style = DesiTheme.type.caption, color = DesiTheme.colors.event.wicket)
         PrimaryButton(stringResource(Res.string.teams_save_action), onClick = { onSave(settings) }, enabled = !invalid, modifier = Modifier.fillMaxWidth())
@@ -155,6 +171,7 @@ internal fun entrySummary(t: Tournament): String = listOfNotNull(
     t.maxTeams?.let { pluralStringResource(Res.plurals.entry_up_to_teams, it, it) },
     t.maxPlayers?.let { pluralStringResource(Res.plurals.entry_up_to_players, it, it) },
     t.entryClosesAt?.let { stringResource(Res.string.entry_closes_on, formatDayAndTime(it)) },
+    stringResource(Res.string.entry_pool_mode_teams_short).takeIf { t.poolMode == PoolMode.TEAMS },
 ).joinToString(" · ")
 
 /** What people do about their entries; the screen wires each to the view model. */
@@ -166,6 +183,10 @@ internal class EntryActions(
     val withdrawTeam: (teamId: String) -> Unit = {},
     val confirmPlayer: (profileId: String) -> Unit = {},
     val removePlayer: (profileId: String) -> Unit = {},
+    val offer: (profileId: String, teamId: String) -> Unit = { _, _ -> },
+    val withdrawOffer: (profileId: String, teamId: String) -> Unit = { _, _ -> },
+    val acceptOffer: (teamId: String) -> Unit = {},
+    val declineOffer: (teamId: String) -> Unit = {},
 )
 
 /**
@@ -177,6 +198,7 @@ internal fun EntryCard(state: TournamentUiState, actions: EntryActions, onEnterT
     val t = state.details?.tournament ?: return
     val me = state.myEntry
     val invites = state.myInvites
+    val offers = state.offersToMe
     if (state.isOrganiser || (me == null && invites.isEmpty() && !state.canEnterTeam && !state.canJoinAsPlayer)) return
     val colors = DesiTheme.colors
     DesiCard(Modifier.fillMaxWidth(), padding = DesiTheme.space.s4) {
@@ -186,6 +208,7 @@ internal fun EntryCard(state: TournamentUiState, actions: EntryActions, onEnterT
                 val team = me?.teamId?.let { id -> t.teams.firstOrNull { it.teamId == id }?.name }
                 val (title, line) = when {
                     me?.status == EntryStatus.INVITED -> Res.string.entry_card_invited to stringResource(Res.string.entry_card_invited_hint)
+                    offers.isNotEmpty() -> Res.string.entry_card_offers to stringResource(Res.string.entry_card_offers_hint)
                     invites.isNotEmpty() -> Res.string.entry_card_team_invited to stringResource(Res.string.entry_card_team_invited_hint, invites.joinToString { it.name })
                     me == null -> Res.string.entry_card_open to stringResource(
                         when {
@@ -205,6 +228,10 @@ internal fun EntryCard(state: TournamentUiState, actions: EntryActions, onEnterT
         }
         if (me?.status == EntryStatus.INVITED) {
             AcceptOrDecline(state.saving, onAccept = actions.acceptInvite, onDecline = actions.leave)
+        }
+        offers.forEach { team ->
+            Text(team.name, style = DesiTheme.type.bodyStrong, color = colors.ink)
+            AcceptOrDecline(state.saving, onAccept = { actions.acceptOffer(team.teamId) }, onDecline = { actions.declineOffer(team.teamId) })
         }
         invites.forEach { invite ->
             if (invites.size > 1) Text(invite.name, style = DesiTheme.type.bodyStrong, color = colors.ink)
@@ -288,14 +315,31 @@ internal fun ColumnScope.Players(
     }
     val pool = t.pool.filter { it.status == EntryStatus.CONFIRMED }
     if (pool.isNotEmpty()) {
+        val teamsPick = t.poolMode == PoolMode.TEAMS
+        // While teams pick, a team's admin asks players; with more than one team they pick which in a sheet.
+        val asking = if (teamsPick && !t.started) state.myEnteredTeams else emptyList()
         SectionHeader(stringResource(Res.string.entry_pool, pool.size), icon = DesiIcons.Person)
-        Text(stringResource(Res.string.entry_pool_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+        Text(stringResource(if (teamsPick) Res.string.entry_pool_teams_hint else Res.string.entry_pool_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
         ListCard {
             pool.forEachIndexed { i, entry ->
+                val id = entry.player.profileId
                 PlayerEntryRow(entry, i > 0, onOpenPlayer) {
-                    if (organiser) {
-                        TextButton(onClick = { onSheet(TournamentSheet.PlacePlayer(entry)) }) {
+                    val asked = asking.filter { team -> t.offers.any { it.profileId == id && it.teamId == team.teamId } }
+                    when {
+                        organiser -> TextButton(onClick = { onSheet(TournamentSheet.PlacePlayer(entry)) }) {
                             Text(stringResource(Res.string.entry_pick_team), style = DesiTheme.type.button, color = DesiTheme.colors.brand)
+                        }
+                        asking.size > 1 -> TextButton(onClick = { onSheet(TournamentSheet.AskPlayer(entry)) }) {
+                            Text(stringResource(Res.string.entry_ask), style = DesiTheme.type.button, color = DesiTheme.colors.brand)
+                        }
+                        asking.size == 1 && asked.isNotEmpty() -> {
+                            Tag(stringResource(Res.string.entry_asked_tag), tone = TagTone.BRAND, icon = DesiIcons.CheckCircle)
+                            TextButton(onClick = { actions.withdrawOffer(id, asking.single().teamId) }) {
+                                Text(stringResource(Res.string.entry_take_back), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
+                            }
+                        }
+                        asking.size == 1 -> TextButton(onClick = { actions.offer(id, asking.single().teamId) }) {
+                            Text(stringResource(Res.string.entry_ask), style = DesiTheme.type.button, color = DesiTheme.colors.brand)
                         }
                     }
                 }
@@ -423,5 +467,25 @@ internal fun InviteChoice(invite: Boolean, onSelect: (Boolean) -> Unit) {
             onSelect = onSelect,
         )
         Text(stringResource(if (invite) Res.string.entry_mode_invite_hint else Res.string.entry_mode_add_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+    }
+}
+
+/** A team's admin running more than one team picks which ones ask the player. */
+@Composable
+internal fun AskPlayerSheet(state: TournamentUiState, entry: TournamentPlayer, onAsk: (teamId: String) -> Unit, onTakeBack: (teamId: String) -> Unit, onDismiss: () -> Unit) {
+    val t = state.details?.tournament ?: return
+    DesiSheet(stringResource(Res.string.entry_ask_title, entry.player.name), onDismiss) {
+        ListCard {
+            state.myEnteredTeams.forEachIndexed { i, team ->
+                val asked = t.offers.any { it.profileId == entry.player.profileId && it.teamId == team.teamId }
+                ListRow(
+                    title = team.name,
+                    leading = { Avatar(team.name, size = 40) },
+                    trailing = if (asked) ({ Tag(stringResource(Res.string.entry_asked_tag), tone = TagTone.BRAND, icon = DesiIcons.CheckCircle) }) else null,
+                    divider = i > 0,
+                    onClick = { if (asked) onTakeBack(team.teamId) else onAsk(team.teamId) },
+                )
+            }
+        }
     }
 }

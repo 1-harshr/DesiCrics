@@ -5,6 +5,7 @@ import com.harsh.desicrics.model.MatchEnding
 import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.MatchRules
 import com.harsh.desicrics.model.OrganiserRole
+import com.harsh.desicrics.model.PoolMode
 import com.harsh.desicrics.model.Stage
 import com.harsh.desicrics.model.TeamSide
 import com.harsh.desicrics.model.TossDecision
@@ -26,6 +27,9 @@ import kotlinx.serialization.Serializable
 //                                                  organisers anyone; team admins their team's members, into its squad)
 //   PUT    /tournaments/{id}/players/{profileId}   PlacePlayerRequest → TournamentDetails (organisers)
 //   POST   /tournaments/{id}/players/{profileId}/accept → TournamentDetails (the player, for an invite)
+//   POST   /tournaments/{id}/players/{profileId}/offers           SquadOfferRequest → TournamentDetails (a team's admin, in TEAMS pool mode)
+//   POST   /tournaments/{id}/players/{profileId}/offers/{teamId}/accept → TournamentDetails (the player)
+//   DELETE /tournaments/{id}/players/{profileId}/offers/{teamId}  → TournamentDetails (the player declines, or the team's admin takes it back)
 //   DELETE /tournaments/{id}/players/{profileId}   → TournamentDetails (organisers; the player; their team's admins before it starts)
 //   POST   /tournaments/{id}/organisers            AddOrganiserRequest → TournamentDetails (organisers)
 //   POST   /tournaments/{id}/start                 → TournamentDetails with the first fixtures (organisers)
@@ -49,6 +53,7 @@ data class CreateTournamentRequest(
     val maxTeams: Int? = null,
     val maxPlayers: Int? = null,
     val entryClosesAt: Long? = null,
+    val poolMode: PoolMode = PoolMode.ORGANISERS,
 ) {
     fun validate(): TournamentError? = when {
         name.isBlank() -> TournamentError.NAME_MISSING
@@ -78,6 +83,7 @@ data class EntrySettingsRequest(
     val maxTeams: Int? = null,
     val maxPlayers: Int? = null,
     val entryClosesAt: Long? = null,
+    val poolMode: PoolMode = PoolMode.ORGANISERS,
 ) {
     fun validate(): TournamentError? = when {
         maxTeams != null && maxTeams !in 2..MAX_TEAMS -> TournamentError.LIMIT_INVALID
@@ -105,6 +111,9 @@ data class EnterTeamRequest(val teamId: String, val invite: Boolean = false)
  */
 @Serializable
 data class AddTournamentPlayerRequest(val profileId: String? = null, val teamId: String? = null, val invite: Boolean = false)
+
+@Serializable
+data class SquadOfferRequest(val teamId: String)
 
 /** Confirms a waiting player, and puts them in [teamId]'s squad, or back in the pool when it's null. */
 @Serializable

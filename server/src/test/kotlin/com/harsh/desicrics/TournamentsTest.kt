@@ -17,6 +17,7 @@ import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.api.ReviewEntryRequest
 import com.harsh.desicrics.api.ScheduleRequest
+import com.harsh.desicrics.api.SquadOfferRequest
 import com.harsh.desicrics.api.SquadPlayer
 import com.harsh.desicrics.api.SquadRequest
 import com.harsh.desicrics.api.StartFixtureRequest
@@ -26,6 +27,7 @@ import com.harsh.desicrics.model.Delivery
 import com.harsh.desicrics.model.DismissalKind
 import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
+import com.harsh.desicrics.model.PoolMode
 import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.Notification
@@ -476,5 +478,40 @@ class TournamentsTest {
         assertEquals(listOf("Soon Cup", "Later Cup", "Undated Cup"), pune.map { it.name })
         assertEquals(false to true, pune.first().takesTeams to pune.first().takesPlayers)
         assertEquals(4, client.get("/tournaments/open") { bearerAuth("test-asha") }.body<List<TournamentSummary>>().size)
+    }
+
+    @Test
+    fun teamsAskPoolPlayersAndPlayersTakeOneOffer() = apiTest { client ->
+        for ((uid, name) in listOf("asha" to "Asha", "dev" to "Dev", "ravi" to "Ravi", "kabir" to "Kabir")) client.setUpProfile(uid, name = name)
+        val devs = client.team("dev", "Dev XI")
+        val ravis = client.team("ravi", "Ravi XI")
+        val cup = client.tournament(
+            "asha",
+            CreateTournamentRequest("Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5, playerEntry = EntryPolicy.OPEN, poolMode = PoolMode.TEAMS),
+        ).tournament
+        client.enter("asha", cup.id, devs.id)
+        client.enter("asha", cup.id, ravis.id)
+        client.addPlayer("kabir", cup.id)
+        suspend fun ask(uid: String, teamId: String) =
+            client.post("/tournaments/${cup.id}/players/kabir/offers") { bearerAuth("test-$uid"); jsonBody(SquadOfferRequest(teamId)) }
+
+        assertEquals(HttpStatusCode.OK, ask("dev", devs.id).status)
+        assertEquals(HttpStatusCode.Conflict, ask("dev", devs.id).status)
+        assertEquals(HttpStatusCode.Forbidden, ask("kabir", ravis.id).status)
+        val asked = ask("ravi", ravis.id).body<TournamentDetails>().tournament
+        assertEquals(listOf(devs.id, ravis.id), asked.offers.map { it.teamId })
+        assertEquals(listOf(NotificationKind.SQUAD_OFFER, NotificationKind.SQUAD_OFFER), client.inbox("kabir").map { it.kind })
+
+        // Kabir takes Dev's offer: he's in that squad, Ravi's offer goes, and Dev hears.
+        assertEquals(HttpStatusCode.Forbidden, client.post("/tournaments/${cup.id}/players/kabir/offers/${devs.id}/accept") { bearerAuth("test-dev") }.status)
+        val taken = client.post("/tournaments/${cup.id}/players/kabir/offers/${devs.id}/accept") { bearerAuth("test-kabir") }.body<TournamentDetails>().tournament
+        assertEquals(devs.id, taken.entryOf("kabir")!!.teamId)
+        assertTrue(taken.offers.isEmpty())
+        assertEquals(NotificationKind.SQUAD_JOINED, client.inbox("dev").first().kind)
+
+        // Where organisers pick, teams can't ask.
+        client.put("/tournaments/${cup.id}/entry") { bearerAuth("test-asha"); jsonBody(EntrySettingsRequest(EntryPolicy.APPROVAL, EntryPolicy.OPEN)) }
+        client.place("asha", cup.id, "kabir", null)
+        assertEquals(HttpStatusCode.Conflict, ask("ravi", ravis.id).status)
     }
 }

@@ -63,6 +63,18 @@ enum class EntryPolicy {
     OPEN,
 }
 
+/** Who puts players from the pool into squads. */
+@Serializable
+enum class PoolMode {
+    ORGANISERS,
+    /** Team admins ask pool players to join their squad, and each player takes one offer. Organisers still can place them. */
+    TEAMS,
+}
+
+/** [teamId] asked the pool player [profileId] to join its squad. */
+@Serializable
+data class SquadOffer(val profileId: String, val teamId: String)
+
 /**
  * A player in a tournament: in the pool while [teamId] is null, otherwise in that team's squad. A player is
  * in one squad per tournament. [fromPool] players entered on their own, so they go back to the pool if
@@ -112,6 +124,9 @@ data class Tournament(
     val maxPlayers: Int? = null,
     /** Epoch millis after which nobody can ask to enter. Organisers still can add entries. */
     val entryClosesAt: Long? = null,
+    val poolMode: PoolMode = PoolMode.ORGANISERS,
+    /** Teams asking pool players to join, while [poolMode] is [PoolMode.TEAMS]. */
+    val offers: List<SquadOffer> = emptyList(),
     val organisers: List<Organiser> = emptyList(),
     val teams: List<TournamentTeam> = emptyList(),
     /** The pool and every squad. */

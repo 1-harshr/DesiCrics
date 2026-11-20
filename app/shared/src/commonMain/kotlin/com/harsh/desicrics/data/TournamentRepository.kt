@@ -34,6 +34,14 @@ class TournamentRepository(private val api: DesiCricsApi, private val config: Ap
 
     suspend fun acceptPlayerInvite(id: String, profileId: String): TournamentDetails = api.acceptPlayerInvite(id, profileId)
 
+    /** A team's admin asks a pool player to join its squad. */
+    suspend fun offer(id: String, profileId: String, teamId: String): TournamentDetails = api.offerSquadPlace(id, profileId, teamId)
+
+    suspend fun acceptOffer(id: String, profileId: String, teamId: String): TournamentDetails = api.acceptSquadOffer(id, profileId, teamId)
+
+    /** The player turns it down, or the team takes it back. */
+    suspend fun removeOffer(id: String, profileId: String, teamId: String): TournamentDetails = api.removeSquadOffer(id, profileId, teamId)
+
     suspend fun review(id: String, teamId: String, confirm: Boolean): TournamentDetails = api.reviewEntry(id, teamId, confirm)
 
     suspend fun setEntry(id: String, settings: EntrySettingsRequest): TournamentDetails = api.setEntry(id, settings)

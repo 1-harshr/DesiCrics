@@ -19,6 +19,7 @@ import com.harsh.desicrics.model.NotificationKind
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Stage
 import com.harsh.desicrics.model.EntryPolicy
+import com.harsh.desicrics.model.PoolMode
 import com.harsh.desicrics.model.TournamentFormat
 import com.harsh.desicrics.api.SupportCategory
 import com.harsh.desicrics.model.PlayerRole
@@ -218,6 +219,7 @@ object TournamentsTable : Table("tournaments") {
     val maxTeams = integer("max_teams").nullable()
     val maxPlayers = integer("max_players").nullable()
     val entryClosesAt = long("entry_closes_at").nullable()
+    val poolMode = enumerationByName("pool_mode", 10, PoolMode::class)
     val started = bool("started")
     val createdBy = varchar("created_by", 128)
     val createdAt = long("created_at")
@@ -238,6 +240,16 @@ object TournamentTeamsTable : Table("tournament_teams") {
     val groupNo = integer("group_no").nullable()
     val status = enumerationByName("status", 10, EntryStatus::class)
     override val primaryKey = PrimaryKey(tournamentId, teamId)
+}
+
+/** Teams asking pool players to join their squads. */
+object TournamentSquadOffersTable : Table("tournament_squad_offers") {
+    val tournamentId = reference("tournament_id", TournamentsTable.id, onDelete = ReferenceOption.CASCADE)
+    val playerId = varchar("player_id", 128)
+    val teamId = reference("team_id", TeamsTable.id)
+    val offeredBy = varchar("offered_by", 128)
+    val offeredAt = long("offered_at")
+    override val primaryKey = PrimaryKey(tournamentId, playerId, teamId)
 }
 
 /** The pool (no team) and every squad; one row per player per tournament. */

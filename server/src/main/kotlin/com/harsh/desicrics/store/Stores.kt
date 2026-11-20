@@ -234,9 +234,13 @@ interface TournamentStore {
      * in another squad is left where they are.
      */
     suspend fun fillSquad(tournamentId: String, teamId: String, profileIds: Collection<String>, addedBy: String, at: Long)
-    /** Moves a player to [teamId]'s squad, or the pool when it's null. */
+    /** Moves a player to [teamId]'s squad (dropping their offers), or the pool when it's null. */
     suspend fun setPlayer(tournamentId: String, profileId: String, teamId: String?, status: EntryStatus)
+    /** Also drops any squad offers to them. */
     suspend fun removePlayer(tournamentId: String, profileId: String)
+    /** False if that team has already asked. */
+    suspend fun addOffer(tournamentId: String, profileId: String, teamId: String, offeredBy: String, at: Long): Boolean
+    suspend fun removeOffer(tournamentId: String, profileId: String, teamId: String)
     suspend fun addOrganiser(tournamentId: String, uid: String, role: OrganiserRole)
     /** Fixes the teams' groups, drops unconfirmed teams and players, and marks it started. False if it already was. */
     suspend fun markStarted(tournamentId: String, teams: List<TournamentTeam>): Boolean

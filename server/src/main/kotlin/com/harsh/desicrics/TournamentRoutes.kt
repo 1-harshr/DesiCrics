@@ -10,6 +10,7 @@ import com.harsh.desicrics.api.EntrySettingsRequest
 import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.ReviewEntryRequest
 import com.harsh.desicrics.api.ScheduleRequest
+import com.harsh.desicrics.api.SquadOfferRequest
 import com.harsh.desicrics.api.StartFixtureRequest
 import com.harsh.desicrics.service.TournamentService
 import io.ktor.http.HttpStatusCode
@@ -49,6 +50,20 @@ fun Route.tournamentRoutes(tournaments: TournamentService) {
                 put("/{profileId}") {
                     val request = call.receive<PlacePlayerRequest>()
                     call.respond(tournaments.placePlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty(), request))
+                }
+                route("/{profileId}/offers") {
+                    post {
+                        val request = call.receive<SquadOfferRequest>()
+                        call.respond(tournaments.offer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty(), request.teamId))
+                    }
+                    post("/{teamId}/accept") {
+                        val p = call.parameters
+                        call.respond(tournaments.acceptOffer(call.user, p["id"].orEmpty(), p["profileId"].orEmpty(), p["teamId"].orEmpty()))
+                    }
+                    delete("/{teamId}") {
+                        val p = call.parameters
+                        call.respond(tournaments.removeOffer(call.user, p["id"].orEmpty(), p["profileId"].orEmpty(), p["teamId"].orEmpty()))
+                    }
                 }
                 post("/{profileId}/accept") {
                     call.respond(tournaments.acceptPlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty()))

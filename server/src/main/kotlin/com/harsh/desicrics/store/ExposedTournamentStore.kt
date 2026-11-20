@@ -5,6 +5,7 @@ import com.harsh.desicrics.db.TeamMembersTable
 import com.harsh.desicrics.db.TeamsTable
 import com.harsh.desicrics.db.TournamentOrganisersTable
 import com.harsh.desicrics.db.TournamentPlayersTable
+import com.harsh.desicrics.db.TournamentSquadOffersTable
 import com.harsh.desicrics.db.TournamentTeamsTable
 import com.harsh.desicrics.db.TournamentsTable
 import com.harsh.desicrics.db.query
@@ -14,6 +15,7 @@ import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.Organiser
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Tournament
+import com.harsh.desicrics.model.SquadOffer
 import com.harsh.desicrics.model.TournamentPlayer
 import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.model.TournamentTeam
@@ -55,6 +57,7 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
                 it[maxTeams] = tournament.maxTeams
                 it[maxPlayers] = tournament.maxPlayers
                 it[entryClosesAt] = tournament.entryClosesAt
+                it[poolMode] = tournament.poolMode
                 it[started] = false
                 it[createdBy] = tournament.createdBy
                 it[createdAt] = tournament.createdAt
@@ -114,6 +117,10 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
             maxTeams = row[TournamentsTable.maxTeams],
             maxPlayers = row[TournamentsTable.maxPlayers],
             entryClosesAt = row[TournamentsTable.entryClosesAt],
+            poolMode = row[TournamentsTable.poolMode],
+            offers = TournamentSquadOffersTable.selectAll().where { TournamentSquadOffersTable.tournamentId eq tournamentId }
+                .orderBy(TournamentSquadOffersTable.offeredAt)
+                .map { SquadOffer(it[TournamentSquadOffersTable.playerId], it[TournamentSquadOffersTable.teamId]) },
             organisers = organisers,
             teams = teams,
             players = players,
@@ -197,6 +204,7 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
             // Players who entered on their own go back to the pool; the rest came with the team.
             TournamentPlayersTable.update({ inSquad and (TournamentPlayersTable.fromPool eq true) }) { it[this.teamId] = null }
             TournamentPlayersTable.deleteWhere { inSquad }
+            TournamentSquadOffersTable.deleteWhere { (TournamentSquadOffersTable.tournamentId eq tournamentId) and (TournamentSquadOffersTable.teamId eq teamId) }
         }
     }
 
@@ -208,6 +216,7 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
                 it[maxTeams] = settings.maxTeams
                 it[maxPlayers] = settings.maxPlayers
                 it[entryClosesAt] = settings.entryClosesAt
+                it[poolMode] = settings.poolMode
             }
         }
     }
@@ -264,13 +273,43 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
                 it[this.teamId] = teamId
                 it[this.status] = status
             }
+            // A player in a squad has no more use for other teams' offers.
+            if (teamId != null) deleteOffers(tournamentId, profileId)
         }
     }
 
     override suspend fun removePlayer(tournamentId: String, profileId: String) {
         db.query {
             TournamentPlayersTable.deleteWhere { (TournamentPlayersTable.tournamentId eq tournamentId) and (playerId eq profileId) }
+            deleteOffers(tournamentId, profileId)
         }
+    }
+
+    override suspend fun addOffer(tournamentId: String, profileId: String, teamId: String, offeredBy: String, at: Long): Boolean = try {
+        db.query {
+            TournamentSquadOffersTable.insert {
+                it[this.tournamentId] = tournamentId
+                it[playerId] = profileId
+                it[this.teamId] = teamId
+                it[this.offeredBy] = offeredBy
+                it[offeredAt] = at
+            }
+        }
+        true
+    } catch (e: Exception) {
+        if (e.isUniqueViolation()) false else throw e
+    }
+
+    override suspend fun removeOffer(tournamentId: String, profileId: String, teamId: String) {
+        db.query {
+            TournamentSquadOffersTable.deleteWhere {
+                (TournamentSquadOffersTable.tournamentId eq tournamentId) and (playerId eq profileId) and (TournamentSquadOffersTable.teamId eq teamId)
+            }
+        }
+    }
+
+    private fun deleteOffers(tournamentId: String, profileId: String) {
+        TournamentSquadOffersTable.deleteWhere { (TournamentSquadOffersTable.tournamentId eq tournamentId) and (playerId eq profileId) }
     }
 
     override suspend fun addOrganiser(tournamentId: String, uid: String, role: OrganiserRole) {

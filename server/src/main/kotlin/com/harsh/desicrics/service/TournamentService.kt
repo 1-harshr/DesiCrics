@@ -20,6 +20,7 @@ import com.harsh.desicrics.model.Match
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.NotificationKind
 import com.harsh.desicrics.model.Organiser
+import com.harsh.desicrics.model.PoolMode
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.StatLeader
@@ -98,6 +99,7 @@ class TournamentService(
             maxTeams = request.maxTeams,
             maxPlayers = request.maxPlayers,
             entryClosesAt = request.entryClosesAt,
+            poolMode = request.poolMode,
             organisers = listOf(Organiser(user.uid, "", OrganiserRole.ORGANISER)),
         )
         tournaments.create(tournament)
@@ -278,6 +280,46 @@ class TournamentService(
             }
         }
         return details(tournamentId)
+    }
+
+    /**
+     * A team's admin asks a pool player to join its squad, while teams pick from the pool. Each team asks
+     * once; the player takes one offer.
+     */
+    suspend fun offer(user: FirebasePrincipal, tournamentId: String, profileId: String, teamId: String): TournamentDetails {
+        val tournament = tournament(tournamentId)
+        if (tournament.poolMode != PoolMode.TEAMS) throw ApiException(HttpStatusCode.Conflict, "Organisers pick teams for players in this tournament")
+        if (tournament.confirmedTeams.none { it.teamId == teamId }) throw ApiException(HttpStatusCode.BadRequest, "That team isn't in the tournament")
+        val team = requireTeamAdmin(user, tournament, teamId)
+        val entry = tournament.entryOf(profileId)
+        if (entry == null || entry.teamId != null || entry.status != EntryStatus.CONFIRMED) {
+            throw ApiException(HttpStatusCode.Conflict, "Only players waiting for a team can be asked")
+        }
+        if (!tournaments.addOffer(tournamentId, profileId, teamId, user.uid, clock())) throw ApiException(HttpStatusCode.Conflict, "Your team has already asked")
+        tell(setOf(profileId) - user.uid, NotificationKind.SQUAD_OFFER, tournament, team.name, PLAYER)
+        return details(tournamentId)
+    }
+
+    /** The player takes a team's offer and joins its squad; its admins hear, and other offers go. */
+    suspend fun acceptOffer(user: FirebasePrincipal, tournamentId: String, profileId: String, teamId: String): TournamentDetails {
+        val tournament = tournament(tournamentId)
+        if (profileId != user.uid) throw ApiException(HttpStatusCode.Forbidden, "Only the player can take an offer")
+        if (tournament.started) throw ApiException(HttpStatusCode.Conflict, "The tournament has started")
+        if (tournament.offers.none { it.profileId == profileId && it.teamId == teamId }) throw ApiException(HttpStatusCode.NotFound, "That offer has gone")
+        val entry = tournament.entryOf(profileId) ?: throw ApiException(HttpStatusCode.NotFound, "That player isn't in the tournament")
+        tournaments.setPlayer(tournamentId, profileId, teamId, EntryStatus.CONFIRMED)
+        teams.get(teamId)?.let { team -> tell(team.admins() - user.uid, NotificationKind.SQUAD_JOINED, tournament, entry.player.name, PLAYER) }
+        return details(tournamentId)
+    }
+
+    /** The player turns an offer down, or the team's admin takes it back. */
+    suspend fun removeOffer(user: FirebasePrincipal, tournamentId: String, profileId: String, teamId: String): TournamentDetails {
+        val tournament = tournament(tournamentId)
+        if (profileId != user.uid && teams.get(teamId)?.roleOf(user.uid) != TeamRole.ADMIN) {
+            throw ApiException(HttpStatusCode.Forbidden, "Only the player or the team's admins can do that")
+        }
+        tournaments.removeOffer(tournamentId, profileId, teamId)
+        return details(tournament.id)
     }
 
     /** Confirms a waiting player and puts them in a squad, or back in the pool. Organisers only. */
