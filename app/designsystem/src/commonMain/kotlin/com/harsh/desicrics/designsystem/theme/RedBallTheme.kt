@@ -16,12 +16,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.resources.Res
-import com.harsh.desicrics.designsystem.resources.bitter_variable
 import com.harsh.desicrics.designsystem.resources.ds_theme_red_ball
+import com.harsh.desicrics.designsystem.resources.noto_serif_condensed_bold
+import com.harsh.desicrics.designsystem.resources.noto_serif_condensed_semibold
 import org.jetbrains.compose.resources.Font
 
 /**
- * Red Ball, for Test cricket: cream flannels, a cherry-leather brand, willow and pavilion green, and slab
+ * Red Ball, for Test cricket: cream flannels, a cherry-leather brand, willow and pavilion green, and condensed
  * numerals like an old honours board. Dark mode is the pavilion at night, in walnut.
  */
 val RedBallTheme: DesiThemeSpec = DesiThemeSpec(
@@ -74,7 +75,7 @@ val RedBallTheme: DesiThemeSpec = DesiThemeSpec(
         ),
         isDark = true,
     ),
-    typography = { desiTypography(bitterFamily(), figtreeFamily(), jetBrainsMonoFamily()) },
+    typography = { desiTypography(notoSerifCondensedFamily(), figtreeFamily(), jetBrainsMonoFamily()) },
     shapes = DesiShapes(
         small = RoundedCornerShape(4.dp),
         medium = RoundedCornerShape(10.dp),
@@ -94,13 +95,14 @@ val RedBallTheme: DesiThemeSpec = DesiThemeSpec(
 )
 
 /**
- * Bitter: Red Ball's display face, a slab serif like an honours board, with lining figures whose
- * tabular widths switch on even for a score on its own.
+ * Noto Serif ExtraCondensed: Red Ball's display face, tall gilt-board serif numerals. The two static
+ * weights are cut from the variable Noto Serif and trimmed to Latin; condensed so a strike rate fits a
+ * stat tile, and tabular as drawn, so scores stay put even as digits on their own.
  */
 @Composable
-fun bitterFamily(): FontFamily = FontFamily(
-    Font(Res.font.bitter_variable, FontWeight.SemiBold),
-    Font(Res.font.bitter_variable, FontWeight.Bold),
+fun notoSerifCondensedFamily(): FontFamily = FontFamily(
+    Font(Res.font.noto_serif_condensed_semibold, FontWeight.SemiBold),
+    Font(Res.font.noto_serif_condensed_bold, FontWeight.Bold),
 )
 
 /** A faint diagonal twill, like the weave of cricket flannels, with a gilt rule along the bottom edge. */
