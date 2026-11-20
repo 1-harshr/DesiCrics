@@ -16,4 +16,5 @@ iOS is out of scope for now.
 | [roadmap.md](roadmap.md) | Phases 0–8, each split into three levels, with exit criteria and status |
 | [phase-7.md](phase-7.md) | Phase 7 spec: wagon wheel first, share studio and overlays, posters, player auction |
 | [phase-8.md](phase-8.md) | Phase 8 spec: cricket-inspired themes and the theme system |
+| [tournament-entry.md](tournament-entry.md) | Teams and players joining a tournament: entry settings, player pool, squads, invites, notifications |
 | [decisions/](decisions/) | Architecture decision records, including [0004](decisions/0004-phases-1-to-5-design-log.md), the design log for Phases 1–5 |

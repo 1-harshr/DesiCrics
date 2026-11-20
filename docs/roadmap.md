@@ -232,3 +232,30 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ⬜ Theme-specific wicket and boundary celebrations
 
 **Exit:** a player switches between at least three themes, light and dark, and every main screen passes the contrast test in each.
+
+---
+
+## Tournament entry
+
+**Goal:** a tournament is a place people join: teams and individual players can enter, the organiser decides how open each door is, and everyone hears what happened to their entry. Spec: [tournament-entry.md](tournament-entry.md).
+
+### Level 1 · Playable
+- ⬜ Entry settings for teams and for players (organisers only, on approval, open), editable until the start
+- ⬜ Player pool: players join on their own; organisers place them in a team's squad
+- ⬜ Tournament squads: one squad per player per tournament, locked at the start; fixtures offer only squad players
+- ⬜ "Invite teams" and "Invite players" links; "Enter your team" and "Join as a player" on the tournament page
+- ⬜ Notifications for requests, confirmations, rejections and placements
+
+### Level 2 · Complete
+- ⬜ Invites that the team or player accepts; withdrawing an entry
+- ⬜ Limits, a waiting list and a closing date
+- ⬜ "Open to join" tournaments by city on the Tournaments tab
+- ⬜ Teams pick free agents from the pool
+- ⬜ The auction's pool moves onto the tournament's player pool
+
+### Level 3 · Delight
+- ⬜ Pick-up tournaments: the organiser makes teams from the pool, or the app splits it into balanced sides
+- ⬜ Squad changes after the lock, shown on team pages
+- ⬜ A reminder to organisers the day before entry closes
+
+**Exit:** an organiser shares team and player invite links in a WhatsApp group; two teams enter and a player with no team joins the pool; the organiser confirms the teams and places the player; everyone is notified, squads lock at the start, and the first fixture offers only squad players.
