@@ -51,18 +51,20 @@ import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.system.ImageFileFormat
+import com.harsh.desicrics.ui.system.rememberCopyImage
 import com.harsh.desicrics.ui.system.rememberSaveImage
 import com.harsh.desicrics.ui.system.rememberShareImage
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
  * The share studio: one sheet for every picture DesiCrics makes. The user picks what to share from
  * [contents] (when there's more than one), swipes through its templates as live previews, picks story or
- * post, then shares the picture or saves it to the gallery. The picture is recorded from the preview
+ * post, then shares the picture, copies it, or saves it to the gallery. The picture is recorded from the preview
  * itself at full size, so it's exactly what was shown. A template with several pages shows a page picker,
- * and Share and Save take every page together.
+ * and Share and Save take every page together; Copy takes the page on show.
  *
  * [initial] is the key of the content to open on; [look] is the theme pictures are drawn in.
  */
@@ -76,6 +78,7 @@ fun ShareStudio(
 ) {
     val shareImage = rememberShareImage()
     val saveImage = rememberSaveImage()
+    val copyImage = rememberCopyImage()
     DesiSheet(title, onDismiss) {
         ShareStudioContent(
             contents,
@@ -83,17 +86,23 @@ fun ShareStudio(
             look = look,
             onShare = { images, format, _ -> shareImage(images, format) },
             onSave = { image, format, name -> saveImage(image, format, name) },
+            onCopy = { image, format -> copyImage(image, format) },
         )
     }
 }
 
 /** What the studio last did, for the line under its buttons. */
-private enum class StudioNote { SAVED, SAVE_FAILED }
+private enum class StudioNote(val text: StringResource, val failed: Boolean) {
+    SAVED(Res.string.share_saved, false),
+    SAVE_FAILED(Res.string.share_save_failed, true),
+    COPIED(Res.string.share_copied, false),
+    COPY_FAILED(Res.string.share_copy_failed, true),
+}
 
 /**
  * The studio without its sheet or the platform's share and save, so tests can draw it. [onShare] gets
  * every page of the picture (usually one), its file format and a file name; [onSave] is called once per
- * page, with "-1", "-2"… on the name when there's more than one.
+ * page, with "-1", "-2"… on the name when there's more than one; [onCopy] gets the page on show.
  */
 @Composable
 fun ShareStudioContent(
@@ -102,6 +111,7 @@ fun ShareStudioContent(
     look: ShareLook = ShareLook.Default,
     onShare: suspend (List<ImageBitmap>, ImageFileFormat, String) -> Unit,
     onSave: suspend (ImageBitmap, ImageFileFormat, String) -> Boolean,
+    onCopy: suspend (ImageBitmap, ImageFileFormat) -> Boolean,
 ) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
@@ -175,23 +185,40 @@ fun ShareStudioContent(
             if (pageCount > 1) PagePicker(pageCount, shownPage, onSelect = { picked = it })
             if (template.kind == TemplateKind.OVERLAY) OverlayNote(onPhoto, onToggle = { onPhoto = it })
             val fileName = "desicrics-${content.key}-${template.key}"
-            Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
-                TonalButton(
-                    stringResource(Res.string.share_save),
-                    onClick = {
-                        scope.launch {
-                            busy = true
-                            val saved = layers.mapIndexed { i, layer ->
-                                onSave(layer.toImageBitmap(), template.kind.file, if (layers.size > 1) "$fileName-${i + 1}" else fileName)
+            // Three buttons don't fit a small phone side by side, so Share, the main one, gets its own row.
+            Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
+                    TonalButton(
+                        stringResource(Res.string.share_save),
+                        onClick = {
+                            scope.launch {
+                                busy = true
+                                val saved = layers.mapIndexed { i, layer ->
+                                    onSave(layer.toImageBitmap(), template.kind.file, if (layers.size > 1) "$fileName-${i + 1}" else fileName)
+                                }
+                                note = if (saved.all { it }) StudioNote.SAVED else StudioNote.SAVE_FAILED
+                                busy = false
                             }
-                            note = if (saved.all { it }) StudioNote.SAVED else StudioNote.SAVE_FAILED
-                            busy = false
-                        }
-                    },
-                    leadingIcon = DesiIcons.Download,
-                    enabled = !busy,
-                    modifier = Modifier.weight(1f),
-                )
+                        },
+                        leadingIcon = DesiIcons.Download,
+                        enabled = !busy,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TonalButton(
+                        stringResource(Res.string.share_copy),
+                        onClick = {
+                            scope.launch {
+                                busy = true
+                                val copied = onCopy(layers[shownPage].toImageBitmap(), template.kind.file)
+                                note = if (copied) StudioNote.COPIED else StudioNote.COPY_FAILED
+                                busy = false
+                            }
+                        },
+                        leadingIcon = DesiIcons.Copy,
+                        enabled = !busy,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
                 PrimaryButton(
                     stringResource(Res.string.share_action),
                     onClick = {
@@ -203,15 +230,15 @@ fun ShareStudioContent(
                     },
                     leadingIcon = DesiIcons.Share,
                     enabled = !busy,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
         note?.let {
             Text(
-                stringResource(if (it == StudioNote.SAVED) Res.string.share_saved else Res.string.share_save_failed),
+                stringResource(it.text),
                 style = DesiTheme.type.caption,
-                color = if (it == StudioNote.SAVED) colors.muted else colors.event.wicket,
+                color = if (it.failed) colors.event.wicket else colors.muted,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
             )

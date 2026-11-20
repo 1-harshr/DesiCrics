@@ -226,7 +226,7 @@ class TournamentPosterScreenshotTest {
     @Test
     fun studio() = shoot("posters_studio") {
         Box(Modifier.background(DesiTheme.colors.surface).padding(20.dp)) {
-            ShareStudioContent(tournamentShareContents(league), onShare = { _, _, _ -> }, onSave = { _, _, _ -> true })
+            ShareStudioContent(tournamentShareContents(league), onShare = { _, _, _ -> }, onSave = { _, _, _ -> true }, onCopy = { _, _ -> true })
         }
     }
 }

@@ -30,3 +30,10 @@ expect fun rememberShareImage(): suspend (images: List<ImageBitmap>, format: Ima
  */
 @Composable
 expect fun rememberSaveImage(): suspend (image: ImageBitmap, format: ImageFileFormat, name: String) -> Boolean
+
+/**
+ * Puts a picture on the clipboard, so it can be pasted straight into a chat. The returned function says
+ * whether it was copied.
+ */
+@Composable
+expect fun rememberCopyImage(): suspend (image: ImageBitmap, format: ImageFileFormat) -> Boolean

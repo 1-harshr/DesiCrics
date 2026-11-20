@@ -64,6 +64,7 @@ import com.harsh.desicrics.designsystem.resources.ic_groups
 import com.harsh.desicrics.designsystem.resources.ic_location_on
 import com.harsh.desicrics.designsystem.resources.ic_mic
 import com.harsh.desicrics.designsystem.resources.ic_more_horiz
+import com.harsh.desicrics.designsystem.resources.ic_content_copy
 import com.harsh.desicrics.designsystem.resources.ic_notifications
 import com.harsh.desicrics.designsystem.resources.ic_person
 import com.harsh.desicrics.designsystem.resources.ic_remove
@@ -100,6 +101,7 @@ object DesiIcons {
     val Notifications: DrawableResource = Res.drawable.ic_notifications
     val Share: DrawableResource = Res.drawable.ic_share
     val Download: DrawableResource = Res.drawable.ic_download
+    val Copy: DrawableResource = Res.drawable.ic_content_copy
     val Teams: DrawableResource = Res.drawable.ic_groups
     val Mic: DrawableResource = Res.drawable.ic_mic
     val ChevronRight: DrawableResource = Res.drawable.ic_chevron_right

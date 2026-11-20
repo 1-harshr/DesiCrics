@@ -133,14 +133,14 @@ class ShareStudioScreenshotTest {
     @Test
     fun studio() = shoot("studio") {
         Box(Modifier.background(DesiTheme.colors.surface).padding(20.dp)) {
-            ShareStudioContent(contents, initial = battingShareKey(1, "a0"), onShare = { _, _, _ -> }, onSave = { _, _, _ -> true })
+            ShareStudioContent(contents, initial = battingShareKey(1, "a0"), onShare = { _, _, _ -> }, onSave = { _, _, _ -> true }, onCopy = { _, _ -> true })
         }
     }
 
     @Test
     fun studioDark() = shoot("studio_dark", dark = true) {
         Box(Modifier.background(DesiTheme.colors.surface).padding(20.dp)) {
-            ShareStudioContent(contents, initial = "result", onShare = { _, _, _ -> }, onSave = { _, _, _ -> true })
+            ShareStudioContent(contents, initial = "result", onShare = { _, _, _ -> }, onSave = { _, _, _ -> true }, onCopy = { _, _ -> true })
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.harsh.desicrics.ui.system
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -64,6 +66,32 @@ actual fun rememberShareImage(): suspend (images: List<ImageBitmap>, format: Ima
             }
             send.setType(format.mimeType).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
+    }
+}
+
+/**
+ * Writes the picture to the same cache folder as shared ones and puts its FileProvider URI on the
+ * clipboard; the app that pastes it is granted read access. It has its own file name, so a later share
+ * doesn't swap the picture out from under the clipboard.
+ */
+@Composable
+actual fun rememberCopyImage(): suspend (image: ImageBitmap, format: ImageFileFormat) -> Boolean {
+    val context = LocalContext.current
+    return remember(context) {
+        { image, format ->
+            val uri = withContext(Dispatchers.IO) {
+                runCatching {
+                    val dir = File(context.cacheDir, "shared").apply { mkdirs() }
+                    val file = File(dir, "desicrics-copied.${format.extension}")
+                    check(file.outputStream().use { image.write(format, it) })
+                    FileProvider.getUriForFile(context, "${context.packageName}.share", file)
+                }.getOrNull()
+            }
+            val clipboard = context.getSystemService(ClipboardManager::class.java)
+            uri != null && clipboard != null && runCatching {
+                clipboard.setPrimaryClip(ClipData.newUri(context.contentResolver, ALBUM, uri))
+            }.isSuccess
         }
     }
 }
