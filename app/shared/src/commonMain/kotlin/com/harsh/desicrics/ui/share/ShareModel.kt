@@ -39,19 +39,46 @@ enum class TemplateKind(val file: ImageFileFormat) {
 }
 
 /**
- * One look for a piece of content. [draw] fills the whole design canvas (see [ShareFormat]) and is the
+ * One look for a piece of content. [drawPage] fills the whole design canvas (see [ShareFormat]) and is the
  * picture itself: the studio records exactly what it draws. Overlays must leave the background empty.
+ *
+ * Most templates are one picture. A long list (a scorecard, a squad, a day's fixtures) can split into
+ * numbered pages with [paged]: the studio previews one page at a time and shares or saves them together.
  */
 @Immutable
-class ShareTemplate(
+class ShareTemplate private constructor(
     /** Stable within its content, e.g. "classic"; used for the saved file's name. */
     val key: String,
     val name: StringResource,
     val kind: TemplateKind,
     /** Formats this template can be drawn in; the studio hides the format switch when there's one. */
-    val formats: List<ShareFormat> = ShareFormat.entries,
-    val draw: @Composable (ShareFormat) -> Unit,
-)
+    val formats: List<ShareFormat>,
+    /** How many pages the template takes in a format; a story fits more rows than a post. At least 1. */
+    val pages: (ShareFormat) -> Int,
+    /** Draws one page, counted from 0. */
+    val drawPage: @Composable (format: ShareFormat, page: Int) -> Unit,
+) {
+    /** A one-page template. */
+    constructor(
+        key: String,
+        name: StringResource,
+        kind: TemplateKind,
+        formats: List<ShareFormat> = ShareFormat.entries,
+        draw: @Composable (ShareFormat) -> Unit,
+    ) : this(key, name, kind, formats, { 1 }, { format, _ -> draw(format) })
+
+    companion object {
+        /** A template that splits into [pages] numbered pages; [draw] gets the format and the page, from 0. */
+        fun paged(
+            key: String,
+            name: StringResource,
+            kind: TemplateKind,
+            formats: List<ShareFormat> = ShareFormat.entries,
+            pages: (ShareFormat) -> Int,
+            draw: @Composable (format: ShareFormat, page: Int) -> Unit,
+        ) = ShareTemplate(key, name, kind, formats, { pages(it).coerceAtLeast(1) }, draw)
+    }
+}
 
 /**
  * Something that can be shared as a picture: a batting innings, a bowling spell, a result, a season, and

@@ -40,25 +40,29 @@ actual fun rememberShareText(): (text: String) -> Unit {
 }
 
 /**
- * Saves the picture in the app's cache and shares it through the FileProvider declared in the app's
+ * Saves the pictures in the app's cache and shares them through the FileProvider declared in the app's
  * manifest (authority "<applicationId>.share"). Each share overwrites the last; nothing piles up.
  */
 @Composable
-actual fun rememberShareImage(): suspend (image: ImageBitmap, format: ImageFileFormat) -> Unit {
+actual fun rememberShareImage(): suspend (images: List<ImageBitmap>, format: ImageFileFormat) -> Unit {
     val context = LocalContext.current
     return remember(context) {
-        { image, format ->
-            val uri = withContext(Dispatchers.IO) {
+        { images, format ->
+            val uris = withContext(Dispatchers.IO) {
                 val dir = File(context.cacheDir, "shared").apply { mkdirs() }
-                // One file per format, so a PNG never goes out with a .jpg name or the other way round.
-                val file = File(dir, "desicrics-score.${format.extension}")
-                file.outputStream().use { image.write(format, it) }
-                FileProvider.getUriForFile(context, "${context.packageName}.share", file)
+                images.mapIndexed { i, image ->
+                    // One file per format, so a PNG never goes out with a .jpg name or the other way round.
+                    val file = File(dir, if (i == 0) "desicrics-score.${format.extension}" else "desicrics-score-${i + 1}.${format.extension}")
+                    file.outputStream().use { image.write(format, it) }
+                    FileProvider.getUriForFile(context, "${context.packageName}.share", file)
+                }
             }
-            val send = Intent(Intent.ACTION_SEND)
-                .setType(format.mimeType)
-                .putExtra(Intent.EXTRA_STREAM, uri)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            val send = if (uris.size == 1) {
+                Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_STREAM, uris.first())
+            } else {
+                Intent(Intent.ACTION_SEND_MULTIPLE).putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
+            }
+            send.setType(format.mimeType).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             context.startActivity(Intent.createChooser(send, null).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         }
     }

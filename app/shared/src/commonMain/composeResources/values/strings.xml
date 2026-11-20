@@ -1227,4 +1227,32 @@
     <string name="share_result_action">Share the result</string>
     <string name="share_scorecard_hint">Tap a player to share their innings or spell.</string>
     <string name="share_player_action">Share %1$s's figures</string>
+
+    <!-- Phase 7 · match posters -->
+    <string name="share_page">%1$d/%2$d</string>
+    <string name="share_pages_note">Share and Save send all %1$d pages together.</string>
+    <string name="share_template_big_score">Big score</string>
+    <string name="share_template_full_card">Full card</string>
+    <string name="share_template_top_performers">Top performers</string>
+    <string name="share_template_spotlight">Spotlight</string>
+    <string name="share_template_team_sheet">Team sheet</string>
+    <string name="share_template_player_grid">Player grid</string>
+    <string name="share_content_scorecard">Scorecard</string>
+    <string name="share_content_player_of_the_match">Player of the match</string>
+    <string name="share_content_squad">Squad</string>
+    <string name="share_scorecard_action">Share the scorecard</string>
+    <string name="share_squad_action">Share the squad</string>
+    <string name="share_squad_title">Share the squad</string>
+    <string name="poster_result">Result</string>
+    <string name="poster_scorecard">Scorecard</string>
+    <string name="poster_top_performers">Top performers</string>
+    <string name="poster_player_of_the_match">Player of the match</string>
+    <string name="poster_squad">Squad</string>
+    <string name="poster_versus">v</string>
+    <string name="poster_extras">Extras %1$d</string>
+    <string name="poster_continued">%1$s, continued</string>
+    <plurals name="poster_player_count">
+        <item quantity="one">%1$d player</item>
+        <item quantity="other">%1$d players</item>
+    </plurals>
 </resources>

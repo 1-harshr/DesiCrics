@@ -166,7 +166,7 @@ fun SeasonOverlay(figures: SeasonFigures, format: ShareFormat) = OverlayFrame(fi
  * the match or season name in small type.
  */
 @Composable
-private fun OverlayFrame(caption: String, format: ShareFormat, content: @Composable ColumnScope.() -> Unit) {
+internal fun OverlayFrame(caption: String, format: ShareFormat, content: @Composable ColumnScope.() -> Unit) {
     val type = DesiTheme.type
     val share = DesiTheme.colors.share
     Column(
@@ -183,7 +183,7 @@ private fun OverlayFrame(caption: String, format: ShareFormat, content: @Composa
 }
 
 @Composable
-private fun OverlayStats(stats: List<ShareStat>) {
+internal fun OverlayStats(stats: List<ShareStat>) {
     val type = DesiTheme.type
     Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
         stats.forEach { stat ->

@@ -17,11 +17,12 @@ enum class ImageFileFormat(val extension: String, val mimeType: String) {
 }
 
 /**
- * Opens the system share sheet with a picture, e.g. a scorecard card for WhatsApp status, written in
- * the given format. Encoding happens off the main thread, so the returned function suspends.
+ * Opens the system share sheet with one or more pictures, e.g. a scorecard card for WhatsApp status, or
+ * every page of a long poster together, written in the given format. Encoding happens off the main
+ * thread, so the returned function suspends.
  */
 @Composable
-expect fun rememberShareImage(): suspend (image: ImageBitmap, format: ImageFileFormat) -> Unit
+expect fun rememberShareImage(): suspend (images: List<ImageBitmap>, format: ImageFileFormat) -> Unit
 
 /**
  * Saves a picture to the phone's gallery under [name] (no extension), asking for storage permission

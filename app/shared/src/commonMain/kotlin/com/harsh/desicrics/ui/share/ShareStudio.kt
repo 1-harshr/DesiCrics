@@ -61,7 +61,8 @@ import org.jetbrains.compose.resources.stringResource
  * The share studio: one sheet for every picture DesiCrics makes. The user picks what to share from
  * [contents] (when there's more than one), swipes through its templates as live previews, picks story or
  * post, then shares the picture or saves it to the gallery. The picture is recorded from the preview
- * itself at full size, so it's exactly what was shown.
+ * itself at full size, so it's exactly what was shown. A template with several pages shows a page picker,
+ * and Share and Save take every page together.
  *
  * [initial] is the key of the content to open on; [look] is the theme pictures are drawn in.
  */
@@ -80,7 +81,7 @@ fun ShareStudio(
             contents,
             initial = initial,
             look = look,
-            onShare = { image, format, _ -> shareImage(image, format) },
+            onShare = { images, format, _ -> shareImage(images, format) },
             onSave = { image, format, name -> saveImage(image, format, name) },
         )
     }
@@ -90,15 +91,16 @@ fun ShareStudio(
 private enum class StudioNote { SAVED, SAVE_FAILED }
 
 /**
- * The studio without its sheet or the platform's share and save, so tests can draw it. [onShare] and
- * [onSave] get the picture, its file format and a file name.
+ * The studio without its sheet or the platform's share and save, so tests can draw it. [onShare] gets
+ * every page of the picture (usually one), its file format and a file name; [onSave] is called once per
+ * page, with "-1", "-2"… on the name when there's more than one.
  */
 @Composable
 fun ShareStudioContent(
     contents: List<ShareContent>,
     initial: String? = null,
     look: ShareLook = ShareLook.Default,
-    onShare: suspend (ImageBitmap, ImageFileFormat, String) -> Unit,
+    onShare: suspend (List<ImageBitmap>, ImageFileFormat, String) -> Unit,
     onSave: suspend (ImageBitmap, ImageFileFormat, String) -> Boolean,
 ) {
     val colors = DesiTheme.colors
@@ -109,7 +111,6 @@ fun ShareStudioContent(
     var onPhoto by rememberSaveable { mutableStateOf(false) }
     var note by remember { mutableStateOf<StudioNote?>(null) }
     var busy by remember { mutableStateOf(false) }
-    val layer = rememberGraphicsLayer()
     val scope = rememberCoroutineScope()
 
     Column(verticalArrangement = Arrangement.spacedBy(space.s4)) {
@@ -128,6 +129,11 @@ fun ShareStudioContent(
             val pager = rememberPagerState { content.templates.size }
             val template = content.templates[pager.currentPage.coerceIn(content.templates.indices)]
             val shown = if (format in template.formats) format else template.formats.first()
+            // Every page of the template in the middle is recorded, so Share and Save send them all.
+            val pageCount = content.templates[pager.settledPage.coerceIn(content.templates.indices)].pages(shown)
+            var picked by remember(pager.settledPage, shown) { mutableStateOf(0) }
+            val shownPage = picked.coerceIn(0, pageCount - 1)
+            val layers = List(pageCount) { key(it) { rememberGraphicsLayer() } }
             if (template.formats.size > 1) {
                 SegmentedControl(
                     options = template.formats,
@@ -153,8 +159,9 @@ fun ShareStudioContent(
                             eachFormat,
                             look,
                             onPhoto = onPhoto,
+                            page = if (index == pager.settledPage) shownPage else 0,
                             // Only the template in the middle is recorded; that's the one Share sends.
-                            layer = layer.takeIf { index == pager.settledPage },
+                            layers = if (index == pager.settledPage) layers else emptyList(),
                         )
                         Text(
                             stringResource(each.name),
@@ -165,6 +172,7 @@ fun ShareStudioContent(
                     }
                 }
             }
+            if (pageCount > 1) PagePicker(pageCount, shownPage, onSelect = { picked = it })
             if (template.kind == TemplateKind.OVERLAY) OverlayNote(onPhoto, onToggle = { onPhoto = it })
             val fileName = "desicrics-${content.key}-${template.key}"
             Row(horizontalArrangement = Arrangement.spacedBy(space.s3)) {
@@ -173,7 +181,10 @@ fun ShareStudioContent(
                     onClick = {
                         scope.launch {
                             busy = true
-                            note = if (onSave(layer.toImageBitmap(), template.kind.file, fileName)) StudioNote.SAVED else StudioNote.SAVE_FAILED
+                            val saved = layers.mapIndexed { i, layer ->
+                                onSave(layer.toImageBitmap(), template.kind.file, if (layers.size > 1) "$fileName-${i + 1}" else fileName)
+                            }
+                            note = if (saved.all { it }) StudioNote.SAVED else StudioNote.SAVE_FAILED
                             busy = false
                         }
                     },
@@ -186,7 +197,7 @@ fun ShareStudioContent(
                     onClick = {
                         scope.launch {
                             busy = true
-                            onShare(layer.toImageBitmap(), template.kind.file, fileName)
+                            onShare(layers.map { it.toImageBitmap() }, template.kind.file, fileName)
                             busy = false
                         }
                     },
@@ -209,12 +220,20 @@ fun ShareStudioContent(
 }
 
 /**
- * One template at [format], with rounded corners. Overlays sit on a checkerboard (or the sample photo) so
- * their transparency shows; that backdrop is outside what's recorded. With a [layer], the template is
- * recorded into it at the format's full pixel size.
+ * One [page] of a template at [format], with rounded corners. Overlays sit on a checkerboard (or the
+ * sample photo) so their transparency shows; that backdrop is outside what's recorded. Each of [layers]
+ * records the page with its index at the format's full pixel size; pages other than [page] are recorded
+ * without being shown.
  */
 @Composable
-fun TemplatePreview(template: ShareTemplate, format: ShareFormat, look: ShareLook = ShareLook.Default, onPhoto: Boolean = false, layer: GraphicsLayer? = null) {
+fun TemplatePreview(
+    template: ShareTemplate,
+    format: ShareFormat,
+    look: ShareLook = ShareLook.Default,
+    onPhoto: Boolean = false,
+    page: Int = 0,
+    layers: List<GraphicsLayer> = emptyList(),
+) {
     val colors = DesiTheme.colors
     val description = stringResource(template.name)
     Box(
@@ -225,19 +244,44 @@ fun TemplatePreview(template: ShareTemplate, format: ShareFormat, look: ShareLoo
         if (template.kind == TemplateKind.OVERLAY) {
             if (onPhoto) SamplePhoto() else Checkerboard()
         }
-        Box(Modifier.fillMaxSize().then(if (layer != null) Modifier.recordInto(layer, format) else Modifier)) {
-            look.Apply { ShareCanvas(format) { template.draw(format) } }
+        layers.forEachIndexed { i, layer ->
+            if (i != page) {
+                Box(Modifier.fillMaxSize().recordInto(layer, format, show = false)) {
+                    look.Apply { ShareCanvas(format) { template.drawPage(format, i) } }
+                }
+            }
+        }
+        val shownLayer = layers.getOrNull(page)
+        Box(Modifier.fillMaxSize().then(if (shownLayer != null) Modifier.recordInto(shownLayer, format) else Modifier)) {
+            look.Apply { ShareCanvas(format) { template.drawPage(format, page) } }
         }
     }
 }
 
-/** Draws the content as usual, and records it into [layer] scaled up to the format's full size. */
-private fun Modifier.recordInto(layer: GraphicsLayer, format: ShareFormat) = drawWithContent {
+/**
+ * Records the content into [layer] scaled up to the format's full size, and draws it as usual unless
+ * [show] is false (a page that's shared but not the one on screen).
+ */
+private fun Modifier.recordInto(layer: GraphicsLayer, format: ShareFormat, show: Boolean = true) = drawWithContent {
     val up = format.widthPx / size.width
     layer.record(IntSize(format.widthPx, format.heightPx)) {
         scale(up, up, pivot = Offset.Zero) { this@drawWithContent.drawContent() }
     }
-    scale(1f / up, 1f / up, pivot = Offset.Zero) { drawLayer(layer) }
+    if (show) scale(1f / up, 1f / up, pivot = Offset.Zero) { drawLayer(layer) }
+}
+
+/** "1/3 2/3 3/3": which page of a long poster is previewed, and a note that they're shared together. */
+@Composable
+private fun PagePicker(count: Int, page: Int, onSelect: (Int) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        ChoiceChips(
+            options = (0 until count).toList(),
+            selected = page,
+            label = { stringResource(Res.string.share_page, it + 1, count) },
+            onSelect = onSelect,
+        )
+        Text(stringResource(Res.string.share_pages_note, count), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+    }
 }
 
 /** Where overlays work best, and a switch to preview one on a photo rather than the checkerboard. */
