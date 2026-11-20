@@ -94,6 +94,7 @@ import com.harsh.desicrics.scoring.ScoringEngine
 import com.harsh.desicrics.scoring.bowlerRuleBreak
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
 import com.harsh.desicrics.ui.share.ResultShare
+import com.harsh.desicrics.ui.share.ScorecardShare
 import com.harsh.desicrics.ui.share.ShareStudio
 import com.harsh.desicrics.ui.share.matchShareContents
 import com.harsh.desicrics.ui.system.rememberShareText
@@ -390,6 +391,14 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
                     InningsWagonWheel(it)
                 }
                 MatchMvp(state)
+                if (state.isComplete) {
+                    TonalButton(
+                        stringResource(Res.string.share_scorecard_action),
+                        onClick = { sheet = ScoringSheet.ShareCard(ScorecardShare.KEY) },
+                        modifier = Modifier.fillMaxWidth(),
+                        leadingIcon = DesiIcons.Share,
+                    )
+                }
             }
             // Latest innings first, so the over in progress is at the top.
             MatchTab.OVERS -> state.innings.asReversed().forEach { InningsOvers(it, showTitle = state.innings.size > 1) }

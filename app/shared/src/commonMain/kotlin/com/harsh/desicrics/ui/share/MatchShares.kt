@@ -7,18 +7,19 @@ import com.harsh.desicrics.scoring.BatterCard
 import com.harsh.desicrics.scoring.BowlerCard
 import com.harsh.desicrics.scoring.InningsState
 import com.harsh.desicrics.scoring.MatchState
-import com.harsh.desicrics.stats.MvpPoints
 import com.harsh.desicrics.ui.text.dismissalText
-import com.harsh.desicrics.ui.text.resultText
 import com.harsh.desicrics.util.format2
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * What a match offers the studio: the score or result first, then each batter's innings and each
- * bowler's spell, in batting order across both innings.
+ * What a match offers the studio: the score or result first, then the scorecard and (once it's over) the
+ * player of the match, then each batter's innings and each bowler's spell, in batting order across both
+ * innings.
  */
 fun matchShareContents(state: MatchState): List<ShareContent> = buildList {
     add(ResultShare(state))
+    add(ScorecardShare(state))
+    state.playerOfTheMatch()?.let { add(PlayerOfTheMatchShare(state, it)) }
     state.innings.forEach { innings ->
         innings.batters.filter { it.balls > 0 || it.runs > 0 }.forEach { add(BattingShare(state, innings, it)) }
     }
@@ -36,28 +37,31 @@ fun bowlingShareKey(innings: Int, playerId: String) = "bowling-$innings-$playerI
 @Composable
 private fun MatchState.caption() = stringResource(Res.string.match_title, match.teamA.name, match.teamB.name)
 
-/** Both totals and the result, or while it's still on, where the match stands. */
+/**
+ * Both totals and the result, or while it's still on, where the match stands: Big score, Broadcast,
+ * Minimal and an overlay.
+ */
 class ResultShare(private val state: MatchState) : ShareContent {
     override val key = KEY
 
     @Composable
     override fun label() = stringResource(if (state.result != null) Res.string.share_content_result else Res.string.share_content_score)
 
-    override val templates: List<ShareTemplate> = summaryTemplates { summary() } + ShareTemplate(
+    override val templates: List<ShareTemplate> = listOf(
+        ShareTemplate("bigscore", Res.string.share_template_big_score, TemplateKind.OPAQUE) { BigScoreTemplate(state.bigScoreFigures(), it) },
+    ) + summaryTemplates { summary() }.filter { it.key != "classic" } + ShareTemplate(
         "overlay", Res.string.share_template_overlay, TemplateKind.OVERLAY,
     ) { format ->
         val summary = summary()
-        ResultOverlay(ResultFigures(summary.headlines, summary.lines.first(), playerOfTheMatch(), summary.caption), format)
+        ResultOverlay(ResultFigures(summary.headlines, summary.lines.first(), state.playerOfTheMatch()?.name, summary.caption), format)
     }
 
     @Composable
     private fun summary(): ShareSummary {
-        val match = state.match
-        val played = state.innings.filter { it.legalBalls > 0 || it.runs > 0 }.ifEmpty { state.innings.take(1) }
-        val status = state.result?.let { resultText(match, it) } ?: stringResource(Res.string.match_title, match.teamA.name, match.teamB.name)
+        val status = state.statusText()
         return ShareSummary(
             title = null,
-            headlines = played.map { ShareHeadline(it.battingTeam.name, it.scoreText, stringResource(Res.string.share_overs_detail, it.oversText)) },
+            headlines = state.playedInnings.map { ShareHeadline(it.battingTeam.name, it.scoreText, stringResource(Res.string.share_overs_detail, it.oversText)) },
             lines = listOf(status),
             caption = state.caption(),
         )
@@ -65,13 +69,6 @@ class ResultShare(private val state: MatchState) : ShareContent {
 
     companion object {
         const val KEY = "result"
-    }
-
-    /** The top MVP once the match is over. */
-    private fun playerOfTheMatch(): String? {
-        if (!state.isComplete) return null
-        val id = MvpPoints.forMatch(state).maxByOrNull { it.value }?.key ?: return null
-        return (state.match.teamA.players + state.match.teamB.players).firstOrNull { it.id == id }?.name
     }
 }
 
