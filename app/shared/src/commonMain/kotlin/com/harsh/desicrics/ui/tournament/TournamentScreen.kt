@@ -94,6 +94,10 @@ import com.harsh.desicrics.model.TournamentFormat
 import com.harsh.desicrics.model.TournamentTeam
 import com.harsh.desicrics.resources.*
 import com.harsh.desicrics.ui.home.HomeMatchCard
+import com.harsh.desicrics.ui.match.OptionsSheet
+import com.harsh.desicrics.ui.match.SheetOption
+import com.harsh.desicrics.ui.share.ShareStudio
+import com.harsh.desicrics.ui.share.tournamentShareContents
 import com.harsh.desicrics.ui.social.PlayerLine
 import com.harsh.desicrics.ui.stats.mvpText
 import com.harsh.desicrics.ui.system.rememberShareText
@@ -116,6 +120,9 @@ internal sealed interface TournamentSheet {
     data object AddOrganiser : TournamentSheet
     data object AddFixture : TournamentSheet
     data class Schedule(val match: Match) : TournamentSheet
+    /** Share the link or a poster. */
+    data object Share : TournamentSheet
+    data object Posters : TournamentSheet
 }
 
 @Composable
@@ -147,7 +154,7 @@ fun TournamentScreen(
     TournamentContent(
         state = state,
         onBack = onBack,
-        onShare = { shareText?.let(share) },
+        onShare = { sheet = TournamentSheet.Share },
         onOpenMatch = onOpenMatch,
         onOpenPlayer = onOpenPlayer,
         onSheet = { sheet = it },
@@ -191,6 +198,22 @@ fun TournamentScreen(
             AddFixtureSheet(details.tournament.confirmedTeams, onAdd = { a, b -> viewModel.addFixture(a, b); close() }, onDismiss = close)
         }
         is TournamentSheet.Schedule -> ScheduleSheet(current.match.scheduledAt, onSave = { at -> viewModel.schedule(current.match.id, at); close() }, onDismiss = close)
+        TournamentSheet.Share -> OptionsSheet(
+            title = stringResource(Res.string.tournament_share),
+            options = listOf(
+                SheetOption(stringResource(Res.string.match_share_link), stringResource(Res.string.poster_share_link_hint)) {
+                    shareText?.let(share)
+                    close()
+                },
+                SheetOption(stringResource(Res.string.poster_share_action), stringResource(Res.string.poster_share_hint)) {
+                    sheet = TournamentSheet.Posters
+                },
+            ),
+            onDismiss = close,
+        )
+        TournamentSheet.Posters -> state.details?.let { details ->
+            ShareStudio(remember(details) { tournamentShareContents(details) }, onDismiss = close, title = stringResource(Res.string.poster_studio_title))
+        }
     }
 }
 

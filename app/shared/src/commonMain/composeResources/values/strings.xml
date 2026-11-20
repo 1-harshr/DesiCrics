@@ -1255,4 +1255,68 @@
         <item quantity="one">%1$d player</item>
         <item quantity="other">%1$d players</item>
     </plurals>
+    <!-- Phase 7 · tournament posters -->
+    <string name="poster_content_fixtures">Fixtures</string>
+    <string name="poster_content_bracket">Knockouts</string>
+    <string name="poster_content_table">Points table</string>
+    <string name="poster_content_announcement">Announcement</string>
+    <string name="poster_template_matchday">Matchday card</string>
+    <string name="poster_template_broadcast_list">Broadcast list</string>
+    <string name="poster_template_minimal_list">Minimal list</string>
+    <string name="poster_template_versus">Versus tiles</string>
+    <string name="poster_template_bracket">Bracket</string>
+    <string name="poster_template_road">Road to the final</string>
+    <string name="poster_template_table">Table</string>
+    <string name="poster_template_minimal_table">Minimal table</string>
+    <string name="poster_template_spotlight">Spotlight</string>
+    <string name="poster_template_hero">Hero</string>
+    <string name="poster_matchday">Matchday</string>
+    <string name="poster_matchday_number">Matchday %1$d</string>
+    <string name="poster_vs">vs</string>
+    <string name="poster_vs_short">v</string>
+    <string name="poster_time_tbc">TBC</string>
+    <string name="poster_tbd">To be decided</string>
+    <string name="poster_road_beat">Beat %1$s</string>
+    <string name="poster_road_lost_to">Lost to %1$s</string>
+    <string name="poster_road_league">%1$s in the league · %2$d pts</string>
+    <string name="poster_road_league_group">%1$s in Group %2$s · %3$d pts</string>
+    <string name="poster_ordinal_st">%1$dst</string>
+    <string name="poster_ordinal_nd">%1$dnd</string>
+    <string name="poster_ordinal_rd">%1$drd</string>
+    <string name="poster_ordinal_th">%1$dth</string>
+    <string name="poster_day">%1$s %2$d %3$s</string>
+    <string name="poster_day_time">%1$s · %2$s</string>
+    <string-array name="poster_weekdays">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
+    <string-array name="poster_months">
+        <item>Jan</item>
+        <item>Feb</item>
+        <item>Mar</item>
+        <item>Apr</item>
+        <item>May</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Aug</item>
+        <item>Sep</item>
+        <item>Oct</item>
+        <item>Nov</item>
+        <item>Dec</item>
+    </string-array>
+    <string name="poster_table_cutoff">Above the line: through to the next round</string>
+    <string name="poster_entries_open">Entries open</string>
+    <string name="poster_starts">Starts</string>
+    <string name="poster_where">Where</string>
+    <string name="poster_dates_soon">Dates soon</string>
+    <string name="poster_organised_by">Organised by %1$s</string>
+    <string name="poster_share_action">Share a poster</string>
+    <string name="poster_share_hint">Fixtures, the table, the knockouts and more, as pictures for WhatsApp and Instagram.</string>
+    <string name="poster_share_link_hint">Anyone can follow the fixtures and table, in the app or a browser.</string>
+    <string name="poster_studio_title">Share a poster</string>
 </resources>
