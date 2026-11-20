@@ -254,8 +254,8 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ The auction's pool moves onto the tournament's player pool
 
 ### Level 3 · Delight
-- ⬜ Pick-up tournaments: the organiser makes teams from the pool, or the app splits it into balanced sides
-- ⬜ Squad changes after the lock, shown on team pages
-- ⬜ A reminder to organisers the day before entry closes
+- ✅ Pick-up tournaments: the organiser makes teams from the pool, or the app splits it into balanced sides
+- ✅ Squad changes after the lock, shown with each team's squad on the tournament's Players tab
+- ✅ A reminder to organisers the day before entry closes
 
 **Exit:** an organiser shares team and player invite links in a WhatsApp group; two teams enter and a player with no team joins the pool; the organiser confirms the teams and places the player; everyone is notified, squads lock at the start, and the first fixture offers only squad players.
