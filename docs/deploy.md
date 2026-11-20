@@ -24,16 +24,18 @@ docker build -t desicrics-server server
 | `FIREBASE_PROJECT_ID` | No | Default `desicrics-45117`. Used to verify sign-in tokens. |
 | `FIREBASE_SERVICE_ACCOUNT` | For push | Path to a Firebase service account JSON key (mount it as a secret file). Without it, notifications only go to the in-app inbox. |
 | `ANDROID_SHA256_FINGERPRINTS` | For verified links | Comma-separated SHA-256 fingerprints of the app's signing certificates (`./gradlew :app:androidApp:signingReport`, or Play Console › App integrity). Served at `/.well-known/assetlinks.json`, so `/join`, `/m` and `/t` links open the app without a chooser. |
-| `WEB_ORIGINS` | For the web app | Comma-separated origins the [web app](web.md) is served from, e.g. `https://desicrics.app,http://localhost:5173`. Lets browsers on those origins read the public API. |
+| `WEB_ORIGINS` | For the web app's dev server | Comma-separated origins allowed to read the public API from a browser, e.g. `http://localhost:5173`. Not needed for the [web app](web.md) served by the proxy, which is on the API's own address. |
 
 ## The permanent address
 
 The app never calls the host directly. The `remote` builds (`assembleRemoteDebug`, `assembleRemoteRelease`) call a Cloudflare Worker, `https://desicrics-api.desicrics-proxy.workers.dev` (`proxy/`), which passes every request, WebSockets included, through to wherever the server runs now. Join, match and tournament links use the same address, so moving hosts needs no new app build and old links keep working.
 
+The Worker also serves the [web app](web.md). A browser loading a page (a navigation, or a request that accepts HTML) gets the web app's files from `web/dist`; everything else, including all of the app's API calls and WebSockets, goes to the server as before. A few server pages stay with the server even in a browser: the stream overlay, `/m/{id}/overlay.json`, `/.well-known/`, `/images/` and `/health`. The web app calls the API on the same address, so it needs no `WEB_ORIGINS` there.
+
 To point it at a new host, change `BACKEND_URL` in `proxy/wrangler.jsonc`, then:
 
 ```sh
-cd proxy && npm install && npm run deploy   # first time: npx wrangler login
+cd proxy && npm install && npm run deploy   # first time: npx wrangler login. Builds web/ first, so it needs Java too
 ```
 
 To build the app against some other address instead, pass `-Pdesicrics.apiBaseUrl=https://<host> -Pdesicrics.publicUrl=https://<host>`.
@@ -93,7 +95,7 @@ Render can't build the image itself (no Android SDK), so `.github/workflows/serv
    Render sets `PORT`, and the health check path is `/`.
 4. **Redeploys:** copy the service's Deploy Hook URL into the `RENDER_DEPLOY_HOOK` repository secret, so each new image deploys itself.
 5. Set `BACKEND_URL` in `proxy/wrangler.jsonc` to `https://<service>.onrender.com` and deploy the proxy (see [The permanent address](#the-permanent-address)).
-6. **Keep it awake:** in [UptimeRobot](https://uptimerobot.com) (free), add an HTTP(s) monitor for `https://desicrics-api.desicrics-proxy.workers.dev/` every 5 minutes, which checks the proxy and the server together. The server then never sleeps, and Render's free 750 hours a month cover one service running all month. Without it, the app still copes: it wakes the server as it opens and waits up to 75 s for the first answer.
+6. **Keep it awake:** in [UptimeRobot](https://uptimerobot.com) (free), add an HTTP(s) monitor for `https://desicrics-api.desicrics-proxy.workers.dev/health` every 5 minutes, which checks the proxy and the server together. The server then never sleeps, and Render's free 750 hours a month cover one service running all month. Without it, the app still copes: it wakes the server as it opens and waits up to 75 s for the first answer.
 
 ## After the first deploy
 

@@ -149,6 +149,8 @@ fun Application.module(
 
     routing {
         get("/") { call.respondText("DesiCrics API") }
+        // For uptime monitors: the proxy serves the web app at /, so they check here instead.
+        get("/health") { call.respondText("ok") }
         publicRoutes(matches, tournaments, community, live, config.androidCertFingerprints)
         imageRoutes(images)
         authenticate("firebase") {
