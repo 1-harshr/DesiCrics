@@ -1,5 +1,6 @@
 package com.harsh.desicrics.di
 
+import com.harsh.desicrics.data.AuctionRepository
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.CommunityRepository
 import com.harsh.desicrics.data.MatchRepository
@@ -12,6 +13,7 @@ import com.harsh.desicrics.data.UserRepository
 import com.harsh.desicrics.data.api.DesiCricsApi
 import com.harsh.desicrics.data.api.IdTokenProvider
 import com.harsh.desicrics.session.SessionViewModel
+import com.harsh.desicrics.ui.auction.AuctionViewModel
 import com.harsh.desicrics.ui.community.CommunityViewModel
 import com.harsh.desicrics.ui.home.HomeViewModel
 import com.harsh.desicrics.ui.match.MatchViewModel
@@ -76,6 +78,7 @@ val dataModule = module {
     singleOf(::TournamentRepository)
     singleOf(::StatsRepository)
     singleOf(::CommunityRepository)
+    singleOf(::AuctionRepository)
     single { ThemePreference(Settings()) }
 }
 
@@ -96,7 +99,8 @@ val viewModelModule = module {
     viewModel { (profileId: String) -> CompareViewModel(profileId, get(), get()) }
     viewModel { (tournamentId: String?) -> LeaderboardViewModel(tournamentId, get()) }
     viewModel { (city: String) -> CommunityViewModel(city, get(), get()) }
-    viewModel { (tournamentId: String) -> TournamentViewModel(tournamentId, get(), get(), get()) }
+    viewModel { (tournamentId: String) -> TournamentViewModel(tournamentId, get(), get(), get(), get()) }
+    viewModel { (auctionId: String) -> AuctionViewModel(auctionId, get(), get(), get()) }
     viewModelOf(::NotificationsViewModel)
     viewModel { (profileId: String, myId: String?) -> PlayerViewModel(profileId, get(), myId) }
 }

@@ -3,9 +3,11 @@ package com.harsh.desicrics.ui.tournament
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.harsh.desicrics.api.CreateTournamentRequest
+import com.harsh.desicrics.data.AuctionRepository
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.data.TournamentRepository
+import com.harsh.desicrics.model.AuctionDetails
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
@@ -77,6 +79,9 @@ data class TournamentUiState(
     val teamResults: List<TeamSummary> = emptyList(),
     val organiserQuery: String = "",
     val organiserResults: List<PlayerSummary> = emptyList(),
+    /** The tournament's player auction, once loaded; null when it has none. */
+    val auction: AuctionDetails? = null,
+    val auctionSaving: Boolean = false,
 ) {
     val isOrganiser: Boolean get() = details?.tournament?.isOrganiser(myId) == true
 
@@ -97,6 +102,7 @@ class TournamentViewModel(
     private val repository: TournamentRepository,
     private val teams: TeamRepository,
     auth: AuthRepository,
+    private val auctions: AuctionRepository,
 ) : ViewModel() {
     private val _state = MutableStateFlow(TournamentUiState(myId = auth.currentUser?.uid))
     val state: StateFlow<TournamentUiState> = _state
@@ -118,6 +124,35 @@ class TournamentViewModel(
             attempt { repository.details(tournamentId) }.fold(
                 onSuccess = { details -> _state.update { it.copy(loading = false, details = details, loadFailed = false) } },
                 onFailure = { _state.update { it.copy(loading = false, loadFailed = it.details == null) } },
+            )
+        }
+        viewModelScope.launch {
+            attempt { auctions.forTournament(tournamentId) }.getOrNull().let { auction ->
+                // A failed load keeps what was there; a 404 comes back as null and clears it.
+                if (auction != null || _state.value.auction == null) _state.update { it.copy(auction = auction) }
+            }
+        }
+    }
+
+    /** Sets up the tournament's auction with the default rules, then opens it. */
+    fun createAuction(onCreated: (String) -> Unit) = auctionAct({ auctions.create(tournamentId) }, onDone = { onCreated(it.auction.id) })
+
+    /** The caller asks to be put up in the auction, or takes the request back. */
+    fun requestAuction(requested: Boolean) {
+        val id = _state.value.auction?.auction?.id ?: return
+        auctionAct({ auctions.setRequest(id, requested) })
+    }
+
+    private fun auctionAct(call: suspend () -> AuctionDetails, onDone: (AuctionDetails) -> Unit = {}) {
+        if (_state.value.auctionSaving) return
+        _state.update { it.copy(auctionSaving = true, actionFailed = false) }
+        viewModelScope.launch {
+            attempt { call() }.fold(
+                onSuccess = { auction ->
+                    _state.update { it.copy(auctionSaving = false, auction = auction) }
+                    onDone(auction)
+                },
+                onFailure = { _state.update { it.copy(auctionSaving = false, actionFailed = true) } },
             )
         }
     }

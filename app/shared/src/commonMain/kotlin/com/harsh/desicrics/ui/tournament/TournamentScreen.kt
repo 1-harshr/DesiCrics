@@ -93,6 +93,7 @@ import com.harsh.desicrics.model.TournamentDetails
 import com.harsh.desicrics.model.TournamentFormat
 import com.harsh.desicrics.model.TournamentTeam
 import com.harsh.desicrics.resources.*
+import com.harsh.desicrics.ui.auction.AuctionCard
 import com.harsh.desicrics.ui.home.HomeMatchCard
 import com.harsh.desicrics.ui.match.OptionsSheet
 import com.harsh.desicrics.ui.match.SheetOption
@@ -133,6 +134,7 @@ fun TournamentScreen(
     onBack: () -> Unit,
     onLeaderboard: () -> Unit = {},
     onOpenTeam: (String) -> Unit = {},
+    onOpenAuction: (String) -> Unit = {},
     viewModel: TournamentViewModel = koinViewModel { parametersOf(tournamentId) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -163,6 +165,8 @@ fun TournamentScreen(
         onLeaderboard = onLeaderboard,
         onOpenTeam = onOpenTeam,
         onRetry = viewModel::refresh,
+        onAuction = { state.auction?.let { onOpenAuction(it.auction.id) } ?: viewModel.createAuction(onOpenAuction) },
+        onAskAuction = viewModel::requestAuction,
     )
     when (val current = sheet) {
         null -> Unit
@@ -231,6 +235,8 @@ internal fun TournamentContent(
     onOpenTeam: (String) -> Unit = {},
     initialTab: TournamentTab = TournamentTab.FIXTURES,
     onRetry: () -> Unit = {},
+    onAuction: () -> Unit = {},
+    onAskAuction: (requested: Boolean) -> Unit = {},
 ) {
     val details = state.details
     val space = DesiTheme.space
@@ -288,6 +294,7 @@ internal fun TournamentContent(
             }
         }
         if (state.actionFailed) ErrorBanner(stringResource(Res.string.tournament_action_failed))
+        if (state.auction != null || (state.isOrganiser && !t.started)) AuctionCard(state.auction, state.myId, state.isOrganiser, state.auctionSaving, onAuction, onAskAuction)
         val tabs = TournamentTab.entries.filter { it != TournamentTab.TABLE || details.tables.isNotEmpty() }
         SegmentedControl(tabs, selected = tab.takeIf { it in tabs } ?: TournamentTab.FIXTURES, label = { stringResource(it.label) }, onSelect = { fixtureTeam = null; tab = it })
         Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
