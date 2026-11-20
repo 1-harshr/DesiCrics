@@ -182,13 +182,17 @@ internal fun RulesCard(settings: AuctionSettings, onEdit: (() -> Unit)?) {
                     add(Res.string.auction_rule_clock to stringResource(Res.string.auction_rule_clock_value, settings.lotSeconds, settings.bidSeconds))
                 }
             }
-            rows.forEachIndexed { i, (label, value) ->
-                ListRow(
-                    title = stringResource(label),
-                    titleColor = DesiTheme.colors.muted,
-                    trailing = { Text(value, style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink) },
-                    divider = i > 0,
-                )
+            // Short label-and-value lines: the rules are a summary, not a list to tap through.
+            Column(Modifier.padding(vertical = DesiTheme.space.s2)) {
+                rows.forEach { (label, value) ->
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = DesiTheme.space.s4, vertical = DesiTheme.space.s2),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(stringResource(label), style = DesiTheme.type.body, color = DesiTheme.colors.muted, modifier = Modifier.weight(1f))
+                        Text(value, style = DesiTheme.type.bodyStrong, color = DesiTheme.colors.ink)
+                    }
+                }
             }
         }
     }

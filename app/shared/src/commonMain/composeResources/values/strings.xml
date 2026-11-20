@@ -1435,7 +1435,7 @@
     <string name="auction_bid_wait">Wait for the next player to come up.</string>
     <string name="auction_you_lead">You have the highest bid</string>
     <string name="auction_your_purse">Purse left</string>
-    <string name="auction_max_bid">Most you can bid</string>
+    <string name="auction_max_bid">Max bid</string>
     <string name="auction_squad">Squad</string>
     <string name="auction_squad_value">%1$d/%2$d</string>
     <string name="auction_seconds_left">%1$d seconds left</string>

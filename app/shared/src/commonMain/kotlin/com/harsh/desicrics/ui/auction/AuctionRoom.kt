@@ -90,12 +90,15 @@ internal fun RoomStage(details: AuctionDetails, millisLeft: Long?, large: Boolea
     val lot = details.state.lot
     Column(modifier, verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
         if (details.state.status == AuctionStatus.PAUSED) PausedStrip()
+        // A large stage fills the height it's given (the hall's left pane).
+        val fill = if (large) Modifier.weight(1f) else Modifier
         if (lot == null) {
-            BetweenLots(details, large = large)
+            BetweenLots(details, fill, large = large)
         } else {
             LotStage(
                 details,
                 lot,
+                fill,
                 large = large,
                 clock = millisLeft?.let { left ->
                     { CountdownRing(left, clockTotalMillis(details.auction.settings, lot), size = if (large) DesiTheme.size.touchTarget * 2 else DesiTheme.size.touchTarget + DesiTheme.space.s4) }

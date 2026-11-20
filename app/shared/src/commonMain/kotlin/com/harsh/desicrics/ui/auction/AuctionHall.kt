@@ -76,8 +76,9 @@ internal fun AuctionHallContent(state: AuctionUiState, actions: AuctionActions) 
             if (state.actionFailed) ErrorBanner(state.actionError ?: stringResource(Res.string.auction_action_failed), Modifier.padding(horizontal = space.s4))
             if (landscape) {
                 Row(Modifier.fillMaxSize().padding(start = space.s4, end = space.s4, bottom = space.s4), horizontalArrangement = Arrangement.spacedBy(space.s4)) {
-                    Column(Modifier.weight(1.1f).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(space.s3)) {
-                        RoomStage(details, millisLeft = null, large = true)
+                    // The stage takes whatever height the controls leave, so SOLD and UNSOLD never scroll away.
+                    Column(Modifier.weight(1.1f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(space.s3)) {
+                        RoomStage(details, millisLeft = null, large = true, modifier = Modifier.weight(1f))
                         controls()
                     }
                     Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(space.s3)) {

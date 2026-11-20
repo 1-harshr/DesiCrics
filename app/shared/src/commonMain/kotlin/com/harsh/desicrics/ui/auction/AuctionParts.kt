@@ -166,11 +166,11 @@ internal val AuctionError.text: StringResource
         AuctionError.NOT_SOLD -> Res.string.auction_error_not_sold
     }
 
-/** A pool player's facts in one line: category, role, then [extra]. */
+/** A pool player's facts in one line: category, role (unless the category says it already), then [extra]. */
 @Composable
 internal fun playerLine(player: AuctionPlayer, vararg extra: String?): String =
     listOfNotNull(player.category, player.player.role?.let { stringResource(it.label) }, *extra)
-        .filter { it.isNotBlank() }.joinToString(" · ")
+        .filter { it.isNotBlank() }.distinctBy { it.lowercase() }.joinToString(" · ")
 
 /**
  * The player up for bidding and where the bidding stands: the card at the centre of every room. [large] is
@@ -191,11 +191,11 @@ internal fun LotStage(
     val name = entry?.player?.name.orEmpty()
     val onHero = colors.onBrandStrong
     Column(
-        modifier.fillMaxWidth().clip(DesiTheme.shapes.large).heroBackground().padding(if (large) space.s6 else space.s5),
-        verticalArrangement = Arrangement.spacedBy(if (large) space.s4 else space.s3),
+        modifier.fillMaxWidth().clip(DesiTheme.shapes.large).heroBackground().padding(if (large) space.s5 else space.s5),
+        verticalArrangement = if (large) Arrangement.SpaceBetween else Arrangement.spacedBy(space.s3),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(space.s4)) {
-            PhotoAvatar(name, entry?.player?.photoUrl, size = if (large) 112 else 72)
+            PhotoAvatar(name, entry?.player?.photoUrl, size = 72)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(space.s1)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(space.s2), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(Res.string.auction_up_now).uppercase(), style = DesiTheme.type.label, color = onHero.copy(alpha = 0.75f))
@@ -213,8 +213,10 @@ internal fun LotStage(
             }
             clock?.invoke()
         }
-        HorizontalDivider(color = onHero.copy(alpha = 0.18f))
+        if (!large) HorizontalDivider(color = onHero.copy(alpha = 0.18f))
         val leading = lot.leading
+        val leadText = if (leading == null) stringResource(Res.string.auction_no_bids) else stringResource(Res.string.auction_leading, details.teamName(leading.teamId))
+        val nextText = stringResource(Res.string.auction_next_bid, points(lot.nextBid, settings))
         Row(verticalAlignment = Alignment.Bottom) {
             Column(Modifier.weight(1f)) {
                 Text(
@@ -228,20 +230,13 @@ internal fun LotStage(
                     color = if (leading == null) onHero else colors.share.gold,
                     maxLines = 1,
                 )
-                Text(
-                    if (leading == null) stringResource(Res.string.auction_no_bids) else stringResource(Res.string.auction_leading, details.teamName(leading.teamId)),
-                    style = if (large) DesiTheme.type.titleMd else DesiTheme.type.bodyStrong,
-                    color = onHero,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                // The big screen is short on height, so who leads moves to the right of the bid there.
+                if (!large) Text(leadText, style = DesiTheme.type.bodyStrong, color = onHero, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
-            Text(
-                stringResource(Res.string.auction_next_bid, points(lot.nextBid, settings)),
-                style = DesiTheme.type.caption,
-                color = onHero.copy(alpha = 0.75f),
-                modifier = Modifier.padding(start = space.s2),
-            )
+            Column(Modifier.padding(start = space.s2), horizontalAlignment = Alignment.End) {
+                if (large) Text(leadText, style = DesiTheme.type.titleLg, color = onHero, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(nextText, style = if (large) DesiTheme.type.body else DesiTheme.type.caption, color = onHero.copy(alpha = 0.75f))
+            }
         }
     }
 }
@@ -300,7 +295,7 @@ internal fun BetweenLots(details: AuctionDetails, modifier: Modifier = Modifier,
     val onHero = colors.onBrandStrong
     Column(
         modifier.fillMaxWidth().clip(DesiTheme.shapes.large).heroBackground().padding(if (large) space.s6 else space.s5),
-        verticalArrangement = Arrangement.spacedBy(space.s2),
+        verticalArrangement = Arrangement.spacedBy(space.s2, if (large) Alignment.CenterVertically else Alignment.Top),
     ) {
         when (val latest = details.latest) {
             is AuctionEvent.Sold -> {
