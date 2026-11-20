@@ -87,6 +87,13 @@ class TournamentService(
     /** Tournaments anyone can ask to enter now, in [city] or anywhere. */
     suspend fun open(city: String): List<TournamentSummary> = tournaments.open(Cities.India.canonical(city.take(100)), clock(), OPEN_PAGE)
 
+    /** Every tournament in [city] unless it's blank, newest first, for the web app. */
+    suspend fun browse(city: String): List<TournamentSummary> = tournaments.browse(city.take(100), BROWSE_PAGE)
+
+    /** Tournaments by name, for the web app's search. Like the rest of search, it needs two letters. */
+    suspend fun search(query: String): List<TournamentSummary> =
+        if (query.trim().length < 2) emptyList() else tournaments.search(query.take(60), SEARCH_PAGE)
+
     suspend fun create(user: FirebasePrincipal, request: CreateTournamentRequest): TournamentDetails {
         request.validate()?.let { throw ApiException(HttpStatusCode.BadRequest, it.message) }
         if (users.get(user.uid) == null) throw ApiException(HttpStatusCode.Conflict, "Set up your profile first")
@@ -646,6 +653,8 @@ class TournamentService(
         const val DAY_MILLIS = 24 * 60 * 60 * 1000L
         /** The most tournaments open to join listed at once. */
         const val OPEN_PAGE = 30
+        const val BROWSE_PAGE = 60
+        const val SEARCH_PAGE = 20
     }
 
     private suspend fun requireOrganiser(user: FirebasePrincipal, tournamentId: String): Tournament {

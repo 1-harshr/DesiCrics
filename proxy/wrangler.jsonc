@@ -10,6 +10,13 @@
     // Where the server runs now. Change this and redeploy to move hosts.
     "BACKEND_URL": "https://desicrics-server-latest.onrender.com"
   },
+  // The web app (docs/web.md), built by `npm run build` in ../web. The Worker decides what reaches it.
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
+  },
   "observability": {
     "enabled": true,
     "traces": { "enabled": true }

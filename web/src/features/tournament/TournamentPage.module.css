@@ -1,0 +1,45 @@
+.trophy {
+  display: grid; place-items: center; flex: none;
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--on-brand-strong); color: var(--brand-strong);
+}
+.organisers { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-4); color: var(--muted); font: 400 13px/18px var(--font-body); }
+.entry { display: grid; gap: var(--space-1); margin-top: var(--space-4); border-color: color-mix(in srgb, var(--brand) 40%, var(--line)); }
+
+.stack { display: grid; gap: var(--space-3); }
+.tabsOnly { margin-top: var(--space-6); }
+.tabBody { margin-top: var(--space-2); }
+@media (min-width: 1100px) {
+  .columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-8); align-items: start; }
+}
+
+.table + .table { margin-top: var(--space-4); }
+.tableCard { margin-top: var(--space-3); overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.tableCard table { width: 100%; border-collapse: collapse; }
+.tableCard th {
+  padding: var(--space-3) 6px; background: var(--sunk); color: var(--muted); text-align: right;
+  font: 600 12px/16px var(--font-body); text-transform: uppercase; letter-spacing: 0.06em;
+}
+.tableCard td { padding: var(--space-3) 6px; border-top: 1px solid var(--line); text-align: right; font: 500 13px/18px var(--font-data); font-variant-numeric: tabular-nums; }
+.tableCard th:first-child, .tableCard td:first-child { width: 44px; padding-left: var(--space-4); text-align: left; }
+.tableCard th:nth-child(2), .tableCard td:nth-child(2) { width: 100%; min-width: 8rem; text-align: left; font: 600 15px/22px var(--font-body); }
+.tableCard th:nth-child(2) { font: 600 12px/16px var(--font-body); }
+.tableCard th:last-child, .tableCard td:last-child { padding-right: var(--space-4); }
+.qualifies td { background: color-mix(in srgb, var(--brand-soft) 50%, transparent); }
+.strong { font-weight: 700; }
+.rank {
+  display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  background: var(--sunk); color: var(--muted); font: 700 13px/1 var(--font-body);
+}
+.rankFirst { background: var(--brand); color: var(--on-brand); }
+.rankPodium { background: var(--brand-soft); color: var(--brand); }
+.qualifyNote { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); color: var(--muted); font: 400 13px/18px var(--font-body); }
+.qualifyDot { width: 10px; height: 10px; border-radius: 50%; background: var(--brand); }
+
+.best { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); }
+.bestMark { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 14px; background: var(--brand); color: var(--on-brand); flex: none; }
+.bestText { flex: 1; min-width: 0; }
+.bestLabel { color: var(--brand); font: 600 12px/16px var(--font-body); text-transform: uppercase; letter-spacing: 0.1em; }
+.bestValue { text-align: right; }
+.bestValue :first-child { color: var(--brand); }
+.statTitle { margin: var(--space-3) 0 var(--space-2); font: 600 15px/22px var(--font-body); }

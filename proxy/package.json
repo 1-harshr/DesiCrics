@@ -2,8 +2,9 @@
   "name": "desicrics-proxy",
   "private": true,
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "web": "npm --prefix ../web ci && npm --prefix ../web run build",
+    "dev": "npm run web && wrangler dev",
+    "deploy": "npm run web && wrangler deploy"
   },
   "devDependencies": {
     "wrangler": "4.165.0"

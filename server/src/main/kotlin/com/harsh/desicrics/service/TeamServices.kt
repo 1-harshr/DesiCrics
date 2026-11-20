@@ -12,6 +12,9 @@ import com.harsh.desicrics.model.HeadToHead
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.NotificationKind
 import com.harsh.desicrics.model.PlayerSummary
+import com.harsh.desicrics.model.PublicTeamPage
+import com.harsh.desicrics.model.RecordAgainst
+import com.harsh.desicrics.model.WinLoss
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSide
@@ -48,6 +51,9 @@ const val INSIGHT_MATCHES = 50
 
 /** Teams per page when browsing them. */
 const val TEAM_PAGE = 30
+
+/** How many of a team's matches its public page lists. */
+const val PUBLIC_MATCHES = 30
 
 class TeamService(
     private val teams: TeamStore,
@@ -96,6 +102,39 @@ class TeamService(
                 requested = team.roleOf(user.uid) == null && teams.hasJoinRequest(teamId, user.uid),
             )
         }
+    }
+
+    /** A team for the web app: its players and latest matches, with no codes, join requests or account IDs. */
+    suspend fun publicPage(teamId: String): PublicTeamPage {
+        val team = teams.get(teamId) ?: throw ApiException(HttpStatusCode.NotFound, "Team not found")
+        val completed = matches.completedForTeamSummaries(teamId).filter { it.result != null }
+        val against = completed
+            // Matches against a side typed in for one game have no team to name a record after.
+            .mapNotNull { match -> (if (match.teamA.teamId == teamId) match.teamB else match.teamA).teamId?.let { it to match } }
+            .groupBy({ it.first }, { it.second })
+            .map { (opponentId, played) ->
+                // Matches come newest first, so this is the opponent's current name.
+                val name = played.first().let { if (it.teamA.teamId == opponentId) it.teamA.name else it.teamB.name }
+                RecordAgainst(opponentId, name, winLoss(teamId, played))
+            }
+            .sortedWith(compareByDescending<RecordAgainst> { it.record.played }.thenBy { it.opponentName })
+        return PublicTeamPage(
+            team = team.copy(createdBy = "", joinCode = null, code = "", members = team.members.map { it.copy(claimCode = null) }),
+            matches = matches.forTeam(teamId, PUBLIC_MATCHES),
+            record = winLoss(teamId, completed),
+            against = against,
+        )
+    }
+
+    /** How [played], all completed with a result, went for [teamId]. */
+    private fun winLoss(teamId: String, played: List<com.harsh.desicrics.model.Match>): WinLoss {
+        fun sideOf(match: com.harsh.desicrics.model.Match) = if (match.teamA.teamId == teamId) TeamSide.A else TeamSide.B
+        return WinLoss(
+            played = played.size,
+            won = played.count { it.result!!.winner == sideOf(it) },
+            lost = played.count { it.result!!.winner == sideOf(it).other },
+            tied = played.count { it.result!!.isTie },
+        )
     }
 
     suspend fun update(user: FirebasePrincipal, teamId: String, request: TeamRequest): SavedTeam {
@@ -196,16 +235,8 @@ class TeamService(
 
     /** Completed matches between two saved teams, from [teamId]'s side. */
     suspend fun headToHead(teamId: String, otherId: String): HeadToHead {
-        val played = matches.between(teamId, otherId).filter { it.status == MatchStatus.COMPLETED && it.result != null }
-        fun sideOf(match: com.harsh.desicrics.model.Match) = if (match.teamA.teamId == teamId) TeamSide.A else TeamSide.B
-        return HeadToHead(
-            teamId = teamId,
-            opponentId = otherId,
-            played = played.size,
-            won = played.count { it.result!!.winner == sideOf(it) },
-            lost = played.count { it.result!!.winner == sideOf(it).other },
-            tied = played.count { it.result!!.isTie },
-        )
+        val record = winLoss(teamId, matches.between(teamId, otherId).filter { it.status == MatchStatus.COMPLETED && it.result != null })
+        return HeadToHead(teamId = teamId, opponentId = otherId, played = record.played, won = record.won, lost = record.lost, tied = record.tied)
     }
 
     /**

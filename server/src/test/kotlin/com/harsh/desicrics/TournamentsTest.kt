@@ -131,6 +131,13 @@ class TournamentsTest {
         // Team 1 and Team 3 batters made fours; Team 3 also hit sixes.
         assertTrue(done.keyStats.mostSixes.first().team == "Team 3")
         assertTrue(client.get("/t/${cup.tournament.id}").bodyAsText().contains("Weekend Cup"))
+
+        // The web app's public JSON, for anyone with the link, without account IDs.
+        val public = client.get("/public/tournaments/${cup.tournament.id}").body<TournamentDetails>()
+        assertEquals(teams[2].id, public.championId)
+        assertEquals("", public.tournament.createdBy)
+        assertTrue(public.tournament.organisers.isNotEmpty() && public.tournament.organisers.all { it.uid.isEmpty() })
+        assertTrue(public.fixtures.all { it.createdBy.isEmpty() && it.scorerUid.isEmpty() })
     }
 
     @Test
