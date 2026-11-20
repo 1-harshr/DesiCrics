@@ -34,11 +34,11 @@ fun Route.statsRoutes(stats: StatsService) {
     }
 }
 
-internal fun Parameters.season(): Int? = get("season")?.toIntOrNull()
+private fun Parameters.season(): Int? = get("season")?.toIntOrNull()
 
-internal fun Parameters.format(): FormatFilter = enum<FormatFilter>("format") ?: FormatFilter.ALL
+private fun Parameters.format(): FormatFilter = enum<FormatFilter>("format") ?: FormatFilter.ALL
 
-internal inline fun <reified T : Enum<T>> Parameters.enum(name: String): T? = get(name)?.let { value ->
+private inline fun <reified T : Enum<T>> Parameters.enum(name: String): T? = get(name)?.let { value ->
     enumValues<T>().firstOrNull { it.name.equals(value, ignoreCase = true) }
         ?: throw ApiException(HttpStatusCode.BadRequest, "Unknown $name: $value")
 }

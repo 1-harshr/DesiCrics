@@ -17,8 +17,6 @@ data class ServerConfig(
      * them at /.well-known/assetlinks.json so join and match links open the app without asking.
      */
     val androidCertFingerprints: List<String> = emptyList(),
-    /** Origins the web app is served from, e.g. `https://desicrics.app`, allowed to call the API from a browser. */
-    val webOrigins: List<String> = emptyList(),
     /** How long one second of an online auction's clock lasts. Only tests change it. */
     val auctionSecondMillis: Long = 1000,
     /** How often to look for tournaments whose entry closes within a day. Only tests change it. */
@@ -29,8 +27,7 @@ data class ServerConfig(
             port = env["PORT"]?.toIntOrNull() ?: 8080,
             firebaseProjectId = env["FIREBASE_PROJECT_ID"] ?: "desicrics-45117",
             firebaseServiceAccount = env["FIREBASE_SERVICE_ACCOUNT"]?.takeIf { it.isNotBlank() },
-            androidCertFingerprints = env["ANDROID_SHA256_FINGERPRINTS"].orEmpty().csv(),
-            webOrigins = env["WEB_ORIGINS"].orEmpty().csv(),
+            androidCertFingerprints = env["ANDROID_SHA256_FINGERPRINTS"].orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() },
             database = DatabaseConfig(
                 url = env["DATABASE_URL"] ?: DatabaseConfig.LOCAL_URL,
                 user = env["DATABASE_USER"] ?: DatabaseConfig.LOCAL_USER,
@@ -40,8 +37,6 @@ data class ServerConfig(
         )
     }
 }
-
-private fun String.csv(): List<String> = split(',').map { it.trim() }.filter { it.isNotEmpty() }
 
 data class DatabaseConfig(
     val url: String = LOCAL_URL,

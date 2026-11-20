@@ -185,7 +185,7 @@ object TournamentEngine {
     /** Every team plays every other in its group once, by the circle method, one matchday per round. */
     private fun league(teams: List<TournamentTeam>): List<PlannedFixture> {
         val fixtures = mutableListOf<PlannedFixture>()
-        for ((group, members) in teams.groupBy { it.group ?: 0 }.entries.sortedBy { it.key }) {
+        for ((group, members) in teams.groupBy { it.group ?: 0 }.toSortedMap()) {
             val ids: MutableList<String?> = members.sortedBy { it.seed }.map { it.teamId }.toMutableList()
             if (ids.size % 2 == 1) ids += null // a bye each matchday
             val rounds = ids.size - 1

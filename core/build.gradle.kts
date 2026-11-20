@@ -8,14 +8,6 @@ plugins {
 
 kotlin {
     jvm()
-    // For the web app: an ES module with TypeScript definitions, called through WebCore (see docs/web.md).
-    js {
-        outputModuleName = "desicrics-core"
-        nodejs()
-        binaries.library()
-        useEsModules()
-        generateTypeScriptDefinitions()
-    }
     android {
        namespace = "com.harsh.desicrics.core"
        compileSdk = libs.versions.android.compileSdk.get().toInt()

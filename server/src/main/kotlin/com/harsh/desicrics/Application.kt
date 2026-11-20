@@ -41,7 +41,6 @@ import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
-import io.ktor.server.plugins.cors.routing.CORS
 import com.harsh.desicrics.cities.standardiseCities
 import io.ktor.server.auth.bearer
 import io.ktor.server.engine.embeddedServer
@@ -106,7 +105,6 @@ fun Application.module(
     matches.listen(tournaments)
     launch { projector.backfill() }
     val teams = TeamService(teamStore, players, matchStore, users, notify = notifier::teamNotice)
-    val stats = StatsService(statsStore, players, users, teamStore, socialStore)
     val community = CommunityService(ExposedCommunityStore(database), players, teamStore, users, matchStore, statsStore)
     val images = ImageService(ExposedImageStore(database), users, teamStore, teams)
     val playerService = PlayerService(players, users)
@@ -126,12 +124,6 @@ fun Application.module(
     }
 
     install(CallLogging)
-    // The web app only reads the public routes, so plain GETs are all it needs.
-    if (config.webOrigins.isNotEmpty()) {
-        install(CORS) {
-            config.webOrigins.forEach { allowHost(it.substringAfter("://"), schemes = listOf(it.substringBefore("://"))) }
-        }
-    }
     install(WebSockets) {
         contentConverter = KotlinxWebsocketSerializationConverter(Json { ignoreUnknownKeys = true })
         pingPeriod = 20.seconds
@@ -156,10 +148,7 @@ fun Application.module(
 
     routing {
         get("/") { call.respondText("DesiCrics API") }
-        // For uptime monitors: the proxy serves the web app at /, so they check here instead.
-        get("/health") { call.respondText("ok") }
-        publicRoutes(matches, tournaments, community, live, config.androidCertFingerprints)
-        publicBrowseRoutes(social, teams, tournaments, stats)
+        publicRoutes(matches, tournaments, community, config.androidCertFingerprints)
         imageRoutes(images)
         authenticate("firebase") {
             profileRoutes(profiles)
@@ -172,7 +161,6 @@ fun Application.module(
             tournamentRoutes(tournaments)
             imageUploadRoutes(images)
             communityRoutes(community)
-            statsRoutes(stats)
             cityRoutes()
             statsRoutes(StatsService(statsStore, players, users, teamStore, socialStore))
             auctionRoutes(auctions, liveAuctions)

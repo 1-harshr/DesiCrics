@@ -53,7 +53,6 @@ class ApplicationTest {
     @Test
     fun rootIsPublic() = apiTest { client ->
         assertEquals("DesiCrics API", client.get("/").bodyAsText())
-        assertEquals("ok", client.get("/health").bodyAsText())
     }
 
     @Test
