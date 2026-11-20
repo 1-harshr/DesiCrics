@@ -348,6 +348,11 @@ class ScreenshotTest {
                     TournamentSummary("x", "Andheri Premier League", "Mumbai", TournamentFormat.ROUND_ROBIN, 8, isOrganiser = true),
                     TournamentSummary("y", "Monsoon Cup", "", TournamentFormat.KNOCKOUT, 16),
                 ),
+                city = "Mumbai",
+                open = listOf(
+                    TournamentSummary("z", "Juhu Beach Bash", "Mumbai", TournamentFormat.BOX_LEAGUE, 3, takesTeams = true, takesPlayers = true),
+                    TournamentSummary("w", "Bandra Box Cricket", "Mumbai", TournamentFormat.KNOCKOUT, 6, takesPlayers = true),
+                ),
             ),
             {}, {}, {},
         )

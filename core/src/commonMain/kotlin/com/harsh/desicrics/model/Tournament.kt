@@ -218,4 +218,8 @@ data class TournamentSummary(
     val format: TournamentFormat,
     val teams: Int,
     val isOrganiser: Boolean = false,
+    val startsAt: Long? = null,
+    /** Teams, or players, can ask to enter it now; set in the list of tournaments open to join. */
+    val takesTeams: Boolean = false,
+    val takesPlayers: Boolean = false,
 )

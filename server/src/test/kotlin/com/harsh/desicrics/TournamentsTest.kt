@@ -456,4 +456,25 @@ class TournamentsTest {
         client.put("/tournaments/${cup.id}/entry") { bearerAuth("test-asha"); jsonBody(closed) }
         assertEquals(HttpStatusCode.Conflict, client.addPlayer("om", cup.id).status)
     }
+
+    @Test
+    fun tournamentsOpenToJoinAreListedByCitySoonestFirst() = apiTest { client ->
+        client.setUpProfile("asha")
+        fun request(name: String, city: String, startsAt: Long? = null, teams: EntryPolicy = EntryPolicy.APPROVAL, players: EntryPolicy = EntryPolicy.APPROVAL, closes: Long? = null) =
+            CreateTournamentRequest(name, city, TournamentFormat.KNOCKOUT, 5, startsAt = startsAt, teamEntry = teams, playerEntry = players, entryClosesAt = closes)
+        client.tournament("asha", request("Later Cup", "Pune", startsAt = 2_000_000_000_000))
+        client.tournament("asha", request("Soon Cup", "pune", startsAt = 1_900_000_000_000, teams = EntryPolicy.ORGANISERS))
+        client.tournament("asha", request("Undated Cup", "Pune"))
+        client.tournament("asha", request("Invite Only", "Pune", teams = EntryPolicy.ORGANISERS, players = EntryPolicy.ORGANISERS))
+        client.tournament("asha", request("Closed Cup", "Pune", closes = 1))
+        client.tournament("asha", request("Mumbai Cup", "Mumbai"))
+        val started = client.tournament("asha", request("Started Cup", "Pune", teams = EntryPolicy.ORGANISERS)).tournament
+        (1..2).map { client.team("asha", "Team $it") }.forEach { client.enter("asha", started.id, it.id) }
+        client.post("/tournaments/${started.id}/start") { bearerAuth("test-asha") }
+
+        val pune = client.get("/tournaments/open?city=PUNE") { bearerAuth("test-asha") }.body<List<TournamentSummary>>()
+        assertEquals(listOf("Soon Cup", "Later Cup", "Undated Cup"), pune.map { it.name })
+        assertEquals(false to true, pune.first().takesTeams to pune.first().takesPlayers)
+        assertEquals(4, client.get("/tournaments/open") { bearerAuth("test-asha") }.body<List<TournamentSummary>>().size)
+    }
 }

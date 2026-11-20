@@ -16,6 +16,9 @@ class TournamentRepository(private val api: DesiCricsApi, private val config: Ap
 
     suspend fun mine(): List<TournamentSummary> = api.myTournaments()
 
+    /** Tournaments taking teams or players now, in [city] or anywhere when it's blank. */
+    suspend fun open(city: String): List<TournamentSummary> = api.openTournaments(city.trim())
+
     suspend fun create(request: CreateTournamentRequest): TournamentDetails =
         api.createTournament(request).also { analytics.log(AnalyticsEvents.TOURNAMENT_CREATED, mapOf("format" to request.format.name.lowercase())) }
 

@@ -9,6 +9,7 @@ import com.harsh.desicrics.db.TournamentTeamsTable
 import com.harsh.desicrics.db.TournamentsTable
 import com.harsh.desicrics.db.query
 import com.harsh.desicrics.api.EntrySettingsRequest
+import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.Organiser
 import com.harsh.desicrics.model.OrganiserRole
@@ -21,7 +22,9 @@ import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.greater
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.lowerCase
 import org.jetbrains.exposed.v1.core.isNull
 import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.core.or
@@ -137,6 +140,30 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
         TournamentsTable.selectAll().where { TournamentsTable.id inList ids }.orderBy(TournamentsTable.createdAt, SortOrder.DESC).map {
             val id = it[TournamentsTable.id]
             TournamentSummary(id, it[TournamentsTable.name], it[TournamentsTable.city], it[TournamentsTable.format], counts[id] ?: 0, id in organised)
+        }
+    }
+
+    override suspend fun open(city: String, now: Long, limit: Int): List<TournamentSummary> = db.query {
+        val taking = (TournamentsTable.teamEntry neq EntryPolicy.ORGANISERS) or (TournamentsTable.playerEntry neq EntryPolicy.ORGANISERS)
+        val notClosed = TournamentsTable.entryClosesAt.isNull() or (TournamentsTable.entryClosesAt greater now)
+        val where = (TournamentsTable.started eq false) and taking and notClosed
+        val rows = TournamentsTable.selectAll()
+            .where { if (city.isBlank()) where else where and (TournamentsTable.city.lowerCase() eq city.trim().lowercase()) }
+            .orderBy(TournamentsTable.startsAt to SortOrder.ASC_NULLS_LAST, TournamentsTable.createdAt to SortOrder.DESC)
+            .limit(limit)
+            .toList()
+        val ids = rows.map { it[TournamentsTable.id] }
+        val counts = if (ids.isEmpty()) emptyMap() else TournamentTeamsTable.selectAll()
+            .where { (TournamentTeamsTable.tournamentId inList ids) and (TournamentTeamsTable.status eq EntryStatus.CONFIRMED) }
+            .groupingBy { it[TournamentTeamsTable.tournamentId] }.eachCount()
+        rows.map {
+            val id = it[TournamentsTable.id]
+            TournamentSummary(
+                id, it[TournamentsTable.name], it[TournamentsTable.city], it[TournamentsTable.format], counts[id] ?: 0,
+                startsAt = it[TournamentsTable.startsAt],
+                takesTeams = it[TournamentsTable.teamEntry] != EntryPolicy.ORGANISERS,
+                takesPlayers = it[TournamentsTable.playerEntry] != EntryPolicy.ORGANISERS,
+            )
         }
     }
 

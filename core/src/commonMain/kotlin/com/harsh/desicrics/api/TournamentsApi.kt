@@ -14,6 +14,7 @@ import kotlinx.serialization.Serializable
 // Tournaments.
 //
 //   GET    /tournaments/mine                       → List<TournamentSummary> (organised, or a team entered)
+//   GET    /tournaments/open?city=                 → List<TournamentSummary> taking teams or players, soonest first
 //   POST   /tournaments                            CreateTournamentRequest → TournamentDetails
 //   GET    /tournaments/{id}                       → TournamentDetails
 //   PUT    /tournaments/{id}/entry                 EntrySettingsRequest → TournamentDetails (organisers, before it starts)

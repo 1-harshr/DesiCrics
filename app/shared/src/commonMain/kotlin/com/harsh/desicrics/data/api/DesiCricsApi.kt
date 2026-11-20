@@ -267,6 +267,9 @@ class DesiCricsApi(
 
     suspend fun myTournaments(): List<TournamentSummary> = call { get("$baseUrl/tournaments/mine", it) }.body()
 
+    suspend fun openTournaments(city: String): List<TournamentSummary> =
+        call { get("$baseUrl/tournaments/open") { it(); parameter("city", city) } }.body()
+
     suspend fun createTournament(request: CreateTournamentRequest): TournamentDetails =
         call { post("$baseUrl/tournaments") { it(); json(request) } }.body()
 

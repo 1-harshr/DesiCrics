@@ -75,6 +75,9 @@ class TournamentService(
 
     suspend fun mine(user: FirebasePrincipal): List<TournamentSummary> = tournaments.forUser(user.uid)
 
+    /** Tournaments anyone can ask to enter now, in [city] or anywhere. */
+    suspend fun open(city: String): List<TournamentSummary> = tournaments.open(city.take(100), clock(), OPEN_PAGE)
+
     suspend fun create(user: FirebasePrincipal, request: CreateTournamentRequest): TournamentDetails {
         request.validate()?.let { throw ApiException(HttpStatusCode.BadRequest, it.message) }
         if (users.get(user.uid) == null) throw ApiException(HttpStatusCode.Conflict, "Set up your profile first")
@@ -533,6 +536,8 @@ class TournamentService(
     private companion object {
         const val TEAM = "team"
         const val PLAYER = "player"
+        /** The most tournaments open to join listed at once. */
+        const val OPEN_PAGE = 30
     }
 
     private suspend fun requireOrganiser(user: FirebasePrincipal, tournamentId: String): Tournament {

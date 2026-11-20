@@ -216,6 +216,11 @@ interface TournamentStore {
     suspend fun get(tournamentId: String): Tournament?
     /** Tournaments [uid] organises, plays in, or that a team they belong to is in. */
     suspend fun forUser(uid: String): List<TournamentSummary>
+    /**
+     * Tournaments that haven't started and take teams or players before [now], in [city] (any case) unless
+     * it's blank; soonest start first, then newest.
+     */
+    suspend fun open(city: String, now: Long, limit: Int): List<TournamentSummary>
     /** False if the team was already entered. */
     suspend fun addTeam(tournamentId: String, team: TournamentTeam): Boolean
     suspend fun setTeamStatus(tournamentId: String, teamId: String, status: EntryStatus)

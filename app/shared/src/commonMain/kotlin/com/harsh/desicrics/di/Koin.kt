@@ -94,7 +94,7 @@ val viewModelModule = module {
     viewModelOf(::ProfileViewModel)
     viewModel { (teamId: String) -> TeamViewModel(teamId, get(), get(), get()) }
     viewModelOf(::SearchViewModel)
-    viewModelOf(::TournamentsViewModel)
+    viewModel { (city: String) -> TournamentsViewModel(city, get()) }
     viewModel { (profileId: String) -> CareerViewModel(profileId, get()) }
     viewModel { (profileId: String) -> CompareViewModel(profileId, get(), get()) }
     viewModel { (tournamentId: String?) -> LeaderboardViewModel(tournamentId, get()) }

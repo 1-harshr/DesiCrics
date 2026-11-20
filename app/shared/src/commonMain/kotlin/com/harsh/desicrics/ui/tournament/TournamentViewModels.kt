@@ -30,14 +30,19 @@ import kotlinx.coroutines.launch
 data class TournamentsUiState(
     val loading: Boolean = true,
     val tournaments: List<TournamentSummary> = emptyList(),
+    /** Where to look for tournaments open to join; starts as the user's own city. */
+    val city: String = "",
+    /** Tournaments taking entries in [city], leaving out the user's own. */
+    val open: List<TournamentSummary> = emptyList(),
     val loadFailed: Boolean = false,
     val saving: Boolean = false,
     val createFailed: Boolean = false,
 )
 
-class TournamentsViewModel(private val repository: TournamentRepository) : ViewModel() {
-    private val _state = MutableStateFlow(TournamentsUiState())
+class TournamentsViewModel(city: String, private val repository: TournamentRepository) : ViewModel() {
+    private val _state = MutableStateFlow(TournamentsUiState(city = city))
     val state: StateFlow<TournamentsUiState> = _state
+    private var openJob: Job? = null
 
     init {
         retry()
@@ -51,6 +56,21 @@ class TournamentsViewModel(private val repository: TournamentRepository) : ViewM
                 onSuccess = { list -> _state.update { it.copy(loading = false, tournaments = list) } },
                 onFailure = { _state.update { it.copy(loading = false, loadFailed = true) } },
             )
+        }
+        loadOpen()
+    }
+
+    /** Looks for open tournaments in another city, once the user stops typing. */
+    fun setCity(city: String) {
+        _state.update { it.copy(city = city.take(100)) }
+        loadOpen(wait = true)
+    }
+
+    private fun loadOpen(wait: Boolean = false) {
+        openJob?.cancel()
+        openJob = viewModelScope.launch {
+            if (wait) delay(400)
+            attempt { repository.open(_state.value.city) }.getOrNull()?.let { list -> _state.update { it.copy(open = list) } }
         }
     }
 

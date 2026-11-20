@@ -25,6 +25,7 @@ import io.ktor.server.routing.route
 fun Route.tournamentRoutes(tournaments: TournamentService) {
     route("/tournaments") {
         get("/mine") { call.respond(tournaments.mine(call.user)) }
+        get("/open") { call.respond(tournaments.open(call.request.queryParameters["city"].orEmpty())) }
         post { call.respond(HttpStatusCode.Created, tournaments.create(call.user, call.receive<CreateTournamentRequest>())) }
         route("/{id}") {
             get { call.respond(tournaments.details(call.parameters["id"].orEmpty())) }

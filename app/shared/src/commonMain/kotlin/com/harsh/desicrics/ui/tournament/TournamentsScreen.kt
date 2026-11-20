@@ -62,18 +62,21 @@ import com.harsh.desicrics.ui.newmatch.ExtraRunQuestions
 import com.harsh.desicrics.ui.newmatch.RulesPreset
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import com.harsh.desicrics.ui.text.dayLabel
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun TournamentsScreen(
+    city: String,
     onOpen: (String) -> Unit,
     /** Null where it is a tab of its own, with nothing behind it. */
     onBack: (() -> Unit)?,
-    viewModel: TournamentsViewModel = koinViewModel(),
+    viewModel: TournamentsViewModel = koinViewModel { parametersOf(city) },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var creating by rememberSaveable { mutableStateOf(false) }
-    TournamentsContent(state, onOpen, onCreate = { creating = true }, onBack, onRetry = viewModel::retry)
+    TournamentsContent(state, onOpen, onCreate = { creating = true }, onBack, onRetry = viewModel::retry, onCity = viewModel::setCity)
     if (creating) {
         CreateTournamentSheet(
             saving = state.saving,
@@ -88,7 +91,14 @@ fun TournamentsScreen(
 }
 
 @Composable
-fun TournamentsContent(state: TournamentsUiState, onOpen: (String) -> Unit, onCreate: () -> Unit, onBack: (() -> Unit)?, onRetry: () -> Unit = {}) {
+fun TournamentsContent(
+    state: TournamentsUiState,
+    onOpen: (String) -> Unit,
+    onCreate: () -> Unit,
+    onBack: (() -> Unit)?,
+    onRetry: () -> Unit = {},
+    onCity: (String) -> Unit = {},
+) {
     val space = DesiTheme.space
     DesiScaffold(title = stringResource(Res.string.tournaments_title), onBack = onBack) { padding ->
         LazyColumn(
@@ -107,6 +117,29 @@ fun TournamentsContent(state: TournamentsUiState, onOpen: (String) -> Unit, onCr
                 item {
                     ListCard {
                         state.tournaments.forEachIndexed { index, t -> TournamentRow(t, divider = index > 0, onClick = { onOpen(t.id) }) }
+                    }
+                }
+            }
+            if (!state.loadFailed) {
+                item { SectionHeader(stringResource(Res.string.tournaments_open), icon = DesiIcons.PersonAdd, modifier = Modifier.padding(top = space.s2)) }
+                item {
+                    DesiTextField(
+                        value = state.city,
+                        onValueChange = onCity,
+                        label = stringResource(Res.string.community_city),
+                        leadingIcon = DesiIcons.Location,
+                        supportingText = stringResource(Res.string.tournaments_open_anywhere).takeIf { state.city.isBlank() },
+                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                    )
+                }
+                // The user's own tournaments are listed above already.
+                val mine = state.tournaments.map { it.id }.toSet()
+                val open = state.open.filter { it.id !in mine }
+                item {
+                    if (open.isEmpty()) {
+                        Text(stringResource(Res.string.tournaments_open_none), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+                    } else {
+                        ListCard { open.forEachIndexed { index, t -> TournamentRow(t, divider = index > 0, onClick = { onOpen(t.id) }) } }
                     }
                 }
             }
@@ -134,10 +167,18 @@ private fun CreateTournamentCard(onCreate: () -> Unit) {
 
 @Composable
 private fun TournamentRow(tournament: TournamentSummary, divider: Boolean, onClick: () -> Unit) {
+    val taking = when {
+        tournament.takesTeams && tournament.takesPlayers -> stringResource(Res.string.tournaments_taking_both)
+        tournament.takesTeams -> stringResource(Res.string.tournaments_taking_teams)
+        tournament.takesPlayers -> stringResource(Res.string.tournaments_taking_players)
+        else -> ""
+    }
     val details = listOf(
         stringResource(tournament.format.label),
         pluralStringResource(Res.plurals.tournaments_team_count, tournament.teams, tournament.teams),
         tournament.city,
+        tournament.startsAt?.let { stringResource(Res.string.tournaments_starts, dayLabel(it)) }.orEmpty(),
+        taking,
     )
     ListRow(
         title = tournament.name,

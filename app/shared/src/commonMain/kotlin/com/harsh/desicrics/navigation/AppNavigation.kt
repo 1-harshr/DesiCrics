@@ -242,7 +242,7 @@ fun AppNavigation(
             }
             entry<TournamentsRoute> {
                 // The Tournaments tab's root, like Feed and Me, has no back arrow.
-                TournamentsScreen(onOpen = { backStack.add(TournamentRoute(it)) }, onBack = if (backStack.size > 1) back else null)
+                TournamentsScreen(city = profile.city, onOpen = { backStack.add(TournamentRoute(it)) }, onBack = if (backStack.size > 1) back else null)
             }
             entry<TournamentRoute> { route ->
                 TournamentScreen(

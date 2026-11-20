@@ -1110,6 +1110,13 @@
     <string name="teams_search">Search teams by name or code</string>
     <string name="teams_no_match">No teams match that.</string>
     <string name="tournaments_empty_title">No tournaments yet</string>
+    <string name="tournaments_open">Open to join</string>
+    <string name="tournaments_open_anywhere">Leave blank to see tournaments anywhere.</string>
+    <string name="tournaments_open_none">No tournaments are taking entries here right now.</string>
+    <string name="tournaments_taking_both">Taking teams and players</string>
+    <string name="tournaments_taking_teams">Taking teams</string>
+    <string name="tournaments_taking_players">Taking players</string>
+    <string name="tournaments_starts">Starts %1$s</string>
     <string name="tournaments_yours">Your tournaments</string>
     <string name="tournaments_create_body">Fixtures, points table and stats, all in one place.</string>
     <string name="stats_matches">Matches</string>
