@@ -4,9 +4,6 @@ name: Server image
 # deploy a ready-made image (Render, see docs/deploy.md). The jar is built here rather than in the
 # image because core's Android target needs the Android SDK, which these runners have.
 on:
-  push:
-    branches: [main]
-    paths: [server/**, core/**, gradle/**, '*.gradle.kts', .github/workflows/server-image.yml]
   workflow_dispatch:
 
 concurrency:
