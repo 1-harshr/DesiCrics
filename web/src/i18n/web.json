@@ -14,5 +14,13 @@
   "web_catalogue_scoring": "Scoring",
   "web_catalogue_lists": "Lists and tags",
   "web_catalogue_stats": "Stats",
-  "web_catalogue_feedback": "Empty, error and offline"
+  "web_catalogue_feedback": "Empty, error and offline",
+  "web_get_app_title": "Score your own matches",
+  "web_get_app_body": "Get DesiCrics on Android to score ball by ball, follow teams and players, and run tournaments.",
+  "web_get_app_action": "Get the app",
+  "web_get_app_dismiss": "Not now",
+  "web_match_live_updates": "Live · updates every ball",
+  "web_match_reconnecting": "Reconnecting to live updates…",
+  "web_match_overs_innings": "{{1}} · {{2}}",
+  "web_match_tournament_link": "See the tournament"
 }

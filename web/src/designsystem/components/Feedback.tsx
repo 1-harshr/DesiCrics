@@ -70,3 +70,12 @@ export function Loading({ label }: { label?: string }) {
     </div>
   );
 }
+
+/** A short message at the foot of the screen that goes away on its own. */
+export function Snackbar({ message }: { message: string }) {
+  return (
+    <div className={styles.snackbar} role="status">
+      {message}
+    </div>
+  );
+}

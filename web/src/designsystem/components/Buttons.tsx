@@ -12,12 +12,14 @@ interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "chi
   trailingIcon?: IconName;
   loading?: boolean;
   full?: boolean;
-  /** Renders a link instead of a button. */
+  /** Renders a link to a page of the app instead of a button. */
   to?: string;
+  /** Renders a link to another site, opened in a new tab. */
+  href?: string;
 }
 
 function makeButton(variant: Variant) {
-  return function Button({ children, icon, trailingIcon, loading, full, to, className, disabled, ...rest }: ButtonProps) {
+  return function Button({ children, icon, trailingIcon, loading, full, to, href, className, disabled, ...rest }: ButtonProps) {
     const classes = [styles.button, styles[variant], full && styles.full, className].filter(Boolean).join(" ");
     const content = (
       <>
@@ -31,6 +33,13 @@ function makeButton(variant: Variant) {
         <Link to={to} className={classes}>
           {content}
         </Link>
+      );
+    }
+    if (href) {
+      return (
+        <a href={href} target="_blank" rel="noreferrer" className={classes}>
+          {content}
+        </a>
       );
     }
     return (

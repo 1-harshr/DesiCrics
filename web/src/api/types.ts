@@ -19,7 +19,7 @@ export type FieldZone = "THIRD_MAN" | "POINT" | "COVER" | "LONG_OFF" | "LONG_ON"
 export type MarginUnit = "RUNS" | "WICKETS";
 export type MatchEnding = "ABANDONED" | "CONCEDED" | "WALKOVER";
 export type AbandonReason = "RAIN" | "BAD_LIGHT" | "GROUND" | "OTHER";
-export type Stage = "LEAGUE" | "QUARTER_FINAL" | "SEMI_FINAL" | "FINAL" | string;
+export type Stage = "LEAGUE" | "ROUND" | "QUARTERFINAL" | "SEMIFINAL" | "FINAL" | "MATCH";
 
 export interface Player {
   id: string;
