@@ -1,0 +1,16 @@
+.columns { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--space-8); align-items: start; }
+@media (min-width: 1100px) {
+  .columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.filters { display: grid; gap: var(--space-2); }
+.stats { margin-top: var(--space-4); }
+.career { display: grid; gap: var(--space-3); }
+.statTitle { margin-top: var(--space-2); font: 600 15px/22px var(--font-body); }
+.form {
+  display: flex; align-items: flex-end; gap: var(--space-2); height: 140px;
+  padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface);
+}
+.formBar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: var(--space-1); height: 100%; min-width: 0; }
+.formValue { font: 500 12px/16px var(--font-data); color: var(--muted); }
+.formFill { width: 100%; max-width: 28px; border-radius: 6px 6px 2px 2px; background: var(--brand); }
+.badges { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }

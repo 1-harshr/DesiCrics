@@ -243,4 +243,8 @@ data class TournamentSummary(
     /** Teams, or players, can ask to enter it now; set in the list of tournaments open to join. */
     val takesTeams: Boolean = false,
     val takesPlayers: Boolean = false,
+    /** Fixtures have been made. Set in the public list of tournaments. */
+    val started: Boolean = false,
+    /** Started, and every fixture is over. Set in the public list of tournaments. */
+    val finished: Boolean = false,
 )

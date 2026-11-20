@@ -67,9 +67,10 @@ fun apiTest(
     push: PushSender = LoggingPushSender,
     auctionSecondMillis: Long = 1000,
     entryReminderEveryMillis: Long = 15 * 60 * 1000L,
+    webOrigins: List<String> = emptyList(),
     block: suspend ApplicationTestBuilder.(HttpClient) -> Unit,
 ) = testApplication {
-    val config = ServerConfig(database = freshDatabase(), auctionSecondMillis = auctionSecondMillis, entryReminderEveryMillis = entryReminderEveryMillis)
+    val config = ServerConfig(database = freshDatabase(), auctionSecondMillis = auctionSecondMillis, entryReminderEveryMillis = entryReminderEveryMillis, webOrigins = webOrigins)
     application { module(config, fakeTokens, push) }
     block(
         createClient {

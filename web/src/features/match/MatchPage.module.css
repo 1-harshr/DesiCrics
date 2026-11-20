@@ -1,0 +1,79 @@
+.heroLive { display: inline-flex; padding: var(--space-1) var(--space-3); border-radius: var(--radius-full); background: #fff; }
+.heroTitle { font: 700 30px/34px var(--font-display); overflow-wrap: anywhere; }
+.heroScore { margin-top: var(--space-4); }
+.heroStatus { margin-top: var(--space-3); font: 600 15px/22px var(--font-body); }
+.heroLine { margin-top: var(--space-2); font: 400 14px/20px var(--font-body); opacity: 0.85; }
+.heroLink {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  margin-top: var(--space-4); padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full); background: rgb(255 255 255 / 0.14);
+  font: 600 14px/20px var(--font-body);
+}
+.heroLink:hover { background: rgb(255 255 255 / 0.22); }
+@media (min-width: 720px) {
+  .heroTitle { font-size: 36px; line-height: 40px; }
+}
+
+.banner { margin-top: var(--space-4); }
+.liveNote { margin-top: var(--space-3); }
+
+.stack { display: grid; gap: var(--space-4); }
+.tabBody { margin-top: var(--space-4); }
+
+/* Phones and tablets: tabs. From 1100px: live and scorecard on the left, overs on the right. */
+.tabsOnly { margin-top: var(--space-6); }
+.columns { display: none; }
+@media (min-width: 1100px) {
+  .tabsOnly { display: none; }
+  .columns { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-8); align-items: start; }
+}
+
+/* Live */
+.crease { display: grid; gap: var(--space-3); margin-top: var(--space-3); }
+.creaseRow { display: flex; align-items: center; gap: var(--space-3); }
+.creaseBowler { padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.creaseIcon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--sunk); color: var(--muted); flex: none; }
+.creaseIconOn { background: var(--brand-soft); color: var(--brand); }
+.creaseName { flex: 1; min-width: 0; }
+.onStrike { color: var(--brand); font: 400 13px/18px var(--font-body); }
+.overHead { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.overBalls { margin-top: var(--space-3); }
+
+/* Scorecard */
+.inningsCard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-md); overflow: hidden; }
+.inningsHead { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-3); padding: var(--space-4); }
+.inningsScore { display: grid; justify-items: end; gap: var(--space-1); }
+.notStarted { padding: 0 var(--space-4) var(--space-4); }
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font: 400 14px/20px var(--font-body); }
+.table th {
+  padding: var(--space-2) 6px;
+  background: var(--sunk); color: var(--muted);
+  font: 600 12px/16px var(--font-body); text-transform: uppercase; letter-spacing: 0.06em; text-align: right;
+}
+.table td { padding: var(--space-3) 6px; border-top: 1px solid var(--line); text-align: right; font: 500 13px/18px var(--font-data); font-variant-numeric: tabular-nums; vertical-align: top; }
+.table th:first-child, .table td:first-child { text-align: left; font-family: var(--font-body); font-size: 15px; line-height: 22px; padding-left: var(--space-4); width: 100%; min-width: 7.5rem; }
+.table th:last-child, .table td:last-child { padding-right: var(--space-4); }
+.table th:first-child { font-size: 12px; line-height: 16px; }
+.notOut { font-weight: 600; }
+.playerLink:hover { color: var(--brand); text-decoration: underline; }
+.howOut { color: var(--muted); font: 400 13px/18px var(--font-body); }
+.strong { font-weight: 700; color: var(--ink); }
+.inningsFoot { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--line); font: 400 14px/20px var(--font-body); }
+
+/* Overs */
+.over { display: grid; gap: var(--space-3); padding: var(--space-4); }
+.over + .over { border-top: 1px solid var(--line); }
+.overTop { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+.overToggle {
+  display: inline-flex; align-items: center; gap: var(--space-1); justify-self: start;
+  padding: 0; border: 0; background: none; color: var(--brand); font: 600 14px/20px var(--font-body); cursor: pointer;
+}
+.overToggle:hover { text-decoration: underline; }
+.commentary { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.commentary li { display: grid; grid-template-columns: 40px 1fr; gap: var(--space-2); font: 400 14px/20px var(--font-body); }
+
+.squads { display: grid; gap: var(--space-4); }
+@media (min-width: 720px) {
+  .squads { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
