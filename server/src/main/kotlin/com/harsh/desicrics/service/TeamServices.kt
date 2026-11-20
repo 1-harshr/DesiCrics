@@ -1,5 +1,6 @@
 package com.harsh.desicrics.service
 
+import com.harsh.desicrics.cities.Cities
 import com.harsh.desicrics.model.TeamInsights
 import com.harsh.desicrics.stats.TeamInsightsEngine
 import com.harsh.desicrics.api.AddMemberRequest
@@ -69,7 +70,7 @@ class TeamService(
         requireProfile(user)
         val id = UUID.randomUUID().toString()
         withFreshCode { code ->
-            val team = SavedTeam(id, request.name.trim(), request.city.trim(), user.uid, members = emptyList(), joinCode = code, code = newPublicCode())
+            val team = SavedTeam(id, request.name.trim(), Cities.India.canonical(request.city), user.uid, members = emptyList(), joinCode = code, code = newPublicCode())
             teams.create(team, adminId = user.uid, at = clock(), lineup = request.lineup).takeIf { it }
         }
         return get(user, id)
@@ -100,7 +101,7 @@ class TeamService(
     suspend fun update(user: FirebasePrincipal, teamId: String, request: TeamRequest): SavedTeam {
         request.validate()?.let { throw ApiException(HttpStatusCode.BadRequest, it.message) }
         requireAdmin(user, teamId)
-        teams.rename(teamId, request.name.trim(), request.city.trim())
+        teams.rename(teamId, request.name.trim(), Cities.India.canonical(request.city))
         return get(user, teamId)
     }
 

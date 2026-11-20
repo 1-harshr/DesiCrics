@@ -1,4 +1,6 @@
 package com.harsh.desicrics.service
+
+import com.harsh.desicrics.cities.Cities
 import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.api.AddPlayerRequest
@@ -49,7 +51,7 @@ class ProfileService(
             // Email comes from the verified token, never from the request body.
             email = user.email,
             photoUrl = request.photoUrl,
-            city = request.city.trim(),
+            city = Cities.India.canonical(request.city),
             role = request.role,
             battingStyle = request.battingStyle,
             bowlingStyle = request.bowlingStyle,

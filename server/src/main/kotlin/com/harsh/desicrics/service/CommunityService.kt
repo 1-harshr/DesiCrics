@@ -1,4 +1,6 @@
 package com.harsh.desicrics.service
+
+import com.harsh.desicrics.cities.Cities
 import com.harsh.desicrics.model.endingLine
 
 import com.harsh.desicrics.api.DirectoryRequest
@@ -51,7 +53,7 @@ class CommunityService(
             val team = teams.get(teamId) ?: throw ApiException(HttpStatusCode.NotFound, "Team not found")
             if (team.roleOf(user.uid) != TeamRole.ADMIN) throw ApiException(HttpStatusCode.Forbidden, "Only a team's admins can post for it")
         }
-        val row = PostRow(UUID.randomUUID().toString(), user.uid, request.kind, request.city.trim(), request.date, request.note.trim(), request.teamId, open = true)
+        val row = PostRow(UUID.randomUUID().toString(), user.uid, request.kind, Cities.India.canonical(request.city), request.date, request.note.trim(), request.teamId, open = true)
         community.addPost(row, clock())
         return view(row, withResponses = true)
     }
@@ -60,7 +62,7 @@ class CommunityService(
     suspend fun open(city: String, kind: LookingForKind?): List<LookingForPost> {
         if (city.isBlank()) return emptyList()
         val today = clock() - clock() % DAY
-        return views(community.openPosts(city, kind, today), withResponses = false)
+        return views(community.openPosts(Cities.India.canonical(city), kind, today), withResponses = false)
     }
 
     /** Posts the caller runs: their own, and their teams' when they're an admin, with the replies. */
@@ -90,12 +92,12 @@ class CommunityService(
 
     // Directory.
 
-    suspend fun directory(city: String, kind: DirectoryKind?): List<DirectoryEntry> = if (city.isBlank()) emptyList() else community.entries(city, kind)
+    suspend fun directory(city: String, kind: DirectoryKind?): List<DirectoryEntry> = if (city.isBlank()) emptyList() else community.entries(Cities.India.canonical(city), kind)
 
     suspend fun addEntry(user: FirebasePrincipal, request: DirectoryRequest): DirectoryEntry {
         request.validate()?.let { throw ApiException(HttpStatusCode.BadRequest, it) }
         requireProfile(user)
-        val entry = DirectoryEntry(UUID.randomUUID().toString(), request.kind, request.name.trim(), request.city.trim(), request.phone.trim(), request.notes.trim(), user.uid)
+        val entry = DirectoryEntry(UUID.randomUUID().toString(), request.kind, request.name.trim(), Cities.India.canonical(request.city), request.phone.trim(), request.notes.trim(), user.uid)
         community.addEntry(entry, clock())
         return entry
     }
@@ -109,7 +111,7 @@ class CommunityService(
     // Rankings.
 
     suspend fun teamRankings(city: String): List<TeamRanking> {
-        val local = community.teamIdsInCity(city).toSet()
+        val local = community.teamIdsInCity(Cities.India.canonical(city)).toSet()
         if (local.isEmpty()) return emptyList()
         // Ratings come from every match between saved teams, so a visiting side's strength counts too.
         val ratings = Rankings.teams(matches.completedBetweenSavedTeams()).filterKeys { it in local }
@@ -119,7 +121,7 @@ class CommunityService(
     }
 
     suspend fun playerRankings(city: String): List<PlayerRanking> {
-        val profiles = stats.profilesInCity(city)
+        val profiles = stats.profilesInCity(Cities.India.canonical(city))
         if (profiles.isEmpty()) return emptyList()
         val ratings = Rankings.teams(matches.completedBetweenSavedTeams())
         val scored = stats.forProfiles(profiles).groupBy { it.profileId }

@@ -1,4 +1,6 @@
 package com.harsh.desicrics.data.api
+
+import com.harsh.desicrics.api.CitySuggestion
 import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.model.TeamInsights
@@ -268,6 +270,9 @@ class DesiCricsApi(
     // Tournaments.
 
     suspend fun myTournaments(): List<TournamentSummary> = call { get("$baseUrl/tournaments/mine", it) }.body()
+
+    suspend fun cities(query: String): List<CitySuggestion> =
+        call { get("$baseUrl/cities") { it(); parameter("q", query) } }.body()
 
     suspend fun openTournaments(city: String): List<TournamentSummary> =
         call { get("$baseUrl/tournaments/open") { it(); parameter("city", city) } }.body()

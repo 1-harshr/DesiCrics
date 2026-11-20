@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.community
+import com.harsh.desicrics.ui.components.CityField
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.component.ErrorState
 
@@ -104,13 +105,12 @@ fun CommunityScreen(
             Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = space.screen, vertical = space.s4),
             verticalArrangement = Arrangement.spacedBy(space.s3),
         ) {
-            DesiTextField(
+            CityField(
                 value = state.city,
                 onValueChange = viewModel::setCity,
                 label = stringResource(Res.string.community_city),
                 leadingIcon = DesiIcons.Location,
                 supportingText = stringResource(Res.string.community_city_hint).takeIf { state.city.isBlank() },
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             )
             SegmentedControl(CommunityTab.entries, selected = state.tab, label = { stringResource(it.label) }, onSelect = viewModel::setTab)
             if (state.actionFailed && sheet == null) {
