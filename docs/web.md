@@ -30,9 +30,9 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `web` branch
 | API types | TypeScript types in `web/src/api/types.ts` that mirror the `core` DTOs | The wire format is JSON; the facade covers the computed parts |
 | Styling | CSS Modules over Crease tokens as CSS custom properties | No styling library; tokens stay in one file like `:app:designsystem` |
 | Design system | `web/src/designsystem/`: tokens, fonts, icons and components | Features never define their own colours, type or shared components, same rule as the app |
-| Fonts | Barlow Condensed, Figtree, JetBrains Mono, self-hosted as WOFF2 | Same files as the app; no Google Fonts request on a scorecard |
-| Icons | SVGs generated from the app's Material Symbols vector drawables | The same icon set without downloading it twice; a script keeps them in step |
-| Text | i18next with `web/src/i18n/en.json`; keys named as in `strings.xml` | No literal UI text, plurals and placeholders, Hindi later. Same rule as the app |
+| Fonts | Barlow Condensed, Figtree, JetBrains Mono, self-hosted | Same files as the app; no Google Fonts request on a scorecard |
+| Icons | SVG generated from the app's Material Symbols vector drawables (`npm run icons`) | The same icon set without downloading it twice; a script keeps them in step |
+| Text | i18next. The app's `strings.xml` is copied to `src/i18n/app.generated.json` (`npm run strings`); web-only text is in `src/i18n/web.json` | Same words as the app and one translation for both. No literal UI text, same rule as the app |
 | Tests | Vitest and Testing Library | |
 | Hosting | Static files behind the existing Cloudflare proxy | One domain: shared `/m`, `/t` and `/join` links open the web app, API paths pass through to the server |
 
@@ -49,11 +49,24 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `web` branch
 - Pages people follow (a live match, a tournament) say "Get the app" once, in a dismissable banner; never on
   scoring screens.
 
+## Working on it
+
+```
+cd web
+cp .env.example .env.local      # API URL and Firebase web config
+npm install
+npm run dev                     # builds :core with Gradle, then serves http://localhost:5173
+```
+
+Run the server with `WEB_ORIGINS=http://localhost:5173 ./gradlew :server:run` so the browser may call it.
+`npm test` runs Vitest; `npm run build` typechecks and builds to `web/dist`. After changing the app's
+`strings.xml` or drawables, run `npm run strings` or `npm run icons`; CI fails if they're out of step.
+
 ## Server changes the web app needs
 
 | Change | Phase |
 |---|---|
-| CORS for the web app's origins (`WEB_ORIGINS`), so it works from a dev server or its own host | 0 |
+| ✅ CORS for the web app's origins (`WEB_ORIGINS`), so it works from a dev server or its own host | 0 |
 | Public JSON for shared pages: `GET /public/matches/{id}`, `GET /public/tournaments/{id}` | 1 |
 | Public live feed: `/public/matches/{id}/live` WebSocket, read only | 1 |
 | The proxy sends `/m/*`, `/t/*`, `/join/*` and the web app's own paths to the web app instead of the server's HTML pages | 1 |
@@ -66,17 +79,17 @@ Everything else uses the existing signed-in API.
 
 **Goal:** an empty web app in Crease that can call the server and run the scoring engine.
 
-- ⬜ `web/` project: Vite, React, TypeScript, React Router, TanStack Query, i18next, Vitest, lint
-- ⬜ Crease tokens as CSS custom properties, light and dark from `prefers-color-scheme`
-- ⬜ Fonts bundled; type scale as classes
-- ⬜ Icons generated from `app/designsystem` drawables
-- ⬜ First components: buttons, card, section header, list card and rows, avatar, tag, live badge, ball chip,
+- 🟡 `web/` project: Vite, React, TypeScript, React Router, TanStack Query, i18next, Vitest. No linter yet
+- ✅ Crease tokens as CSS custom properties, light and dark from `prefers-color-scheme`
+- 🟡 Fonts bundled; type scale as classes. Shipped as TTF for now; WOFF2 would halve them
+- ✅ Icons generated from `app/designsystem` drawables
+- ✅ First components: buttons, card, section header, list card and rows, avatar, tag, live badge, ball chip,
   over strip, score header, match card, empty state, error state, error banner, loading
-- ⬜ App shell: bottom bar under 720px, side rail above
-- ⬜ `:core` JS target and `WebCore` facade: `MatchDetails` JSON in, scorecard view JSON out
-- ⬜ API client with base URL from `VITE_API_URL`, `ApiError` messages, ID token when signed in
-- ⬜ Server: CORS
-- ⬜ CI builds and tests `web/`
+- ✅ App shell: bottom bar under 720px, side rail above
+- ✅ `:core` JS target and `WebCore` facade: `MatchDetails` JSON in, scorecard view JSON out
+- ✅ API client with base URL from `VITE_API_URL`, `ApiError` messages, ID token when signed in
+- ✅ Server: CORS
+- ✅ CI builds and tests `web/`
 
 **Exit:** `npm run build` passes, the component catalogue page renders in both themes, and a test computes a
 scorecard in the browser with `:core`.
