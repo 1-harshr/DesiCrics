@@ -291,7 +291,14 @@ private fun ColumnScope.Scoring(ui: MatchUiState, state: MatchState, actions: Ma
     // While the pad is up the screen is tight, so the header shrinks and the crease card tightens; the keys
     // keep their full size. Followers and the other tabs get the roomy layout.
     val compact = ui.isScorer && crease
-    Scoreboard(state, actions.onBack, onShare = { sheet = ScoringSheet.Share }, onOptions = if (ui.canEdit) ({ sheet = ScoringSheet.MatchOptions }) else null, compact = compact)
+    Scoreboard(
+        state,
+        actions.onBack,
+        onShare = { sheet = ScoringSheet.Share },
+        onOptions = if (ui.isScorer && !state.isComplete) ({ sheet = ScoringSheet.MatchOptions }) else null,
+        optionsEnabled = ui.canEdit,
+        compact = compact,
+    )
     Row(
         Modifier.padding(horizontal = DesiTheme.space.screen, vertical = if (compact) DesiTheme.space.s2 else DesiTheme.space.s3),
         verticalAlignment = Alignment.CenterVertically,
@@ -459,7 +466,14 @@ private fun ScoringHaptics(ui: MatchUiState) {
  * it in two rows for while the scorer's pad is up, dropping the live badge and first-innings line.
  */
 @Composable
-private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Unit, onOptions: (() -> Unit)?, compact: Boolean = false) {
+private fun Scoreboard(
+    state: MatchState,
+    onBack: () -> Unit,
+    onShare: () -> Unit,
+    onOptions: (() -> Unit)?,
+    optionsEnabled: Boolean = true,
+    compact: Boolean = false,
+) {
     val colors = DesiTheme.colors
     val onGreen = colors.onBrandStrong
     val innings = state.current
@@ -493,7 +507,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
                     Icon(painterResource(DesiIcons.Share), stringResource(Res.string.match_share), tint = onGreen)
                 }
                 if (onOptions != null) {
-                    IconButton(onClick = onOptions, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
+                    IconButton(onClick = onOptions, enabled = optionsEnabled, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
                         Icon(painterResource(DesiIcons.More), stringResource(Res.string.match_options), tint = onGreen)
                     }
                 }
@@ -542,7 +556,7 @@ private fun Scoreboard(state: MatchState, onBack: () -> Unit, onShare: () -> Uni
                 Icon(painterResource(DesiIcons.Share), stringResource(Res.string.match_share), tint = onGreen)
             }
             if (onOptions != null) {
-                IconButton(onClick = onOptions, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
+                IconButton(onClick = onOptions, enabled = optionsEnabled, modifier = Modifier.offset(x = DesiTheme.space.s3)) {
                     Icon(painterResource(DesiIcons.More), stringResource(Res.string.match_options), tint = onGreen)
                 }
             }
