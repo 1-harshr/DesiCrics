@@ -34,6 +34,8 @@ import com.harsh.desicrics.store.ExposedSupportStore
 import com.harsh.desicrics.store.ExposedTeamStore
 import com.harsh.desicrics.store.ExposedTournamentStore
 import com.harsh.desicrics.store.ExposedUserStore
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -41,6 +43,7 @@ import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.auth.bearer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -118,6 +121,15 @@ fun Application.module(
     }
 
     install(CallLogging)
+    if (config.webOrigins.isNotEmpty()) {
+        install(CORS) {
+            config.webOrigins.forEach { allowHost(it.substringAfter("://"), schemes = listOf(it.substringBefore("://"))) }
+            allowHeader(HttpHeaders.Authorization)
+            allowHeader(HttpHeaders.ContentType)
+            allowMethod(HttpMethod.Put)
+            allowMethod(HttpMethod.Delete)
+        }
+    }
     install(WebSockets) {
         contentConverter = KotlinxWebsocketSerializationConverter(Json { ignoreUnknownKeys = true })
         pingPeriod = 20.seconds

@@ -24,6 +24,7 @@ docker build -t desicrics-server server
 | `FIREBASE_PROJECT_ID` | No | Default `desicrics-45117`. Used to verify sign-in tokens. |
 | `FIREBASE_SERVICE_ACCOUNT` | For push | Path to a Firebase service account JSON key (mount it as a secret file). Without it, notifications only go to the in-app inbox. |
 | `ANDROID_SHA256_FINGERPRINTS` | For verified links | Comma-separated SHA-256 fingerprints of the app's signing certificates (`./gradlew :app:androidApp:signingReport`, or Play Console › App integrity). Served at `/.well-known/assetlinks.json`, so `/join`, `/m` and `/t` links open the app without a chooser. |
+| `WEB_ORIGINS` | For the web app | Comma-separated origins the [web app](web.md) is served from, e.g. `https://desicrics.app,http://localhost:5173`. Lets browsers on those origins call the API. |
 
 ## The permanent address
 
