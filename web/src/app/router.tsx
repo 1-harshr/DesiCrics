@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from "react-router";
+import { createBrowserRouter, createHashRouter, Outlet } from "react-router";
 import { AppShell } from "@/designsystem/components";
 import { CataloguePage } from "@/features/catalogue/CataloguePage";
 import { HomePage } from "@/features/home/HomePage";
@@ -24,7 +24,10 @@ function Layout() {
   );
 }
 
-export const router = createBrowserRouter([
+// GitHub Pages serves index.html at the site root, so nested routes go in the hash there.
+const createRouter = import.meta.env.VITE_HASH_ROUTING === "true" ? createHashRouter : createBrowserRouter;
+
+export const router = createRouter([
   {
     element: <Layout />,
     children: [

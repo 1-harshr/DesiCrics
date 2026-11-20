@@ -30,7 +30,7 @@ export function GetAppBanner() {
   };
   return (
     <aside className={styles.banner}>
-      <img src="/icon.svg" alt="" className={styles.bannerIcon} />
+      <img src={`${import.meta.env.BASE_URL}icon.svg`} alt="" className={styles.bannerIcon} />
       <div className={styles.bannerText}>
         <div className={styles.bannerTitle}>{s("web_get_app_title")}</div>
         <p className={styles.bannerBody}>{s("web_get_app_body")}</p>
@@ -51,7 +51,7 @@ export function TopBar() {
   return (
     <header className={styles.top}>
       <Link to="/" className={styles.brand}>
-        <img src="/icon.svg" alt="" />
+        <img src={`${import.meta.env.BASE_URL}icon.svg`} alt="" />
         <span>{s("web_brand")}</span>
       </Link>
       <a href={playStoreUrl} target="_blank" rel="noreferrer" className={styles.topLink}>
