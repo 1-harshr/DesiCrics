@@ -8,6 +8,7 @@ object DesiThemes {
         ClassicTheme,
         FloodlightsTheme,
         GullyTheme,
+        RedBallTheme,
     )
 
     /** The theme saved as [id], or [default] when nothing is saved or that theme no longer ships. */

@@ -12,4 +12,5 @@
     <string name="ds_theme_classic">Classic</string>
     <string name="ds_theme_floodlights">Floodlights</string>
     <string name="ds_theme_gully">Gully</string>
+    <string name="ds_theme_red_ball">Red Ball</string>
 </resources>
