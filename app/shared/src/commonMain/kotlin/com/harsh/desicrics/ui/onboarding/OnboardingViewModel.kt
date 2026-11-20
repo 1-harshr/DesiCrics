@@ -18,11 +18,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * The onboarding steps in order. The first two build the profile, which is saved on leaving [GAME]; the
- * rest need it and can each be skipped. [CLAIM], [FOLLOW] and [NOTIFY] only show when they have something
+ * The onboarding steps in order. The first three build the profile, which is saved on leaving [GAME]; the
+ * rest need it and can each be skipped, as can [CITY]. [CLAIM], [FOLLOW] and [NOTIFY] only show when they have something
  * to offer.
  */
-enum class OnboardingStep { ABOUT, GAME, PHOTO, CLAIM, TEAM, FOLLOW, NOTIFY }
+enum class OnboardingStep { ABOUT, CITY, GAME, PHOTO, CLAIM, TEAM, FOLLOW, NOTIFY }
 
 /** Something to follow in the player's city, and whether they've ticked it. */
 data class Suggestion(val type: FollowType, val id: String, val name: String, val subtitle: String, val photoUrl: String?, val following: Boolean = false)

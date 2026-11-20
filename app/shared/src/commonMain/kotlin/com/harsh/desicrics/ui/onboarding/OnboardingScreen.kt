@@ -76,6 +76,7 @@ import com.harsh.desicrics.ui.profile.AboutSection
 import com.harsh.desicrics.ui.profile.EditProfileViewModel
 import com.harsh.desicrics.ui.profile.GameSection
 import com.harsh.desicrics.ui.profile.ProfileFormError
+import com.harsh.desicrics.ui.profile.ProfileCityField
 import com.harsh.desicrics.ui.profile.ProfileFormState
 import com.harsh.desicrics.ui.system.LightStatusBarIcons
 import com.harsh.desicrics.ui.system.rememberImagePicker
@@ -87,8 +88,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * First run after sign-up, one question per screen: the profile over two steps (saved on leaving the
- * second), then a photo, claiming past matches, a team, people to follow and notifications, each of
+ * First run after sign-up, one question per screen: the profile over three steps (saved on leaving the
+ * third), then a photo, claiming past matches, a team, people to follow and notifications, each of
  * which can be skipped. [joinCode] comes from a team link the app was opened with; [onJoinedFromLink]
  * clears that link once it's used here. The view models are keyed to the account, so signing out and
  * up again as someone else starts afresh.
@@ -114,7 +115,7 @@ fun OnboardingScreen(uid: String, joinCode: String?, onJoinedFromLink: () -> Uni
             onUpdate = profile::update,
             onContinue = {
                 when (state.step) {
-                    OnboardingStep.ABOUT -> if (profile.check()) viewModel.next()
+                    OnboardingStep.ABOUT, OnboardingStep.CITY -> if (profile.check()) viewModel.next()
                     OnboardingStep.GAME -> profile.save {
                         viewModel.loadSuggestions(profile.state.value.city)
                         viewModel.next()
@@ -193,7 +194,8 @@ fun OnboardingContent(form: ProfileFormState, state: OnboardingUiState, actions:
                     verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s6),
                 ) {
                     when (step) {
-                        OnboardingStep.ABOUT -> AboutSection(form, actions.onUpdate, titled = false)
+                        OnboardingStep.ABOUT -> AboutSection(form, actions.onUpdate, titled = false, withCity = false)
+                        OnboardingStep.CITY -> ProfileCityField(form, actions.onUpdate, popularWhenEmpty = true)
                         OnboardingStep.GAME -> GameStep(form, actions)
                         OnboardingStep.PHOTO -> PhotoStep(form, actions)
                         OnboardingStep.CLAIM -> ClaimStep(state, actions)
@@ -455,6 +457,7 @@ private fun BottomBar(form: ProfileFormState, state: OnboardingUiState, isLast: 
     val step = state.step
     val done = when (step) {
         OnboardingStep.ABOUT, OnboardingStep.GAME -> true
+        OnboardingStep.CITY -> form.city.isNotBlank()
         OnboardingStep.PHOTO -> form.photoUrl != null
         OnboardingStep.CLAIM -> state.claimed != null
         OnboardingStep.TEAM -> state.teamName != null || state.requestedTeams.isNotEmpty()
@@ -499,6 +502,7 @@ private fun BottomBar(form: ProfileFormState, state: OnboardingUiState, isLast: 
 private val OnboardingStep.title: StringResource
     get() = when (this) {
         OnboardingStep.ABOUT -> Res.string.onboarding_about_title
+        OnboardingStep.CITY -> Res.string.onboarding_city_title
         OnboardingStep.GAME -> Res.string.onboarding_game_title
         OnboardingStep.PHOTO -> Res.string.onboarding_photo_title
         OnboardingStep.CLAIM -> Res.string.onboarding_claim_title
@@ -510,6 +514,7 @@ private val OnboardingStep.title: StringResource
 private val OnboardingStep.subtitle: StringResource
     get() = when (this) {
         OnboardingStep.ABOUT -> Res.string.onboarding_about_subtitle
+        OnboardingStep.CITY -> Res.string.onboarding_city_subtitle
         OnboardingStep.GAME -> Res.string.onboarding_game_subtitle
         OnboardingStep.PHOTO -> Res.string.onboarding_photo_subtitle
         OnboardingStep.CLAIM -> Res.string.onboarding_claim_subtitle
@@ -550,6 +555,7 @@ private fun StepPreview(step: OnboardingStep, dark: Boolean = false) = DesiTheme
 }
 
 @Preview @Composable private fun OnboardingAboutPreview() = StepPreview(OnboardingStep.ABOUT)
+@Preview @Composable private fun OnboardingCityPreview() = StepPreview(OnboardingStep.CITY)
 @Preview @Composable private fun OnboardingGamePreview() = StepPreview(OnboardingStep.GAME)
 @Preview @Composable private fun OnboardingGameDarkPreview() = StepPreview(OnboardingStep.GAME, dark = true)
 @Preview @Composable private fun OnboardingPhotoPreview() = StepPreview(OnboardingStep.PHOTO)

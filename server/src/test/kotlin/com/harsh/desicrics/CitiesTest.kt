@@ -51,6 +51,8 @@ class CitiesTest {
         // The same name in two states: both, the bigger one first.
         assertEquals(listOf("Maharashtra", "Bihar"), cities.suggest("aurangabad").filter { it.name == "Aurangabad" }.map { it.state })
         assertTrue(cities.suggest("m").isEmpty())
+        assertEquals("Mumbai", cities.suggest("").first().name)
+        assertEquals(CitySuggestion.LIMIT, cities.suggest(" ").size)
         assertTrue(cities.suggest("ma").size <= CitySuggestion.LIMIT)
     }
 

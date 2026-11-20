@@ -163,7 +163,12 @@ private fun Header(state: ProfileFormState, isOnboarding: Boolean, onBack: (() -
 }
 
 @Composable
-internal fun AboutSection(state: ProfileFormState, onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit, titled: Boolean = true) {
+internal fun AboutSection(
+    state: ProfileFormState,
+    onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit,
+    titled: Boolean = true,
+    withCity: Boolean = true,
+) {
     val prefix = stringResource(Res.string.common_phone_prefix)
     val invalid = (state.error as? ProfileFormError.Invalid)?.error
 
@@ -193,14 +198,25 @@ internal fun AboutSection(state: ProfileFormState, onUpdate: ((ProfileFormState)
                 color = DesiTheme.colors.muted,
             )
         }
-        CityField(
-            value = state.city,
-            onValueChange = { value -> onUpdate { it.copy(city = value) } },
-            label = stringResource(Res.string.profile_city_label),
-            leadingIcon = DesiIcons.Location,
-            error = invalid?.takeIf { it == ProfileError.CITY_TOO_LONG }?.let { stringResource(it.label) },
-        )
+        if (withCity) ProfileCityField(state, onUpdate)
     }
+}
+
+@Composable
+internal fun ProfileCityField(
+    state: ProfileFormState,
+    onUpdate: ((ProfileFormState) -> ProfileFormState) -> Unit,
+    popularWhenEmpty: Boolean = false,
+) {
+    val invalid = (state.error as? ProfileFormError.Invalid)?.error
+    CityField(
+        value = state.city,
+        onValueChange = { value -> onUpdate { it.copy(city = value) } },
+        label = stringResource(Res.string.profile_city_label),
+        leadingIcon = DesiIcons.Location,
+        error = invalid?.takeIf { it == ProfileError.CITY_TOO_LONG }?.let { stringResource(it.label) },
+        popularWhenEmpty = popularWhenEmpty,
+    )
 }
 
 @Composable

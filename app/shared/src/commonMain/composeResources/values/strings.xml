@@ -1267,7 +1267,10 @@
     <string name="onboarding_continue">Continue</string>
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_about_title">Welcome! First, you</string>
-    <string name="onboarding_about_subtitle">Your name and city, as teammates and scorers will see them.</string>
+    <string name="onboarding_about_subtitle">Your name and number, as teammates and scorers will see them.</string>
+    <string name="onboarding_city_title">Where do you play?</string>
+    <string name="city_popular">Popular cities</string>
+    <string name="onboarding_city_subtitle">We'll show you teams, players and tournaments in your city.</string>
     <string name="onboarding_game_title">How do you play?</string>
     <string name="onboarding_game_subtitle">This goes on your player card. You can change it any time.</string>
     <string name="onboarding_photo_title">Add a photo</string>
