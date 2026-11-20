@@ -28,10 +28,12 @@ class Cities(cities: List<City>) {
 
     /**
      * Cities matching what's been typed: names starting with it first, then other names starting with it,
-     * then names with a word starting with it. Bigger cities first within each.
+     * then names with a word starting with it. Bigger cities first within each. Nothing typed yet gives the
+     * biggest cities, to pick from without typing.
      */
     fun suggest(query: String, limit: Int = CitySuggestion.LIMIT): List<CitySuggestion> {
         val q = key(query)
+        if (q.isEmpty()) return byPopulation.take(limit).map { CitySuggestion(it.name, it.state) }
         if (q.length < MIN_QUERY) return emptyList()
         fun rank(city: City): Int? = when {
             key(city.name).startsWith(q) -> 0

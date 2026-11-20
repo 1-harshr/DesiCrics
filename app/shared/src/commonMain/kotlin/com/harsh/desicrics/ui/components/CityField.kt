@@ -5,6 +5,7 @@ import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +27,10 @@ import com.harsh.desicrics.designsystem.icon.DesiIcons
 import com.harsh.desicrics.designsystem.theme.DesiTheme
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
+import com.harsh.desicrics.resources.Res
+import com.harsh.desicrics.resources.city_popular
 import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.mp.KoinPlatform
 
 /** Where suggestions come from: the server's city list, or nothing where there's no app to ask (previews). */
@@ -38,7 +42,8 @@ private fun defaultSuggest(): suspend (String) -> List<CitySuggestion> {
 /**
  * A city, typed freely, with matching cities from the list underneath as you type. Picking one fills in its
  * standard spelling; anything else is kept as typed (the server tidies known names either way). Suggestions
- * only show while the field has focus, and never for a city that's already exactly picked.
+ * only show while the field has focus, and never for a city that's already exactly picked. With [popularWhenEmpty],
+ * an empty field lists the biggest cities to tap instead, focused or not, for a screen that's only there to ask.
  */
 @Composable
 fun CityField(
@@ -50,19 +55,24 @@ fun CityField(
     supportingText: String? = null,
     error: String? = null,
     imeAction: ImeAction = ImeAction.Done,
+    popularWhenEmpty: Boolean = false,
     suggest: suspend (String) -> List<CitySuggestion> = remember { defaultSuggest() },
 ) {
     var focused by remember { mutableStateOf(false) }
     var suggestions by remember { mutableStateOf(emptyList<CitySuggestion>()) }
+    var suggestionsArePopular by remember { mutableStateOf(false) }
     val suggestionsInView = remember { BringIntoViewRequester() }
     LaunchedEffect(value, focused) {
         val query = value.trim()
-        if (!focused || query.length < MIN_QUERY) {
+        val popular = popularWhenEmpty && query.isEmpty()
+        // Popular cities aren't matches (nor matches popular), so a switch between them clears the list at once.
+        if (popular != suggestionsArePopular) suggestions = emptyList()
+        if (!popular && (!focused || query.length < MIN_QUERY)) {
             suggestions = emptyList()
             return@LaunchedEffect
         }
         // Wait for a pause in typing before asking.
-        delay(DEBOUNCE_MS)
+        if (!popular) delay(DEBOUNCE_MS)
         suggestions = try {
             suggest(query)
         } catch (e: CancellationException) {
@@ -71,9 +81,11 @@ fun CityField(
             // No suggestions offline; the city can still be typed.
             emptyList()
         }
+        suggestionsArePopular = popular
     }
     // Once a city is picked (or typed exactly), the list has done its job.
     val shown = if (suggestions.any { it.name == value.trim() }) emptyList() else suggestions
+    val popular = popularWhenEmpty && value.isBlank()
     Column(modifier, verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
         DesiTextField(
             value = value,
@@ -85,7 +97,10 @@ fun CityField(
             error = error,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = imeAction),
         )
-        if (focused && shown.isNotEmpty()) {
+        if ((focused || popular) && shown.isNotEmpty()) {
+            if (popular) {
+                Text(stringResource(Res.string.city_popular), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+            }
             // Fields low on a screen would leave the list under the keyboard.
             LaunchedEffect(shown) { suggestionsInView.bringIntoView() }
             CitySuggestions(shown, Modifier.bringIntoViewRequester(suggestionsInView), onPick = {
