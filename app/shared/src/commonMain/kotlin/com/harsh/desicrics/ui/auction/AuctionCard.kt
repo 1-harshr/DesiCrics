@@ -37,6 +37,8 @@ fun AuctionCard(
     onOpen: () -> Unit,
     onAsk: (requested: Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    /** False while the tournament takes players itself: joining it puts them up in the auction. */
+    canAsk: Boolean = true,
 ) {
     val colors = DesiTheme.colors
     val space = DesiTheme.space
@@ -66,7 +68,7 @@ fun AuctionCard(
             else -> Res.string.auction_card_open
         }
         TonalButton(stringResource(open), onClick = onOpen, modifier = Modifier.fillMaxWidth(), leadingIcon = if (status == AuctionStatus.LIVE) DesiIcons.Play else DesiIcons.Auction)
-        if (isOrganiser || myId == null || status == AuctionStatus.FINISHED) return@DesiCard
+        if (isOrganiser || myId == null || status == AuctionStatus.FINISHED || !canAsk) return@DesiCard
         val me = auction.player(myId)
         when {
             me == null && status == AuctionStatus.SETUP -> TextButton(onClick = { onAsk(true) }, enabled = !saving) {

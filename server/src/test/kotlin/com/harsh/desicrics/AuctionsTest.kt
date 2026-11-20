@@ -3,7 +3,9 @@ package com.harsh.desicrics
 import com.harsh.desicrics.api.AddAuctionPlayerRequest
 import com.harsh.desicrics.api.ApiError
 import com.harsh.desicrics.api.AuctionPlayerRequest
+import com.harsh.desicrics.api.AddTournamentPlayerRequest
 import com.harsh.desicrics.api.BidRequest
+import com.harsh.desicrics.api.PlacePlayerRequest
 import com.harsh.desicrics.api.CreateAuctionRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
 import com.harsh.desicrics.api.EnterTeamRequest
@@ -257,5 +259,34 @@ class AuctionsTest {
             delay(50)
         }
         error("The auction didn't get there in time")
+    }
+
+    @Test
+    fun theTournamentPoolGoesUpAndSoldPlayersJoinSquads() = apiTest { client ->
+        val room = client.room()
+        suspend fun joinPool(uid: String) {
+            client.post("/tournaments/${room.tournamentId}/players") { bearerAuth("test-$uid"); jsonBody(AddTournamentPlayerRequest()) }
+            client.put("/tournaments/${room.tournamentId}/players/$uid") { bearerAuth("test-asha"); jsonBody(PlacePlayerRequest()) }
+        }
+        // Dev was in the pool before the auction, Esha joins after; both go up.
+        joinPool("dev")
+        val id = client.createAuction(room).auction.id
+        joinPool("esha")
+        val pool = client.get("/auctions/$id") { bearerAuth("test-asha") }.details().players
+        assertEquals(setOf("dev", "esha"), pool.map { it.profileId }.toSet())
+        assertTrue(pool.none { it.requested })
+
+        client.act("asha", id, "start").details()
+        for ((uid, team) in listOf("dev" to room.teamA, "esha" to room.teamB)) {
+            client.act("asha", id, "next", NextPlayerRequest(uid)).details()
+            client.act("asha", id, "bids", BidRequest(team.id)).details()
+            client.act("asha", id, "sold").details()
+        }
+        client.act("asha", id, "finish").details()
+
+        val t = client.get("/tournaments/${room.tournamentId}") { bearerAuth("test-asha") }.body<TournamentDetails>().tournament
+        assertEquals(room.teamA.id, t.entryOf("dev")!!.teamId)
+        assertEquals(room.teamB.id, t.entryOf("esha")!!.teamId)
+        assertTrue(t.pool.isEmpty())
     }
 }

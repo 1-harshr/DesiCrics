@@ -355,7 +355,10 @@ internal fun TournamentContent(
         }
         if (state.actionFailed) ErrorBanner(stringResource(Res.string.tournament_action_failed))
         EntryCard(state, entry, onEnterTeam = { onSheet(TournamentSheet.EnterTeam) })
-        if (state.auction != null || (state.isOrganiser && !t.started)) AuctionCard(state.auction, state.myId, state.isOrganiser, state.auctionSaving, onAuction, onAskAuction)
+        if (state.auction != null || (state.isOrganiser && !t.started)) AuctionCard(
+            state.auction, state.myId, state.isOrganiser, state.auctionSaving, onAuction, onAskAuction,
+            canAsk = !t.takesPlayers(nowMillis()) && state.myEntry == null,
+        )
         val tabs = TournamentTab.entries.filter {
             when (it) {
                 TournamentTab.TABLE -> details.tables.isNotEmpty()

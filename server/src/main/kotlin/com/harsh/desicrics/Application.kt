@@ -84,9 +84,14 @@ fun Application.module(
     val social = SocialService(socialStore, matchStore, teamStore, players)
     val notifier = Notifier(socialStore, pushSender)
     val statsStore = ExposedStatsStore(database)
+    val liveAuctions = LiveAuctions()
+    val auctions = AuctionService(
+        ExposedAuctionStore(database), ExposedTournamentStore(database), teamStore, players, users, liveAuctions,
+        scope = this, secondMillis = config.auctionSecondMillis,
+    )
     val tournaments = TournamentService(
         ExposedTournamentStore(database), matchStore, matches, teamStore, players, users, statsStore,
-        onRescheduled = notifier::rescheduled, notify = notifier::tournamentNotice,
+        onRescheduled = notifier::rescheduled, notify = notifier::tournamentNotice, onPoolJoined = auctions::addFromTournament,
     )
     // The live feed first, so watchers see a ball before anything slower runs.
     matches.listen(live)
@@ -102,11 +107,6 @@ fun Application.module(
     val playerService = PlayerService(players, users)
     val account = AccountService(players, teamStore, ExposedSupportStore(database))
     launch { matches.backfillInningsScores() }
-    val liveAuctions = LiveAuctions()
-    val auctions = AuctionService(
-        ExposedAuctionStore(database), ExposedTournamentStore(database), teamStore, players, users, liveAuctions,
-        scope = this, secondMillis = config.auctionSecondMillis,
-    )
     launch { auctions.resumeClocks() }
 
     install(CallLogging)

@@ -68,6 +68,8 @@ class TournamentService(
     private val onRescheduled: suspend (Match) -> Unit = {},
     /** Tells organisers about entries, and entrants what became of them; see [com.harsh.desicrics.live.Notifier.tournamentNotice]. */
     private val notify: TournamentNotice = { _, _, _, _, _, _ -> },
+    /** A player is confirmed in the pool, waiting for a team: the tournament's auction takes them too. */
+    private val onPoolJoined: suspend (tournamentId: String, profileId: String) -> Unit = { _, _ -> },
     private val clock: () -> Long = System::currentTimeMillis,
 ) : MatchListener {
 
@@ -219,6 +221,7 @@ class TournamentService(
         val entry = tournament.entryOf(profileId)
         if (entry?.status != EntryStatus.INVITED) throw ApiException(HttpStatusCode.Conflict, "There's no invite to accept")
         tournaments.setPlayer(tournamentId, profileId, entry.teamId, EntryStatus.CONFIRMED)
+        if (entry.teamId == null) onPoolJoined(tournamentId, profileId)
         tell(tournament.organiserIds() - user.uid, NotificationKind.ENTRY_JOINED, tournament, entry.player.name, PLAYER)
         return details(tournamentId)
     }
@@ -268,6 +271,7 @@ class TournamentService(
             val where = tournament.entryOf(profileId)?.teamId?.let { id -> tournament.teams.firstOrNull { it.teamId == id }?.name }
             throw ApiException(HttpStatusCode.Conflict, if (where != null) "${person.name} is already in $where's squad" else "${person.name} is already in the tournament")
         }
+        if (status == EntryStatus.CONFIRMED && squadTeam == null) onPoolJoined(tournamentId, profileId)
         when {
             status == EntryStatus.WAITLISTED -> Unit
             status == EntryStatus.INVITED -> tell(setOf(profileId), NotificationKind.ENTRY_INVITED, tournament, person.name, PLAYER)
@@ -330,6 +334,7 @@ class TournamentService(
             tournament.confirmedTeams.firstOrNull { it.teamId == teamId } ?: throw ApiException(HttpStatusCode.BadRequest, "That team isn't in the tournament")
         }
         tournaments.setPlayer(tournamentId, profileId, team?.teamId, EntryStatus.CONFIRMED)
+        if (team == null && entry.status != EntryStatus.CONFIRMED) onPoolJoined(tournamentId, profileId)
         when {
             team != null && team.teamId != entry.teamId -> tell(setOf(profileId) - user.uid, NotificationKind.SQUAD_PLACED, tournament, team.name, PLAYER)
             entry.status == EntryStatus.PENDING -> tell(setOf(profileId) - user.uid, NotificationKind.ENTRY_CONFIRMED, tournament, entry.player.name, PLAYER)
@@ -544,6 +549,7 @@ class TournamentService(
                 val id = player.player.profileId
                 tournaments.setPlayer(tournamentId, id, null, if (open) EntryStatus.CONFIRMED else EntryStatus.PENDING)
                 if (open) {
+                    onPoolJoined(tournamentId, id)
                     tell(setOf(id), NotificationKind.ENTRY_CONFIRMED, t, player.player.name, PLAYER)
                 } else {
                     tell(setOf(id), NotificationKind.ENTRY_PROMOTED, t, player.player.name, PLAYER)

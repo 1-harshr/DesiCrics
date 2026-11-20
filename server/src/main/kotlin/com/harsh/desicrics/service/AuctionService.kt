@@ -8,6 +8,7 @@ import com.harsh.desicrics.auction.AuctionEngine
 import com.harsh.desicrics.auction.AuctionSetup
 import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.live.LiveAuctions
+import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.Auction
 import com.harsh.desicrics.model.AuctionDetails
 import com.harsh.desicrics.model.AuctionError
@@ -93,7 +94,24 @@ class AuctionService(
         settings.validate()?.let { throw ApiException(HttpStatusCode.BadRequest, it.message) }
         val row = AuctionStore.AuctionRow(UUID.randomUUID().toString(), tournamentId, tournament.name, settings, AuctionStatus.SETUP, user.uid, clock())
         if (!auctions.create(row)) throw ApiException(HttpStatusCode.Conflict, "This tournament already has an auction")
+        // Players already in the tournament's pool, waiting for a team, are who the auction is for.
+        for (entry in tournament.pool.filter { it.status == EntryStatus.CONFIRMED }) {
+            auctions.addPlayer(row.id, PlayerRow(entry.player.profileId, settings.basePrice, null, false, null, null, clock()))
+        }
         return details(row.id)
+    }
+
+    /**
+     * A player joined the tournament's pool: they go up in its auction too, while it's being set up or run.
+     * Nothing happens without an auction, or if they're in its pool already.
+     */
+    suspend fun addFromTournament(tournamentId: String, profileId: String) {
+        val auctionId = auctions.idForTournament(tournamentId) ?: return
+        locked(auctionId) {
+            val loaded = load(auctionId)
+            if (loaded.state.status == AuctionStatus.FINISHED) return@locked
+            if (auctions.addPlayer(auctionId, PlayerRow(profileId, loaded.settings.basePrice, null, false, null, null, clock()))) changed(auctionId)
+        }
     }
 
     suspend fun forTournament(tournamentId: String): AuctionDetails =
@@ -263,7 +281,7 @@ class AuctionService(
         if (!auctions.addEvent(loaded.row.id, event, state.status, by, clock())) {
             throw ApiException(HttpStatusCode.Conflict, "The auction changed meanwhile; try again")
         }
-        if (event is AuctionEvent.Finish) joinTeams(state)
+        if (event is AuctionEvent.Finish) joinTeams(loaded.tournament.id, state)
         rearm(loaded.row.id, loaded.settings, event, state)
         val details = details(loaded.copy(events = events, state = state), event)
         live.publish(details)
@@ -273,10 +291,16 @@ class AuctionService(
     /** Must hold the auction's lock: sends the new state after a change to the setup. */
     private suspend fun changed(auctionId: String): AuctionDetails = details(auctionId).also(live::publish)
 
-    private suspend fun joinTeams(state: AuctionState) {
+    /** Bought and retained players join their team, and its squad for the tournament. */
+    private suspend fun joinTeams(tournamentId: String, state: AuctionState) {
         val now = clock()
         for (team in state.teams) {
-            for (profileId in team.retained + team.bought) teams.addMember(team.teamId, profileId, TeamRole.MEMBER, now)
+            for (profileId in team.retained + team.bought) {
+                teams.addMember(team.teamId, profileId, TeamRole.MEMBER, now)
+                if (!tournaments.addPlayer(tournamentId, profileId, team.teamId, EntryStatus.CONFIRMED, fromPool = true, addedBy = "auction", at = now)) {
+                    tournaments.setPlayer(tournamentId, profileId, team.teamId, EntryStatus.CONFIRMED)
+                }
+            }
         }
     }
 
