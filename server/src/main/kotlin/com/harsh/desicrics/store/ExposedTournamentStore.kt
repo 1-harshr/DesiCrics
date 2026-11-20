@@ -1,5 +1,6 @@
 package com.harsh.desicrics.store
 
+import com.harsh.desicrics.db.MatchesTable
 import com.harsh.desicrics.db.PlayersTable
 import com.harsh.desicrics.db.TeamMembersTable
 import com.harsh.desicrics.db.TeamsTable
@@ -13,6 +14,7 @@ import com.harsh.desicrics.db.query
 import com.harsh.desicrics.api.EntrySettingsRequest
 import com.harsh.desicrics.model.EntryPolicy
 import com.harsh.desicrics.model.EntryStatus
+import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.Organiser
 import com.harsh.desicrics.model.OrganiserRole
 import com.harsh.desicrics.model.Tournament
@@ -181,6 +183,34 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
                 startsAt = it[TournamentsTable.startsAt],
                 takesTeams = it[TournamentsTable.teamEntry] != EntryPolicy.ORGANISERS,
                 takesPlayers = it[TournamentsTable.playerEntry] != EntryPolicy.ORGANISERS,
+            )
+        }
+    }
+
+    override suspend fun browse(city: String, limit: Int): List<TournamentSummary> = db.query {
+        val rows = TournamentsTable.selectAll()
+            .apply { if (city.isNotBlank()) where { TournamentsTable.city.lowerCase() eq city.trim().lowercase() } }
+            .orderBy(TournamentsTable.startsAt to SortOrder.DESC_NULLS_FIRST, TournamentsTable.createdAt to SortOrder.DESC)
+            .limit(limit)
+            .toList()
+        val ids = rows.map { it[TournamentsTable.id] }
+        if (ids.isEmpty()) return@query emptyList()
+        val counts = TournamentTeamsTable.selectAll()
+            .where { (TournamentTeamsTable.tournamentId inList ids) and (TournamentTeamsTable.status eq EntryStatus.CONFIRMED) }
+            .groupingBy { it[TournamentTeamsTable.tournamentId] }.eachCount()
+        val fixtures = MatchesTable.select(MatchesTable.tournamentId, MatchesTable.status)
+            .where { MatchesTable.tournamentId inList ids }
+            .groupBy({ it[MatchesTable.tournamentId]!! }, { it[MatchesTable.status] })
+        rows.map {
+            val id = it[TournamentsTable.id]
+            val started = it[TournamentsTable.started]
+            // The next round is made as soon as one ends, so no unfinished fixture left means it's over.
+            val played = fixtures[id].orEmpty()
+            TournamentSummary(
+                id, it[TournamentsTable.name], it[TournamentsTable.city], it[TournamentsTable.format], counts[id] ?: 0,
+                startsAt = it[TournamentsTable.startsAt],
+                started = started,
+                finished = started && played.isNotEmpty() && played.all { status -> status == MatchStatus.COMPLETED },
             )
         }
     }

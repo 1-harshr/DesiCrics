@@ -39,13 +39,16 @@ interface UserStore {
 
 interface MatchStore {
     /** Newest first. */
-    suspend fun feedPage(status: com.harsh.desicrics.model.MatchStatus?, before: Long?, afterId: String, uid: String, scope: String?): List<Match>
+    /** A page of matches, newest first. A non-blank [city] keeps those of that city's teams and hosts, whatever [scope]. */
+    suspend fun feedPage(status: com.harsh.desicrics.model.MatchStatus?, before: Long?, afterId: String, uid: String, scope: String?, city: String? = null): List<Match>
     suspend fun recent(limit: Int): List<Match>
 
     suspend fun details(matchId: String): MatchDetails?
 
     /** Newest first: matches [profileId] played in, scored or created. */
     suspend fun forPlayer(profileId: String, limit: Int): List<Match>
+    /** Matches the saved team played or is due to play, newest first. */
+    suspend fun forTeam(teamId: String, limit: Int): List<Match>
 
     /** A tournament's fixtures (without rosters), by round. */
     suspend fun forTournament(tournamentId: String): List<Match>
@@ -221,6 +224,8 @@ interface TournamentStore {
      * it's blank; soonest start first, then newest.
      */
     suspend fun open(city: String, now: Long, limit: Int): List<TournamentSummary>
+    /** Every tournament in [city] (any case) unless it's blank, newest first, with whether it started and finished. */
+    suspend fun browse(city: String, limit: Int): List<TournamentSummary>
     /** False if the team was already entered. */
     suspend fun addTeam(tournamentId: String, team: TournamentTeam): Boolean
     suspend fun setTeamStatus(tournamentId: String, teamId: String, status: EntryStatus)

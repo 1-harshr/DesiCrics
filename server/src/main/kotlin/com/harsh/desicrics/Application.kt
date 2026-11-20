@@ -105,6 +105,7 @@ fun Application.module(
     matches.listen(tournaments)
     launch { projector.backfill() }
     val teams = TeamService(teamStore, players, matchStore, users, notify = notifier::teamNotice)
+    val stats = StatsService(statsStore, players, users, teamStore, socialStore)
     val community = CommunityService(ExposedCommunityStore(database), players, teamStore, users, matchStore, statsStore)
     val images = ImageService(ExposedImageStore(database), users, teamStore, teams)
     val playerService = PlayerService(players, users)
@@ -152,6 +153,7 @@ fun Application.module(
         // For uptime monitors: the proxy serves the web app at /, so they check here instead.
         get("/health") { call.respondText("ok") }
         publicRoutes(matches, tournaments, community, live, config.androidCertFingerprints)
+        publicBrowseRoutes(social, teams, tournaments, stats)
         imageRoutes(images)
         authenticate("firebase") {
             profileRoutes(profiles)
@@ -164,7 +166,7 @@ fun Application.module(
             tournamentRoutes(tournaments)
             imageUploadRoutes(images)
             communityRoutes(community)
-            statsRoutes(StatsService(statsStore, players, users, teamStore, socialStore))
+            statsRoutes(stats)
             auctionRoutes(auctions, liveAuctions)
         }
     }

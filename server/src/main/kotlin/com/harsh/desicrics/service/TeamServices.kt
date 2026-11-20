@@ -11,6 +11,7 @@ import com.harsh.desicrics.model.HeadToHead
 import com.harsh.desicrics.model.MatchStatus
 import com.harsh.desicrics.model.NotificationKind
 import com.harsh.desicrics.model.PlayerSummary
+import com.harsh.desicrics.model.PublicTeamPage
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSide
@@ -47,6 +48,9 @@ const val INSIGHT_MATCHES = 50
 
 /** Teams per page when browsing them. */
 const val TEAM_PAGE = 30
+
+/** How many of a team's matches its public page lists. */
+const val PUBLIC_MATCHES = 30
 
 class TeamService(
     private val teams: TeamStore,
@@ -95,6 +99,15 @@ class TeamService(
                 requested = team.roleOf(user.uid) == null && teams.hasJoinRequest(teamId, user.uid),
             )
         }
+    }
+
+    /** A team for the web app: its players and latest matches, with no codes, join requests or account IDs. */
+    suspend fun publicPage(teamId: String): PublicTeamPage {
+        val team = teams.get(teamId) ?: throw ApiException(HttpStatusCode.NotFound, "Team not found")
+        return PublicTeamPage(
+            team = team.copy(createdBy = "", joinCode = null, code = "", members = team.members.map { it.copy(claimCode = null) }),
+            matches = matches.forTeam(teamId, PUBLIC_MATCHES),
+        )
     }
 
     suspend fun update(user: FirebasePrincipal, teamId: String, request: TeamRequest): SavedTeam {

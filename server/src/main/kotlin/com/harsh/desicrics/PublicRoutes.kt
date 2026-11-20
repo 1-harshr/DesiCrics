@@ -105,7 +105,7 @@ fun Route.publicRoutes(
 /** Who created and scores a match are Firebase account IDs, which nobody outside the app needs. */
 internal fun MatchDetails.forPublic(): MatchDetails = copy(match = match.forPublic())
 
-private fun Match.forPublic(): Match = copy(createdBy = "", scorerUid = "")
+internal fun Match.forPublic(): Match = copy(createdBy = "", scorerUid = "")
 
 /**
  * The tournament as its public page shows it: no account IDs, and none of the entry workings (player pool,

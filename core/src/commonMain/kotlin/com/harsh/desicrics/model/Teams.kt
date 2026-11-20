@@ -65,6 +65,14 @@ data class TeamSummary(
     val code: String = "",
 )
 
+/** A team as anyone may see it on the web: its players and latest matches, without codes or join requests. */
+@Serializable
+data class PublicTeamPage(
+    val team: SavedTeam,
+    /** Newest first. */
+    val matches: List<Match> = emptyList(),
+)
+
 /** How two saved teams have done against each other in completed matches. */
 @Serializable
 data class HeadToHead(
