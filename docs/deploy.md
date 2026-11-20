@@ -105,15 +105,11 @@ Render can't build the image itself (no Android SDK), so `.github/workflows/serv
 
 ## Android releases
 
-Once CI passes on `main`, **Android release** builds the signed APK for the deployed server (`remoteRelease`).
-The version is `1.0.<run>` so each new build installs over the last. You can also build it from
-GitHub › Actions › Android release › Run workflow. Download the APK from the run's **Artifacts** section.
+Go to GitHub › Actions › Firebase App Distribution › Run workflow, select a branch containing
+this workflow, and click **Run workflow**. It builds the signed `remoteRelease` APK from that branch,
+numbers it `1.0.<run>`, and sends it to the Firebase `internal` tester group.
 
-To send a build to testers, open a successful **Android release** run on `main` that has an APK artifact.
-Copy the number after `/actions/runs/` in its URL. Then go to GitHub › Actions › Firebase App Distribution › Run workflow
-and enter that number in `release_run_id`. Firebase notifies the `internal` tester group when the build is available.
-
-Repository secrets for the Android release build and Firebase distribution:
+Repository secrets for this workflow
 
 | Secret | What |
 | --- | --- |

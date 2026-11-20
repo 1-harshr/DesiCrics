@@ -1,83 +1,71 @@
-name: Android release
+name: Firebase App Distribution
 
-# Builds the release APK (remote flavor: the deployed server) once CI passes on main and uploads it
-# to the workflow run for manual Firebase distribution. See docs/deploy.md
-# ("Android releases") for the secrets it needs; until they're set it explains what's missing and stops.
+# Keep the workflow path so Android version codes continue from previous releases.
 on:
-  workflow_run:
-    workflows: [CI]
-    types: [completed]
-    branches: [main]
   workflow_dispatch:
-
-concurrency:
-  group: android-release
-  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  release:
-    # From CI only when it passed on a push (not a pull request); by hand, always.
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+  distribute:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-      RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
-      RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-      RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-      RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-      VERSION_NAME: 1.0.${{ github.run_number }}
+    defaults:
+      run:
+        shell: bash
     steps:
-      - name: Check secrets
-        id: secrets
-        run: |
-          missing=""
-          for name in GOOGLE_SERVICES_JSON RELEASE_KEYSTORE_BASE64 RELEASE_KEYSTORE_PASSWORD RELEASE_KEY_ALIAS RELEASE_KEY_PASSWORD; do
-            [ -n "${!name}" ] || missing="$missing $name"
-          done
-          if [ -n "$missing" ]; then
-            echo "::notice::Skipping the release build; repository secrets not set:$missing"
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: actions/checkout@v4
-        if: steps.secrets.outputs.ready == 'true'
         with:
-          # The commit CI just passed, not whatever main has moved on to since.
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
 
-      # Matches gradle/gradle-daemon-jvm.properties.
       - uses: actions/setup-java@v4
-        if: steps.secrets.outputs.ready == 'true'
         with:
           distribution: zulu
           java-version: 21
 
       - uses: gradle/actions/setup-gradle@v4
-        if: steps.secrets.outputs.ready == 'true'
 
-      - name: Build the release APK
-        if: steps.secrets.outputs.ready == 'true'
+      - name: Build the signed release APK
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
+          : "${GOOGLE_SERVICES_JSON:?Set the GOOGLE_SERVICES_JSON repository secret}"
+          : "${RELEASE_KEYSTORE_BASE64:?Set the RELEASE_KEYSTORE_BASE64 repository secret}"
+          : "${RELEASE_KEYSTORE_PASSWORD:?Set the RELEASE_KEYSTORE_PASSWORD repository secret}"
+          : "${RELEASE_KEY_ALIAS:?Set the RELEASE_KEY_ALIAS repository secret}"
+          : "${RELEASE_KEY_PASSWORD:?Set the RELEASE_KEY_PASSWORD repository secret}"
+
           printf '%s' "$GOOGLE_SERVICES_JSON" > app/androidApp/google-services.json
           printf '%s' "$RELEASE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
           ./gradlew :app:androidApp:assembleRemoteRelease \
-            -Pdesicrics.versionCode=${{ github.run_number }} \
-            -Pdesicrics.versionName="$VERSION_NAME" \
+            -Pdesicrics.versionCode="$GITHUB_RUN_NUMBER" \
+            -Pdesicrics.versionName="1.0.$GITHUB_RUN_NUMBER" \
             -Pdesicrics.releaseKeystore="$RUNNER_TEMP/release.keystore" \
             -Pdesicrics.releaseKeystorePassword="$RELEASE_KEYSTORE_PASSWORD" \
             -Pdesicrics.releaseKeyAlias="$RELEASE_KEY_ALIAS" \
             -Pdesicrics.releaseKeyPassword="$RELEASE_KEY_PASSWORD"
-          mv app/androidApp/build/outputs/apk/remote/release/androidApp-remote-release.apk "DesiCrics-$VERSION_NAME.apk"
 
-      # Download from the workflow run's page (Actions › Android release › Artifacts).
-      - uses: actions/upload-artifact@v4
-        if: steps.secrets.outputs.ready == 'true'
+      - uses: actions/setup-node@v4
         with:
-          name: DesiCrics-${{ env.VERSION_NAME }}
-          path: DesiCrics-${{ env.VERSION_NAME }}.apk
+          node-version: 24
+
+      - name: Distribute to internal testers
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          : "${FIREBASE_SERVICE_ACCOUNT:?Set the FIREBASE_SERVICE_ACCOUNT repository secret}"
+          app_id=$(jq -er '
+            [.client[] | select(.client_info.android_client_info.package_name == "com.harsh.desicrics")][0]
+            | .client_info.mobilesdk_app_id | select(type == "string" and length > 0)
+          ' app/androidApp/google-services.json)
+
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase.json"
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$GOOGLE_APPLICATION_CREDENTIALS"
+          npx --yes firebase-tools@15 appdistribution:distribute \
+            app/androidApp/build/outputs/apk/remote/release/androidApp-remote-release.apk \
+            --app "$app_id" --groups internal --release-notes "$GITHUB_REF_NAME @ $GITHUB_SHA"
