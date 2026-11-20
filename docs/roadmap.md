@@ -259,3 +259,28 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ A reminder to organisers the day before entry closes
 
 **Exit:** an organiser shares team and player invite links in a WhatsApp group; two teams enter and a player with no team joins the pool; the organiser confirms the teams and places the player; everyone is notified, squads lock at the start, and the first fixture offers only squad players.
+
+---
+
+## Simple mode
+
+**Goal:** someone who only wants to score a match can, in a second, minimal front end with its own screens. It shares view models, repositories and the scoring engine with Full mode, and one switch moves between them. Spec: [simple-mode.md](simple-mode.md).
+
+### Level 1 · Playable
+- ✅ App mode (Simple or Full), stored on the phone; existing users stay on Full
+- ✅ One switch at the root between the two shells, and a test that keeps their screens apart
+- ✅ An App mode row and sheet in Me → Settings, in both modes
+- ✅ Simple Home, new match (teams, overs, toss), match screen (runs, extras, wickets, undo, result) and Me
+
+### Level 2 · Complete
+- ⬜ Simple scorecard and result sharing; saved teams in Simple new match
+- ⬜ Theme and delete account in Simple Me
+- ⬜ The mode question at sign-up
+- ⬜ Links Simple doesn't have open a "part of Full mode" page with a switch
+
+### Level 3 · Delight
+- ⬜ A one-time tip for existing users that Simple mode exists
+- ⬜ The mode kept per account across phones
+
+**Exit:** a new user picks "Score my matches", starts a match choosing only teams, overs and the toss, scores it and shares the result; switching to Full shows the match with everything else back.
+

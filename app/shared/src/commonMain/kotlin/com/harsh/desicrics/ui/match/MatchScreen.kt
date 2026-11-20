@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.match
+import com.harsh.desicrics.ui.text.ballFor
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
@@ -1078,29 +1079,6 @@ private fun MatchMissing(notFound: Boolean, actions: MatchActions) {
         onRetry = actions.onRetry.takeIf { !notFound },
         secondary = { GhostButton(stringResource(Res.string.common_back), onClick = actions.onBack, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Back) },
     )
-}
-
-/** How a ball looks in the over strip: "4", "W", "2wd", "nb", "1lb", "•". */
-@Composable
-internal fun ballFor(delivery: Delivery): Ball {
-    if (delivery.wicket != null) return Ball(stringResource(Res.string.scoring_ball_wicket), BallKind.Wicket)
-    val extra = delivery.extra ?: return when (delivery.runsOffBat) {
-        0 -> Ball("•", BallKind.Dot)
-        4 -> Ball("4", BallKind.Four)
-        6 -> Ball("6", BallKind.Six)
-        else -> Ball("${delivery.runsOffBat}", BallKind.Runs)
-    }
-    val (short, runs) = when (extra) {
-        ExtraType.WIDE -> Res.string.scoring_ball_wide to delivery.extraRuns
-        ExtraType.NO_BALL -> Res.string.scoring_ball_no_ball to delivery.runsOffBat + delivery.extraRuns
-        ExtraType.BYE -> Res.string.scoring_ball_bye to delivery.extraRuns
-        ExtraType.LEG_BYE -> Res.string.scoring_ball_leg_bye to delivery.extraRuns
-    }
-    val shortText = stringResource(short)
-    // A plain wide or no-ball is just "wd" / "nb"; anything more shows the total, e.g. "3wd".
-    val label = if (runs <= delivery.extraPenalty && delivery.isWideOrNoBall) shortText
-    else stringResource(Res.string.scoring_ball_extra_with_runs, runs, shortText)
-    return Ball(label, BallKind.Extra)
 }
 
 // Previews: sample teams and balls only; all labels come from string resources.
