@@ -2,6 +2,14 @@ package com.harsh.desicrics.data.api
 import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.model.TeamInsights
+import com.harsh.desicrics.api.AddAuctionPlayerRequest
+import com.harsh.desicrics.api.AuctionPlayerRequest
+import com.harsh.desicrics.api.BidRequest
+import com.harsh.desicrics.api.CreateAuctionRequest
+import com.harsh.desicrics.api.NextPlayerRequest
+import com.harsh.desicrics.api.ReverseSaleRequest
+import com.harsh.desicrics.model.AuctionDetails
+import com.harsh.desicrics.model.AuctionSettings
 import com.harsh.desicrics.api.AddMemberRequest
 import com.harsh.desicrics.api.AddOrganiserRequest
 import com.harsh.desicrics.api.CreateTournamentRequest
@@ -284,6 +292,82 @@ class DesiCricsApi(
     /** A walkover or call-off for a match that never starts. */
     suspend fun endBeforeStart(matchId: String, request: EndBeforeStartRequest): MatchDetails =
         call { post("$baseUrl/matches/$matchId/end") { it(); json(request) } }.body()
+
+    // Auctions (see core/.../api/AuctionApi.kt).
+
+    /** Null when the tournament has no auction yet. */
+    suspend fun tournamentAuction(tournamentId: String): AuctionDetails? = try {
+        call { get("$baseUrl/tournaments/$tournamentId/auction", it) }.body()
+    } catch (e: ApiException) {
+        if (e.status == HttpStatusCode.NotFound) null else throw e
+    }
+
+    suspend fun createAuction(tournamentId: String, settings: AuctionSettings): AuctionDetails =
+        call { post("$baseUrl/tournaments/$tournamentId/auction") { it(); json(CreateAuctionRequest(settings)) } }.body()
+
+    suspend fun auction(auctionId: String): AuctionDetails = call { get("$baseUrl/auctions/$auctionId", it) }.body()
+
+    suspend fun updateAuctionSettings(auctionId: String, settings: AuctionSettings): AuctionDetails =
+        call { put("$baseUrl/auctions/$auctionId/settings") { it(); json(settings) } }.body()
+
+    suspend fun addAuctionPlayer(auctionId: String, request: AddAuctionPlayerRequest): AuctionDetails =
+        call { post("$baseUrl/auctions/$auctionId/players") { it(); json(request) } }.body()
+
+    /** Also accepts a player's request to join the pool. */
+    suspend fun updateAuctionPlayer(auctionId: String, profileId: String, request: AuctionPlayerRequest): AuctionDetails =
+        call { put("$baseUrl/auctions/$auctionId/players/$profileId") { it(); json(request) } }.body()
+
+    /** Also declines a request. */
+    suspend fun removeAuctionPlayer(auctionId: String, profileId: String): AuctionDetails =
+        call { delete("$baseUrl/auctions/$auctionId/players/$profileId", it) }.body()
+
+    /** The caller asks to be in the pool, or withdraws. */
+    suspend fun setAuctionRequest(auctionId: String, requested: Boolean): AuctionDetails {
+        val url = "$baseUrl/auctions/$auctionId/requests"
+        return call { if (requested) post(url, it) else delete(url, it) }.body()
+    }
+
+    suspend fun startAuction(auctionId: String): AuctionDetails = auctionAction(auctionId, "start")
+
+    /** Brings [profileId] up, or whoever is next when null. */
+    suspend fun nextAuctionPlayer(auctionId: String, profileId: String? = null): AuctionDetails =
+        call { post("$baseUrl/auctions/$auctionId/next") { it(); json(NextPlayerRequest(profileId)) } }.body()
+
+    /** Without an [amount], the least the next bid can be (the hall's tap-a-team). */
+    suspend fun bid(auctionId: String, teamId: String, amount: Int? = null): AuctionDetails =
+        call { post("$baseUrl/auctions/$auctionId/bids") { it(); json(BidRequest(teamId, amount)) } }.body()
+
+    suspend fun sellAuctionPlayer(auctionId: String): AuctionDetails = auctionAction(auctionId, "sold")
+
+    suspend fun passAuctionPlayer(auctionId: String): AuctionDetails = auctionAction(auctionId, "unsold")
+
+    suspend fun undoAuction(auctionId: String): AuctionDetails = auctionAction(auctionId, "undo")
+
+    suspend fun pauseAuction(auctionId: String): AuctionDetails = auctionAction(auctionId, "pause")
+
+    suspend fun resumeAuction(auctionId: String): AuctionDetails = auctionAction(auctionId, "resume")
+
+    suspend fun reverseSale(auctionId: String, profileId: String): AuctionDetails =
+        call { post("$baseUrl/auctions/$auctionId/reverse") { it(); json(ReverseSaleRequest(profileId)) } }.body()
+
+    /** Ends the auction; sold players join their teams. */
+    suspend fun finishAuction(auctionId: String): AuctionDetails = auctionAction(auctionId, "finish")
+
+    private suspend fun auctionAction(auctionId: String, action: String): AuctionDetails =
+        call { post("$baseUrl/auctions/$auctionId/$action", it) }.body()
+
+    /**
+     * The auction room as it changes, over a WebSocket, starting with its current state. Ends (or throws) when
+     * the connection drops; the caller decides whether to reconnect. Count the clock down from
+     * [AuctionDetails.lotEndsAt] against [AuctionDetails.serverTime], not the phone's clock.
+     */
+    fun liveAuction(auctionId: String): Flow<AuctionDetails> = flow {
+        val token = tokens.idToken(forceRefresh = false)
+        val url = baseUrl.replaceFirst("http", "ws") + "/auctions/$auctionId/live"
+        http.webSocket(url, request = { token?.let { bearerAuth(it) } }) {
+            while (true) emit(receiveDeserialized<AuctionDetails>())
+        }
+    }
 
     // Stats.
 
