@@ -105,22 +105,18 @@ Render can't build the image itself (no Android SDK), so `.github/workflows/serv
 
 ## Android releases
 
-Once CI passes on `main`, `.github/workflows/android-release.yml` builds the release APK for the deployed server
-(`remoteRelease`), numbered `1.0.<run>` so each one installs over the last. It goes to two places:
+Go to GitHub › Actions › Firebase App Distribution › Run workflow, select a branch containing
+this workflow, and click **Run workflow**. It builds the signed `remoteRelease` APK from that branch,
+numbers it `1.0.<run>`, and sends it to the Firebase `internal` tester group.
 
-- **Firebase App Distribution** (Firebase console › Release & Monitor › App Distribution): everyone in the
-  `internal` group (Testers & Groups; the workflow names it by alias) gets an email; they install the Firebase
-  App Tester app once, then each new build from it.
-- **The workflow run** (GitHub › Actions › Android release › the run › Artifacts): a zip with the APK, kept 90 days.
-
-It can also be run by hand (Actions › Android release › Run workflow). Repository secrets it needs:
+Repository secrets for this workflow
 
 | Secret | What |
 | --- | --- |
 | `GOOGLE_SERVICES_JSON` | `app/androidApp/google-services.json` (CI uses it too) |
 | `RELEASE_KEYSTORE_BASE64` | the release key: `base64 -i app/androidApp/release.keystore` |
 | `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD` | from `app/androidApp/release.keystore.properties` |
-| `FIREBASE_SERVICE_ACCOUNT` | JSON key of a service account with the Firebase App Distribution Admin role (optional; without it the APK is only on the run) |
+| `FIREBASE_SERVICE_ACCOUNT` | JSON key of a service account with the Firebase App Distribution Admin role. Required for the Firebase workflow. |
 
 The release key and its passwords stay out of git. **Back them up**: an APK signed with any other key won't
 install over the existing ones, so testers would have to uninstall first. Its SHA-1 and SHA-256 must be on the
