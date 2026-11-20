@@ -247,11 +247,11 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ Notifications for requests, confirmations, rejections and placements
 
 ### Level 2 · Complete
-- ⬜ Invites that the team or player accepts; withdrawing an entry
-- ⬜ Limits, a waiting list and a closing date
-- ⬜ "Open to join" tournaments by city on the Tournaments tab
-- ⬜ Teams pick free agents from the pool
-- ⬜ The auction's pool moves onto the tournament's player pool
+- ✅ Invites that the team or player accepts; withdrawing an entry
+- ✅ Limits, a waiting list and a closing date
+- ✅ "Open to join" tournaments by city on the Tournaments tab
+- ✅ Teams pick free agents from the pool
+- ✅ The auction's pool moves onto the tournament's player pool
 
 ### Level 3 · Delight
 - ⬜ Pick-up tournaments: the organiser makes teams from the pool, or the app splits it into balanced sides

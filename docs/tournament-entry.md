@@ -38,7 +38,7 @@ A tournament has two kinds of entry, **teams** and **players**, and each has its
 
 ### Entry states
 
-`INVITED` → `PENDING` → `CONFIRMED`, plus `WAITLISTED` and `WITHDRAWN`. Rejected entries are deleted, as today. A team or player can withdraw their own entry until the tournament starts.
+`CONFIRMED`, `PENDING` (asked, waiting for an organiser), `INVITED` (asked by an organiser, waiting to accept) and `WAITLISTED`. Rejected and withdrawn entries are deleted, as rejected ones were before. A team or player can withdraw their own entry until the tournament starts.
 
 ### Tournament squads
 
@@ -58,7 +58,7 @@ Players who enter on their own go into the tournament's **player pool**. A tourn
 |---|---|
 | **Organiser places them** | An organiser assigns each pool player to a team's squad **(default)** |
 | **Teams pick** | Team admins see the pool as free agents and ask a player to join their squad; the player accepts |
-| **Auction** | The pool is the auction's player pool (it replaces `auction_players.requested`); sold players join the buying team's squad |
+| **Auction** | Pool players go up in the tournament's auction: those waiting when it's set up, and anyone confirmed into the pool after; sold and retained players join the buying team's squad. The auction keeps its own requests for tournaments that don't take players |
 | **Organiser makes the teams** | For pick-up tournaments with no saved teams: the organiser creates the teams from the pool, or the app splits it into balanced sides by role and stats |
 
 A pool player who joins a squad leaves the pool. Pool players who are never placed still count as entered, so they get the tournament's notifications.
