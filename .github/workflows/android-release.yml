@@ -83,7 +83,7 @@ jobs:
           name: DesiCrics-${{ env.VERSION_NAME }}
           path: DesiCrics-${{ env.VERSION_NAME }}.apk
 
-      # Testers in the "testers" group get an email and install from Firebase's App Tester app.
+      # Testers in the "internal" group get an email and install from Firebase's App Tester app.
       - name: Send to Firebase App Distribution
         if: steps.secrets.outputs.ready == 'true'
         env:
@@ -97,4 +97,4 @@ jobs:
           printf '%s' "$RELEASE_NOTES" > "$RUNNER_TEMP/notes.txt"
           app_id=$(jq -r '.client[] | select(.client_info.android_client_info.package_name == "com.harsh.desicrics") | .client_info.mobilesdk_app_id' app/androidApp/google-services.json | head -1)
           GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/firebase.json" npx --yes firebase-tools@15 appdistribution:distribute \
-            "DesiCrics-$VERSION_NAME.apk" --app "$app_id" --groups testers --release-notes-file "$RUNNER_TEMP/notes.txt"
+            "DesiCrics-$VERSION_NAME.apk" --app "$app_id" --groups internal --release-notes-file "$RUNNER_TEMP/notes.txt"

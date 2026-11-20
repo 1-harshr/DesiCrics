@@ -109,7 +109,8 @@ Once CI passes on `main`, `.github/workflows/android-release.yml` builds the rel
 (`remoteRelease`), numbered `1.0.<run>` so each one installs over the last. It goes to two places:
 
 - **Firebase App Distribution** (Firebase console › Release & Monitor › App Distribution): everyone in the
-  `testers` group gets an email; they install the Firebase App Tester app once, then each new build from it.
+  `internal` group (Testers & Groups; the workflow names it by alias) gets an email; they install the Firebase
+  App Tester app once, then each new build from it.
 - **The workflow run** (GitHub › Actions › Android release › the run › Artifacts): a zip with the APK, kept 90 days.
 
 It can also be run by hand (Actions › Android release › Run workflow). Repository secrets it needs:
