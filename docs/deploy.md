@@ -82,11 +82,11 @@ fly deploy --config fly.toml --dockerfile server/Dockerfile server
 
 Free, but the web service sleeps after about 15 minutes without traffic (the next request waits about a minute) and the free Postgres expires after 30 days. Fine for trying the app with a few people; not for a live Sunday.
 
-For each release, select `main` under **Actions → Server image → Run workflow**. The workflow builds
+For each release, select `main` under **Actions → Deploy Server → Run workflow**. The workflow builds
 the server and publishes the image as `ghcr.io/<owner>/desicrics-server`.
 
 1. **Postgres:** New › Postgres, Free, region Singapore (the closest to India). From its Connections section, note the *internal* hostname, database, user and password.
-2. **Image:** run the Server image workflow once (Actions › Server image › Run workflow), then make the package public (GitHub › Packages › desicrics-server › Package settings), or give Render a GitHub token as registry credentials.
+2. **Image:** run the Deploy Server workflow once (Actions › Deploy Server › Run workflow), then make the package public (GitHub › Packages › desicrics-server › Package settings), or give Render a GitHub token as registry credentials.
 3. **Web service:** New › Web Service › Existing image, `ghcr.io/<owner>/desicrics-server:latest`, Free, region Singapore. Environment:
    - `DATABASE_URL` = `jdbc:postgresql://<internal hostname>:5432/<database>`
    - `DATABASE_USER`, `DATABASE_PASSWORD` from step 1
@@ -107,16 +107,17 @@ the server and publishes the image as `ghcr.io/<owner>/desicrics-server`.
 
 ## Release server, Android, and web together
 
-Once the manual workflows are on `main`, sign in with `gh auth login` using a GitHub account with
-write access to the repository. From the repo root, run `./scripts/release-all.sh`.
+In GitHub, go to **Actions → Deploy All → Run workflow** and select `main`. To start the same
+release workflows from a terminal, sign in with `gh auth login` using an account with repository
+write access, then run `./scripts/release-all.sh` from the repo root.
 
-The script starts **Server image**, **Firebase App Distribution**, and **Deploy web to GitHub Pages**
-on `main`. The runs can overlap. Check their results in **Actions**. If a launch fails, the script
-stops and any runs already started continue.
+Both entry points start **Deploy Server**, **Deploy Android**, and **Deploy Web**
+on `main`. The runs can overlap. Check each release's result in **Actions**. If a launch fails,
+any runs already started continue.
 
 ## Android releases
 
-Go to GitHub › Actions › Firebase App Distribution › Run workflow, select a branch containing
+Go to GitHub › Actions › Deploy Android › Run workflow, select a branch containing
 this workflow, and click **Run workflow**. It builds the signed `remoteRelease` APK from that branch,
 numbers it `1.0.<run>`, and sends it to the Firebase `internal` tester group.
 

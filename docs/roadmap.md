@@ -28,7 +28,7 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to `main`.
 - ✅ `strings.xml` set up in `:app:shared` and `:app:designsystem`; sign-in, profile and session text moved ([ui-conventions.md](ui-conventions.md))
 - ✅ Phone OTP + Google sign-in screens in Crease
 - ✅ Profile onboarding: name, role, styles; photo upload from the profile editor
-- ✅ CI: build, unit tests, server tests (`.github/workflows/ci.yml`)
+- ✅ **Build and Test** runs builds, unit tests, and server tests (`.github/workflows/ci.yml`).
 
 ### Level 3 · Delight
 - 🟡 Staging server deploy: the image builds and boots on Postgres, and both hosting options are scripted in [deploy.md](deploy.md); the deploy itself waits for the hosting decision

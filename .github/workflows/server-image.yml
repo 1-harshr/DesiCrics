@@ -1,4 +1,4 @@
-name: Server image
+name: Deploy Server
 
 # Builds the server's Docker image and publishes it to GitHub's container registry, for hosts that
 # deploy a ready-made image (Render, see docs/deploy.md). The jar is built here rather than in the
