@@ -1,32 +1,34 @@
 # Web app
 
-A React web app for people who don't have DesiCrics installed. It covers the same product as the Android app, in
-the same Crease look, adapted to the browser: real URLs for every page, layouts that use a wide screen, hover and
-keyboard support. It talks to the same Ktor server and uses the same scoring rules.
+A view-only React web app for people who don't have DesiCrics installed. They can follow live matches,
+scorecards, tournaments, teams, players and stats in a browser, in the same Crease look as the Android app,
+adapted to the web with real URLs, wide-screen layouts, and hover and keyboard support.
+
+It doesn't do anything that changes data: no sign-in, no scoring, no creating or managing matches, teams or
+tournaments. Those stay in the app, and the web app points people there when they want to do more.
 
 Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `web` branch until it merges.
 
 ## Who it's for
 
-1. **Followers with a shared link.** Someone opens a WhatsApp link to a match, tournament or team invite. Today
-   they get a bare HTML page from the server; the web app gives them the real live scorecard. This is the
-   biggest group, so it comes first, and it needs no sign-in.
-2. **Players without the app,** or on an iPhone, which the Android app doesn't cover. They sign in, set up a
-   profile, follow teams, join teams and enter tournaments.
-3. **Organisers at a laptop.** Setting up tournaments, fixtures and auctions is easier on a big screen, and the
-   auction hall is meant for one.
-4. **Scorers in a pinch,** on a borrowed phone or a laptop at the ground.
+1. **Followers with a shared link.** Someone opens a WhatsApp link to a match or tournament. Today they get a
+   bare HTML page from the server; the web app gives them the real live scorecard. This is the biggest group,
+   so it comes first.
+2. **Fans browsing.** Family at the boundary, or players on an iPhone, which the Android app doesn't cover,
+   looking up live matches, results, a team or a player's stats.
+3. **Spectators on a big screen.** A live scorecard or an auction on a projector or TV at the ground.
 
 ## Decisions
 
 | Area | Choice | Why |
 |---|---|---|
+| Scope | View only, no accounts | Everything people do stays in the app; the web is for watching and looking things up |
 | Location | `web/` at the repo root, its own npm project | Next to `server/` and `proxy/`; Gradle doesn't build it |
 | Build | Vite, React, TypeScript | Static files, fast dev server, no server rendering needed |
-| Routing | React Router (library mode) | Every page has a URL; the app's `NavKey` routes map one to one |
+| Routing | React Router (library mode) | Every page has a URL, and the shared `/m/{id}` and `/t/{id}` links keep working |
 | Server data | TanStack Query | Caching, retries and refetch on focus, the job the app's repositories do |
-| Auth | Firebase JS SDK: phone OTP with invisible reCAPTCHA, Google popup | Same Firebase project and ID tokens, so the server needs no change |
-| Scoring rules | `:core` compiled to JavaScript with Kotlin/JS and called through a small JSON facade (`WebCore`) | One rules engine for phone, server and browser, as the architecture asks. No TypeScript port to drift out of step |
+| Server API | Read-only `/public/...` routes that need no token and leave out account IDs | The signed-in API stays as it is; the public routes carry only what a viewer may see |
+| Scorecards | `:core` compiled to JavaScript with Kotlin/JS and called through a small JSON facade (`WebCore`) | The same scoring engine as the phone and server, so a scorecard reads the same everywhere. No TypeScript port to drift out of step |
 | API types | TypeScript types in `web/src/api/types.ts` that mirror the `core` DTOs | The wire format is JSON; the facade covers the computed parts |
 | Styling | CSS Modules over Crease tokens as CSS custom properties | No styling library; tokens stay in one file like `:app:designsystem` |
 | Design system | `web/src/designsystem/`: tokens, fonts, icons and components | Features never define their own colours, type or shared components, same rule as the app |
@@ -38,22 +40,19 @@ Status: ✅ done · 🟡 partial · ⬜ to do. Status refers to the `web` branch
 
 ### Adapting to the web, not copying the phone
 
-- **Below 720px** it looks like the app: bottom navigation, one column, run pad in the thumb zone.
+- **Below 720px** it looks like the app: bottom navigation and one column.
 - **From 720px** navigation moves to a side rail and content centres at 600px, as on tablets.
-- **From 1100px** pages that have two things to show use two columns: scorecard and commentary, tournament table
-  and fixtures, auction player card and purses.
-- Every tappable thing has hover and focus states; dialogs and sheets close with Esc.
-- The scoring screen takes keyboard shortcuts (`0`–`6`, `W` wide, `N` no-ball, `B` bye, `L` leg bye, `X` out,
-  `U` undo).
-- Bottom sheets become centred dialogs on wide screens.
-- Pages people follow (a live match, a tournament) say "Get the app" once, in a dismissable banner; never on
-  scoring screens.
+- **From 1100px** pages that have two things to show use two columns: scorecard and over-by-over, tournament
+  table and fixtures, a player's stats and their recent matches.
+- Every link and control has hover and focus states.
+- Pages say "Get the app" once, in a banner that can be dismissed, for anyone who wants to score, follow or
+  join.
 
 ## Working on it
 
 ```
 cd web
-cp .env.example .env.local      # API URL and Firebase web config
+cp .env.example .env.local      # the API URL
 npm install
 npm run dev                     # builds :core with Gradle, then serves http://localhost:5173
 ```
@@ -64,20 +63,25 @@ Run the server with `WEB_ORIGINS=http://localhost:5173 ./gradlew :server:run` so
 
 ## Server changes the web app needs
 
+All read only, with no sign-in. Each leaves out Firebase account IDs, claim and join codes, and anything else
+only members or organisers see in the app.
+
 | Change | Phase |
 |---|---|
-| ✅ CORS for the web app's origins (`WEB_ORIGINS`), so it works from a dev server or its own host | 0 |
-| Public JSON for shared pages: `GET /public/matches/{id}`, `GET /public/tournaments/{id}` | 1 |
-| Public live feed: `/public/matches/{id}/live` WebSocket, read only | 1 |
-| The proxy sends `/m/*`, `/t/*`, `/join/*` and the web app's own paths to the web app instead of the server's HTML pages | 1 |
-
-Everything else uses the existing signed-in API.
+| ✅ CORS for the web app's origins (`WEB_ORIGINS`) | W0 |
+| ✅ `GET /public/matches/{id}`, `GET /public/tournaments/{id}` | W1 |
+| ✅ `/public/matches/{id}/live` WebSocket | W1 |
+| The proxy sends `/m/*`, `/t/*`, `/join/*` and the web app's own paths to the web app instead of the server's HTML pages | W1 |
+| Public match lists (live, recent, upcoming, by city), tournament lists, search | W2 |
+| Public team and player pages, player stats | W2 |
+| Public leaderboards, rankings, directory and "looking for" posts | W3 |
+| Public auction feed for watching | W4 |
 
 ---
 
 ## Phase W0 · Foundation
 
-**Goal:** an empty web app in Crease that can call the server and run the scoring engine.
+**Goal:** an empty web app in Crease that can call the server and draw a scorecard.
 
 - 🟡 `web/` project: Vite, React, TypeScript, React Router, TanStack Query, i18next, Vitest. No linter yet
 - ✅ Crease tokens as CSS custom properties, light and dark from `prefers-color-scheme`
@@ -87,7 +91,7 @@ Everything else uses the existing signed-in API.
   over strip, score header, match card, empty state, error state, error banner, loading
 - ✅ App shell: bottom bar under 720px, side rail above
 - ✅ `:core` JS target and `WebCore` facade: `MatchDetails` JSON in, scorecard view JSON out
-- ✅ API client with base URL from `VITE_API_URL`, `ApiError` messages, ID token when signed in
+- ✅ API client with base URL from `VITE_API_URL` and `ApiError` messages
 - ✅ Server: CORS
 - ✅ CI builds and tests `web/`
 
@@ -96,65 +100,49 @@ scorecard in the browser with `:core`.
 
 ## Phase W1 · Shared links
 
-**Goal:** a shared match or tournament link opens a live, good-looking page in any browser, without signing in.
+**Goal:** a shared match or tournament link opens a live, good-looking page in any browser.
 
-- ⬜ Server: public match and tournament JSON, public live feed
+- ✅ Server: public match and tournament JSON, public live feed
 - ⬜ Match page `/m/:id`: score header, Live / Scorecard / Overs tabs, updates every ball; two columns on desktop
-- ⬜ Tournament page `/t/:id`: points tables, fixtures, key stats, champion
-- ⬜ Join page `/join/:code`: team name and how to join, with sign-in to join from the web
+- ⬜ Tournament page `/t/:id`: champion, points tables, fixtures, key stats
+- ⬜ Join page `/join/:code`: how to join the team in the app
 - ⬜ Not found and offline states
 - ⬜ "Get the app" banner
 - ⬜ Hosting and proxy routing
 
 **Exit:** a match link sent on WhatsApp opens the live scorecard on an iPhone, and it updates ball by ball.
 
-## Phase W2 · Sign in and you
+## Phase W2 · Browse
 
-**Goal:** someone without the app signs in, sets up a profile and follows what they care about.
+**Goal:** someone with no link can find a match, a team or a player and follow along.
 
-- ⬜ Sign-in: phone OTP and Google
-- ⬜ Onboarding: you, how you play, photo, claim players, team, follow, in the app's order and skip rules
-- ⬜ Home feed: your live match first, then followed, then nearby
-- ⬜ Profile (Matches / Teams / Stats), edit profile, photo upload
-- ⬜ Search, player pages, follow and unfollow
-- ⬜ Notifications inbox
-- ⬜ Settings: theme, sign out, delete account, support form
+- ⬜ Home: live now, then recent results and upcoming fixtures, filtered by city
+- ⬜ Tournaments: ongoing, upcoming and finished, by city
+- ⬜ Search across matches, teams, players and tournaments
+- ⬜ Team page: squad, recent results, record against other teams
+- ⬜ Player page: career, season and format stats, form, recent matches
 
-**Exit:** a new user signs up on the web, follows a team, and sees that team's next match in their feed.
+**Exit:** a parent searches for their child's team, opens it, and follows its live match.
 
-## Phase W3 · Score a match
+## Phase W3 · Stats and community
 
-**Goal:** a full match scored from a browser, with the same rules and the same result as on the phone.
+**Goal:** the numbers and listings people like to look up.
 
-- ⬜ New match: teams → squads → rules, presets, toss
-- ⬜ Scoring: run pad, extras, wicket flow with fielders, undo, strike and bowler changes, end of innings
-- ⬜ Retire, substitutes and latecomers, revise target, declare, end early
-- ⬜ Take over scoring with a handover code, both ways between phone and web
-- ⬜ Wagon wheel
-- ⬜ Keyboard shortcuts
+- ⬜ Leaderboards by city, tournament and season
+- ⬜ Team and player rankings by city
+- ⬜ Compare two players
+- ⬜ Directory of grounds, umpires and scorers, and "looking for" posts, to read
 
-**Exit:** a 5-over match scored on the web matches, ball for ball, the same match scored on the phone.
+**Exit:** the city's top run-scorers and the team rankings open from a link with no app.
 
-## Phase W4 · Teams, tournaments and community
-
-**Goal:** everything around matches.
-
-- ⬜ Teams: list, create, team page, members, admins, join codes, join requests, insights, head to head
-- ⬜ Tournaments: list, create, entry settings, player pool, squads, offers, pick-up teams, start, fixtures,
-  scheduling, organisers
-- ⬜ Stats: player stats, compare, leaderboards
-- ⬜ Community: looking for, directory, rankings
-
-**Exit:** an organiser runs a tournament from a laptop, from entries to the final, while teams enter from the app.
-
-## Phase W5 · Big screen and extras
+## Phase W4 · Big screen
 
 **Goal:** the things a browser does better than a phone.
 
-- ⬜ Auction hall on a projector, and online bidding
-- ⬜ Share studio and posters, downloaded as images
-- ⬜ Themes from Phase 8
-- ⬜ Installable (web app manifest), and web push for followed matches
+- ⬜ Big-screen scorecard for a projector or TV, readable from across the ground
+- ⬜ Auction hall to watch, with the player up, bids and purses
 - ⬜ Stream overlay moved from the server's page into the web app
+- ⬜ Themes from Phase 8
+- ⬜ Installable (web app manifest)
 
-**Exit:** an auction runs with the hall on a projector and owners bidding from the web and the app.
+**Exit:** a live match and an auction both run on a projector from the web app.
