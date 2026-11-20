@@ -45,7 +45,10 @@ import com.harsh.desicrics.data.SocialRepository
 import com.harsh.desicrics.model.UserProfile
 import com.harsh.desicrics.ui.system.RegisterForPush
 import org.koin.compose.koinInject
+import com.harsh.desicrics.ui.auction.AuctionPoster
 import com.harsh.desicrics.ui.auction.AuctionScreen
+import com.harsh.desicrics.ui.share.ShareStudio
+import com.harsh.desicrics.ui.share.auctionShareContents
 import com.harsh.desicrics.ui.community.CommunityScreen
 import com.harsh.desicrics.ui.home.HomeScreen
 import com.harsh.desicrics.ui.match.MatchScreen
@@ -253,8 +256,12 @@ fun AppNavigation(
                 )
             }
             entry<AuctionRoute> { route ->
-                // The share studio's "Sold!" and "Team after auction" posters plug in through onSharePoster.
-                AuctionScreen(route.auctionId, onBack = back, onOpenPlayer = { backStack.add(PlayerRoute(it)) })
+                // Share on the sold moment or a team's results opens the studio with that poster.
+                var poster by remember { mutableStateOf<AuctionPoster?>(null) }
+                AuctionScreen(route.auctionId, onBack = back, onOpenPlayer = { backStack.add(PlayerRoute(it)) }, onSharePoster = { poster = it })
+                poster?.let { current ->
+                    ShareStudio(remember(current) { auctionShareContents(current) }, onDismiss = { poster = null }, title = stringResource(Res.string.poster_studio_title))
+                }
             }
             entry<NotificationsRoute> {
                 NotificationsScreen(onOpenMatch = { backStack.add(MatchRoute(it)) }, onBack = back, onOpenTeam = { backStack.add(TeamRoute(it)) })

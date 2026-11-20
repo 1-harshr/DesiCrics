@@ -1517,4 +1517,20 @@
         <item quantity="one">%1$d player hasn't been up yet.</item>
         <item quantity="other">%1$d players haven't been up yet.</item>
     </plurals>
+
+    <!-- Phase 7 · auction posters -->
+    <string name="share_content_sold">Sold!</string>
+    <string name="share_content_team_after_auction">Team after auction</string>
+    <string name="share_template_stamp">Stamp</string>
+    <string name="poster_auction_tag">Player auction</string>
+    <string name="poster_auction_sold">SOLD!</string>
+    <string name="poster_auction_sold_to">Sold to</string>
+    <string name="poster_auction_to_team">To %1$s</string>
+    <string name="poster_auction_price">Price</string>
+    <string name="poster_auction_base">Base price %1$s</string>
+    <string name="poster_auction_after">After the auction</string>
+    <string name="poster_auction_spent">%1$s spent</string>
+    <string name="poster_auction_left">%1$s left</string>
+    <string name="poster_auction_retained">Retained</string>
+    <string name="poster_auction_retained_short">Kept</string>
 </resources>

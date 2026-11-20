@@ -199,5 +199,6 @@ An auction fills tournament squads the way local IPL-style leagues do. Each team
 - `AuctionEngine` in `core` is pure: auction state is a fold over the event list, just like `MatchState` over deliveries. The server checks every action against it.
 - Live updates use the existing WebSocket setup with an auction channel. The countdown runs on the server, and clients only show it.
 - A new migration adds `auctions`, `auction_players` and `auction_events`.
+- Posters: **Sold!** (Stamp, Minimal, Overlay) and **Team after auction** (Team sheet, paged for big squads), in `ui/share/AuctionPosters.kt`. The sold moment and each team on the results open the studio.
 
 **Out of scope for 7.4:** right to match, trades after the auction, and anything to do with real payments.
