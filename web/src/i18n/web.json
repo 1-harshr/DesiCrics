@@ -1,0 +1,13 @@
+{
+  "web_nav_home": "Home",
+  "web_nav_matches": "Matches",
+  "web_nav_teams": "Teams",
+  "web_nav_tournaments": "Tournaments",
+  "web_nav_me": "You",
+  "web_brand": "DesiCrics",
+  "web_catalogue_title": "Crease on the web",
+  "web_catalogue_body": "Every design-system component, in the current theme.",
+  "web_not_found_title": "This page isn't here",
+  "web_not_found_body": "The link may be old or typed wrong.",
+  "web_not_found_action": "Go home"
+}
