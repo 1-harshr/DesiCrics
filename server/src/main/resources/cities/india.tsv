@@ -1,0 +1,3745 @@
+# Indian cities from GeoNames (https://www.geonames.org), CC BY 4.0. Built by scripts/build-cities.sh.
+# name	state	population	other names, comma-separated
+Mumbai	Maharashtra	12691836	Asumumbay,Bombai,Bombaim,Bombaj,Bombay,Bombaya,Bombej,Bombejus,Bumbaj,Dakbayan sa Bombay,Lungsod ng Mumbai,Moembaai,Mumbaj,Mumbaja,Mumbajo,Mumbajus,Mumbay,Numbai,Vomvai,bamba'i,bmbyy,bwmbay,gretara mumba'i,meng mai,mmbay,mmbyy,muba'i,mum bi,mumba'i,mumpai,munbai,mwmbay,mwmbyy,mymbais,pullapa mumba'i
+Delhi	Delhi	11034555	Daehli,Dehli,Delchi,Delhio,Deli,Delis,Delkhi,Dellium,Dilhi,Dilli,Faritani Delhi,New Delhi,Old Delhi,Sahdzahanabad,Stare Deli,de li,dehali,delli,deri,dhilli,dhly,dhly qdym,dil'hi,dili,dlhy,dly,dylhy,na'i dilli,tilli
+Bengaluru	Karnataka	8495492	Ban'nkalor,Bangalor,Bangalore,Bangalore City,Bangalur,Bangaluri,Bengalour,Bengaluras,Bengaluro,Bengalurus,baeng-geollo,bagalaura,ban jia luo er,bang kha l xr,bang-galloleu,bangalaura,bangalora,bangalura,bangaroru,beng-gallulu,bengalora,benguluru,bnghalwr,bnglwr,bynglwr,penkalur
+Hyderabad	Telangana	6993262	Bhaganagar,Haidarabadas,Haiderabad,Hajdarabad,Hajderabad,Hyderabad AP,Khajdarabad,Khajderabad,hai de la ba,haidarabada,haidarabadu,haiderabado,haitarapat,hayadarabada ema. karporesana,hayadrabada,hydr abad,hydr abad dkn,hydrabad
+Ahmedabad	Gujarat	6357693	Achmentampant,Ahmadabad,Ahmadabadas,Ahmadabado,Ahmadobod,Akhmadabad,Akhmadabad shaary,Akhmedabad,Amadavad,Amdavada,Amedabato,Amedebatum,Exmetabad,a mei da ba de,a wa,afumadabado,aham'madabad,ahamadabad,ahamadabada,ahamedabada,ahimadabada,ahmadabadi,ahmd abad,ahmdabad,ahmdabad - hyndystan,ai ha mai da ba de,ai ha mai de bao,akamatapat,amadabada,amadabadeu,amadaraada,amadavada,xah mda bad,ya mei da ba de
+Chennai	Tamil Nadu	4681087	Cenaj,Cenajo,Cenajus,Cenay,Cennai,Cennaj,Chehnai,Chenaj,Chennai - cennai,Chennaj,Csennai,Maderaspatanum,Madras,Tamizhagam,Tamulinadu,Tsennai,cen ni,cena'i,cenna'i,chen'nai,chenai,chnay,chnayy,chynay,chynayy,jin nai,qing nai,tshynay
+Kolkata	West Bengal	4631392	Calcuta,Calcutta,Caligardamana,Kaelkuettae,Kal'kuta,Kal'kutta,Kal'kuttae,Kalikata,Kalkata,Kalkota,Kalkouta,Kalkueta,Kalkuta,Kalkutta,Kolkat,Kolkate,Kolkato,Sealdah,jia er ge da,jia li ji da,kalakata,kalakatta,klkta,klkth,klkwth,ko l ka ta,kolakata,kolkatta,korukata,kwlkata,qwlqth
+Surat	Gujarat	4591246	Suratas,Surate,Surato,curat,su la te,surata
+Pune	Maharashtra	3124458	Poona,Poune,Pun,Puna,Punae,Puneo,Puni,Puno,bwnh,pu na,pune sahara,pwna,pwnh,pwny
+Jaipur	Rajasthan	3046163	Caypur,Dzaipur,Dzaipuras,Dzajpur,Dzajpura,Dzhajpur,Dzsaipur,Gajpuro,Iaipura,Jainagar,Jaipur City,Jayapur,Jaypur,Jeypore,Tzaipour,Zhajpur,ceyppur,chay pu ra,jaipuleu,jaipura,jaipuru,jayapura,jayapuram,jaybwr,jaypwr,jypwr,zhai pu er,zhai pu ya
+Kanpur	Uttar Pradesh	2823249	Cawnpore,Cawnporne,Kanpour,Kanpuras,Kanpuro,Kanpwr,kanapura,kanpuru
+Lucknow	Uttar Pradesh	2472011	Lakhnau,Lakkhnau,Lakkhnau shaary,Laknaou,Laknau,Laknauo,Laknava,Lucknow City,Luknow,ilakno,lakh nea,lakhana'u,lakhanau,lakno,laksnau,lei ke nao,leokeunau,lkhnw,lknaw,rakunau
+Nagpur	Maharashtra	2405665	Ajni,Nagpore,Nagpura,Nagpuras,Nagpuro,Nankpour,na ge pu er,nagapur,nagapura,nagapuram,nageupuleu,naghbwr,nagpwr,nagupuru,nakpur
+Coimbatore	Tamil Nadu	2136916	Koimbator,Koimbatore,Koimbatur,Kojambuttur,Kovai,Koyambattur,Koyamuttur,ge yin bai tuo,ko'ibatura,ko'imabatore,ko'imbatora,ko'imbatura,koimbatoleu,koyambattura,koyambatturu,koyambatura,koyampattur,koyamputtur,koyanbuttouru,kwymbatwr,kwymbtwr
+Indore	Madhya Pradesh	1994397	Indaur,Indhur,Indor,Indore Madhya Pradesh,Induras,Induro,andwr,ayndwr,idaura,indaura,indoleu,indora,indori,indoru,indura,intor,yin duo er
+Thane	Maharashtra	1841488	Tane,Tanna,Thana,Tkhana,Tkhane,ta na,tanh,tany,thyn
+Vadodara	Gujarat	1822221	Baroda,Vadadara,Vadodarae,Vadodaro,Vantontara,Vapadedara,ba luo da,badodala,barodara,bhadodara,fadwdara,radodara,vadeadara,varodara,vatotara,vuadodara,wa duo da la,wadwdara,wdwdrh,wtho thra
+Bhopal	Madhya Pradesh	1798218	Bhojpal,Bhopala,Bhopalas,Bhopalo,Bkhapal,Bkhopal,Bopal,bo pa er,boparu,bwbal,bwpal,popal
+Rasapudipalem	Andhra Pradesh	1728128	Raspari Palao,Visakhapatnam
+Pimpri-Chinchwad	Maharashtra	1727692	Pimpri Chinchwad,Pimpri-Chinchvad,Pimpri-Cincvad,Pimpri-Csincsvad,Pimpris-Cincvadas,Pimpry-Chynchvad,bin bu li jin jie wo de,pimpari cinacaraada,pimpari cinca'oyara,pimpari cincavada,pimpari-cincavada,pimpeulichinchiwadeu,pimpiri-cincvatu,pympry-chynchwad
+Patna	Bihar	1684297	New Patna,Patna New City,Patnao,ba te na,batna,pat na,patana,pateuna,patona,ptnh
+Kallakurichi	Tamil Nadu	1682687	Kallakurikkhi
+Ludhiana	Punjab	1618879	Ludhijana,Ludijana,Ludkhiana,Ludkhijana,lu di ya na,ludhi'ana,ludhiyana,lutiyana,rudiana,rudiyana
+Nashik	Maharashtra	1486053	Nasik,Nasikas,Nasiko,Naszik,na xi ke,nacik,nashiku,nashk,nasika,nasikeu,nask,nasyk
+Madurai	Tamil Nadu	1465625	Madura,Maduraj,Madurajus,Mathurai,m thu ri,ma du lai,madhura,madhurai,madourai,madulai,madura'i,madwray,maturai,mdwray,mdwrayy
+Tirunelveli	Tamil Nadu	1435844	Nellai,Tinnevelli,Tinnevelly,Tinnevelly Junction,Tirunelweli,di lu nei er wei li,tilunelbelli,tirunalaveli,tirunelabeli,tirunelaveli,tiruneruvueri,trwnlwyly,tyrwnlfly,tyrwnlwly,tyrwnlwyly,tyrwnylwyly
+Agra	Uttar Pradesh	1430055	Agra - agara,Agro,Aqra,Lungsod ng Agra,a ge la,agara,ageula,agura,akra
+Faridabad	Haryana	1414050	Faridabadas,Faridabado,Farydabad,frydabad,pharidabada
+Rajkot	Gujarat	1390640	Radzhkot,Radzkot,Radzkotas,rajikotto
+Najafgarh	Delhi	1365000	Nadzhafgarkh,Najafgarli,Najfargharh,na jia fu ga er,najafugaru,najaphagara,najaphagarha,najapkar
+Jamshedpur	Jharkhand	1339438	Cemsidpur,Dzamsedpur,Dzamsedpura,Dzamsedpuras,Dzamshedpur,Dzhamshedpur,Dzhamshehdpur,Dzsamsedpur,Gamsedpur,Jamsedpur,Jamshidpur,Jarnshedpur,Tatanagar,Tzamsentpour,chamseth pu ra,gu mu xie de bu er,jamasedapura,jamcetpur,jamsedapura,jamshyd pwr,jamsyedeupuleu,jamushedopuru,jia mu xie de bu er,jmshdpwr,jmshyd pwr,jmshydbwr,jmshydpwr,zhe xue pu
+Pimpri	Maharashtra	1284606	pimpari,pimpiri,pmpry
+Kalyan	Maharashtra	1262255	Kal'jan
+Dombivali	Maharashtra	1247327	Dombivli,Kalyan-Dombivli,dombibali,dong bi fu li,dwmbywly,tompivali
+Meerut	Uttar Pradesh	1223184	Meerut City,Merath,Meratkh,Mirat,Miratas,Mirut,meluteu,meratha,merato,mi la te,mirarr,mirat nagaram,mirata,miruta,myrwt
+Virar	Maharashtra	1222390	Vasai-Virar City
+Nowrangapur	Odisha	1220946	Nabarangapur,Nabarangpur,Nowrangpur
+Srinagar	Jammu and Kashmir	1206419	Caspira,Shrinagar,Srinagaras,Srinagaro,Srinankar,Srinigar,Srynagar,Suryanagar,Szrinagar,cirinakar,seulinagaleu,shurinagaru,si li na jia,sirinagara,siry nagar,srinagara,srinagaram,srinagari,srinkhr,sry nghr,sry ngr,srynaghar,srynghr,sryngr
+Ghaziabad	Uttar Pradesh	1199191	Gaziabad,Gaziabade,Gazijabad,Ghazibad,gajhiyabad,gajhiyabada,gajiabadeu,gajiyabada,gajiyabada  uttara pradesa,gasiyabad,gazi'abada,gaziyabada,gazuiyabado,ghaji'abada,ghajiyabad,ghajiyabada,ghaziabadi,ghazy,jia ji a ba de,kaciyapat
+Dhanbad	Jharkhand	1196214	Dhanabad,Dhanbaid,Dkhanbad,dan abad,danbad,danbado,dhanabada,dnbad
+Aurangabad	Maharashtra	1175116	Aurangabad - aurangabada,Aurangabadas,Aurangabado,Chhatrapati Sambhaji Nagar,Chhatrapati Sambhajinagar,a'orangabada,a'urangabada,aurangabada,awrng abad,awrnk abad,chatrapati sambhajinagara
+Varanasi	Uttar Pradesh	1164404	Banaras,Banares,Benares,Kashi,Kasi,Varanasio,Varanasis,Varanassi,Waranasi,balanasi,baranasi,bnars,faranasy,pha ran si,varanaci,wa la na xi,waranashi,waranasy,waransy
+Amritsar	Punjab	1159227	Amricar,Amritsara,Amritsaras,Amritszar,Amrytsar,a mu li ze,aamritsar,ambrsr,amirtacaras,amlichaleu,amritasara,amrtasara,amrtasarah,amrtsr,amuritosaru,xmvt sra,yamrytsar
+Vijayawada	Andhra Pradesh	1143232	Bejawada,Bezawada,Bezwada,Vidzajavada,Vidzhajavada,Vidzsajavada,Vijajauada,Vijayavada,Widzajawada,bejavada,bijayabada,bijayarada,bijayawada,bijayawara,fjayawada,fyjayawada,vicayavata,vijaiavada,vijaivara,vijayavara,vijayavata,vuijayawada,wei jie ya wa da,wjyawada,wyjyawada
+Ranchi	Jharkhand	1120374	Ranci,Rancis,Rancsi,lan qi,lanchi,raci,ramci,ranchy,ranci jilla,ranshy
+Jabalpur	Madhya Pradesh	1081677	Dzabalpur,Dzabalpuras,Dzhabalpur,Dzsabalpur,Gabalpuro,Jubbulpore,gu ba er pu er,jabalapura,jabalapuram,jabalpuleu,jabarupuru,japalpur,jbl pwr,jblbwr
+Prayagraj	Uttar Pradesh	1073438	Alahabadas,Alla Abba Habab,Allahabad,Allahabad - ilahabada,Allakhabad,Ilahabad,Prayag,alakapat,an la a ba de,arahabado,elahabada,ilahabada,irahabado
+Visakhapatnam	Andhra Pradesh	1063178	Vaisakhapattanam,Visak,Visakha,Visakhapatnamas,Vishakapatnam,Vishakhapatanam,Vishakhapatnam,Vishakkhapatnam,Vizag,Vizag City,Vizagapatam,Vizagapatnam,bisakhapatana,bisakhapattama,bisyakapateunam,fshakabatnm,fysakhabatnam,fyshakhabatnam,vicakappattinam,visakhapatanama,visakhapattanam,visakhapattanama,vuishakapatonamu,wei sha ka pa te nan,wisakha pat tnam,wshakapatnm,wysakapatnam
+Jodhpur	Rajasthan	1056191	Codpur,Dzhodkhpur,Dzodhpur,Dzodhpura,Dzodhpuras,Dzodpur,Dzsodhpur,Godhpur,Jodhpur City,Tzontchpour,cotpur,gwdpwr,jiao te bu er,jodeupuleu,jodhapura,jodhapuram,jodopuru,jwdapwr,jwdbwr,jwdpwr,yodapura,yodhapura
+Gwalior	Madhya Pradesh	1054420	Gvalijar,Gvalijor,Gvalior,Nkvalior,gua liao er,gvaliyara
+Howrah	West Bengal	1027672	Haora,Haura,Hawrah,Khaora,ha'ora
+Raipur	Chhattisgarh	1027264	Raipura,Raipuras,Rajpur,Rajpuro,Rayapura,Raypur,lai bu er,laipuleu,ra'ipura,raipuru,ray pwr,raybwr,rayppur
+Tiruchirappalli	Tamil Nadu	1022518	Tiruccirappalli,Tiruccsirapalli,Tiruchchinappalli,Tiruchchirappalli,Tiruchi,Tiruchirapali,Tiruchirapalli,Tirucirapali,Trichinapalli,Trichinopoli,Trichinopoly,Trichy,Trinchinopoly,di lu ji la pa li,tiluchilapalli,tiruchiraparri,tirucirapalli,tirutchirapparri,tricimalaidurgam,trwchraply,tyrwchyrapaly,tyrwchyraply
+Kota	Rajasthan	1001694	Kotah,Kotah City,ke ta,kotta,kwta,qwth
+Sholapur	Maharashtra	997281	Solapur,solapura,sollapura,sorapuru
+Chandigarh	Chandigarh	970602	Candigarchas,Candigarh,Chandigar,Chandigarkh,Czandigarh,cadigarha,candhigad,candigadh,candigadha,candigara,candigarha,cantikar,chandigadh,chandigarhi,chandigaru,chang di jia er
+Tiruppur	Tamil Nadu	963173	Tirupur,di lu pu,tiruppura,tiruppuru,tirupura,tyrwpwr
+Guwahati	Assam	962334	Gauhati,Gaukhati,Guvahati,Guvahatis,Guvakhati,gu wa ha ti,gu'ahati,guhati,guraahati,guvahatti,guyahati,gwahty,gwaty,jwahaty,kavukatti,kuvahatti,kuvakatti
+Hubballi	Karnataka	943788	Hubli,Hubli City,Khubli-Dkharvad
+Mysuru	Karnataka	920550	Mahisur,Maisur,Maisuru,Majsor,Majsur,Majszur,Mysooru,Mysore,ma'isora,mahisura,mai suo er,maicur,maisoleu,maisoru,maisura,mayswr,mhaisura,myswr
+Salem	Tamil Nadu	917414	Selam,Szalem,celam,sai lei mu,salema,sallem,salm,selama,seramu
+Gurugram	Haryana	886519	Guragaona,Gurgaon,Gurgaonas,Gurgaono,Nkournkaon,gu er gang,gudaganva,guleugaon,guragamo,guragamva,guraganv,guraganva,guragavam,gurugrama,guruguramu,gwrgan,gwrgaw,jwrjawn,khuru khram,kurkavun,qwrqan
+Bhubaneswar	Odisha	885363	Bhubaneshwar,Bkhubaneshvar,Ekamra-Kshetra,Temple City of India,bhubanesbara,bhuvanesvara,bubaneshuwaru,puvanecuvaram
+Bhiwandi	Maharashtra	874032	Bhivandi,Bhiwndi,Bivandi,Bkhivandi,bhi'oyadi,biwandi,bywandy,pi wen di
+Jalandhar	Punjab	868929	Calandhar,Dzalandar,Dzalandhar,Dzalandhara,Dzalandharas,Dzhalandkhar,Dzsalandhar,Galangar,Jullundur,Jullundur City,Tzalantar,chlan thra,gu lang da er,jaladhara,jalandar,jalandara,jalandhara,jalandhari,jalantar,jallandaleu,jarandaru,jlndr
+Kanayannur	Kerala	851406	Kanajannur
+Bhayandar	Maharashtra	809378	Bhayander,Bhayndar,Bhayundar,Bkhajandar,Mira-Bhayandar,bha'indara,bhayandr,byandar,payantar
+Narela	Delhi	800000	nyrla
+Thiruvananthapuram	Kerala	788271	City of Lord Anantha,Tiruvananantapuram,Tiruvanantapuram,Tiruvanantapuramas,Tkhiruvanantkhapuram,Trivandrum,te li fan de lang,thyrwfananthabwram,tilubanantapulam,tiru'anantapuram,tirubanantapurama,tiruvanantapurama,tiruvuanantapuramu,tribanadrama,tribendrama,trywandrwm,trywwndrwm
+Aligarh	Uttar Pradesh	753207	Aligarkh,Koil,aligara,aligarha
+Bareilly	Uttar Pradesh	745435	Barejli,Bareli,ba lei li,baleilli,baraili,bareri,bereli,bryly,pareli
+Moradabad	Uttar Pradesh	721139	Muradabad
+Warangal	Telangana	704570	Ekasila Nagaram,Orugallu,Varangal,Varangalas,raarangala,varangal jilla,varangala,varangala-nagaram,varankal,wa lang jia er,walang-gal,warangala,warangaru,warangl,wrnjl
+Gorakhpur	Uttar Pradesh	674246	Gorakhpuras,Gorakkhpur,Gorakpur,Gorakpura,Goruckpur,Korakhpur,Nkorakpour,ge lei ke bu er,ghwrakhbwr,golakeupuleu,gorakhapura,gorakhapura loka sabha halaka,gorakhapura loka sabha nirbacana mandali,gorakhapura loka sabha nirvacana ksetra,gorakhapuram,goraksapura,gorakupuru,gwrkpwr,jwrakhbwr,kho rakh pu ra,korakpur
+Guntur	Andhra Pradesh	670073	Guntura,Gunturas,Gunturu,Nkountour,ghntwr,gntwr,gong tu er,guntouru,guntuleu,gunturumandalam,gutura,gwntwr,jwntwr,khun tur,kuntur
+Puducherry	Puducherry	657209	Pondicero,Pondicheri,Pondicherri,Pondicherry,Pondichery,Pondiseri,Pondisheri,Ponducherry,Pondy,Poudhucherry,Puduchcheri,Puducherri,Puduvai,Territoire de Pondichery,ben de zhi li,ben de zhi li shi,pandiceri,panticceri,pondiceri
+Amravati	Maharashtra	647057	amaravati
+Bikaner	Rajasthan	644406	bikanera
+Kochi	Kerala	633553	British Cochin,Cochim,Cochin,Ernakulam,Fort Cochin,Kochin,Koczin,Kuchi Bandar,ke zhi,keacci,kocci,koci,qwzy
+Bhilai	Chhattisgarh	627734	Bhilai Nagar,Bhilaj Nagar,Bhilajus,Bilaj,Bkhilai,balay,bhila'i,bhila'i nagara,bhilai nagara,bi lai,billai,birai,pilay
+Cuttack	Odisha	610189	Katak,Kataka,Kattak,Kattake,katakam,katakku,katk,ke ta ke,kutakeu,kuttaka
+Borivli	Maharashtra	609617	Borivali,bao li wa li,boribali,bwry waly,porivali
+Bhavnagar	Gujarat	605882	Baunagar,Bharnagar,Bhaunagar,Bhunagar,Bkhavnagarom,ba fu na jia er,babeunagaleu,bavunagaru,bawngr,bhavanagara,pavanakar
+Sangli	Maharashtra	601214	Sangla,Turmeric city
+Jamnagar	Gujarat	600943	Camnaqar,Dzamnagar,Dzamnagara,Dzamnagaras,Dzhamnagar,Dzhamnagarom,Dzsamnagar,Gamnagar,Jamnogar,Navanagar,Navangar,Nawanagar,Nowanagar,Nowanuggur,Tzamnankar,cham nkhr,gu mu ne ge er,jam ngr,jam njr,jamanagara,jamanagara jilla,jamanagaram,jamnagaleu,jamnagari,jamnakar,jamngr,jamunagaru,jmngr
+Jammu	Jammu and Kashmir	576198	Dzammu,Dzamu,Dzhammu,Dzhamu,Gamu,Jammu City,cam'mu,gu mu mu,jam'mu,jamu,janmu
+Bokaro	Jharkhand	564319	Bokaro Steel City
+Nanded	Maharashtra	550564	Nandair,Nander,nadera,nan dai de,nan ded,nan theth,nandd,nandeda,nandedeu,nandedo,nandera,nandyd,nantet,nantetu,nndyd
+Kozhikode	Kerala	550440	Calecute,Calicut,Calicutium,City of Spices,Kal'kutta,Kalicut,Kalikuto,Kojikode,Kolikod,Kozhikkot,Kozhikod,Kozikkot,Kozikode,Kozsikode,kajahikode,kajhikada,kalikotu,kalykwt,karikatto,ke ze ke de,kealikkeat,kealikkeat jilla,kho chi khod,kojhikora,kojikodeu,kolikkot,kolikkota,kolikkotu,kolikoda,kolikora,qwzyqwd
+Kolhapur	Maharashtra	549236	Kolkhapur
+Nellore	Andhra Pradesh	547621	Nellur,Nelluru,Nelor,Simhapuri,nei luo er,nellare,nellaura,nellora,nelluru-nagaram,neruru,nlwr,nylwr,nylwry,sinhapuri
+Kalaburagi	Karnataka	543147	Gul'barga,Gulbarga,Gulburga,Kalaburgi,Kalburgi,Kulbarga,glbrgh,gu er bo jia,gulabarga,gulbaleuga,gurubaruga,klbrkt,kulparka
+Ajmer	Rajasthan	542321	Acmer,Adzhmer,Adzmer,Adzmera,Adzmeras,Adzsmir,Agmer,Ajmer City,a jie mei er,ajamera,ajamira,ajimeleu,ajmeri,ajmir,ajmyr,ajumeru
+Dehradun	Uttarakhand	522081	Degradun,Deharaduna,Dehra,Dehra Dun,Dehradunas,Dekhradun,Dekhradune,Deradun,d'ehradun,de la dui,deheradoun,deladun,deraduna,dhradwn,teratun
+Erode	Tamil Nadu	521891	Brod,Irodu,Periyar,ai luo de,elodeu,eroda,iread,iroda,irodou,irotu
+Durgapur	West Bengal	518872	dourugapuru,drgapwr,du er jia bu er,duleugapuleu,durgapura,dwrgapwr,turkapur,turkapur  merku vankalam
+Ulhasnagar	Maharashtra	516584	Oulasnankar,Ulasnagar,Ulasnagara,Ulasnagaras,Ulkhasnagar,awlasnagr,awlasnaqr,awlhasnghr,awlhasnjr,awlhsngr,ul'hacanakar,ul'hasanagara,ulahasanagara,ulhaseunagaleu,ulhasnagari,ullas nagar,ullasanagara,ullasnagara,uruhasunagaru,wu er ha si ne ge er,xul has sna kha
+Loni	Uttar Pradesh	516082	Lone
+Siliguri	West Bengal	515574	Shiliguri,Silguri,Siligun,xi li gu li
+Ujjain	Madhya Pradesh	515215	Outzen,Uddzhajn,Uddzsain,Udzaina,Udzainas,Udzajin,Udzdzain,Udzhdzhajn,Ujjaini,Ujjayn,ajyn,awjayn,awjayyn,awjyn,ujain,ujaina,ujaini,ujjaina,ujjayin,ujjayini,ujjeyan,wu du yan na,wu gu yin,xuch chen
+Bilimora	Gujarat	510879	Bilimor,Mora
+Asansol	West Bengal	504271	Asanol,asanasola,asansoru
+Mangaluru	Karnataka	499487	Kodial,Kudla,Maikala,Mangalooru,Mangalor,Mangalore,Mangaloro,Mangalur,Manglapuram,Tulu Nadu,kodiyal,maingalura,mang kha l xr,mang-galloleu,mangalora,mangalura,mangaroru,manghlwr,manglwr,mankalur,men ge luo er,mengalora,mnglwr,myangalora
+Belagavi	Karnataka	490045	Belagaavi,Belagoavi,Belgaan,Belgaavi,Belgaon,Belgaum,Belgaumas,bei er gao mu,belaga'uma,belagam,belagamva,belaganva,belgam,berugaumu,blgam,blgaywm,bylgawm,bylgwm,pelkam
+Saharanpur	Uttar Pradesh	484873	Sakharanpur
+Vellore	Tamil Nadu	484690	Vellor,Velluru,Velur,Veluru,belloleu,bellore,bhellora,vellora,vellura,velura,vueruru,wei luo er,wylwr
+Bhatpara	West Bengal	483129	Bkhatpara
+Malegaon	Maharashtra	481228	
+Modinagar	Uttar Pradesh	475843	
+Gaya	Bihar	474093	Gaja
+Ambattur	Tamil Nadu	466205	
+Jalgaon	Maharashtra	460228	Dzalgaon,Dzhalgaon,Dzhalgaone,Galgaon,jalagamo,jalagamva,jalaganva,jalagava,jalgaw,jalgawn,jalkav,jia er gang,jlgawn
+Kurnool	Andhra Pradesh	460184	Kandenavolu,Karnul,Karnulis,Karnulu,Kurmul,Kurnul,ka nu er,karnula,karunuru,krnwl,kuleunuel,kuranula,kurnala,kurnula,kwrnwwl
+Ramgundam	Telangana	452261	Ramagundam
+Udaipur	Rajasthan	451100	Oodeypore,Udajpur,awdy pwr,udaipuleu,udaipura,udaipuru,udayapur,udayapura,udayapuram,utayappur,wu dai pu
+Maheshtala	West Bengal	448317	Makheshtala
+Patiala	Punjab	446246	Pat'jala
+Shyamnagar	West Bengal	441956	Shamnagar,Shamnagore,Shjamnagar,Syamnagar
+Davangere	Karnataka	435128	Davanagere,Davanagiri,Davangeri,Devangere
+Akola	Maharashtra	428857	Akula,a ke la,akolla,akwla
+Rajpur Sonarpur	West Bengal	424368	Radzhpur-Sonarpur,Rajpur,Sonarpur,Sonarpur Rajpur
+Korba	Chhattisgarh	419146	koraba jila,korpa
+Jhansi	Uttar Pradesh	412927	Dzhkhansi
+Thoothukudi	Tamil Nadu	410760	Thoothukkudi,Tuticorin,Tutikorin,Tutukudi,du di ge lin,thothukkuri,touttoukkudi,tutikorina,tuttukkuti,tuttukkuti turamukham,twtwkwdy
+Ballari	Karnataka	410445	Belari,Belaris,Bellari,Bellary,bei la li,blary,bllary,bylary,pellari
+Bhagalpur	Bihar	400146	Bkhagalpur,pakalpur
+Agartala	Tripura	400004	Agratala,Ajarthala,Ankartala,Aqartala,a jia er ta la,agaleutalla,agaratala,agarutara,agrtla,akartala
+Gauriganj	Uttar Pradesh	390395	Gaurigandzh,gao li gan ni,gauligeoji,gauriganja,gouriganji
+Kakinada	Andhra Pradesh	384182	Cocanada,Coconada,East Godavari,Godavari
+Latur	Maharashtra	382940	la du er,latr,latura,latwr,ratouru
+Panihati	West Bengal	378705	Panikhati
+Rajamahendravaram	Andhra Pradesh	376333	Radzhamandri,Rajahmondry,Rajahmundri,Rajahmundry,Rajamahendri,Rajamandri
+Dhule	Maharashtra	375559	Dhulia,Dkhule,Dule,dwlh,tu lai
+Rohtak	Haryana	374292	Rokhtak,luo he ta ke,rohataka,rwhtak,rwtk
+Ahilyanagar	Maharashtra	367140	Ahmednagar,Akhmednagar,ahamedanagara,ahilyanagara,ahmd nghr,ahmd ngr,ahmd njr,ahmdnajar,ahmdngr,ahmdnqr,akamatnakar
+Kollam	Kerala	367107	Coilum,Coulao,Desinganadu,Kolam,Kolamo,Kullamalai,Kvilon,Quilon,keallam,kollama,korramu,kui long,kwlam,kwlm
+Bilaspur	Chhattisgarh	365579	Bilaspura
+Bhilwara	Rajasthan	359483	Bkhilvara
+Brahmapur	Odisha	356598	Berhampore,Berhampur,Berkhampur,Brahmapuramu,Brahmapuras,Bramapur,Ganjam,barampuram,brahmapura,brahmapuram,brhmapwr,bu la he ma pu er
+Muzaffarpur	Bihar	354462	Mouzafarpour,Muzafarpur,Muzafarpura,Muzafarpuras,Tirhoot,majahpharapura,mu saffa phex,mu zha fu fa er pu er,mucaparpur,mucapparpur,mujapaleupuleu,mujaphar pur,mujapharpur,mujaphpharapura,mujhaphpharapura,muphajjarapura,muzaffarupuru,mzfr pwr,mzfrbwr,mzfrpwr
+Punasa	Madhya Pradesh	350000	
+Muzaffarnagar	Uttar Pradesh	349706	Muzafarnagar,mu zha fa er na jia er,mujapharanagara,mujaphpharanagara,mujaphpharanagaram,mujhaphpharanagara,muzaffara nagara,muzaffarunagaru,mzfr ngr,mzfrngr
+Avadi	Tamil Nadu	345996	
+Kadapa	Andhra Pradesh	344893	Cuddapah,Kurpah,katappa
+Kukatpally	Telangana	341709	Kukatpalle,Kukatpalli,ku ka te pa er lai,kukat palli,kukatapalle,kukatapalli,kukkatapalli,kukkatpalli,kwkatpalh
+Kamarhati	West Bengal	332965	Kamarhatty,Kamarkhati
+Mathura	Uttar Pradesh	330511	Madhura,Mandura,Matkhura,Matura,Muttra,ma tu la,matoura,matula,matwra
+Chanda	Maharashtra	328351	Candrapur,Candrapura,Candrapuras,Chandrapur,Tsantrapour,candrapuram,canthra pu ra,cantirappur,chandapuleu,chandorapuru,chandrapwr,chndrapwr,chndrpwr,qian de la bu er,shandrabwr
+Vijayapura	Karnataka	327427	Bidzapur,Bidzapuras,Bidzhapur,Bidzsapur,Bijapur,Districte de Bijapur,Vijapura,Vijayapur,Visiapur,bi gu bu er,bi jia bu er,bijapuleu,bijapura,bijapuram,bijapuru,byjapwr,pijappur
+Shivamogga	Karnataka	322650	Shimoga,Shimogga,Shivamoggi,cimakka,shymwga,shywamwga,simeaga,simoga,sivamogga,xi mo jia
+Alwar	Rajasthan	322568	Aluaro,Alvar,Alvara,Alvaras,Alwar City,a er wa er,al-wa,alaraara,alavara,aloyara,alvari,alwr,aruwaru
+Shahjanpur	Uttar Pradesh	320434	Shahjahanpur,Shakhdzhakhanpur
+Junagadh	Gujarat	319462	Dzhunagadkh,Junagad,Junagarh,Junaghur
+New Delhi	Delhi	317797	Dellium Novum,Dilli,N'ju-Deli,Neo Delchi,Neu-Delhi,Nev Deli,New Dilli,Niu Deli,Niw Telhi,Nju Delkhi,Nov-Delhio,Nova Delhi,Nova Deli,Nova Deli - na'i dilli,Nova-Delhi,Nove Dilli,Nueba Deli,Nueva Delhi,Nuova Delhi,Nyja Deli,Nyu Deli,Yeni Delhi,dlhy aljdydt,na'i dilli,naya dilli,niu-deli,niwde li,nyudelli,nyuderi,nyw dlhy,nywdlhy,putu tilli,xin de li
+Thrissur	Kerala	315957	Trichur,Trichura,tiruccur
+Nizamabad	Telangana	311152	nijamabad
+Tumkur	Karnataka	307359	Tumakooru,Tumakuru
+Parbhani	Maharashtra	307170	Parbaini,Parbani,Parbkhani,pa er ba ni,parabhani,prbany
+Hisar	Haryana	307024	Hissar,Khisar,hisara,hsar,xi sa er
+Firozabad	Uttar Pradesh	306409	
+Kulti	West Bengal	305405	
+Karnal	Haryana	302140	
+Barddhaman	West Bengal	301725	Bardhaman,Bardkhaman,Bordhoman,Burdwan,bardhamana
+Gundupalaiyam	Puducherry	300104	Gundupalaijam,Ozhukarai,Uzhavarkarai
+Barasat	West Bengal	298127	
+Mulugu	Telangana	297671	
+Bihar Sharif	Bihar	297268	Behar,Bihar,Bikharsharif
+Bali	West Bengal	296973	Bally
+Rampur	Uttar Pradesh	296418	
+Darbhanga	Bihar	296039	Darbanga,Darbkhanga,Ntarmpchan'nka,da er bang ge a,dalabhang-ga,darabhaga,darabhanga,darbnja,darubanga,dbarabhana,drbnga,drbnqa,tarpanka,thr phangkh a
+Panipat	Haryana	295970	Panipata
+Tirupati	Andhra Pradesh	295323	Tirumala - Tirupati,Tirumalai,Tirupathi,di lu pa di,tirumala,tirupatih,tiruppati,trwpty,tyrwpaty,tyrwpty
+Greater Noida	Uttar Pradesh	293908	Bol'shaja Nojda,Didzioji Noida,Granda Noida,Velika Nojda,brhattara nayada,da nuo yi da,geuleiteo noida,gretar noyida,gretara no'eda,gretara no'ida,noyta perunakar,nwyda alkbry,nwyda bzrg
+Noida	Uttar Pradesh	293908	Naveen,New Okhla Industrial Development Authority,Nojda,neayda,no'eda,no'era,no'ida,noyada,noyida,noyta,nuo yi da,nwyda
+Aizawl	Mizoram	293416	Ai jal,Aidzhal,Aijal,Aizal,Aizavlis,Aizol,Aizwal,Ajzol,a'ijala,a'ijola,a'izola,ai zao er,aijali,aijaul,aijavla,aijhavala,aijhola,aijola,aizauru,aycal,ayyzwl,ayzal,ayzwal
+Gandhinagar	Gujarat	292797	Gandinagar,Ghandhinagar,Ghandinagar,gandhinagara,gandhinagaram,gandinagaru,ganjinagaru,kantinakar
+Dindigul	Tamil Nadu	292512	Dhundgal,Dindukkal,Dundigal,dindigula,dindukkala,ding di gu er,dyndygwl,tindoukkaru,tindoukkaru xian,tintukkal
+Thanjavur	Tamil Nadu	291067	Tancavur,Tandzavur,Tandzavura,Tandzavuras,Tandzawur,Tandzsavur,Tangavur,Tanjavur,Tanjor,Tanjore,Tantzavour,Thandzavur,Tkhandzhavur,tajavura,tan gu wu er,tanjabuleu,tanjabura,tanjavura,tanjavuru,tanjawwr,than cawu r,thanajabura,thanjabara,thnjfwr,tnjawr
+Karimnagar	Telangana	289821	karinnagar
+Dewas	Madhya Pradesh	289550	Devas,de wa si,de'oyasa,deraasa,devasa,dewasu,dwas,dywas
+Sonipat	Haryana	289333	Sonepat,Sonepat Punjab
+Ichalkaranji	Maharashtra	287353	Icalkarandzi,Ichokarejndzhi,aychalkaranjy,aychl krnjy,aychlkyrnjy,icalakaranaji,icalakaranji,icalkaranji,yi qie er ge lun ji
+Bathinda	Punjab	285788	Bkhatinda,ba ting da,bathida,batynda,bhatinda,pattinta
+Jalna	Maharashtra	285577	Dzhalna,jlna
+Kirari Sulemannagar	Delhi	283211	
+Satna	Madhya Pradesh	282977	
+Purnia	Bihar	282248	Pournia,Purnea,Purnija,bwrnya,pu er ni ya,pulina,pur na,puraniya,purni'a,purniya,puruniya,pwrnya,pwrnyh
+Imphal	Manipur	277196	Impkhal,impal,imphala,inparu
+Saugor	Madhya Pradesh	274556	Sagar,sagara
+Kushinagar	Uttar Pradesh	274403	
+Rourkela	Odisha	273317	Raurkella,Roukela,Rourella,Rourkera,Rurkela,lu ji la,ra'urakela,ravurkela,rurakela,rwrkla,rxr ke la
+Durg	Chhattisgarh	268806	Drug,Durga,Durgas,Ntarnk,deogeuleu,dourugu,drg,du er ge,durkh,dwrg,dwrj,dwrq,turk
+Anantapur	Andhra Pradesh	267161	Anantapour,Anantapuramu,Anantapure,a na en ta pu er,anantapura,anantapuram,anantapwr,annt pwr
+Ratlam	Madhya Pradesh	264914	Hatlam
+Ranipet	Tamil Nadu	264330	Ranippettai
+Lal Bahadur Nagar	Telangana	261987	L.B.Nagar,Lal Bakhadur Nagar,Lalbahadur Nagar
+Arrah	Bihar	261430	Ara,Arrakh,Shahabad,a la,araraha
+Gajuwaka	Andhra Pradesh	258944	Gajuuaka,gajuraaka,gajuvaka,gajwwaka,jia jiu wa ka,kajuvaka
+Etawah	Uttar Pradesh	257448	Ehtavakh
+Ambarnath	Maharashtra	253475	Amarnath,Amarnatkh
+Naihati	West Bengal	253221	Naikhati
+Bharatpur	Rajasthan	252838	Baratpuras,Batarpur,Bcharatpour,Bharatpura,Bkharatpur,ba rat pu ra,bahalatupuleu,baratopuru,bharatapura,bharatapuram,bharatbwr,bharatpwr  rajstan,bhrtpwr,paretpur,po luo duo bu er
+Begusarai	Bihar	252008	Begusaraj,Begusarajus,Bekousarai,be ku sa ri,begusalai,begusara'i,begusaray,begusaraya,begusura'i,bei gu sa lai,bjsaray,pekucaray
+Tiruvottiyur	Tamil Nadu	249446	Tiruvattiyur,Tiruvottijur
+Gandhidham	Gujarat	247992	Gandi Dham,Gandkhidkham
+Mau	Uttar Pradesh	246050	Mau Nath Bhanjan,Mau Nathbhanjan,Maunath Bhanjan,ma'u,ma'unatha bhanjana,mao na te ban zhan,mavu,maw,myw
+Sikar	Rajasthan	244497	
+Ramagundam	Telangana	242979	la ma gu en da mu,ramagndm,ramagundam mandala,ramagundama,ramagwndam,ramakuntam
+Hapur	Uttar Pradesh	242920	Khapur
+Farrukhabad	Uttar Pradesh	241152	
+Alappuzha	Kerala	240991	Alapalli,Alapolai,Alappula,Alapulai,Aleppi,Allapuza,Alleppey,Alleppi,Aulapolai
+Katihar	Bihar	240838	Hafiz Saifganj,Katikhar
+Sri Ganganagar	Rajasthan	237780	Ganganagar,Sriganga Najar,Sriganganagar
+Rewa	Madhya Pradesh	235654	Reva,Rewah,lei wa,reva sahara,riva,riwa,rywa
+Uluberiya	West Bengal	235345	Ulubaria,Uluberia
+Sivakasi	Tamil Nadu	234704	Shivakasi,civakaci,sibakasi,xi wa ka xi
+Karur	Tamil Nadu	234191	ka lu er,kaluleu,karura,karuru,karwr,krwr
+Raichur	Karnataka	234073	Rajchur
+Pallavaram	Tamil Nadu	233984	
+Ooty	Tamil Nadu	233426	Ootacamund,Udagamandalam,Udakamandalam,Udhagai,Udhagamandalam,Utakamand,udagamandalama,udakamandaramu,udhagamandalama,utakai,utakamantalam
+Pali	Rajasthan	230075	Pali-Marwar
+Hosur	Tamil Nadu	229528	Khosur,Oossoor
+Vizianagaram	Andhra Pradesh	228720	Viguyanagram,Vizianagarm,Vizianagram,Vizianagram City,Vizijanagaram,bijayanagarama,bijianagalam,bijiyanagarama,fyzynjarm,vijayanagara,vijayanagaram,vijayanagarama,vijayanakaram,vuijayanagaramu,wei ji ya ne ge lei mu,wjayangrm
+Shrirampur	West Bengal	226317	Serampore,Serampur
+Quthbullapur	Telangana	225816	Kvsbullapur,Qutubullapur,ku te bu er la pu er,kutaba'ullapura,kutbullapura mandala
+Nadiad	Gujarat	225071	Hadiad,Nadiyad,Naidad
+Nagercoil	Tamil Nadu	224849	Nagarkoil,Nagarkovil,Nagerkojl,nakarkovil
+Mango	Jharkhand	223805	
+Murwara	Madhya Pradesh	221883	Katni
+Kanchipuram	Tamil Nadu	221715	Conjeeveram,Conjevaram,Conjeveram,Kancheepuram,Kanchi,Kanchipurami,Kancipuram,Kancipuramas,Kancsipuram,Kanjippuram,gan ji bu lei mu,huang zhi,jian zhi bu luo,kan ci pu ram,kanchipulam,kanchipuramu,kanchy pwrm,kanchypwram,kanci,kancipurama,kanshybwrm,kantshybwram
+Singrauli	Madhya Pradesh	220257	singara'uli,singarauli,sinra'uli,sngrawly,syngrawly,xin ge lao li
+Mirzapur	Uttar Pradesh	220029	Mirzapur-cum-Vindhyachal,Mirzapuro,Mirzarpur
+Kharagpur	West Bengal	219665	Khargpur,karakpur,ke lei ge bu er,kharagapura,khargapura,khragpwr
+Eluru	Andhra Pradesh	218020	Ehluru,Ellore,Elourou,Eluras,West Godavari,ai lu lu,aylwrw,elura,eruru,illulu,xxl lex rum
+Yamuna Nagar	Haryana	217071	Abdullahpur,Abdullapur,Jamna Nagar,Jamunanagar,Yamunanagar
+Raurkela Industrial Township	Odisha	216410	Raurkela Industrial Tounship
+Bidar	Karnataka	216020	bi de er,bidara,bidaru,bydr
+Munger	Bihar	213303	Manger,Monghyr
+Nandyal	Andhra Pradesh	211424	Nand'jal,Nandial,Nandyala
+Panchkula	Haryana	211355	Panchkula Urban Estate,Pusat Bandar Panchkula,bantshkwla,pancakula,pancakula upa sahara
+Burhanpur	Madhya Pradesh	210886	Burkhanpur
+Morvi	Gujarat	210451	Morbi
+Anand	Gujarat	209410	Aimand,Anaud,a nen de,anada,anand  gwjarat,ananda,anandeu,anandi,anando,anant,annd,annd  gjrat
+Ongole	Andhra Pradesh	208344	anagole,ao en ge lai,awngl,awngwl,ong-gol,ongol,ongola,ongolu,ongore,onkol
+Hosapete	Karnataka	206167	Hospet,Hoszpet,Khospet,hosapeta,hospeta,hospete,huo si pei te,hwspt
+Nangloi Jat	Delhi	205596	Nangloi,Nangloi Dzhat
+Secunderabad	Telangana	204182	Sekunderabad,cikkantarapat,sai kang de la ba de,sekkandrabad,sekundarabada,sekundelabadeu,shikandarabado,sikandarabada,sikindrabad,skndr abad
+Deoghar	Jharkhand	203123	Deogar,Deogarh,Deogarkh,de ao jia er,de'ogara,de'oghara,devaghara,dwghar
+Chapra	Bihar	202352	Chhapra,Chkhapra,Chupra,capara,capra,chapara,qia pu la
+Khandwa	Madhya Pradesh	200738	Kandva,kan de wa,khandava,khando'oya,khandoraa,khandva
+Puri	Odisha	200564	Jagannath,Jagannathpur,Puri District,pwry
+Morena	Madhya Pradesh	200482	Pech Morena,mo lei na,molena,morina,muraina,mwryna
+Gyanpur	Uttar Pradesh	200000	G'janpur
+Bulandshahr	Uttar Pradesh	198612	Boulantsachr,Buelendsehr,Bulandsahr,Bulandsara,Bulandsaras,Bulandshakhr,Bulandshakhre,Bulandshar,blndshhr,bu lan de she he er,bu lan de si ha he er,buladasahira,buland sahar,bulandasahara,bulandsahar,bullandeusyaleu,burandosharu,bwlndshhr,phu lan thsahr,pulantacakar
+Bhind	Madhya Pradesh	197585	Bkhind,bhinda,bin de,pintu
+Bhalswa Jahangirpur	Delhi	197148	Bkhalsua Dzhakhangirpur
+Khammam	Telangana	196283	Khammamett,Khammamette,Kkhammam,ka mu ma mu,kam'mam,kham'mam,kham'mama,khamam
+Sambhal	Uttar Pradesh	196109	Sambal,sambhala
+Bhiwani	Haryana	196057	Bkhivani
+Panvel	Maharashtra	195373	Navi Mumbai Panvel Raigarh,Panwel,pan wei er,pana'oyela,panabela,panaraela,panavela,panwl,pnwyl
+Ambala	Haryana	195153	Ambata
+Kumarapalayam	Tamil Nadu	195071	Komarapalayam,Kumarapalajam
+Machilipatnam	Andhra Pradesh	192827	Bandar,Kistna,Krishna,Masulipatam,Masulipatao,Masulipatnam,macilipatnam
+Mahesana	Gujarat	190753	Mehsana,Mekhsana,Meusana
+Mahbubnagar	Telangana	190400	Mahboobnagar,Makhbubnagar
+Sambalpur	Odisha	189366	Sambalpore,sa mu ba er pu er,sambalapura,sambalpuleu,sanbarupuru,smblpwr
+Bhusawal	Maharashtra	187421	Bhusaval,Bkhusaval
+Raebareli	Uttar Pradesh	186433	Rae Bareli,Raj-Bareli,Rajbareli,Rampereli,la ai ba lei li,la-ebalelli,ra'e bareli,ra'ebareli,rabarly,raebareri,ray bryly,raya bereli,rayabareli,rayabereli,raybareli,rayh brly,repareli,ri bare li
+Haridwar	Uttarakhand	186079	Hardwar,Haridvar,Khardvar,Kharidvar,arittuvar,haraduraara,haradvara,haridowaru,haridu'ara,haridvara,haridvaram,he er de wa er
+Phusro	Jharkhand	185555	Fusro
+Sopara	Maharashtra	184664	
+Adoni	Andhra Pradesh	184625	
+Sujangarh	Rajasthan	183808	Sudzhangarkh
+Sirsa	Haryana	182534	sirasa,syrsa,xi er sa
+Dinapur Nizamat	Bihar	182429	
+Bahraigh	Uttar Pradesh	182218	Baharaich,Bahraich,Bakhrajch
+Karaikkudi	Tamil Nadu	181851	Karaikudi
+Sultan Pur Majra	Delhi	181554	
+Guna	Madhya Pradesh	180935	gana,gna,gu na,kuna
+Chandannagar	West Bengal	180623	Candanagar,Candanagaro,Candarnagar,Chandan Nagar,Chandanagar,Chandernagor,Chandernagore,can thn nkhr,candanagara,candananagara,cantannakar,chandanagaleu,chandanagari,chndn ngr,chndngr,jin de ne ge er,shanderunagoru
+Baharampur	West Bengal	180547	Bahrampur,Bakharampur,Berhampore,ba ha la mu pu er,baharamapura
+Shahuwadi	Maharashtra	180322	Shakhuuadi
+Madanapalle	Andhra Pradesh	180180	ma da na pa er lai,ma da na pa li,madanapalle mandala,madanapalli,matanappalli,mdnply
+Shivpuri	Madhya Pradesh	179977	si xi wo pu li,sibapuri,sivapuri
+Surendranagar	Gujarat	179628	Civil Station,Surendranagar Dudhrej,Wadhwan,Wadhwan Camp,Wadhwan City,Wadhwan Civil Station
+Neyveli	Tamil Nadu	179150	Neiveli,Nejveli,naiveli,nebheli,nei yi wei li,neyabeli,nywaly
+Silchar	Assam	178865	cilcar,silacara,silacara-nagaram,xi er qia er
+Proddatur	Andhra Pradesh	177797	prodduturu
+Hugli	West Bengal	177005	Hooghly,Hooghly-Chinsura,Hooghly-Chinsurah,Khugli
+Hashtsal	Delhi	176877	Khashcal
+Amroha	Uttar Pradesh	176253	Amrokha
+Chhindwara	Madhya Pradesh	175052	Chindwara,Chkhindvara,Sindwara
+Tambaram	Tamil Nadu	174787	ta mu ba la mu,tambarama,tamparam
+Bhetia	Jharkhand	174355	Adityapur,Bkhetia
+Pathankot	Punjab	174306	Patkhankot,Rathankot,bathankwt,bo tan guo de,pa tan ke te,papankoteu,pasankotou,patankwt,pathanakota,pattankot
+Badlapur	Maharashtra	174226	ba de la pu er,badalapura,bdlapwr
+Cuddalore	Tamil Nadu	173636	Gondelour,Gudalur,Kudalur,Kuddalor,Kuddalore,gu da luo er,kadalura,kadaluru,kadaruru,kaddalora,katalur,kudalloleu
+Shimla	Himachal Pradesh	173503	Simla,cimla,shimura,shymla,simala,sinla,symlh,xi mu la
+Gadag-Betageri	Karnataka	172813	Gadag-Betigeri
+Gadag	Karnataka	172612	
+Veraval	Gujarat	171121	
+Navsari	Gujarat	171109	Nausari,Navasari,Nosari
+Bahadurgarh	Haryana	170767	Bahadurgarho,Bakhadurgarkh,ba ha du er jia er,bahaddurgad,bahadouga,bahaduleugaleu,bahadur ghar,bahaduragadha,bahaduragara,bahaduragarha,pahaturkkar
+Haldia	West Bengal	170695	Khaldija
+Raiganj	West Bengal	170252	Rajgandzh,Rayganj
+Malda	West Bengal	170039	English Bazar,inglisa bajara,malada
+Jaunpur	Uttar Pradesh	169572	Caunpur,Dzhaunpur,Jawnpur,jaunapura,jaunapuram,jaunpuru,jauyanapura,jwn pwr,jwnfwr,jwnpwr,jwnpwr  atrprdysh,qiao en pu er
+Deoli	Delhi	169122	
+Bharuch	Gujarat	169007	Baroach,Bharoch,Bkharuch,Broach
+Hoshiarpur	Punjab	168653	Hoshiarpur Railroad Station,Hushiarpur,Khoshiarpur
+Jind	Haryana	167592	Dzhind
+Kumbakonam	Tamil Nadu	167155	Kudanthai,ku mu ba ke na mu,kumbakonama,kumbhakeanam,kumbhakonam,kumbhakonama,kumpakonam
+Mohali	Punjab	166864	Mokhali,S.A.S. Nagar
+Fatehpur	Uttar Pradesh	166480	Fatehpur City,Fatekhpur
+Tonk	Rajasthan	165294	Ton'k,Tonk City,dong ge,tank,tanka,tong ke,tongkeu,tonka,tonku,twnk,twnq
+Udupi	Karnataka	165000	Ountoupi,Udipi,Udupis,Udupisa,awdwby,awdwpy,brahmavar,uddapi,udoupi,udpi,udupimandalam,uduppi,urupi,utuppi,wu du pi,xuthupi
+Thenali	Andhra Pradesh	164937	Andhra Paris,Tenali
+Sitapur	Uttar Pradesh	164435	
+Bhadravati	Karnataka	163903	Bkhadravati
+Vapi	Gujarat	163630	Wapi,bapi,vappi,wapy,wpy
+Moga	Punjab	163397	Mogu,moka,mwga,mwga  pnjab
+Raj-Nandgaon	Chhattisgarh	163114	Radzhnandgaon,Raj Nandga,Raj Nandgaon
+Robertsonpet	Karnataka	162230	Roberconpet,Robertson Pet,luo bei er te suo en pei te,rabartasana peta,rabartasanapeta,rabartsan pete,rapartcanpettai,robartasanapeta
+Unnao	Uttar Pradesh	161671	Unao
+Budaun	Uttar Pradesh	161555	Badajun,Badaun,badanyu,badauna,badayum,bu dao en,budauna,patavun
+Madhyamgram	West Bengal	161126	Maddham Gram,Madkhjamgram,ma di ya mu ge la mu,madhyagrama,madhyamagrama
+Chittoor	Andhra Pradesh	160722	Chittor,Chittur,Chitturu,chtwr,cittara,cittur,cittura,citturu,citura,qi te tuo ao er,shytwr
+Jamuria	West Bengal	160242	Dzhamuria,Jaykayanagar,Jaykaynagar
+Jaigaon	West Bengal	158664	Dzhajgaon
+Batala	Punjab	158621	Butala
+Orai	Uttar Pradesh	158265	
+Saharsa	Bihar	156540	Sakharsa,cakarca,sa ha er sa,sahaleusa,saharasa,saharusa,sharsa
+Vidisha	Madhya Pradesh	155951	Bhilsa,Vidisa,Vintisa,bidisa,bidisya,fydysha,pi di sha,vitisa,vuidisha,wdysha,wei di si ha,wydysh
+Hanumangarh	Rajasthan	155687	Khanumangarkh,Sadulgarh
+Thanesar	Haryana	155152	Tannasar
+Hassan	Karnataka	155006	Gasan,Hasszan,Khasan,ha sang,hacan,has'sana,hasan,hasana,hasanam,hsn
+Kishangarh	Rajasthan	154886	Kishangarkh,kil'ha harikrisanagarha,kisanagadha,kisanagara,kisanagarha
+Dalupura	Delhi	154791	Dallo Pura
+Rudrapur	Uttarakhand	154554	lu de la pu er,rudrapura,rudrapuram,rwdarpwr
+Nalgonda	Telangana	154326	na er ge en da,nalaganada,nalagonda,nalgonda-nagaram,naljwnda,nalkonta
+Hazaribagh	Jharkhand	153595	Hazaribag,Hazarybaugh,Khazaribag,hajaribaga
+Medinipur	West Bengal	153349	Midnapor,Midnapore,Midnapur
+Balurghat	West Bengal	153279	Balurgkhat
+Fyzabad	Uttar Pradesh	153047	Faizabad,Fajzabad
+Dinapore	Bihar	152940	Danapur
+Porbandar	Gujarat	152760	Poorbunder,Porbandarom,Port Porbandar,Purbandar,bo er ben de er,bwrbndr,poleubandaleu,porabandara,porpantar
+Banda	Uttar Pradesh	152218	
+Hindupur	Andhra Pradesh	151677	Khindupur
+Beawar	Rajasthan	151152	Beavar
+Anantnag	Jammu and Kashmir	150592	Anantnagas,Islamabad,a nen de na ge,anantanag,anantanaga,anantanak,ananteulageu,anantnaj,anantonaggu,anatanaga,annt nag,anntnag,xnantnakh
+Serilingampalle	Telangana	150525	Serilingampally
+Raigarh	Chhattisgarh	150019	Rajgarh,Rajgarkh,lai ge er,laigaleu,raigaru,rayagadha,rayagara,rayagarha,rayaghar,raygadh,rayjarh,raykar
+Malkajgiri	Telangana	150000	ma er ka jie ji li,makajgyry,malakajagiri,malkajaganja,malkajkiri,mlkajgyry
+Shantipur	West Bengal	149983	Santipur
+Bhuj	Gujarat	148834	Bhooj,Bhug,Bkhudzh,bhoja,bhuja,bhuji,bhwy,buji,buju,bwj,phuch,pu jie,pu jie shi,puj
+Barakpur	West Bengal	148174	Barrackpore,Barrakpor,Chanak,North Barrackpore
+Hajipur	Bihar	147688	Khadzhipur
+Sasaram	Bihar	147408	
+Bhimavaram	Andhra Pradesh	146961	Bheemavaram,Bkhimavaram
+Beed	Maharashtra	146709	Bhir,Bid,Bid Rural,Bidh,Bir,Mahboobganj,Mahbubganj,bida,bira
+Burari	Delhi	146190	
+Krishnanagar	West Bengal	145926	Krishnagar,Krishnagar City,Krishnagiri,Krishnigar,ke li si he na na jia er,kirusnanakar,krsnanagara
+Chitradurga	Karnataka	145853	Chitaldroog,Chitaldrug,Chitaldurg,Chitradurg,Chitrakaldurga,Chitteldrug,citradurga,citradurga nagara,citradurgam,citraturka
+Dibrugarh	Assam	145488	Dibrugarkh,Lakhinpur,di bu lu jia er,dibraugara,dibrgara,dibrugadh,dibrugadha,dibrugara,dibrugara-nagaram,dibrugarha,dybrwjarh,tiprukar
+Abohar	Punjab	145302	Abokhar,a bo he er,abohara,abwhar,apohar
+Tiruvannamalai	Tamil Nadu	145278	Tirruvannamalai,Tiruvannamalaj,tiruvuan'namarai
+Kaithal	Haryana	144915	Kajtkhal,ka'ithala,kai ta er,kaisaru,kaital,kaithala,kaittal,kethala,kythal
+Balasore	Odisha	144373	Balasor,Baleshwar,Baleswar,ba la suo er,balaswr,balesbara,balesvara,bareshuwaru,palesvar
+Godhra	Gujarat	143644	Godhr,Godkhra,Godkhre,gadhara,ge de la,ge te la,goddora,godeula,godhara,godra,kotara
+Shillong	Meghalaya	143229	Shilong,Silongas,cillan,shilongi,shiron,shylang,shylwngh,silam,silamga,silanga,sillang,silleann,sillong,silonga,xi long
+Rewari	Haryana	143021	Revari
+Basirhat City	West Bengal	143007	Basirhat,Basirkhat
+Chhatarpur	Madhya Pradesh	142128	Catarpur,Chantarpur,Chhattarpur,Chkatarpur,Chkhatarpur,cattar pur,cattarpur,chataleupuleu,chatarapura,chatarapura rajya,chatarapuram,chatarupuru,chatrapura,chattarapura,chhatarpwr,qie de er bu er
+Mandsaur	Madhya Pradesh	141667	Mandasor,man de shao er,mandasaura,mandosauru,mandsa'ur,mndswr
+Chas	Jharkhand	141640	casa,qia si
+Palanpur	Gujarat	141592	
+Lakhimpur	Uttar Pradesh	140223	Lakkhimpur
+Valsad	Gujarat	139764	Bulsar,Walsad
+Damoh	Madhya Pradesh	139561	Damokh,da mo,dameah,damoha
+Haldwani	Uttarakhand	139497	Chalntvani,Haldvani,Haldvanis,Haldwani-Kathgodam,Haldwani-cum-Kathgodam,Khaldvani,ha er de wa ni-qiu mu-ka te ge da mu,haladavani,haladuraani-tilakara-kathagodama,haladwani,haldavani,haldeuwani,haldvani-kathagodama,haldvani-va-kathagodama,haldwany,haltavani,harudowani
+Habra	West Bengal	139297	Khabra
+Kolar	Karnataka	138462	
+Srikakulam	Andhra Pradesh	137944	Chicacole,Shrikakulam,Srikakoulam,Srikakulama,Srikakulamas,seulikakullam,si li jia gu lan,sri kh khu lam,srykakwlm,surikakuramu,syrkakwlm
+Mandya	Karnataka	137358	Mand'ja,Mandja,man di ya,mandaya,mandia,mandiya,mantiya,men di ya
+Madhurampur Dehri	Bihar	137231	Dehri,Madkhurampur Dekhri
+Kanchrapara	West Bengal	136954	Kachrapara,Kancharapara,Kanchrapura
+Dimapur	Nagaland	135860	Dampur
+Maler Kotla	Punjab	135424	Malerkotla
+Siwan	Bihar	135066	Savan,Sivan
+Kalol	Gujarat	134426	
+Bankura	West Bengal	133966	
+Patan	Gujarat	133737	
+Gonda City	Uttar Pradesh	133583	Gonda,Gonda Oudh
+Dhaulpur	Rajasthan	133075	Dholpur,Dkholpur
+Gondia	Maharashtra	132813	Gondija,Gondiya,gonadiya,gondiya jila,gondiya jille,gong di ye
+Palakkad	Kerala	132728	Palakad,Palakkat,Palghat,blkad,pa la ka de,palaghata,palakkada,palakkara,palakkatu,pallakadeu,parakaddo
+Bettiah	Bihar	132209	Betiakh,Bettiakh,bei te di ya,betia,betiya,betti'a,bettia,bettiya,petti'ah
+Palwal	Haryana	131926	Palval,balwal,pa er wa er,pal-wol,pala'oyala,palaraala,palavala,palavala zila,palawala,paruwaru,plwl
+Raniganj	West Bengal	131261	Ranigandzhe
+Etah	Uttar Pradesh	131023	Ehtakh,eta,eta jilla,etaha
+Pilibhit	Uttar Pradesh	131008	Pilibhhit,Pilibkhit
+Rajapalayam	Tamil Nadu	130442	Rajapalaiyam,Rajapalajam
+Botad	Gujarat	130327	
+Deoria	Uttar Pradesh	129570	Deorija,de ao li ya,de'uriya,devariya,dywrya,dywrya  atrprdysh
+Nimach	Rajasthan	128561	Neemuch,Nimakkh
+Khardah	West Bengal	128346	Khardaha,Khardakh
+Yavatmal	Maharashtra	128175	Javatmal,Yeotmal
+Halisahar	West Bengal	128172	Halishahar,Khalisakhar
+Khanna	Punjab	128137	Hanna,Kkhana,ka na,kan'na,kanna,khana
+Titagarh	West Bengal	127751	Titagarkh
+Hathras	Uttar Pradesh	126882	Khatkhras
+Jorhat	Assam	126736	Dzhorkhat,Sibsagar,jor'hat
+Lalitpur	Uttar Pradesh	126475	lalipura,lalit pur,lalitapura,lalitapuram,lallispuleu,lei li de bu er,rarittopuru
+Guntakal	Andhra Pradesh	126270	Guntakai,Guntakal Junction,Guntakul,gantalaka,gong ta ka er,guntakala,guntakallu,kuntakkal
+Pithampur	Madhya Pradesh	126200	Pisampur
+Mothihari	Bihar	126158	Motihan,Motihari,Motikhari
+Kanhangad	Kerala	125564	Kankhangad,Kannangad
+Jagdalpur	Chhattisgarh	125463	Dzhagdalpur,gu ge da er pu er,jagadalapura,jagadalpura,jgdlpwr
+Jagadhri	Haryana	124894	Dzhagadkhari
+Darjiling	West Bengal	123797	Dardzhiling,Dardzilingas,Dargiling,Darjeeling,Rdorje gling,da ji ling,daleujilling,dar jylng,darjilim,drgylyng
+Kurichchi	Tamil Nadu	123667	Kurichi,Kurikkhkkhi
+Dam Dam	West Bengal	122719	Dum Dum
+Hardoi	Uttar Pradesh	122635	Khardoj
+Puruliya	West Bengal	122533	Purulia,Purulija
+Dharmavaram	Andhra Pradesh	121874	Dkharmavaram
+Bhadreswar	West Bengal	121662	Bkhadresuar
+Nagaon	Assam	121628	Nowgong,nakon
+Vejalpur	Gujarat	121610	
+Chikmagalur	Karnataka	121484	Chickmagalur,Chikkamagaluru,Chikmanglur,Chikmugalur,cikkamagaluru
+Bhadrak	Odisha	121338	Bhadrakh,Bkhadrak,Bkhadrakkh,ba de la ke,baddorakku,badeulag,bhadraka,patrak
+Sawai Madhopur	Rajasthan	121106	Savai Madhopur,Savaj-Madkhopur,cavay matopur,sa'oya'i madhopura,saraa'i madhupura,sava'i madhopura,sava'i madhopuram,sava'imadhopura,savay madhopur,sawa'i madhopura,sawai madeuhopuleu,se wa yi ma tuo bu er
+Ambikapur	Chhattisgarh	121071	Surguja,Surquja
+Mandoli	Delhi	120417	
+Satara	Maharashtra	120195	
+Churu	Rajasthan	120157	
+Gangapur	Rajasthan	120115	
+Madhavaram	Tamil Nadu	119105	Madavaram,Madkhavaram,ma da wa la mu,madabaramu,madavarama,madhabarama,madhavarama,matavaram
+Dohad	Gujarat	118846	Dahod,Dakhod
+Barshi	Maharashtra	118722	Barsi,ba er si xi,baleusi,barshy,barsy,bashi,brshy  hnd,parsi
+Adilabad	Telangana	118526	Edlabad,adilabadu,atilapat
+Jhunjhunun	Rajasthan	118473	Dzhkhundzhkhunu,Jhunjhunu
+Jetpur	Gujarat	118302	Dzhetpur,Jetpur Navagadh,jie pu er
+Uppal Kalan	Telangana	118259	Oopal,Pedda Uppal,Upal,Uppal
+Gudivada	Andhra Pradesh	118167	
+Baran	Rajasthan	117992	
+Narmadapuram	Madhya Pradesh	117988	Hoshangabad,Husengabad,Khoshangabad,fushangabado,hosangabad,hosangabada,hosankapat,hosyangabadeu,huo si hang ge a ba de,husangabada,narmadapurama
+Amreli	Gujarat	117967	Amrelis,amareli,amrly,amryly,an lei li
+Pudukkottai	Tamil Nadu	117630	Poodoocottah,Puducotai,Pudukattai,Pudukkottai-Trichinopoly,Pudukkottaj,Pudukotah,Pudukottai,pu du ke tai,pudoukottai,pudukkotta'i,purukkotta'i,putukkottai
+Narasaraopet	Andhra Pradesh	117489	na la sa la ao pei te,narasara'opet,narasara'opeta,narasaravupeta
+Rishra	West Bengal	117014	
+Baripada	Odisha	116849	Mayurbhanj
+Muktsar	Punjab	116747	Shri-Muktsar-Sakhib
+Azamgarh	Uttar Pradesh	116644	Azamgarkh,a zha mu jia er,ajamagadha,ajamagadha jilla,ajamagadha-nagaram,ajamagara,ajhamagadha,azamagarha,azamugaru
+Barnala	Punjab	116449	Anahadgarh
+Yelahanka	Karnataka	116447	Elakhanka,yalahanka,ye la han ka
+Chittorgarh	Rajasthan	116406	Chitor,Chitorgarh,Chittaurgarh,Chittor,Chittorgarkh,Citorgar,Csitorgarh,Tsitornkarth,chittorugaru,cit tea rkhrh,citaura,citoragara,cittaudagadha,cittauragadha,cittauragara,cittauragarha,cittodagadha,cittorkar,ji duo er ge er,shytwrgharh,shytwrjarh,z'ytwrgr
+Tinsukia	Assam	116322	Tinsukija
+Khargone	Madhya Pradesh	116150	Khargon
+Baidyabati	West Bengal	115504	Baidjabati
+Basti	Uttar Pradesh	115115	
+Gangavati	Karnataka	114642	Gangawati
+Ambur	Tamil Nadu	114608	a mu bu er,ambura,amburu,ambwr,ampur
+Giridih	Jharkhand	114533	Giridikh,girid'iha,girid'iha jila,giridi
+Wardha	Maharashtra	113759	Vardha,Vardkha,Varntcha,oyaradha,raaradha,varta,waruda,wo er ta
+Tadepalligudem	Andhra Pradesh	112655	Tadepallegudem
+Chanduasi	Uttar Pradesh	112635	Chandausi,Kkhanduasi
+Bagaha	Bihar	112634	Bagakha
+Achalpur	Maharashtra	112311	Acalpur,Ellichpur,a qia er pu er,acalapur,acalapura,accalpur,achalpuleu,acharupuru,achlpwr,akalpwr,alacapura,ashlbwr
+Gondal	Gujarat	112197	
+Dharashiv	Maharashtra	112085	Osmanabad,Usmanabad,ao si ma na ba de,osamanabada,osmanabada,usamanabada,usmanabada,usumanabado
+Port Blair	Andaman and Nicobar	112050	Port Bler,Port Bleras,Port-Blehr,Port-Bler,Portus Blairensis,Sri Vijaya Puram,bu lai er gang,porata bale'ara,port piler,porta blera,porta bleyara,portableyara,poteubeulleeo,potoburea,pwrt blr,pwrt blyyr
+Bagalkot	Karnataka	111933	Bagalakote,Bagalkota,Bagalkotas,Bankalkot,ba ga ke te,ba jia er ke te,bagakos,bagalakota,bagalakotemandalam,bagarukoto,baghalakwt,bajalakwt,pakalkot,phakhl kot
+Suriapet	Telangana	111729	Suryapet
+Bangaon	West Bengal	111693	Bongaon,banagam,banagamo,banagavam,bang ge a ao en
+Ashoknagar Kalyangarh	West Bengal	111475	Ashoknagar Kaljangarkh
+Deesa	Gujarat	111160	Dis,Disa
+Navadwip	West Bengal	111123	Nabadurip,Nabadwip,Nadia,Navadvip
+Nandurbar	Maharashtra	111037	nan du er ba er,nandarabara,nandarbar,nandouabaru,nanduleubaleu,nandurabara,nandwrbar,nanturpar,nndwrbar
+Sultanpur	Uttar Pradesh	110368	
+Delhi Cantonment	Delhi	110351	Delkhi Kantonment,New Cantonment
+Firozpur	Punjab	110313	Ferozepore,Ferozepur,Feruzpur
+Pandit Deen Dayal Upadhyaya Nagar	Uttar Pradesh	109650	DDU Nagar,Moghal Sarai,Moghulserdai,Mughal Sarai,Mugkhalsarai
+Sehore	Madhya Pradesh	109118	Sekhor,cehor,sai huo lei,seho,sehor,shwr,sihora
+Kanpur Cantonment	Uttar Pradesh	108534	Kanpur Cantt,Kanpur Kantonment
+Bansbaria	West Bengal	108474	Bansberia
+Tadpatri	Andhra Pradesh	108171	
+Jalpaiguri	West Bengal	107832	Dzhalpajguri,Paiguri
+Mangalagiri	Andhra Pradesh	107197	mang ge a la ji li,mankalakiri
+Ranebennur	Karnataka	106406	Ranebennuru,Raneebennur,Ranibennur,Renibennur
+Khurja	Uttar Pradesh	105909	Khurga,khuraja,ku er gu,kurja nakaram
+Kishanganj	Bihar	105782	Kishanganij,Kishanganj Bazar
+Ponnani	Kerala	105512	Ponani
+Hindaun	Rajasthan	105452	Hindaun City,Khindaun,hinda'una,hindauna,hindauna siti,hindaunanagaram,hindona,xin dao en
+Jamalpur	Bihar	105434	Dzhamalpur
+Nagaur	Rajasthan	105218	Nagaur Marwar
+Ambala Sadar	Haryana	104974	
+Bhiwadi	Rajasthan	104921	Bhivadi,Bkhiuadi,bhiraadi,bhivari,bhywady,bi wa di,bywady,pivati
+Bundi	Rajasthan	104919	Bundi City
+Miryalaguda	Telangana	104918	Mir'jalaguda,Mirialguda,Miriyalguda,Miryalguda
+Soyibug	Jammu and Kashmir	104000	Sojbug
+Jagtial	Telangana	103930	Dzhagtial,jagityala
+Roorkee	Uttarakhand	103894	Rorke,Rourki,Rurke,Rurki,lugki,luo ao er kai ai,roraki,rraki,rudaki,rur khi,ruraki,rurkki,ruruki,rwrky,rwrqy
+Udgir	Maharashtra	103550	
+Nagda	Madhya Pradesh	103501	Nagda-Dhar
+Betul	Madhya Pradesh	103330	Badnur
+Jahanabad	Bihar	103202	Dzhekhanabad,Jehanabad
+Kashipur	Uttarakhand	103138	jia xi bu er,kashipuru,kashypwr,kasi pur,kasipuleu,kasipur,kasipura
+Ghazipur	Uttar Pradesh	103095	Gkhazipur
+Amaravati	Andhra Pradesh	103000	
+Nagapattinam	Tamil Nadu	102905	Nagapatinam,Nagappattinam,Negapainttam City,Negapatam,Negapattinam,nagapattinamu,nagappattinamu,nakappattinam
+Buxar	Bihar	102861	Buksar
+Mormugao	Goa	102345	Goa,Marmagao,Marmagoa,Marmugao,Mermugao,Porio
+Seoni	Madhya Pradesh	102343	
+Aurangabad	Bihar	102244	
+Hinganghat	Maharashtra	101805	Khingangkhat
+Dhamtari	Chhattisgarh	101677	Dkhamtari
+Chilakalurupet	Andhra Pradesh	101398	Kkhilakalurupet
+Malappuram	Kerala	101386	Malapouram,Malapurama,Malapuramas,ma la pu lan,ma la pu nan,ma la pu pu la mu,ma lep pu ram,malabwram,malappurama,mallapulam,marrapuramu,mlapwrm
+Banswara	Rajasthan	101017	Bansvara
+Chirmiri	Chhattisgarh	100800	Kkhirmiri
+Itarsi	Madhya Pradesh	100574	
+Vasco da Gama	Goa	100485	Vasco,Vasko-da-Gama
+Gangtok	Sikkim	100286	Gangtoka,Gangtokas,gagatoka,gan tuo ke,ganatoka,gangataka,gangatok,gangatoka,gangtokeu,gannteakk,gantoka,gantoku,gngtwk,gyantaka,kentak
+Datia	Madhya Pradesh	100284	Datija
+Phagwara	Punjab	100146	Pkhagvara
+Airoli	Maharashtra	100000	
+Luckeesarai	Bihar	99979	Lakhisarai,Luckesserai
+Shikohabad	Uttar Pradesh	99678	
+Kasganj	Uttar Pradesh	99462	Kasgandzh,Kasgang,ka si gan jie,kas ganj,kas khan ch,kasagaja,kasaganja,kaseuganjeu,kasganja,kasgnj,kaskan,kasuganji
+Khambhat	Gujarat	99164	Cambay,Kambay,Khambayat
+Kohima	Nagaland	99039	Kokhima,ke xi ma,keahima,kokima
+Pandharpur	Maharashtra	98923	Pandkharpur,padharapura,pan da er pu er,pandaripuramu,pandharapura,pantaripuram
+Kapurthala Town	Punjab	98916	Kapurtala,Kapurthala,Kapurtkhala,k pu rth la,ka pu er ta la,kabwrthala,kapuleutalla,kapurathala,kapurttala,kapurutara,kapwrtalh
+Mahuva	Gujarat	98519	Mahura
+Silvassa	Dadra and Nagar Haveli and Daman and Diu	98265	Selvasa,Silvasa,cilvaca,silabas'sa,silabhasa,silavasa,silbasa,suiruvuasa,sylwasa,xi er wa sa
+Balangir	Odisha	98238	Bolangir
+Nawada	Bihar	98029	
+Bhilai Charoda	Chhattisgarh	98008	
+Shamli	Uttar Pradesh	97966	
+Jharsuguda	Odisha	97730	Dzhkharsuguda,Jharsaguda,Jharsguda,Jharsogra,Jharsugra,Jharsugude,gu er su gu da,jharasugada,jharasuguda,jharasugura
+Sadatpur Gujran	Delhi	97641	
+Chalisgaon	Maharashtra	97551	
+Villupuram	Tamil Nadu	97380	Villapurum,Vizhupparaiyar,viluppuram
+Amalner	Maharashtra	97369	a ma er nei er,amalanera,amalnera,amalnr,aml nyr
+Tellicherry	Kerala	97201	Talasseri,Teliceri,Tellicherri,Tellichery,Thalassery,Tkhalaserj,t'lsry,ta la si sai er yi,talacceri,talas'seri,talaseri,talasry,taraseri,thalas'serya,tlshyry
+Manjeri	Kerala	97102	man jie li,manceri,mnjyry
+Barmer	Rajasthan	96225	
+Puth Kalan	Delhi	96002	Pooth Kalan
+Kuniyamuttur	Tamil Nadu	95924	
+Sardarshahr	Rajasthan	95911	
+Sahibganj	Jharkhand	95890	
+Sanand	Gujarat	95890	
+Paramagudi	Tamil Nadu	95579	
+Zerakpur	Punjab	95553	Zirakpur
+Tiruchengode	Tamil Nadu	95335	di lu qin ge ao de,tiluchengodeu,tiruccenkotu,tirucen'gode,tirucenagore,tirucengod,tirucengoda,tirucengode,tiruchengodde
+Closepet	Karnataka	95167	Ramanagaram
+Emmiganur	Andhra Pradesh	95149	Emmiganuru,Yemmiganur
+Vaniyambadi	Tamil Nadu	95061	Vanivambadi,baniyamabari,fanymbdy,vaniyamabadi,vaniyampati,wa ni ye mu ba di,wanyyambady,wnymbdy
+Kovilpatti	Tamil Nadu	95057	Koilpatti,ke wei er pa di,kobhilapatti,kobilapatti
+Parli Vaijnath	Maharashtra	94863	Parli,Purli,Purli Vaijnath,parali,parali vaijanatha,parali-vaidyanatha taluka,parly,vaijanatha
+Mainpuri	Uttar Pradesh	94619	Majnpuri,ma'inapuri,mai en pu li,mainapuri,mainpuli,menpuri,meyinpuri,myn pwry
+Khamgaon	Maharashtra	94604	
+Makrana	Rajasthan	94487	
+Allinagaram	Tamil Nadu	94453	Theni Allinagaram
+Gudiyatham	Tamil Nadu	93973	Gudiyattam,Gudiyetram,Gudiyetranallur
+Dhar	Madhya Pradesh	93917	Dkhar
+Baraut	Uttar Pradesh	93544	
+Kalyani	West Bengal	93184	ka li ya ni
+Doddaballapura	Karnataka	93105	Dod Ballapur
+Chirala	Andhra Pradesh	92942	
+Akot	Maharashtra	92637	a ke te,akat,akota,akoteu,akotto
+Fatehpur	Rajasthan	92595	
+Gharroli	Delhi	92540	Gharoli
+Rajpura	Punjab	92301	Kajpura
+Kot Kapura	Punjab	91979	
+Bhandara	Maharashtra	91845	Bkhandara
+Molarband	Delhi	91402	
+Bagaha	Bihar	91383	Bagaha Division
+Rayachoti	Andhra Pradesh	91234	
+Kadayanallur	Tamil Nadu	90364	Kadaiyanallur
+Valparai	Tamil Nadu	90353	
+Pollachi	Tamil Nadu	90180	bo la qi,peallacci,pollacci,pollaci,pwlachy
+Kavali	Andhra Pradesh	90099	
+Roha	Maharashtra	90000	Roha-Kolaba,rohe
+Mancherial	Telangana	89935	Mancheral,manciryala
+Avaniyapuram	Tamil Nadu	89635	
+Muradnagar	Uttar Pradesh	89482	Muravnagar,mrad ngr,mradngr,mu la de na jia er,murada nagara,muradanagara,murat nakar
+Ankleshwar	Gujarat	89457	Anklesvar
+Kadiri	Andhra Pradesh	89429	
+Shahdol	Madhya Pradesh	89289	Sahdol,sahadola,saharola,satol,si ha he duo er
+Shrirampur	Maharashtra	89282	
+Mahoba	Uttar Pradesh	89170	
+Ramgarh	Jharkhand	88781	Ramgarh Cantonment
+Contai	West Bengal	88702	
+Sangrur	Punjab	88615	
+Nirmal	Telangana	88433	Nirmala,ni er ma er,nrml
+Deoband	Uttar Pradesh	88171	Deobande,de ao ban de,de'obanda,deobando,devabanda,diobandeu,diyoband,dywband,dywbnd,tevapantu
+Neyyattinkara	Kerala	88104	Neyattinkara
+Tanda	Uttar Pradesh	88073	
+Kolar	Madhya Pradesh	87882	
+Jhumri Telaiya	Jharkhand	87867	Jhumri Tellaya,Jumri Tilaiya,Kodarma
+Aruppukkottai	Tamil Nadu	87722	
+Faridkot	Punjab	87695	
+Madgaon	Goa	87650	Margao,marko
+Velampalaiyam	Tamil Nadu	87427	
+Jamui	Bihar	87357	
+Anjar	Gujarat	87183	Andzharom
+Paralakhemundi	Odisha	87152	Parala,parlakimidi
+Jharia	Jharkhand	86938	gu li ya,jhariya
+Karaikal	Puducherry	86838	Karikal
+Kamthi	Maharashtra	86793	Kamptee,Kamtha,kampti
+Hansi	Haryana	86770	Khansi
+Mayiladuthurai	Tamil Nadu	86660	Mayavaram,Mayaveram,Mayuram,ma yi la du tu lai,mailadutturai,mayalanduthura'i,mayiladuthuraya,mayiladuturai,mayilatuturai
+Anakapalle	Andhra Pradesh	86519	anakapalli
+Maduravoyal	Tamil Nadu	86195	ma du la wo ye er,madhuraboyala,madurabhoyala,maturavayal
+Sarni	Madhya Pradesh	86141	
+Dausa	Rajasthan	85960	Daosa,da'usa,dao sa,tauca
+Paradip Garh	Odisha	85868	Paradeep,Paradip,Paradipur,Paradwip
+Hingoli	Maharashtra	85103	Khingoli,hing-golli,hingori,hinkoli,xin ge li,xing ge ao li
+Baruni	Bihar	84888	Barani
+Jeypore	Odisha	84830	Jaypur,Jeyepore,Jeypur
+Bijnor	Uttar Pradesh	84593	Bidzhnor,bi jie nuo er,bijanaura,bijanora,bijnora,bjnwr,pijnor
+Dhoraji	Gujarat	84545	Dhorail
+Virappanchathiram	Tamil Nadu	84453	Veerappanchatiram
+Balaghat	Madhya Pradesh	84261	Burha
+Udhampur	Jammu and Kashmir	84015	Udkhampur,udamapura,udhamapura,udhamapuram,utampur,wu da mu pu er
+Najibabad	Uttar Pradesh	84006	Najibabab
+Idaiyarpalaiyam	Tamil Nadu	83908	Goundampalayam
+Harihar	Karnataka	83219	ha li ha er,harihara
+Chilla Soroda Bangar	Delhi	83217	
+Sirsilla	Telangana	83186	sirisilla
+Karauli	Rajasthan	82960	ka lao li
+Mansa	Punjab	82956	
+Jangipur	West Bengal	82548	
+Gobindgarh	Punjab	82266	
+Saunda	Jharkhand	81915	
+Maraimalainagar	Tamil Nadu	81872	
+Ashoknagar	Madhya Pradesh	81828	Ashok Nagar,Pachhar,a si huo ke na jia er,acok nakar,ashwk ngr,asokanagara,asokanagara jilla,asokanagaram
+Phulwari Sharif	Bihar	81740	
+Mhow	Madhya Pradesh	81702	Mhow Cantonment,Mhow Gaon,Mhowgaon,maho'o senanibasa,mahora senanibasa,mahu,mahum,mhova kyantonmenta,mu huo wo bing zhan
+Malout	Punjab	81406	
+Kadi	Gujarat	81404	
+Vijalpor	Gujarat	81245	
+Palakollu	Andhra Pradesh	81199	Palacole,Palakol
+Himatnagar	Gujarat	81137	Ahmadnagar,Ahmednagar
+Dholka	Gujarat	80945	
+Kotkapura	Punjab	80741	
+Bargarh	Odisha	80625	Baragarh,Bargarkh,ba er jia er,baga,baleugaleu,baragadha,baragara,baragarha,bargadh,bargar,barghar,bo er ge er,parkaht
+Kharghar	Maharashtra	80612	kharaghara
+Kairana	Uttar Pradesh	80432	ka'irana,kai la na,kailana,kyrana
+Brajarajnagar	Odisha	80403	Brajrajnagar,brajarajanagara,brajaranjanagara,bu la gu la jie na jia er
+Kamareddi	Telangana	80315	Kamareddipet,Kamaredi
+Palwancha	Telangana	80199	Paloncha
+Manmad	Maharashtra	80058	
+Srikalahasti	Andhra Pradesh	80056	Kalakhasti,kalahasti mandira,si li ka la ha si di
+Kottagudem	Telangana	79819	Kothagudem
+Nawabganj	Uttar Pradesh	79246	Nawabgang
+Gokak	Karnataka	79121	
+Tikamgarh	Madhya Pradesh	79106	
+Arakkonam	Tamil Nadu	79080	Arkonam
+Araria	Bihar	79021	Ararija,arariya,ararya
+Koch Bihar	West Bengal	78737	Cooch Behar,Kuch Bihar
+Kharakvasla	Maharashtra	78684	Khadakvaslal,Khadakwasla,Khandakwalsa,Kirkee Cantonment
+Bhadohi	Uttar Pradesh	78568	ba duo xi,bhanadohi
+Katoya	West Bengal	78408	Katwa
+Medininagar	Jharkhand	78396	Daltenganj,Daltongandzh,Daltonganj,Daltongganj,da er tong ge a en jie,da tong ga ni,daltan ganj,daltanaganja,daltanaganjanagaram,daltenaganja,daltong-ganjeu,darutonganji,dolataganja,medininagara,mydynyngar,talttonkan
+Washim	Maharashtra	78387	Basim
+Bagbera	Jharkhand	78356	
+Savarkundla	Gujarat	78354	
+Basoda	Madhya Pradesh	78289	
+Tanuku	Andhra Pradesh	77962	ta nu ku,tanukku,tanuku mandala,tnwkw
+Gurdaspur	Punjab	77928	grdaspwr,gu er da si bu er,gu er da si pu er,guleudapuleu,guradasapura,gurudas pur,gurudasapura,gurudasapuram,gurudaspur,gurudasupuru,gwrdaspwr,krdasfwr,kurtaspur
+Edattala	Kerala	77811	Edathala
+Bodhan	Telangana	77573	
+Balrampur	Uttar Pradesh	77396	
+Baramula	Jammu and Kashmir	77276	
+Karwar	Karnataka	77139	Karvar,Kawar,ka er wa er,kaleuwaleu,kar war,kara'oyara,kararaara,karavara,karavaram,kauo,krwar
+Dhulian	West Bengal	77070	
+Rabkavi-Banhatti	Karnataka	77004	
+Mawana	Uttar Pradesh	76973	Mavana,ma wa na,ma'ona,maraana,mwana
+Shirpur	Maharashtra	76905	Shirpure,cirpur,shi pu er,shirupuru,shrpwr,sirapura,sirpur,sirpura,swileupuleu,xi er bu er
+Budge Budge	West Bengal	76837	
+Kundla	Gujarat	76809	
+Visnagar	Gujarat	76753	
+Kannauj	Uttar Pradesh	76714	Kanaudzh,Kanauj,Kannaudzh,ka nao jie,kanauja,kanauji,kannauja,kannoci,kannoja,qnwj
+Khajoori Khas	Delhi	76640	
+Neelankarai	Tamil Nadu	76600	Nelankarai,Nilankaraj,Oggiyamduraipakkam,nei ai lan ka lai,nilanakara'i,nilankara'i,nilankarai
+Nagina	Uttar Pradesh	76593	
+Badagara	Kerala	76493	Vadakara,Vatakara,barakara,radakara,vuadakara,wa da ka la,wtkra
+Fazilka	Punjab	76492	Fazika
+Electronic City Phase I	Karnataka	76348	
+Ratnagiri	Maharashtra	76229	Rutnagherry,irattinakiri,la te na ji li,rtnagry
+Keshod	Gujarat	76193	Kesod
+Konnagar	West Bengal	76082	
+Chintamani	Karnataka	76068	
+Sindhnur	Karnataka	75837	
+Madhubani	Bihar	75736	Madkhubani
+Bodinayakkanur	Tamil Nadu	75680	Bodinayakanur
+Khadki	Maharashtra	75654	Kirkee
+Dhrangadhra	Gujarat	75578	Dhrangadra
+Tezpur	Assam	75540	Darrang,tai ci pu er,tejapura,tyzpwr
+Srivilliputhur	Tamil Nadu	75396	Sriviliputkhur,si li wei li pu tu er,sribilliputhura,srivilli putturu,srivilliputura,sry wly pwtwr,tiruvilliputtur
+Benipur	Bihar	75317	
+Paloncha	Telangana	75224	
+Jaora	Madhya Pradesh	74907	Dzhaora,gu ao la,ja'ora,jaola,jara,jaro,javara,jayara,jia ao la
+Tura	Meghalaya	74858	
+Gudur	Andhra Pradesh	74851	kutur
+Narnaul	Haryana	74581	na er nao er,naleunaul,nanauru,nar nwl,narana'ula,naranaula,narna'ul,narnal,narnaula,narnwl
+Balotra	Rajasthan	74496	
+Kharar	Punjab	74460	Kkharar,kalaleu,karar,ke lei er,kharara
+Yadgir	Karnataka	74294	Jadgir,ya de ji er,yadagira,yadagiri,yadgyr,yajileu,yajjiru,yatakiri,yyadagira
+Harda	Madhya Pradesh	74268	Harda Khas
+Pilkhua	Uttar Pradesh	74212	Pilkhuwa
+Ambajogai	Maharashtra	74114	Ambe,Ambejogai,Mominabad
+Kapas Herd	Delhi	74073	
+Bela	Uttar Pradesh	73992	Bela Partabgarh,Partapgarh,Pratapgarh
+Rabkavi	Karnataka	73835	
+Bawana	Delhi	73680	Bawana Delhi
+Shahabad	Uttar Pradesh	73606	Hardoi
+Virudhachalam	Tamil Nadu	73585	Thirumudhukundram,Vriddhachalam,birodhacalama,virud'dhacalam,virudhacalama,viruttaccalam,wei lu da qia la mu
+Chandpur	Uttar Pradesh	73555	Bijnor
+Kasipalaiyam	Tamil Nadu	73425	
+Sikandarabad	Uttar Pradesh	73379	Sikandrabad
+Virudunagar	Tamil Nadu	73273	Virudhupatti,Virudupatti
+Pattukkottai	Tamil Nadu	73135	Pattukottai,Patukotai,pa tu ke tai,patokotai,pattoukkottai,pattukkotai,pattukkotta'i,pattukotai,pattukotta'i,pattwkwttay,patwkwtay
+Pusad	Maharashtra	73046	
+Tindivanam	Tamil Nadu	72796	Tindivangam,Tinthirivanam,tintivanam
+Chopda	Maharashtra	72783	chobda,choppuda,copada,copda,copta,qiao pu da
+Taliparamba	Kerala	72465	Talipparamba,Tullipurmbu,ta li pa la mu ba,talipparamp,talipparampa
+Sangareddi	Telangana	72344	Sangareddipet,Sangareddypeta
+Palghar	Maharashtra	72335	
+Dharapuram	Tamil Nadu	72291	da la pu la mu,dharapurama,tarapuram
+Payyanur	Kerala	72111	Payyannur
+Sheopur	Madhya Pradesh	71951	Sheopur Kalan,chwpwr,ciyoppur,se'opura,serapura,sheopuru,shywpwr,si he ao pu er,si'upura,sipuleu,siyopur,siyopura,syopura,syopuram,xie ao bu er
+Channapatna	Karnataka	71942	Cannapatna,Chanapatna,Channapatan,canapatana,cannapatana,cannapattana,cannapattanam,cannappattana,cennapatna,chanapattona,channapateuna,jin ne bo de na
+Koyilandy	Kerala	71873	Kovilkandi,Koyilandi,Quilandi,Quilandy,keayilanti
+Faridpur	Uttar Pradesh	71783	Bharatpur
+Barauni	Bihar	71660	
+Krishnagiri	Tamil Nadu	71323	ke li si he na ji li,kiruttinakiri,krshnagry,krsnagiri,kurishunagiri
+Sopur	Jammu and Kashmir	71292	Sopor,Sopore
+Rayagada	Odisha	71208	
+Zahirabad	Telangana	71166	
+Khopoli	Maharashtra	71141	ke bo li
+Ratangarh	Rajasthan	71124	
+Markapur	Andhra Pradesh	71092	
+Bolpur	West Bengal	70998	bo er pu er,bolapura,bolapura pascima bangala
+Panjim	Goa	70991	Nova Goa,Panadzhi,Panadzi,Panadzis,Panadzsi,Panaji,Pangim,pa na ji,panjy,pn chi,pnjy
+Ranaghat	West Bengal	70984	
+Bapatla	Andhra Pradesh	70777	
+Fatehabad	Haryana	70777	Fatahabad
+Beypore	Kerala	70751	Beipur,Beppur,Beypur,bei yi bo lei,bepura,beyapare,peppur
+Koppal	Karnataka	70698	Kappal,Kopbal,ge bo er,kopal,kopala,koppala,kopparu,kwppal
+Badvel	Andhra Pradesh	70626	
+Dadri	Uttar Pradesh	70609	
+Thenkasi	Tamil Nadu	70545	Tenkasi
+Suratgarh	Rajasthan	70536	Suratgarkh
+Auraiya	Uttar Pradesh	70508	Aurajja,Etawah,a'ura'iya,ao lai ye,araiya,aulaiya,aura'iya,auraya,auri'a,awraya,awrya
+Palani	Tamil Nadu	70467	Palni,pa la ni
+Nallur	Tamil Nadu	70115	South Nallur
+Chamrajnagar	Karnataka	69875	Chamarajanagar
+Mithepur	Delhi	69837	
+Mangrol	Gujarat	69779	Mangral,Mungrol
+Basavakalyan	Karnataka	69717	Basavakal'jan,Kalyani,ba sa wa ka er yan,basabakallian,basabakalyana,basabhakalyana,basavakali'ana,basavakalyana,basavakalyanam,basavuakariyan,basawakalyan,bswa klyan,pacavakalyan
+Pul Pehlad	Delhi	69657	
+Chaibasa	Jharkhand	69565	
+Tripunittura	Kerala	69390	Thrippunithura,Tripunnittara
+Shajapur	Madhya Pradesh	69263	
+Mettupalayam	Tamil Nadu	69213	Mettupalaiyam,Mettupalayam-Coimbatore,Mettuppalaiyam,mettupalayam koyambatturu,mettupalayama
+Sunam	Punjab	69069	
+Bhawanipatna	Odisha	69045	
+Ziauddin Pur	Delhi	68993	
+Jamkhandi	Karnataka	68938	
+Basmat	Maharashtra	68846	Basmath
+Taj Pul	Delhi	68796	
+Kayamkulam	Kerala	68634	Kayangulam,Kayankulam
+Dharmapuri	Tamil Nadu	68619	Dkharmapuri,da er ma pu li,darumapuri,tarmapuri
+Bisalpur	Uttar Pradesh	68355	bi sa er pu er,bi se er bu er,bisalapura,bisapuleu,bisarupuru,bsalpwr,picalpur,visalapura
+Attili	Andhra Pradesh	68196	
+Cumbum	Tamil Nadu	68090	Kambam
+Munnar	Kerala	68000	mu na er,mun'naru,munar,munara,munnara,mwnar
+Panipat Taraf Makhdum Zadgan	Haryana	67998	
+Nabha	Punjab	67972	
+Bihat	Bihar	67952	
+Samastipur	Bihar	67925	
+Karanja	Maharashtra	67907	Karandzha,Karanja Bibi
+Sitamarhi	Bihar	67818	
+Rajsamand	Rajasthan	67798	
+Malkapur	Maharashtra	67740	
+Modasa	Gujarat	67648	Modassa
+Jaisalmer	Rajasthan	67604	Dzaisalmer,Dzhajsalmer,Dzsaiszalmer,Jailsamer,Tzaisalmer,gu sha mei er,jaisalamera,jaisalmeleu,jaisarumeru,jayasalamera,jesalamera,jeycalmer,jyslmyr
+Buldana	Maharashtra	67431	
+Dhenkanal	Odisha	67414	
+Urun-Islampur	Maharashtra	67391	
+Gopalganj	Bihar	67339	
+Bongaigaon	Assam	67322	
+Sangamner	Maharashtra	67309	Sangamnor,cankamner,sang ge a mu nei er,sang-ganeleu,sangamanera,sangamanera taluka,sangamuna,sanganner,sngamnr,sngm nyr
+Haveri	Karnataka	67102	
+Mannargudi	Tamil Nadu	66999	ma na er gu di,mannaraguri,mannarkuti
+Jhalawar	Rajasthan	66919	Brijnagar
+Tarn Taran	Punjab	66847	
+Siddipet	Telangana	66737	siddipeta
+Bellampalli	Telangana	66660	Bellampalle
+Barbil	Odisha	66540	
+Koratla	Telangana	66504	
+Rishikesh	Uttarakhand	66390	Rikhikesh
+Goyerkata	West Bengal	66358	
+Mandamarri	Telangana	66176	
+Puliyankudi	Tamil Nadu	66034	Puliyangudi
+Palasa	Andhra Pradesh	65833	
+Gohana	Haryana	65708	
+Pulivendla	Andhra Pradesh	65706	
+Chengalpattu	Tamil Nadu	65689	Chengalpat,Chingleput,cengalapattu,cenkalpattu,qin ge a er pa tu
+Wadgaon Kolhati	Maharashtra	65620	
+Ladnun	Rajasthan	65575	Ladnu
+Supaul	Bihar	65437	
+Gangarampur	West Bengal	65316	
+Ramanathapuram	Tamil Nadu	65314	Ramanatkhapuram,Ramanatkhapurama,Ramanthapuram,Ramnad,iramanatapuram,la ma na ta pu la mu,ramanatapuramu,ramanathapurama,ramanthapurama
+Jagraon	Punjab	65305	gu ge la ao en,jagara'um,jagararana,jagra'om,jagravam
+Sinnar	Maharashtra	65299	Szinnar,cinnar,shinaru,sinnaleu,sinnara,snar,synar,xi na er
+Kopargaon	Maharashtra	65273	ke pa er ga an,ke pa er jia ao en,kopagaon,kopaleugaon,kopar gav,koparagamo,koparagamva,koparaganva,koparagava taluka,kopargan,koparkan
+Alipur Duar	West Bengal	65232	Alipur,Alipur Duars,Alipurduar
+Tandur	Telangana	65115	
+Khatauli	Uttar Pradesh	64731	Kkhatauli,ka tao li,ke dao li,khatawly,khatuyali
+Viraraghavapuram	Tamil Nadu	64698	Tiruverkadu
+Siuri	West Bengal	64659	Suri
+Bina	Madhya Pradesh	64529	Bina Railway Colony
+Palitana	Gujarat	64497	
+Chaumu	Rajasthan	64417	Chomu,Chomun
+Halol	Gujarat	64265	
+Kodar	Telangana	64234	Kodad
+Bangarda Chhota	Madhya Pradesh	64213	
+Tadepalle	Andhra Pradesh	64149	
+Tirupattur	Tamil Nadu	64125	
+Chinnachowk	Andhra Pradesh	64053	Chinna Chowk,chynachwwk,cinnacaka,cinnacauka,cinnacauku,qin na qiao wo ke
+Bishnupur	West Bengal	64041	Vishnupur
+Amur	Telangana	64023	Armur
+Baheri	Uttar Pradesh	63953	
+Nawalgarh	Rajasthan	63948	Navalgarkh,na wa er jia er,na'oyalagara,naval gad,navalagadha,navalgadh,navalgarhi,navalkar'h,nawalgaleu,nawaruga
+Anaiyur	Tamil Nadu	63917	
+Kunnamkulam	Kerala	63903	Kunamkulam,kun na mu ku lan,kunnamakulama,kunnankulam,kwnamkwlm
+Raghogarh	Madhya Pradesh	63873	Raghugarh
+Tohana	Haryana	63871	
+Jatani	Odisha	63697	Jatni
+Arni	Tamil Nadu	63671	Arani
+Chik Ballapur	Karnataka	63652	Chikkaballapura
+Dhubri	Assam	63388	Dhuburi,Dubri,dhubari
+Borsad	Gujarat	63377	
+Gadwal	Telangana	63177	
+Piduguralla	Andhra Pradesh	63103	Pidugurala
+Sheikhpura	Bihar	62927	Shaikhpura
+Sirsi	Karnataka	62882	sirasi,xi er xi
+Nipani	Maharashtra	62865	Nimpani
+Kannur	Kerala	62836	Cananor,Cannanore,Kananorskom,Kanoor,Kanour,Kanur,Kanura,Kanuras,Thatta,The city of Looms and Lores,The crown of Kerala,ka nu er,kaluleu,kan nu ra,kan'nuru,kannanuru,kannara,kannura,kanwr,knur,knwr
+Bari	Rajasthan	62721	
+Nokha	Rajasthan	62699	Noka,Nokha mani,Nokhamandi
+Vinukonda	Andhra Pradesh	62550	
+Renukut	Uttar Pradesh	62413	Renukoot
+Nagari	Andhra Pradesh	62253	
+Chidambaram	Tamil Nadu	62153	Chitdambaram,Cidambaram,chdmbrm,chedabalam,chidamubaramu,chydambaram,cidambarama,citamparam,ji deng bo lei mu
+Dabwali	Haryana	62113	
+Sibsagar	Assam	62104	Sibsagor Naga Bhumi
+Narwana	Haryana	62090	Narwanal
+Okha	Gujarat	62052	Okha Port,Port Okha
+Nani Daman	Dadra and Nagar Haveli and Daman and Diu	62000	
+Kuchaman	Rajasthan	61969	Kuchaman City,Kuchawan
+Nimbahera	Rajasthan	61949	
+Siddhapur	Gujarat	61867	Sidhpur
+Diphu	Assam	61797	Diphn
+Attur	Tamil Nadu	61793	Atur,Atur-Salem,a tu er,attoo,attura,atturu,attwr,atuleu,atura
+Rayadrug	Andhra Pradesh	61749	Rayadurg
+Rath	Uttar Pradesh	61728	Rata
+Cheruvannur	Kerala	61614	
+Vriddhachalam	Tamil Nadu	61498	
+Barh	Bihar	61470	Barkh
+Shahada	Maharashtra	61376	
+Dabra	Madhya Pradesh	61277	
+Udumalaippettai	Tamil Nadu	61133	Udamalpet
+Tiptur	Karnataka	60957	
+Sahaswan	Uttar Pradesh	60953	
+Wanparti	Telangana	60949	Wanaparthy
+Sirhind	Punjab	60847	
+Bardoli	Gujarat	60821	Bardoti
+Mokameh	Bihar	60678	Mokama,Mokamah
+Arambagh	West Bengal	60639	
+Poonamalle	Tamil Nadu	60607	Poonamallee
+Keonjhargarh	Odisha	60590	Kendujhar,Keonjhar
+Bhadravati	Maharashtra	60565	
+Panruti	Tamil Nadu	60323	pan lu di,panaruti,pannurutti
+Ilkal	Karnataka	60242	
+Kiratpur	Uttar Pradesh	60223	
+Vrindavan	Uttar Pradesh	60195	Brindaban,Vrindaban
+Kodungallur	Kerala	60190	Cranganore,Cranganur,Methala,Muchiri,Muchiripattinam,Muyirikkodu,Muziris,Shinkli
+Nedumangad	Kerala	60161	
+Bangaon	Bihar	60000	
+Narsimhapur	Madhya Pradesh	59966	Narsimahpur,Narsinghpur
+Ponnur	Andhra Pradesh	59913	
+Kathua	Jammu and Kashmir	59866	Katkhua,ka tu a,kathu'a,kathura,kathuraa,kathuva,kathwa
+North Lakhimpur	Assam	59841	Lakhimpur,Severnyj Lakkhimpur,auyam laksipura,bei lei jin bu er,lakhimapura,lakhympwr,nuo er te la ji mu pu er,utari lakhimapura,uttara lakhimapura,uttara lakhimpur,uttara laksmipura,uttari lakhimapura,vatakku lakkimpur
+Masaurhi Buzurg	Bihar	59803	Masaurhi,Masaurki
+Nerkunram	Tamil Nadu	59790	
+Shegaon	Maharashtra	59672	segamo,seganva,si he jia ao en
+Mandideep	Madhya Pradesh	59654	Manideep
+Pachora	Maharashtra	59609	
+Gobichettipalayam	Tamil Nadu	59523	Gobichettipalaiyam,Gobichettipalyam,Gopichettipalaiyam,ge bi qie di pa la ye mu,gobicettipalayama,kopiccettippalaiyam
+Gangoh	Uttar Pradesh	59519	
+Itanagar	Arunachal Pradesh	59490	Kalyanpur,itanagara,itanagaram,itanagaru,ittanakar
+Jaitpur	Haryana	59330	Jait Pur
+Narasapur	Andhra Pradesh	59306	Narasapuram,Narsapur,na er sa pu er,naracapuram mantalam,narasapuram mandala
+Dhone	Andhra Pradesh	59272	
+Rajgarh	Rajasthan	59193	Sadulpur,rajagarha
+Ullal	Karnataka	59116	Ulaul,Ullai
+Panna	Madhya Pradesh	59091	
+Gola Gokarannath	Uttar Pradesh	58986	Gola
+Gohad	Madhya Pradesh	58939	Gohadi,Gokhad,ge ha de,gohada,gohaddo,gohadeu,kohat
+Wani	Maharashtra	58840	Vanja,Wun
+Thiruvarur	Tamil Nadu	58777	Tirnvalur,Tiruvalur,Tiruvarur,di lu wa lu er,thirubarura,tiruvarura,tiruvaruru,tiruvuaruru
+Upleta	Gujarat	58775	
+Nuzvid	Andhra Pradesh	58590	
+Lonavla	Maharashtra	58562	Lonauli,Lonavala
+Una	Gujarat	58528	
+Sillod	Maharashtra	58230	Silod,cillot,shiroddo,silloda,sillodeu,sillora,siloda,xi luo de
+Sira	Karnataka	57928	
+Chikhli	Maharashtra	57889	Chikkhli,cikhali
+Jhargram	West Bengal	57796	Jharagram
+Kagaznagar	Telangana	57583	
+Bhatapara	Chhattisgarh	57537	
+Kasibugga	Andhra Pradesh	57507	Palasa Kasibugga
+Hasanpur	Uttar Pradesh	57481	
+Lohardaga	Jharkhand	57411	
+Jahangirabad	Uttar Pradesh	57363	
+Sherkot	Uttar Pradesh	57361	Bijnor
+Katras	Jharkhand	57349	
+Macherla	Andhra Pradesh	57290	
+Naksalbari	West Bengal	57283	Nakalbari,Naxalbari
+Sankarankovil	Tamil Nadu	57277	Sankaranainer Koil,Sankaranayinarkovil,Sankaranayinarkovyil
+Mulbagal	Karnataka	57276	
+Kandukur	Andhra Pradesh	57246	
+Tiruvalla	Kerala	57223	Thiruvalla
+Roshanpura	Delhi	57217	
+Ponnuru	Andhra Pradesh	57170	
+Kollegal	Karnataka	57149	Collegal,Kollegalam
+Mukandpur	Delhi	57135	Mukand Pur
+Unjha	Gujarat	57108	
+Chhibramau	Uttar Pradesh	57071	
+Tilhar	Uttar Pradesh	57043	
+Lunglei	Mizoram	57011	Lungleh,Lungliah,lnglyy,long ge lai yi,lun'gale'i,lungalai,lungle'i,lunle'i,lunley,lwngly
+Hoskote	Karnataka	56980	Hosakote,Khoskote,hos kote,hoseukote,hoskota,hosukote,huo si ke tai,ocakotte
+Byasanagar	Odisha	56946	
+Bada Barabil	Odisha	56870	Barabil
+Samalkot	Andhra Pradesh	56864	
+Karimganj	Assam	56854	karimaganja
+Bobbili	Andhra Pradesh	56819	babbili,bo bu bi li,bobbiri,bwbly,poppili
+Mettur	Tamil Nadu	56743	
+Sattenapalle	Andhra Pradesh	56721	
+Tirurangadi	Kerala	56632	
+Tennala	Kerala	56546	Thennala
+Chakradharpur	Jharkhand	56531	Chakardharpore,Chakardharpur,cakradharapura,cakratarpur,qia ke la da er pu er
+Sendhwa	Madhya Pradesh	56485	Sendhawa,Sendkhva,centava,sen de wa,sendeuhwa,sendhava,sendhva,sendouwa,sendu'oya,senduraa,sendva,senthava,sndhwa
+Talegaon Dabhade	Maharashtra	56435	Dabhade,Talegaon-Dabhada
+Hiriyur	Karnataka	56416	
+Anjangaon	Maharashtra	56380	
+Charkhi Dadri	Haryana	56337	Charki Dadrai,Charki Dadri,Dadri
+Ujhani	Uttar Pradesh	56309	
+Bankra	West Bengal	56273	
+Dabhoi	Gujarat	56253	
+Teghra	Bihar	56234	
+Obra	Uttar Pradesh	56110	
+Tiruvallur	Tamil Nadu	56074	Thiruvallur,Tiruvellore,di lu wa lu er,tharuballura,tiluballuleu,tirubharura,tiruvallura,tiruvalluru,tiruvuarruru,tyrwwalwr
+Mandapeta	Andhra Pradesh	56063	
+Tirur	Kerala	56058	Tirur Station,di lu er,tirura,tyrwr
+Ropar	Punjab	56038	Rupar,Rupnagar
+Namakkal	Tamil Nadu	55997	
+Arcot	Tamil Nadu	55955	Arkota
+Laharpur	Uttar Pradesh	55911	
+Viramgam	Gujarat	55821	
+Islampur	West Bengal	55691	
+Karad	Maharashtra	55663	
+Yanam	Andhra Pradesh	55626	Janam,Yanaon
+Abu Road	Rajasthan	55599	
+Raxaul	Bihar	55536	Raksaul,Rasaul,Raxaul Bazar,la ke ao er ba zha er,raja'ula bajara,raksaula,raksula bajara
+Moonniyur	Kerala	55535	
+Barwani	Madhya Pradesh	55504	
+Kottayam	Kerala	55374	Kotayam,Kottajam,kattayama,ke ta ya mu,ke te ta ye mu,keattayam,kottayama,kottayamu,kwtayam
+Tiruttangal	Tamil Nadu	55362	Thiruthangal
+Petlad	Gujarat	55330	
+Jalaun	Uttar Pradesh	55299	
+Periya Semur	Tamil Nadu	55282	
+Madhupur	Jharkhand	55238	
+Dhuri	Punjab	55225	
+Challakere	Karnataka	55194	calakera,calakkeri,callakere,chalakyry,charakea,chlkrh,kallakele,qia er la kai lei
+Etawa	Madhya Pradesh	55185	Bina-Etawa,Etawah
+Chiplun	Maharashtra	55139	
+Mandla	Madhya Pradesh	55133	
+Bhimunipatnam	Andhra Pradesh	55082	Bheemunipatnam,Bimlipatam
+Mawlai-Mawiong	Meghalaya	55012	Mawlai
+Kavanur	Tamil Nadu	54986	Kovur,Kundrathur
+Pithapuram	Andhra Pradesh	54859	
+Kandi	West Bengal	54848	
+Idappadi	Tamil Nadu	54823	Edapadi,Edappadi
+Sahibabad Daulotpur	Delhi	54773	
+Punganuru	Andhra Pradesh	54746	Punganur
+Ghatal	West Bengal	54658	
+Sagar	Karnataka	54550	
+Sihor	Gujarat	54547	Shihor,Sihara,sihora,xi huo er
+Mundka	Delhi	54541	
+Deglur	Maharashtra	54493	Diglur,de ge lu er,degalur,degalura,degaluru,degeullo-eo,deglura,deguro,dyglwr,teklur
+Madhepura	Bihar	54472	Madhipura,Madhupura
+Baramati	Maharashtra	54415	
+Mahasamund	Chhattisgarh	54413	
+Sidhi	Madhya Pradesh	54331	Sidi,Sidkhi
+Kasaragod	Kerala	54172	Kasaragod Fort
+Garhchiroli	Maharashtra	54152	Gadchiroli,Garhchiroh
+Puttur	Andhra Pradesh	54092	
+Jalor	Rajasthan	54081	Granite City,Jabalipura,Jalore,Suvarngiri,jalaura
+Samana	Punjab	54072	
+Razampeta	Andhra Pradesh	54050	Rajampet
+Wari	Maharashtra	54048	Wadi
+Shella	Meghalaya	54039	
+Palmaner	Andhra Pradesh	54035	
+Deolali	Maharashtra	54027	Deolali Cantonment
+Kanakapura	Karnataka	54014	Kanakpura,Kankanhalli,ka na ka pu la,kanakapula,kanakapwra
+Wokha	Nagaland	54010	
+Umred	Maharashtra	53971	Umrer,umareda,umarera,umaret,umleideu,umureddo,vumrad,wu mu lei de
+Kalna	West Bengal	53964	Ambika Kalna,Koalna
+Pallichal	Kerala	53861	
+Tandoni	Tamil Nadu	53854	Thanthoni
+Parvatipuram	Andhra Pradesh	53844	
+Kotharia	Gujarat	53794	
+Ottapalam	Kerala	53792	Ottappalam,ao te ta pu pa la mu,awtapalam,orrappalam,otapallam,ottapalama,ottapalem,ottaparamu,ottappalama
+Didwana	Rajasthan	53749	
+Begampur	Delhi	53682	Begum Pur
+Gaddi Annaram	Telangana	53622	Gaddiannaram
+Dumraon	Bihar	53618	damravam,du mu la ao en,dumara'om,dumara'um,dumara'una,dumaramva,dwmrawn
+Nerupperichchal	Tamil Nadu	53579	Neripperichal
+Jaggaiahpet	Andhra Pradesh	53530	
+Rampur Hat	West Bengal	53468	
+Khanapuram Haveli	Telangana	53442	
+Goalpara	Assam	53430	
+Tuni	Andhra Pradesh	53425	
+Laxmangarh	Rajasthan	53392	Lachhmangarh,Lachhmangarh Sikar,Lachmangarh,laksmanagarha
+Shahpur	Karnataka	53366	Shakhpura
+Bhongir	Telangana	53339	
+Puttur	Karnataka	53331	
+Sri Dungargarh	Rajasthan	53294	Dungargarh,Shri Dungargarh
+Ayodhya	Uttar Pradesh	53293	Ajodhija,Ajodhjo,Ajodhya,Ajodkh'e,Ajodkh'ja,Ajodkhja,Oudh,a yue ti ya,ayead'dhya,ayod'dha,ayodhi'a,ayodhye,ayodia,ayodiya,ayotti,aywdya,x yoth ya
+Mubarakpur	Uttar Pradesh	53263	Azamgarh
+Amalapuram	Andhra Pradesh	53231	
+Arsikere	Karnataka	53216	a er xi kai lei,aleusikeleu,arasikera,arasikere,arccikkeri,arsikera,arsikeri,arsikir,arsykrh,arsykyr,arsykyry,ashikea
+Phaltan	Maharashtra	53202	pa er tan,phalatana
+Ashta	Madhya Pradesh	53184	
+Sandila	Uttar Pradesh	53182	
+Vikarabad	Telangana	53143	Vicarabad
+Baruipur	West Bengal	53128	
+Choudwar	Odisha	52999	
+Shahabad	Karnataka	52952	Shahabad Deccan
+Sultanganj	Bihar	52892	
+Mandi Dabwali	Haryana	52873	Mandi Dabwal
+Konch	Uttar Pradesh	52773	Kunch
+Baprola	Delhi	52744	Bapraula
+Venkatagiri	Andhra Pradesh	52688	Venkatagiri Town
+Dabhel	Dadra and Nagar Haveli and Daman and Diu	52578	Dabel,Dadhel
+Biswan	Uttar Pradesh	52516	
+Kosi	Uttar Pradesh	52492	
+Siruguppa	Karnataka	52492	
+Sironj	Madhya Pradesh	52460	
+Jangaon	Telangana	52394	Jangoon
+Daudnagar	Bihar	52364	
+Dandeli	Karnataka	52295	dan de li,danadeli,dandeli abhayaranyam
+Ramapuram	Tamil Nadu	52295	
+Mudhol	Karnataka	52199	Mudkhol,mu duo,mu duo er,mudahala,mudhola,mudol,mudoru,mutol,mwdwl
+Thodupuzha	Kerala	52045	teatupula,thodupuyha,todupula,todupuza,totupula,tuo du pu zha
+Devakottai	Tamil Nadu	51865	Devakotai,de wa ke tai,debakotai,debakotta,debakotta'i,devakotta'i,devakotti,devuakottai,dywakwttay,tevakottai
+Arwal	Bihar	51849	
+Kaliyaganj	West Bengal	51748	Kaliaganj,Kaliyagan
+Nasirabad	Rajasthan	51747	
+Khagaul	Bihar	51577	Kkhagaul,ka gao er,khaga'ula,khagaula
+Changanacheri	Kerala	51430	Changanacherry,Changanasseri,Changanassery
+Shorapur	Karnataka	51398	Shoratur,Surapur,Suratur
+Mandvi	Gujarat	51376	Cutch Mandi,Cutch-Mandvi
+Rajgangpur	Odisha	51362	Rajagangapur
+Ozar	Maharashtra	51297	Ojhai,Ojhar,ao zha er,awzar,oja,ojara,ojhara
+Peranampattu	Tamil Nadu	51271	Peranambattu,Pernambut
+Gumla	Jharkhand	51264	
+Ramnagar	Uttarakhand	51244	
+Vazhakkala	Kerala	51242	
+Shujalpur	Madhya Pradesh	51225	
+Tirumangalam	Tamil Nadu	51194	Thirumangalam
+Sidlaghatta	Karnataka	51159	Sidlagkhatta,citlakatta,shidoragatta,sidalaghata,sidalaghatta,sideullahata,sidlaghat,xi de la jia te ta
+Khurai	Madhya Pradesh	51108	
+Hilsa	Bihar	51052	
+Rampura Phul	Punjab	51023	
+Fatwa	Bihar	50961	Fatwah
+Tundla	Uttar Pradesh	50939	
+Mannarakkat	Kerala	50921	
+Metpalle	Telangana	50902	Metpalli
+Naya Gaon	Punjab	50869	
+Repalle	Andhra Pradesh	50866	lei pa er lai,repalle mandala,ripalle
+Hunsur	Karnataka	50865	Khunsur
+Nanjangud	Karnataka	50598	Nanjangud Town
+Forbesganj	Bihar	50475	
+Nithari	Delhi	50464	
+Sunabeda	Odisha	50394	
+Gajraula	Uttar Pradesh	50380	
+Virapandi	Tamil Nadu	50301	Veerapandi
+Dahanu	Maharashtra	50287	
+Rasipuram	Tamil Nadu	50244	Rasipur
+Salur	Andhra Pradesh	50206	saluru
+Bhabhua	Bihar	50179	Bhabua
+Hodal	Haryana	50143	hodala,huo da er
+Bhadrachalam	Telangana	50087	Bhadrachellam Road
+Aonla	Uttar Pradesh	50011	Aonla Kila
+Tirupparangunram	Tamil Nadu	50004	Thiruparangundram,Thirupparankundram,Tiruparankundram,Tirupparankunram
+Chatra	Jharkhand	49985	
+Khagaria	Bihar	49982	
+Dhampur	Uttar Pradesh	49973	
+Phalodi	Rajasthan	49914	Pkhalodi,falwdy,farodi,pa luo di,pallodi,paloti,phalori
+Gangakher	Maharashtra	49891	
+Sardhana	Uttar Pradesh	49857	Sardkhana,cartana,sa er da na,sadana,saleudana,saradhana,sardana
+Nohar	Rajasthan	49835	Nohor Tehsils,Nokhar,noa,nohaleu,nohara,nuo ha er,nwhar
+Yeola	Maharashtra	49826	Eola,Jeola,Yevale,Yevla,Yewle,elo,eyola,ieora,ye wo la,ye-olla,yebala,yebhla,yevala,yeyola,ywla,yywla
+Bhaisa	Telangana	49764	Bhainsa
+Perintalmanna	Kerala	49723	Perintalmana,Perinthalmanna,Peritalmanna,pei lin ta er man na,perinathalamanna,perintalamanna,pryntalmana,pyrntalmna
+Perambalur	Tamil Nadu	49648	byrmbalwr,pei la mu ba lu er,peramabalura,perambalura,perambaluru,perampalur,peranbaruru
+Baduria	West Bengal	49547	Badurii
+Gudalur	Tamil Nadu	49535	
+Kizhake Chalakudi	Kerala	49525	Chalakudi
+Narkatiaganj	Bihar	49507	
+Peddapuram	Andhra Pradesh	49477	Peddapuram Town
+Majalgaon	Maharashtra	49453	Manjlegaon
+Daund	Maharashtra	49450	Dhond,dao en de,daunda
+Kapadvanj	Gujarat	49308	Kapadranj
+Kotputli	Rajasthan	49202	
+Dyane	Maharashtra	49192	
+Bail-Hongal	Karnataka	49182	Bail Hongal
+Biaora	Madhya Pradesh	49093	
+Naugachhia	Bihar	49069	Naugachia
+Kanuru	Andhra Pradesh	49006	
+Dehu Road	Maharashtra	48961	
+Piparia	Madhya Pradesh	48826	Piparla
+Barpeta	Assam	48824	ba er pei da,ba er pei ta,baleupeta,bapeta,barapeta,barpta,barpyta,parappita
+Gooty	Andhra Pradesh	48658	ge ao te yi,goti,guti,gutti,gwty
+Tamluk	West Bengal	48646	
+Vengara	Kerala	48600	
+Jaisingpur	Maharashtra	48510	Jayasingpar,Jaysingpur
+Nangal	Punjab	48497	Nangal Township
+Jasdan	Gujarat	48483	
+Godda	Jharkhand	48480	ge de da,goda,jwda,kotta
+Bikramganj	Bihar	48465	
+Morar	Madhya Pradesh	48464	Morar Cantonment
+Jhajjar	Haryana	48424	Dzhadzhar,gu jie gu er,jahjar,jajiaru,jajyaleu,jakajjar,jhajara,jhajjara,qie jie er
+Ramnagar	Bihar	48411	
+Nihtaur	Uttar Pradesh	48389	Nehtaur
+Mahnar Bazar	Bihar	48293	
+Vite	Maharashtra	48289	Vita
+Gumia	Jharkhand	48141	
+Tanalur	Kerala	47976	
+Bhinmal	Rajasthan	47932	
+Sadasivpet	Telangana	47920	Sadaseopet,Sadashivpet,sa da xi wo pei te,sadasibapeta,sadasywpt
+Bakhtiarpur	Bihar	47897	
+Jalandhar Cantonment	Punjab	47845	Jullundur Cantonment
+Athani	Karnataka	47842	Athni,a te ni,athani taluka
+Warud	Maharashtra	47817	Varud,oyaruda,raaruda,varuda,varut,wa lu de,waruddo,wo-eodeu,wrwd
+Wankaner	Gujarat	47814	Vankaner Kathiawar
+Churachandpur	Manipur	47774	
+Dungarpur	Rajasthan	47706	
+Chhaya	Gujarat	47699	
+Dumka	Jharkhand	47663	damka,danka,dmka,du mu ka,dumaka,dumaka jila,dumaka jilla,dwmka,jing ka,tumka
+Gadarwara	Madhya Pradesh	47604	
+Pithoragarh	Uttarakhand	47571	Pathorgarh,Pithoragari
+Ballia	Bihar	47550	Balia
+Bihta	Bihar	47549	
+Atrauli	Uttar Pradesh	47512	Aligarh
+Walajapet	Tamil Nadu	47498	Walaja
+Koraput	Odisha	47468	ke la pu te,koraputa,koraputo,korataputa,kwrabwt
+Umarkhed	Maharashtra	47458	
+Gudalur	Tamil Nadu	47419	
+Kunnamangalam	Kerala	47396	
+Alangad	Kerala	47329	
+Alengad	Kerala	47329	
+Jodhpur	Gujarat	47329	
+Punalur	Kerala	47263	
+Vikramasingapuram	Tamil Nadu	47241	
+Vattiyurkavu	Kerala	47187	Vattiyoorkaavu,Vattiyoorkavu,Vattiyurkaavu
+Padrauna	Uttar Pradesh	47181	Padarauna,bo de lao na,pa de lao na,padeulana,padorouna,padra'una,padrawna,padruna,pararauna,patruna
+Ambah	Madhya Pradesh	47177	
+Komalapuram	Kerala	47126	
+Mattanur	Kerala	47078	Mattannur
+Harpanahalli	Karnataka	47039	
+Kendraparha	Odisha	47006	Kendrapara
+Tighri	Delhi	46974	Tigri
+Pallikal	Kerala	46962	
+Selu	Maharashtra	46915	Sailu
+Medak	Telangana	46880	mdak,medaka,medaka jila,medakeu,medakku,mei de ge,mendaka,metak,mydak
+Patancheru	Telangana	46821	Patancheroo
+Chhatarpur	Delhi	46776	Chatarpur,Chattarpur,Chhattarpur
+Dondaicha	Maharashtra	46767	
+Jamner	Maharashtra	46762	
+Burla	Odisha	46698	
+Porur	Tamil Nadu	46690	bo lu er,porura
+Nellikkuppam	Tamil Nadu	46678	Nellikuppami
+Padra	Gujarat	46660	
+Kawardha	Chhattisgarh	46657	
+Gulaothi	Uttar Pradesh	46647	
+Joda	Odisha	46631	
+Seohara	Uttar Pradesh	46546	
+Warora	Maharashtra	46532	Varora,oyarora,raarora,varara,varoda,varrora,wa luo la,walola,wrwra
+Manvi	Karnataka	46465	
+Kurseong	West Bengal	46427	Karsiyang,Kharasana,karsiyam
+Manglaur	Uttarakhand	46395	Manglaur Town
+Nilambur	Kerala	46366	Nilambur Taluk
+Ganj Dundwara	Uttar Pradesh	46314	Dundwaraganj
+Nanpara	Uttar Pradesh	46280	
+Khordha	Odisha	46205	Khurda,Khurdha,Kkhurda,k'horta,ke er da,khodra,khorada,khord'dha,khorda,khurada,khwrda,koda
+Atarra	Uttar Pradesh	46168	Atarra Buzurg
+Barbigha	Bihar	46075	
+Merta	Rajasthan	46070	Merta City
+Jammalamadugu	Andhra Pradesh	46069	
+Garhwa	Jharkhand	46059	Garwa
+Nawanshahr	Punjab	46024	Nawashahr,na wan si ha he er,na'oyanasahara,naraanasahara,navana sahara,navanasahara,navansahara,navansahara-nagaram,navansahira,nawanasahara,nwanshhr
+Ranavav	Gujarat	46018	Ranawao
+Banka	Bihar	45977	Bhagalpur
+Thoubal	Manipur	45947	
+Mahmudabad	Uttar Pradesh	45921	
+Milavittan	Tamil Nadu	45863	
+Pakur	Jharkhand	45840	Pakaur
+Cherthala	Kerala	45827	Chertala,Chertkhala,certala,certhala,certtalai,cheleutalla,chrtala,chyrtala,qie er ta la
+Nayudupet	Andhra Pradesh	45769	Nayudupeta
+Farrukhnagar	Telangana	45675	Farooqnagar
+Rampura	Punjab	45639	
+Chirakkal	Kerala	45601	
+Chirkunda	Jharkhand	45508	
+Coonoor	Tamil Nadu	45494	konora,kunnur,kunnura,kunura,kunuru,qiao ao nuo ao er
+Pandhurna	Madhya Pradesh	45479	
+Shertallai	Kerala	45474	Shertalla,Shertally
+Kodur	Kerala	45459	
+Giddarbaha	Punjab	45370	
+Meddappakkam	Tamil Nadu	45356	Madambakkam,Medavakkam,Sembakkam
+Nandikotkur	Andhra Pradesh	45343	
+Khalilabad	Uttar Pradesh	45321	
+Chittaranjan	West Bengal	45305	Chittarandzhan,Mihijam,Mihijan
+Pathardih	Jharkhand	45276	Pathardihi
+Champa	Chhattisgarh	45256	
+Mehkar	Maharashtra	45248	Mehekar,Mekhekar,Mekhkar,mehakar,mehakara,mehakkar,mehkara,mei he ka er,mekaleu,mika
+Dhanpuri	Madhya Pradesh	45156	
+Sundergarh	Odisha	45036	Sundargarh,Sundargarkh,cuntarkar'h,sandaga,sun da er jia er,sundar ghar,sundaragadha,sundaragara,sundeogaleu,swndrgar
+Dig	Rajasthan	44999	Deeg
+Tumsar	Maharashtra	44869	tamsar,tmsr,toumusaru,tu mu sa er,tumasara,tumcar,tumsaleu
+Rameswaram	Tamil Nadu	44856	Rameshvaram,Ramesvaram,iramecuvaram,la mei si wa la mu,ramesbarama,rameshuwaramu,ramesvarama,ramesvarama sahara,ramesvarama tirtha,ramesvaramu,rameswarama
+Bangarapet	Karnataka	44849	Bowringpet
+Tanda	Uttar Pradesh	44822	
+Visharam	Tamil Nadu	44786	Melvisharam
+Thiruthani	Tamil Nadu	44781	Tirutani,Tiruttani
+Digras	Maharashtra	44767	
+Maradu	Kerala	44704	
+Bandikui	Rajasthan	44664	
+Dowleswaram	Andhra Pradesh	44637	
+Balapur	Maharashtra	44594	
+Tondalam	Tamil Nadu	44590	Nelliyalam,Tondivala
+Jawaharnagar	Telangana	44562	
+Homnabad	Karnataka	44483	Hominabad
+Memari	West Bengal	44448	
+Nandura	Maharashtra	44419	Nandur Buzruk,Nandura Buzruk,Nandura Buzurg
+Kottangara	Kerala	44402	Kottamkara
+Angul	Odisha	44386	Anugul,Ungul,a nu gu er,angula,angwl,anugola,anugula,anukol,anwgl
+Kottakkal	Kerala	44382	
+Libaspur	Delhi	44375	
+Dalli Rajhara	Chhattisgarh	44363	Dalli-Rajhara
+Kalpi	Uttar Pradesh	44339	
+Jintur	Maharashtra	44291	
+Daman	Dadra and Nagar Haveli and Daman and Diu	44282	Damanas,Damanum,Damao,Damaun,da man,damana,damani,taman
+Ramnagar	Uttar Pradesh	44277	
+Anekal	Karnataka	44260	a nei ka er,anekala
+Akkarampalle	Andhra Pradesh	44219	
+Nidadavole	Andhra Pradesh	44173	Nidadavol
+Raisen	Madhya Pradesh	44162	
+Guduvancheri	Tamil Nadu	44098	Nandivaram - Guduvancheri
+Varangaon	Maharashtra	44067	
+Sihora	Madhya Pradesh	44048	
+Chidawa	Rajasthan	43953	Chirawa
+Ahmadpur	Maharashtra	43936	Ahmedpur,Rajura
+Olavanna	Kerala	43895	
+Gobardanga	West Bengal	43808	
+Melmadai	Tamil Nadu	43797	
+Saint Thomas Mount	Tamil Nadu	43795	Madras Saint Thomas Mount,Parangimalai,Paranginealai,Saint Thomas's Mount,St. Thomas Mount-cum-Pallavaram
+Yellandu	Telangana	43787	Yellandlapad,Yellandrapad
+Haflong	Assam	43756	Haflang
+Polavaram	Andhra Pradesh	43710	Polarvaram
+Kanuru	Andhra Pradesh	43696	ka nu lu
+Bodupal	Telangana	43692	
+Ramachandrapuram	Andhra Pradesh	43657	
+Panachikkad	Kerala	43595	
+Shoranur	Kerala	43533	
+Pallikaranai	Tamil Nadu	43493	pa li ka la nai,pallikarana'i,pallikkaranai
+Kandhla	Uttar Pradesh	43387	
+Barwala	Haryana	43384	
+Nilithi	Delhi	43371	Nilothi
+Jambusar	Gujarat	43344	
+Varkala	Kerala	43276	barakala,varkal,varkale,varkkalai,wa er ka la,wrkla
+Katol	Maharashtra	43267	
+Kopali	Jharkhand	43256	
+Sainthia	West Bengal	43221	sai en di ya,samithiya,sinthi'a
+Choornikkara	Kerala	43207	
+Kamal Pur Majra Burari	Delhi	43086	
+Barhiya	Bihar	43045	
+Sojat	Rajasthan	43023	Sodzhat,cojat,sojata,sojateu,sojatto,suo gu te,suo ya te,swjat
+Kalimpong	West Bengal	43000	Kalimpang
+Periyakulam	Tamil Nadu	42976	
+Simdega	Jharkhand	42944	simadega,symdga,xi mu de jia
+Bishrampur	Jharkhand	42925	Bisrampur
+Kottuvalli	Kerala	42922	
+Bairagnia	Bihar	42895	Bairgania
+Diglipur	Andaman and Nicobar	42877	Adakamaranahalli,digalipura,tiklipur
+Panipat Taraf Ansar	Haryana	42877	
+Ranjangaon S	Maharashtra	42877	
+Kakkodi	Kerala	42866	
+Mahbubabad	Telangana	42851	Mahboobabad
+Perumbaikad	Kerala	42839	
+Arvi	Maharashtra	42822	
+Parasia	Madhya Pradesh	42786	Dongar Parasia
+Sivaganga	Tamil Nadu	42785	Shivaganga,civakankai,shivuagangai,sibaganga,sivaganga'i,xi wa gang ge a
+Limbdi	Gujarat	42769	Limri
+Chavara	Kerala	42655	
+Dahegam	Gujarat	42632	Dehgam
+Shahabad	Haryana	42607	Shahbad
+Jaspur	Uttarakhand	42524	gu si pu er,jasapura,jaspura,jaspwr,jspr
+Than	Gujarat	42508	Thangadh
+Baola	Gujarat	42458	Bavla
+Khekra	Uttar Pradesh	42408	
+Bhupalpally	Telangana	42387	
+Dinhata	West Bengal	42381	
+Aland	Karnataka	42371	Alland,Keregadde,a la en de,aland  karnataka,alanda,alantu,allandeu,alnd,ananda,arando
+Naini Tal	Uttarakhand	42309	Nainital
+Idar	Gujarat	42306	idara,yi da er
+Chinnamanur	Tamil Nadu	42305	Chinnammanur
+Bhawani Mandi	Madhya Pradesh	42283	
+Kyathampalle	Telangana	42275	
+Sikandra Rao	Uttar Pradesh	42229	
+Palladam	Tamil Nadu	42225	
+Razam	Andhra Pradesh	42197	Rajam
+Jajpur	Odisha	42157	Gaypur
+Jora	Madhya Pradesh	42153	Joura,Zhora
+Canning	West Bengal	42132	Canning Town,Port Canning
+Khairabad	Uttar Pradesh	42125	khairabada
+Pratapgarh	Rajasthan	42079	Partabgarh,Partapgarh,Pratabgarh
+Dhaka	Bihar	42063	
+Kannad	Maharashtra	42056	
+Nathdwara	Rajasthan	42016	Nathwara
+Abdu Rahiman Nagar	Kerala	41993	
+Golaghat	Assam	41989	
+Kekri	Rajasthan	41890	kai ke li,kekari,kekeuli,kekkari,kekuri,kykry
+Barauli	Bihar	41877	
+Mahe	Kerala	41816	Makh,Mayyazhi
+Diamond Harbour	West Bengal	41802	Hajipur
+Surampatti	Tamil Nadu	41782	
+Baghpat	Uttar Pradesh	41766	Bagpat
+Bar Bigha	Bihar	41758	
+Narayanpet	Telangana	41752	
+Khambhaliya	Gujarat	41734	Khambhalia,Khambhaliva
+Bilara	Rajasthan	41710	
+Trikonavattam	Kerala	41609	Thrikkovilvattom
+Rajgir	Bihar	41587	Radzhgir,Rajagriha,Rajgriha
+Kudappanakkunnu	Kerala	41583	
+Paithan	Maharashtra	41536	Paitkhan,Pajtkhan,pa'ithana,pai tan,paitan,paithana,paittan,pethina,pytan
+Kodinar	Gujarat	41492	Kodina,Korinar
+Pileru	Andhra Pradesh	41489	Piler
+Pirayiri	Kerala	41359	
+Ramganj Mandi	Rajasthan	41328	
+Vaijapur	Maharashtra	41296	
+Kannamangalam	Kerala	41260	
+Saundatti	Karnataka	41215	Saundatti Yellamma,Soundatti
+Jaggayyapeta	Andhra Pradesh	41180	
+Peddapalli	Telangana	41171	
+Dhupgari	West Bengal	41168	Dhupguri
+Triprangod	Kerala	41167	Triprangode
+Chakan	Maharashtra	41113	
+Bharthana	Uttar Pradesh	41055	Bkhartkhana,ba er ta na,ba er tan na,baleutana,basana,bharatathana,bharathana,bhartahana,partana,phalasiya
+Patti	Punjab	40976	
+Jalarpet	Tamil Nadu	40959	Jolarpettai
+Talcher	Odisha	40841	Talchar
+Thottada	Kerala	40818	
+Kalliyoor	Kerala	40816	
+Arantangi	Tamil Nadu	40814	Arrantangy
+Athiyannur	Kerala	40712	
+Icchannur	Kerala	40697	Chelannur
+Sherghati	Bihar	40666	
+Bhadra	Rajasthan	40662	Bkhadra
+Jhajha	Bihar	40646	Dzhadzha,Jha Jha,Jha-Jha,Nawadih,gu gu,jhaja
+Ghatsila	Jharkhand	40624	Ghatshila
+Dharmanagar	Tripura	40595	
+Kayalpattinam	Tamil Nadu	40588	Aramaganori,Coilnapatam,Kajalpatinam,Kayalpatnam,Kayalpatuam,ka ye er pa di na mu,kayalapattanama,kayalapattinama,kayalpattinama
+Nowgong	Madhya Pradesh	40580	
+Savanur	Karnataka	40567	
+Naila	Chhattisgarh	40561	Naila-Janjgir
+Nannambra	Kerala	40543	
+Manapparai	Tamil Nadu	40510	Manaparai
+Boyampalaiyam	Tamil Nadu	40503	Thottipalayam
+Kallakkurichchi	Tamil Nadu	40449	Kallakirichi
+Kulathummal	Kerala	40448	
+Ettumanur	Kerala	40438	Athirampuzha
+Ghatampur	Uttar Pradesh	40435	
+Channarayapatna	Karnataka	40417	Chanzarayapatna
+Akividu	Andhra Pradesh	40413	
+Kovvur	Andhra Pradesh	40379	Kovur
+Vellakkovil	Tamil Nadu	40359	Vellakoil
+Bhalki	Karnataka	40333	
+Sabalgarh	Madhya Pradesh	40333	Sabalgarkh,capalkar,sa ba er jia er,sabagaleu,sabal ghar,sabalagadha,sabalagara,sabalagarha,sabalgadh,sabaruga,sblgrh
+Kattipparutti	Kerala	40318	Kattipparuthi
+Murtajapur	Maharashtra	40295	Murtazapur
+Peringathur	Kerala	40292	
+Solan	Himachal Pradesh	40283	Solana,Solon
+Nadapuram	Kerala	40230	Kummankod
+Gursahaiganj	Uttar Pradesh	40214	
+Maihar	Madhya Pradesh	40192	
+Bantval	Karnataka	40155	Bantwall,Bantyal,Bartval
+Pallipalayam	Tamil Nadu	40140	Pallipalayam Agraharam,Pudupalayam Agraharam
+Mapusa	Goa	40122	Mapuca,mappuca,mhapusa
+Taki	West Bengal	40113	Takoj
+Akalkot	Maharashtra	40103	
+Maner	Bihar	40068	Maner Sharif,Manera,ma nei er
+Malur	Karnataka	40050	
+Bakhri	Bihar	40043	Bahadurpur,Bakhri Bazar
+Mayyanad	Kerala	40039	
+Mappilaiurani	Tamil Nadu	40035	
+Melur	Tamil Nadu	40017	Mailore
+Hasimara	West Bengal	40000	Hashimara
+Sathupalli	Telangana	40000	Sathupalle,Sathupally
+Puranpur	Uttar Pradesh	39988	
+Akluj	Maharashtra	39972	Aklui
+Bansi	Uttar Pradesh	39926	
+Bilaspur	Uttar Pradesh	39873	
+Vadavalli	Tamil Nadu	39873	
+Thakurdwara	Uttar Pradesh	39860	
+Amudalavalasa	Andhra Pradesh	39799	
+Vyara	Gujarat	39789	Vvara
+Bhavani	Tamil Nadu	39744	
+Samalkha	Haryana	39710	
+Porsa	Madhya Pradesh	39669	bo er sa,porasa,pwrsa
+Kadungalur	Kerala	39666	Kadungalloor
+Kalappatti	Tamil Nadu	39586	
+Anandpur	Odisha	39585	
+Chaklasi	Gujarat	39581	
+Radhanpur	Gujarat	39558	
+Murshidabad	West Bengal	39557	
+Manakunnam	Kerala	39538	
+Bhachau	Gujarat	39532	Bachau,Buchow
+Jalalabad	Punjab	39525	
+Kurinjippadi	Tamil Nadu	39514	Kurinjipadi,Vadalur
+Sedam	Karnataka	39341	Seram,cetam,sai da mu,sedama,sedamu,serama,sram
+Vadasinor	Gujarat	39330	Balasinor
+Kampli	Karnataka	39307	
+Karo	Jharkhand	39305	Bokaro
+Tirkadavur	Kerala	39285	Thrikkadavoor
+Jogbani	Bihar	39281	
+Mukondapalli	Tamil Nadu	39245	Mookondapalli
+Sirohi	Rajasthan	39229	Sirokhi,shirohi,xi luo xi
+Aroor	Kerala	39214	Aror,a luo ao er,arur,arura,arwr
+Othukkungal	Kerala	39139	
+Ghosi	Uttar Pradesh	39138	Gkhosi,ge xi,ghausi,goshi,gosi,kuhaci
+Sumerpur	Rajasthan	39132	
+Pehowa	Haryana	39101	Pekhova,peha'oya,peharaa,pehava,peheava,pehova,pei huo wa,peowa,phwwa,pihova
+Karakkad	Kerala	39098	Chavakkad
+Nurpur	Uttar Pradesh	39077	
+Revelganj	Bihar	39039	
+Betamcherla	Andhra Pradesh	38994	
+Belpahar	Odisha	38993	
+Chika	Haryana	38952	Cheeka
+Paravur Tekkumbhagam	Kerala	38946	Paravar,Paravoor,Paravur
+Tuvagudi	Tamil Nadu	38887	Thuvakudi
+Dwarka	Gujarat	38873	Dvarka
+Kotamangalam	Kerala	38837	
+Katpadi	Tamil Nadu	38833	Dharapadavedu
+Rangat	Andaman and Nicobar	38824	
+Sagauli	Bihar	38815	Saganli,Saghauli,Sagowlee,Segowlee,Segowlie,Sugauli
+Rahuri	Maharashtra	38813	
+Sanawad	Madhya Pradesh	38740	Sanavad
+Kondapalle	Andhra Pradesh	38714	Kondapalli
+Vetapalem	Andhra Pradesh	38671	
+Sangaria	Rajasthan	38638	
+Jalesar	Uttar Pradesh	38614	Jalesar Town
+Nattakam	Kerala	38599	
+Palia Kalan	Uttar Pradesh	38547	Palia
+Bayana	Rajasthan	38502	Bajan,Bayaha
+Rajula	Gujarat	38489	
+Bodh Gaya	Bihar	38439	Bodh Gaja,Bodh-Gaja,Bodhgaja,Bodhgaya,Buddh Gaya,Buddha Gaya,bod'dha gaya,bodha gaya,bodhagaya,bodkh-gaja,bud'dha gaya,budagaya,buddagaya,bwdh gaya,phuthth kh ya,pu ti jia ye,puttakaya
+Keru	Rajasthan	38429	Kuri Bhagtasani
+Kollancode	Tamil Nadu	38385	
+Kilakarai	Tamil Nadu	38355	Kilakari,kai ai la ka lai,kilakara'i,kilakkarai
+Kumhari	Chhattisgarh	38334	
+Chikodi	Karnataka	38307	cikkodi,cikodi,cikodi taluka,qi ke di
+Khairtal	Rajasthan	38298	
+Pathanamthitta	Kerala	38285	Pattanamtitta
+Chorod	Kerala	38245	Chorode
+Nandigama	Andhra Pradesh	38219	
+Indi	Karnataka	38217	
+Kondli	Delhi	38207	
+Nildoh	Maharashtra	38157	Digdoh
+Kabnur	Maharashtra	38146	
+Malavalli	Karnataka	38129	
+Suluru	Andhra Pradesh	38065	Sulurpet,Sulurpeta
+Kaman	Rajasthan	38040	
+Chetwayi	Kerala	38011	Chaughat,Chavakkad,Chetwagi,Chitwye,Chowghat
+Nongthymmai	Meghalaya	38004	Nongmynsong,Nongtkhjmai,Umpling,nanthim'ma'i,nonathim'ma'i,nong ge te yi mai,nongathim'ma'i
+Shahbazpur	Bihar	38000	sahabajapura
+Wadi	Karnataka	37988	Vadi
+Tirupati NMA	Andhra Pradesh	37968	
+Gauribidanur	Karnataka	37947	Gauibidanur,Goribidnur
+Tasgaon	Maharashtra	37945	
+Agar	Madhya Pradesh	37917	Agar-agar
+Rajakilpakkam	Tamil Nadu	37906	Chitlapakkam
+Gharonda Neemka Bangar	Delhi	37876	
+Dibai	Uttar Pradesh	37873	
+Robertsganj	Uttar Pradesh	37855	Robertsgandzh,Sonbhadra,luo bei er te si gan jie,rabartasaganja,rabartsganja,robartasaganja
+Pen	Maharashtra	37852	
+Tarikere	Karnataka	37848	
+Maudaha	Uttar Pradesh	37844	Maudakha,mao de ha,maud'aha,mautaha,modaha,moudaha
+Gharaunda	Haryana	37816	Gkharaunda,ghara'unada,jia lao en da
+Sathyamangalam	Tamil Nadu	37816	cattimankalam,sa di ya mang ge a la mu,sathyamangalama,satyamangalama,styamnglm
+Cheyyar	Tamil Nadu	37802	Tiruvattiyur,Tiruvetipuram,Tiruvettipuram
+Sonepur	Bihar	37776	
+Niwai	Rajasthan	37765	Newai
+Gogri Jamalpur	Bihar	37753	
+Bilasipara	Assam	37739	
+Satana	Maharashtra	37701	
+Rawatbhata	Rajasthan	37699	Rawat Bhatta,Rawatbhaia
+Ellenabad	Haryana	37680	Kharyal
+Wanadongri	Maharashtra	37667	
+Parola	Maharashtra	37666	pa luo la,palolla,parole,parora,prola
+Pathri	Maharashtra	37648	Patri
+Bopal	Gujarat	37635	
+Chettipalaiyam	Tamil Nadu	37620	
+Talattala	Kerala	37517	Thazhuthala
+Jhalrapatan	Rajasthan	37506	Jhalrapatan Chhroni,Jhalrapatan City,Jhalrapatna City,Patan
+Zira	Punjab	37498	ci la,jhira,jila,jira,qi la,zi la
+Leh	Ladakh	37475	Leha,Lekh,Len,lai zhen,lie cheng,lyah
+Kanker	Chhattisgarh	37442	
+Sarangpur	Madhya Pradesh	37435	
+Sandur	Karnataka	37431	
+Bangarmau	Uttar Pradesh	37425	
+Kanigiri U	Andhra Pradesh	37420	
+Jaito	Punjab	37377	Jaitu
+Dongargarh	Chhattisgarh	37372	Dongargarkh,Dongragarh,dogragara,dong ge la jia er,dong-galeugaleu,dongaragada,dongaragara,dongaragarha,dongargar,dongaruga,dongragadha,dungaragadha,tonkarkat
+Phulbani	Odisha	37371	Phulabani,Phulbam
+Malayinkeezhu	Kerala	37350	
+Attingal	Kerala	37346	Attungal,a te ting ge a er,arrinkal,attinagala,attingala
+Perunkalattu	Tamil Nadu	37342	Peerkankaranai,Perungalathur
+Morsi	Maharashtra	37333	Morshi
+Pilibangan	Rajasthan	37288	Pilibanga
+Nelamangala	Karnataka	37232	
+Sindgi	Karnataka	37226	
+Vettur	Kerala	37219	Vetchur,Vettoor
+Bhadgaon	Maharashtra	37214	
+Ratia	Haryana	37152	
+Sirur	Maharashtra	37111	Ghodnadi,Shirur
+Ashta	Maharashtra	37105	Satara,asta
+Lalganj	Bihar	37098	
+Tinnanur	Tamil Nadu	37095	Thiruninravur
+Bandipura	Jammu and Kashmir	37081	Bandapur,Bandipore,Bandipur
+Pujali	West Bengal	37047	
+Garhmuktesar	Uttar Pradesh	37043	
+Bahadurganj	Bihar	36993	
+Nakodar	Punjab	36973	na ke da er,nakodara,nkwdr
+Lunavada	Gujarat	36954	Lunawada
+Vazhayur	Kerala	36909	
+Hojai	Assam	36869	Hojal
+Akbarpur	Uttar Pradesh	36865	Miranpur Akbarpur,akabarapura,akbarapuram,akbrpwr  ambdkar ngar
+Pipar	Rajasthan	36810	Pipar City
+Lanka	Assam	36805	
+Tuensang	Nagaland	36774	Mozungjami
+Vuyyuru	Andhra Pradesh	36755	
+Lakshmeshwar	Karnataka	36754	Lakshmeshvar
+Kumta	Karnataka	36719	Coompta,Kumpta,ku mu ta,kumata
+Yaval	Maharashtra	36706	Yawal
+Tilda Newra	Chhattisgarh	36682	
+Kattivakkam	Tamil Nadu	36617	
+Peringottupulam	Kerala	36602	Koottilangadi
+Sohna	Haryana	36552	Sokhna,sohana,suo he na
+Patamundai	Odisha	36528	Patamudai
+Kodaikanal	Tamil Nadu	36501	Kodaikan,Kodajkanal
+Ichchapuram	Andhra Pradesh	36493	Ichapuram,Ichchapur,Ichekapuram,iccapuram
+Daryapur	Maharashtra	36463	
+Chunar	Uttar Pradesh	36459	
+Aminpur	Telangana	36452	Ameenapur
+Mungeli	Chhattisgarh	36450	
+Barnagar	Madhya Pradesh	36438	
+Purna	Maharashtra	36433	
+Khunti	Jharkhand	36390	
+Nargund	Karnataka	36291	na er gu en de,nagando,naleugadeu,nar gund,naragunda,nargunda,narkunt,nrgnd,nrgwnd
+Parappur	Kerala	36270	
+Neem ka Thana	Rajasthan	36231	Neem-Ka-Thana
+Vilappil	Kerala	36212	
+Nilanga	Maharashtra	36172	ni lang ge a,nilanka,nillang-ga,niranga,nlnga,nlngha,nlnja,nylanga
+Naharlagun	Arunachal Pradesh	36158	Nagarlagun,Nakharlagun,naharalaguna,naharlaguna,naharlagwn,nakarlakun
+Boisar	Maharashtra	36151	bo yi sa er,bo'isara,bwysr
+Ausa	Maharashtra	36118	a'usa,aca,ao sa,asusa,awsa
+Sadabad	Uttar Pradesh	36093	
+Bindki	Uttar Pradesh	36058	
+Mahalingpur	Karnataka	36055	
+Ravu	Madhya Pradesh	36055	Rau
+Malpura	Rajasthan	36028	
+Bramhapuri	Maharashtra	36025	Brahmapuri,Bramhapari
+Wai	Maharashtra	36025	Vaj,va'i
+Shikaripura	Karnataka	36015	Shikaripur,Shikarpur
+Shirdi	Maharashtra	36004	Sirdis,cirati,she de,shyrdy,siradi,sirdi,siriri
+Neduva	Kerala	35996	
+Venganoor	Kerala	35963	
+Ramanattukara	Kerala	35937	
+Mokokchung	Nagaland	35913	Mkokchung,Mokokshung
+Pinjaur	Haryana	35912	Pinjore
+Madayi	Puducherry	35888	
+Partur	Maharashtra	35883	
+Talakkad	Kerala	35820	Tallakad
+Krishnarajasagara	Karnataka	35805	
+Jhabua	Madhya Pradesh	35753	Dkhabua
+Madipakkam	Tamil Nadu	35752	Madipakam,Madippakkam,ma di pa ka mu,madippakkama,maribakkama,matippakkam
+Karala	Delhi	35730	
+Gariadhar	Gujarat	35692	Gariyadhar
+Kakrala	Uttar Pradesh	35690	
+Bidasar	Rajasthan	35683	
+Lahar	Madhya Pradesh	35674	
+Ambasamudram	Tamil Nadu	35645	Ambassamudram,a mu ba sa mu de la mu,ambasamudrama,ambasamwdram,ampacamuttiram
+Islampur	Bihar	35641	
+Kaipamangalam	Kerala	35626	
+Medchal	Telangana	35611	
+Ganaur	Haryana	35603	
+Sholinganallur	Tamil Nadu	35602	
+Kovur	Andhra Pradesh	35600	
+Tuljapur	Maharashtra	35596	
+Barpeta Road	Assam	35571	ba er pei ta luo a de,barapeta raoda,barapeta roda,barrya roda,parpetta rotu
+Uravakonda	Andhra Pradesh	35565	
+Babina	Uttar Pradesh	35538	
+Rafiganj	Bihar	35536	
+Umarga	Maharashtra	35477	amrga,amrgha,amrja,umaga,umaraga,umarka,umaruga,vumarga,wu ma er ga,wu ma er jia
+Igatpuri	Maharashtra	35461	Vigatpuri,Wigatpura,aygatpwry,aygt pwry,igatapuri,yi jia te pu li
+Perumanna	Kerala	35460	
+Budhana	Uttar Pradesh	35442	
+Lingsugur	Karnataka	35411	
+Rajpipla	Gujarat	35392	
+Dharangaon	Maharashtra	35375	Darangaon,Dkharangaon,da lang ge a ao en,dharanagamo,dharanagamva,dharanaganva,dharanagava
+Mahemdavad	Gujarat	35368	Mehmadabad
+Karamsad	Gujarat	35285	
+Surandai	Tamil Nadu	35272	
+Manali	Tamil Nadu	35248	
+Waris Aliganj	Bihar	35243	Waris Ariganj
+Pulgaon	Maharashtra	35238	
+Usilampatti	Tamil Nadu	35219	
+Puzhathi	Kerala	35212	
+Perunad	Kerala	35173	
+Karamadai	Tamil Nadu	35166	karamatai
+Giddalur	Andhra Pradesh	35150	Giddaluru
+Atmakur	Andhra Pradesh	35137	
+Pappinissheri	Kerala	35134	Pappinisseri
+Vijapur	Gujarat	35118	
+Rawatsar	Rajasthan	35102	
+Dubrajpur	West Bengal	35087	
+Karumattampatti	Tamil Nadu	35062	
+Jalalabad	Uttar Pradesh	35051	
+Marancheri	Kerala	35011	
+Podaturpet	Tamil Nadu	35000	Podhaturpet,Pothatturpettai,potatturpettai
+Shahabad	Uttar Pradesh	34962	Sahabad
+Peruvallur	Kerala	34941	
+Rairangpur	Odisha	34929	Kuchaiburi,Rairan'nkpour,Rajrangpur,lai lang ge pu er,lailangpuleu,ra'irangapura,rairangupuru,rairanppur,rayarangapura,rayirangpur,rayrangpwr,ryrngpwr
+Sirkazhi	Tamil Nadu	34927	Cikal,Shiyali,Sirkali
+Kichha	Uttarakhand	34904	
+Vijayapura	Karnataka	34866	Vadigenhalli,bijayapura,vijayappur,wei gu ye pu la
+Hebbagodi	Karnataka	34827	Khebagodi,he bu ba ge di,hebbagori,hebbagudi
+Chemancheri	Kerala	34819	
+Erattupetta	Kerala	34814	Eratupeta
+Ramdurg	Karnataka	34800	Ramdrug
+Jamadoba	Jharkhand	34774	
+Safidon	Haryana	34728	
+Bolarum	Telangana	34667	Bollaram
+Bareli	Madhya Pradesh	34663	Baraily,Barajli,Bareilly,Barell,ba lai er yi,balailli,bara'ili,barairi,barayly,paraili
+Eramala	Kerala	34658	
+Shikarpur	Uttar Pradesh	34649	
+Sankeshwar	Karnataka	34637	Sankeshvar
+Karjat	Maharashtra	34554	ka er gu te,karajata,karjata,krjt
+Bakhtiyarpur	Bihar	34533	
+Bagasra	Gujarat	34521	Bagasara
+Villiappally	Kerala	34502	
+Aymanam	Kerala	34470	Aimanam
+Angamali	Kerala	34399	Angamally
+Villianur	Puducherry	34383	Vilianur,Villenour,Villiyanur,birian'a,villiyanura
+Lalsot	Rajasthan	34363	
+Mehidpur	Madhya Pradesh	34362	Mahidpur
+Soyagaon	Maharashtra	34341	
+Sangola	Maharashtra	34321	
+Vedaraniyam	Tamil Nadu	34266	Vedaranayam,Vedaraniam,Vedaranniyam
+Kuruvattur	Kerala	34241	
+Muddebihal	Karnataka	34217	
+Navapur	Maharashtra	34207	
+Khachrod	Madhya Pradesh	34191	
+Yanamalakuduru	Andhra Pradesh	34177	Yenamalakuduru
+Malajkhand	Madhya Pradesh	34176	
+Vapi INA	Gujarat	34162	
+Kunigal	Karnataka	34155	ku ni jia er,kun ni gao,kunigala,kunigaru,kunikal,kwnygal,kwnyjal
+Kadur	Karnataka	34151	
+Chelambra	Kerala	34149	
+Hamirpur	Uttar Pradesh	34144	
+Kokrajhar	Assam	34136	Kokradzhar,ke ke la gu er,kokaraajhara,kokarajahara,kokarajhara,kokarajhara jila,kokarajhara jilla,kokeulahaleu,kokraj'har,kokrajhara,kokurajiharu,kwkrajhar
+Risod	Maharashtra	34136	
+Kalka	Himachal Pradesh	34134	Kalki,kalaka
+Nawabganj	Uttar Pradesh	34134	
+Kagal	Maharashtra	34106	
+Parassala	Tamil Nadu	34096	Parasala,Parasuvaikkal
+Titlagarh	Odisha	34067	Titilagarh,Titlagar
+Begamganj	Madhya Pradesh	34031	
+Nagalapuram	Andhra Pradesh	34026	
+Jamkhed	Maharashtra	34017	
+Fatehpur	Uttar Pradesh	34010	patepur,tahasila fatehapura
+Elampalloor	Kerala	33959	
+Jayamkondacholapuram	Tamil Nadu	33945	Jayankondacholpuram,Jayankondam
+Tudiyalur	Tamil Nadu	33924	Thudiyalur,Tudiyallur
+Alankod	Kerala	33918	Alamcode
+Shahpura	Rajasthan	33895	
+Elayavur	Kerala	33853	Elayavoor
+Guledagudda	Karnataka	33851	Guledgarh,Guledgud,Guledgudd
+Iramallur	Kerala	33829	Eramalloor
+Piro	Bihar	33785	
+Guskhara	West Bengal	33780	Gushkara
+Umreth	Gujarat	33762	
+Narsipatnam	Andhra Pradesh	33757	
+Bahjoi	Uttar Pradesh	33752	Bhajoi,ba he qiao yi,bahajo'i,bahazo'i,bahjo'i
+Dharmabad	Maharashtra	33741	
+Vemalwada	Telangana	33706	Lembulavataka,Lemulavada,Vemulavada,Vemulawada R
+Colgong	Bihar	33700	
+Basudebpur	Odisha	33690	
+Rajakhera	Rajasthan	33666	
+Hailakandi	Assam	33637	Hailikandi,Hylakandi,ha'ilakandi
+Jagatsinghapur	Odisha	33631	Jagatsinghpur,Jagatsingpur
+Gevrai	Maharashtra	33562	Georai
+Madikeri	Karnataka	33540	Mercara,Merkara
+Kopaganj	Uttar Pradesh	33539	
+Thana Bhawan	Uttar Pradesh	33498	
+Pundri	Haryana	33484	
+Vagholi	Maharashtra	33479	Wagholi
+Chand Chaur	Bihar	33457	
+Birmitrapur	Odisha	33442	
+Chaksu	Rajasthan	33432	Chatsu,cakasu,cakcu,caksu,chakuseu,chakusu,chksw,qia ke su
+Darsi	Andhra Pradesh	33418	
+Zaidpur	Uttar Pradesh	33397	ja'idapura,jaidapura,jayedapura,zai de pu er,zaidapura,zyd pwr,zydpwr
+Remuna	Odisha	33378	lei mu na
+Puthenvelikara	Kerala	33372	Puttanvelikara
+Amli	Dadra and Nagar Haveli and Daman and Diu	33369	
+Anupgarh	Rajasthan	33309	
+Salaya	Gujarat	33246	
+Idangansalai	Tamil Nadu	33245	Edaganasalai
+Kosamba	Gujarat	33221	
+Basavana Bagevadi	Karnataka	33198	Bagevadi
+Muhammadabad	Uttar Pradesh	33186	
+Lakhyabad	West Bengal	33162	Lakkhjabad,Layabad,Loyabad,loyabada,luo ye ba de
+Aya Nagar	Delhi	33123	
+Umaria	Madhya Pradesh	33114	
+Chanderi	Madhya Pradesh	33081	caderi,canderi,qian de li
+Ajanur	Kerala	33079	
+Manendragarh	Chhattisgarh	33071	
+Ramgarh	Rajasthan	33024	
+Bhadasar	Rajasthan	33006	Adarsh Bas
+Srvanampatti	Tamil Nadu	32920	Saravanampatti
+Bhokar	Maharashtra	32899	Bkhokar,bhokara,bo ka er,bokaleu,bokaru,pokar
+Patratu	Jharkhand	32899	Patrotu
+Sanchor	Rajasthan	32875	Sanchore
+Kurumbapet	Puducherry	32871	
+Kaimganj	Uttar Pradesh	32858	Kaimgandzh,ka'ima gaja,ka'imaganja,kai mu gan jie,kaimagaja,kaimganja,kaimganji,kaimuganji,kayamaganja,kaymkan,kayum ganj,qaym gnj,qaym knj
+Bamaur	Madhya Pradesh	32838	Bamor,Banmore
+Janjgir	Chhattisgarh	32833	
+Egra	West Bengal	32832	
+Bihariganj	Bihar	32805	
+Mushabani	Jharkhand	32761	Mosaboni,Mosaboni Mines,Musabani
+Udaipur	Tripura	32758	Udajpur
+Dighwara	Bihar	32741	Digha
+Ngur	Mizoram	32734	Champhai
+Garhakota	Madhya Pradesh	32726	
+Vengola Kizhakkumbagam	Kerala	32697	Vengola
+Mamun	Punjab	32689	
+Nanjikkottai	Tamil Nadu	32689	
+Bijuri	Madhya Pradesh	32682	
+Ghugus	Maharashtra	32654	
+Taranagar	Rajasthan	32640	Reni
+Nepanagar	Madhya Pradesh	32611	Nepa Nagar
+Badepalli	Telangana	32598	
+Nautanwa	Uttar Pradesh	32587	Nautanwa Bazar
+Pirzadaguda	Telangana	32586	Peerzadguda
+Hisua	Bihar	32585	Khisua,hisu'a,hisu'oya,hisuraa,xi su a
+Shamshabad	Telangana	32583	
+Vallabh Vidyanagar	Gujarat	32581	Vallabh,Vallabh Vidhyanagar
+Erraguntla	Andhra Pradesh	32574	Yerraguntla
+Edappal	Kerala	32550	Edapal
+Manuguru	Telangana	32539	Manugur
+Soro	Odisha	32531	
+Ulliyeri	Kerala	32509	
+Saoner	Maharashtra	32498	Savner,sa wo nei er,sa'onera,sanwnr,saona,saoneo,saranera,savaner,savanera,sawanera,sawnyr,soner,sonera
+Muttayyapuram	Tamil Nadu	32494	
+Manwath	Maharashtra	32488	Manwat,man wa te,mana'oyatha,manaraatha,manavata,manvatha,mnwat
+Dhandhuka	Gujarat	32475	
+Jujuvadi	Tamil Nadu	32474	Zuzuvadi
+Hatta	Madhya Pradesh	32465	Hatla,Khatta
+Jagdispur	Bihar	32447	Jagdishpur
+Almora	Uttarakhand	32442	Al'mora,a er mo la,alamoda,alamora,almoda,arumora
+Thuraiyur	Tamil Nadu	32439	
+Saknepalli	Telangana	32385	Kyathampalle
+Anta	Rajasthan	32377	Antah
+Gajendragarh	Karnataka	32359	Gajendragad
+Narsinghgarh	Madhya Pradesh	32329	
+Kalyandurg	Andhra Pradesh	32328	Kalyandrug
+Chittur	Kerala	32298	Chittur-Cochin
+Madhapar	Gujarat	32293	
+Chhabra	Rajasthan	32285	
+Manamadurai	Tamil Nadu	32257	Manamadura,ma na ma du lai,manamadura'i,manamaduraya,manamaturai
+Tiruchchendur	Tamil Nadu	32171	Tiruchendur
+Bisauli	Uttar Pradesh	32154	
+Kangayam	Tamil Nadu	32147	
+Mannanchori	Kerala	32139	Mannanchery
+Kakching	Manipur	32138	
+Turaiyur	Tamil Nadu	32134	Turalyur
+Bijaynagar	Rajasthan	32124	Bijainagar,Vijainagar
+Ferokh	Kerala	32122	Ferok,Feroke
+Dhamnod	Madhya Pradesh	32093	
+Jora Khurd	Madhya Pradesh	32087	Jaura Khurd
+Pavugada	Karnataka	32063	Pavagada
+Thenhippalam	Kerala	32045	
+Halvad	Gujarat	32024	Halwad
+Meerpet	Telangana	32013	Badangpet
+Zamania	Uttar Pradesh	32008	Zaminia
+Bhatkal	Karnataka	32000	
+Malkapur	Maharashtra	32000	
+Makhdumpur	Bihar	31994	
+Shafi Pur Ranhola	Delhi	31944	
+Jaridih	Jharkhand	31882	Jaridih Bazar
+Rasra	Uttar Pradesh	31876	
+Sadpalli	Telangana	31857	Sathupalle
+Sattur	Tamil Nadu	31856	
+Maur	Punjab	31849	
+Chhota Gobindpur	Jharkhand	31843	
+Sasvad	Maharashtra	31821	
+Vilavoorkkal	Kerala	31761	
+Kotma	Madhya Pradesh	31756	
+Kottaikuppam	Tamil Nadu	31726	
+Khaira	Maharashtra	31699	
+Talikota	Karnataka	31693	Talikoti
+Puzhal	Tamil Nadu	31665	
+Kalpatta	Kerala	31580	Kalpetta,ka er pei te ta,kalapetta,kalparra
+Ambad	Maharashtra	31553	
+Rahatgarh	Madhya Pradesh	31537	
+Sijua	Jharkhand	31537	
+Vandavasi	Tamil Nadu	31530	Wandiwash
+Tirumuruganpundi	Tamil Nadu	31528	Thirumuruganpoondi
+Thanneermukkom	Kerala	31525	
+Parur	Kerala	31503	Paravur
+Gomoh	Jharkhand	31495	
+Elur	Kerala	31468	Eloor
+Chemmumiahpet	Andhra Pradesh	31416	
+Jalalpur	Uttar Pradesh	31388	
+Kharagpur	Bihar	31385	Karankpour,Kcharagpuras,Kharagpura,ka la ge pu er,kalagupuleu,karagupuru,karajbwr,karakpur,khadagapura,kharagapura,kharajpwr,kharkh pu ra
+Sri Madhopur	Rajasthan	31366	
+Lumding Railway Colony	Assam	31347	Kumding,Lumding
+Ahmedgarh	Punjab	31302	
+Chitapur	Karnataka	31299	
+Jhanjharpur	Bihar	31283	
+Naspur	Telangana	31244	
+Singanallur	Tamil Nadu	31239	
+Unchagao	Maharashtra	31238	Uchgaon,Unchagoa
+Bagru	Rajasthan	31229	
+Cheriyamundam	Kerala	31212	
+Allapuram	Tamil Nadu	31211	
+Ramapuram	Andhra Pradesh	31169	
+Rosera	Bihar	31155	
+Podili	Andhra Pradesh	31145	Podile,Podill
+Shrigonda	Maharashtra	31134	
+Kalliyassheri	Kerala	31122	Kalliasseri
+Kannanendal	Tamil Nadu	31095	
+Pandharkawada	Maharashtra	31094	Pandharkaoda
+Mankachar	Meghalaya	31091	Manikarchar
+Katirur	Kerala	31087	
+Erandol	Maharashtra	31071	Ehrandol,ai lan duo er,ayrandwl,elangdol,eranadola,erandola,ernadol,irantol
+Adirampattinam	Tamil Nadu	31066	Adirampatnam,Atirampattinam,Attirampattinam
+Kurali	Punjab	31060	
+Jagdishpur	Uttar Pradesh	31029	
+Ponneri	Tamil Nadu	31025	bo nei li
+Shamsabad	Uttar Pradesh	31009	
+Malakanagiri	Odisha	31007	Malakangairi,Malkanagiri,Malkangiri
+Deolali	Maharashtra	30997	Devlali Pravra
+Mangrul Pir	Maharashtra	30983	
+Narsampet	Telangana	30963	
+Berasia	Madhya Pradesh	30951	bairasiya,barasiya,bei la xia,belasia,berashia,berasiya,beresiya,byrasya,peraciya
+Badami	Karnataka	30943	
+Pasan	Chhattisgarh	30928	
+Pamban	Tamil Nadu	30926	
+Banda	Madhya Pradesh	30923	
+Kalakkadu	Tamil Nadu	30921	Kalakad
+Kondagaon	Chhattisgarh	30921	Kondegaon
+Puthuppariyaram	Kerala	30895	
+Vilangudi	Tamil Nadu	30884	
+Rudarpur	Uttar Pradesh	30873	
+Sholinghur	Tamil Nadu	30856	
+Manavadar	Gujarat	30850	Manawadar
+Puraini	Bihar	30829	
+Deulgaon Raja	Maharashtra	30827	
+Dharmadam	Kerala	30804	
+Madurantakam	Tamil Nadu	30796	
+Kizhuvalam-Koonthalloor	Kerala	30770	
+Dharamsala	Himachal Pradesh	30764	Bhagsu,Daramsala,Darmsala,Dharamshala,Dharmasala,Dharmsala,Dharmshala,Dkharamsala,Ntaramsala,da lan sa la,dalamsalla,daramushara,dharamasala,dharansala,taramcala,taramshala,thrrm sala
+Pedana	Andhra Pradesh	30721	
+Kaij	Maharashtra	30704	
+Kallamchavadi	Tamil Nadu	30702	Thiruneermalai
+Un	Gujarat	30671	
+Vadanappally	Kerala	30657	
+Irimbiliyam	Kerala	30635	
+Mudbidri	Karnataka	30632	Mudabidri
+Pallappatti	Tamil Nadu	30624	Pallapatti
+Cheranellur	Kerala	30594	
+Maharaganj	Uttar Pradesh	30548	Maharajganj
+Nagavaram	Telangana	30502	Nagaram,Nagawaram
+Tarakeswar	West Bengal	30475	ta la kai si wa er,tarakesbara,tarakesvara,tarakyshwr
+Siraspur	Delhi	30445	
+Kundapura	Karnataka	30444	Coondapoor,Kundapur
+Uran	Maharashtra	30439	arn,urana
+Kasba	Bihar	30421	Qasba
+Karjan	Gujarat	30405	
+Muvattupuzha	Kerala	30397	mu wa te tu pu zha,mubattupujha,mubattupuyha,muvarruppulai,muvarrupula,muvattupujha,muvattupusa
+Manawar	Madhya Pradesh	30393	
+Pihani	Uttar Pradesh	30369	
+Madukkarai	Tamil Nadu	30357	Madukarai,Mudukarai,ma du ka lai,madukkara'i,matukkarai
+Amlai	Madhya Pradesh	30354	
+Mansa	Gujarat	30347	
+Dharuhera	Haryana	30344	
+Sarkhej	Gujarat	30341	
+Banmankhi Bazar	Bihar	30336	
+Rehli	Madhya Pradesh	30329	
+Udaipur	Rajasthan	30264	
+Taramangalam	Tamil Nadu	30222	Tharamangalam
+Amla	Madhya Pradesh	30215	
+Tirukkoyilur	Tamil Nadu	30212	Tirukkovilur
+Musiri	Tamil Nadu	30209	
+Hirakud	Odisha	30207	
+Khair	Uttar Pradesh	30173	kha'ira,khaira,khaira prakhanda,kher
+Rajauli	Bihar	30170	
+Kakkalapalle	Andhra Pradesh	30128	
+Cherukavu	Kerala	30126	
+Seoni Malwa	Madhya Pradesh	30100	Seoni Marwa,Seoni-Malwa
+Oddanchathiram	Tamil Nadu	30064	Oddanchatram
+Fatehpur Sikri	Uttar Pradesh	30026	Fatehpur-Sikri,Fatekhpur Sikri,fatehapura sikari,fth pwr sykry,phatepur sikri
+Azhiyur	Kerala	30023	
+Byadgi	Karnataka	30014	
+Birpara	West Bengal	30000	
+Cherpulassery	Kerala	30000	
+Multai	Madhya Pradesh	29976	Multaj,maltai,mltayy,mu er tai,mulata'i,multa'i,multay,murutai,mwltayy
+Holenarasipura	Karnataka	29974	Hole Narsipur
+Talaja	Gujarat	29948	
+Marhaura	Bihar	29932	Markhaura,ma er hao la,mar'ha'ura,mar'haura,maraha'ura,marahwra
+Kareli	Madhya Pradesh	29929	
+Baddi	Himachal Pradesh	29911	
+Bhongaon	Uttar Pradesh	29911	
+Panakkudi	Tamil Nadu	29895	Panagudi,Panaikkudi
+Gadhada	Gujarat	29872	
+Pulakkod	Kerala	29872	Poolacode
+Mukerian	Punjab	29841	
+Ramgarh	Rajasthan	29834	ramagara,ramgrh  hnd
+Ariyankuppam	Puducherry	29808	
+Karumalur	Kerala	29805	Karumalloor
+Kottarakara	Kerala	29788	
+Mavoor	Kerala	29781	
+Pilani	Rajasthan	29741	
+Devarkonda	Telangana	29731	
+Rajgarh	Madhya Pradesh	29726	
+Minad	Kerala	29716	Meenad
+Nedumbassery	Kerala	29706	
+Rajura	Maharashtra	29668	
+Bilari	Uttar Pradesh	29666	
+Muvattupula	Kerala	29664	Muvatupusha,Muvatupuzha
+Adur	Kerala	29652	
+Walwadi	Maharashtra	29636	
+Puthuppally	Kerala	29635	
+Miranpur Katra	Uttar Pradesh	29626	
+Raisinghnagar	Rajasthan	29626	
+Kidarakulam	Kerala	29624	Karakulam
+Kuttuparamba	Kerala	29619	Koothuparamba
+Arangaon	Maharashtra	29591	Jamkhed
+Pakridayal	Bihar	29582	
+Dhanera	Gujarat	29578	
+Chengamanad	Kerala	29576	
+Lakheri	Rajasthan	29572	
+Kalavoor	Kerala	29564	
+Behror	Rajasthan	29531	beharora,behrora,bei he luo er
+Reddipalaiyam	Tamil Nadu	29511	Ayappakkam
+Zunheboto	Nagaland	29499	
+Rajaori	Jammu and Kashmir	29486	Rajauri,rajwary,rajwry
+Sankagiri	Tamil Nadu	29467	Sankari
+Mharal Bk	Maharashtra	29462	
+Mainaguri	West Bengal	29459	
+Nedumpana	Kerala	29454	
+Puttankulam	Kerala	29447	Poothakkulam
+Nagar Karnul	Telangana	29439	Karnul
+Sagwara	Rajasthan	29439	
+Ibrahimpatnam	Andhra Pradesh	29432	
+Vadakku Valliyur	Tamil Nadu	29417	
+Jamtara	Jharkhand	29415	
+Khedbrahma	Gujarat	29402	
+Tirukkalikkunram	Tamil Nadu	29391	Tirukalikundram
+Talakkolattur	Kerala	29388	Thalakkulathur
+Palkonda	Andhra Pradesh	29378	Palakonda
+Cheruthazham	Kerala	29348	
+Dhari	Gujarat	29346	
+Amballur	Kerala	29341	
+Koovappady	Kerala	29339	
+Chendamangalam	Kerala	29326	
+Jewar	Uttar Pradesh	29316	
+Nawapara	Chhattisgarh	29315	Gobra Nawapara,Nawapara Rajim
+Tarsadi	Gujarat	29305	
+Ner	Maharashtra	29302	Parsopant
+Shahpura	Rajasthan	29259	
+Vijayapuram	Kerala	29248	
+Husainabad	Jharkhand	29241	Jopla
+Udaipurwati	Rajasthan	29236	
+Bachhraon	Uttar Pradesh	29232	
+Jandiala Guru	Punjab	29232	Jandiala
+Irinjalakuda	Kerala	29208	
+Renwal	Rajasthan	29201	Kishangarh,Kishangarh Renwal
+Kumbalam	Kerala	29193	kumpalam
+Basni	Rajasthan	29187	Basni Bailima,Basni Belima
+Morigaon	Assam	29164	Marigaon
+Madhugiri	Karnataka	29159	Maddagiri,Madkhugiri,ma du ji li,madeugili,madhugirih,madhwgyry,madogiri,matukiri
+Urakam	Kerala	29157	
+Ariyalur	Tamil Nadu	29144	
+Islamnagar	Uttar Pradesh	29144	Aryanagar
+Ponmana	Kerala	29139	Panmana
+Mahendragarh	Haryana	29128	Kanaud,Manendragarh,Mohindargarh
+Mudalgi	Karnataka	29128	
+Nakrekal	Telangana	29126	
+Unamaucheri	Tamil Nadu	29122	Urapakkam
+Gorai	Maharashtra	29107	Corai,Grai
+Uttamapalaiyam	Tamil Nadu	29050	Uthamapalayam
+Khandela	Rajasthan	29044	Kkhandela,khanadela,khandla
+Sirsaganj	Uttar Pradesh	29034	
+Chodavaram	Andhra Pradesh	29000	
+Umarkot	Chhattisgarh	28993	
+Hupari	Maharashtra	28953	
+Suar	Uttar Pradesh	28941	
+Devadurga	Karnataka	28929	de wa du er jia,debadurga
+Manoharpur	Rajasthan	28928	
+Nahan	Himachal Pradesh	28899	
+Ladwa	Haryana	28887	
+Gil	Punjab	28884	Gill
+Gunupur	Odisha	28870	gu nu pu er,gunapura,gunupura
+Avinashi	Tamil Nadu	28868	Avanashi
+Kotagiri	Tamil Nadu	28848	ke ta ji li,keattagiri,kottakiri
+Sikka	Gujarat	28814	Sika,Siki
+Panipat Taraf Rajputan	Haryana	28803	
+Kondotty	Kerala	28794	Kondotti,keanteatti,kontotti
+Desaiganj	Maharashtra	28781	
+Rusera	Bihar	28781	
+Maddur	Karnataka	28754	
+Nongstoin	Meghalaya	28742	Nongstojn,namgasto'ina,nangstoyin,nanstaina,nonasto'ina,nong ge si tuo yi en,nong si duo yin,nongasto'in,nongasto'ina,nongseutoin,nongsto'ina,nongusutoin,nonstayn,nwngstwyyn
+Raikot	Punjab	28734	
+Dinapur Cantonment	Bihar	28723	
+Jhalod	Gujarat	28720	
+Karera	Madhya Pradesh	28705	Karery
+Murliganj	Bihar	28691	
+Soron	Uttar Pradesh	28683	
+Mukher	Maharashtra	28647	
+Vandiyur	Tamil Nadu	28646	
+Alandi	Maharashtra	28645	Alandi-Devachi,a lan di,alandy,alanti
+Pattambi	Kerala	28632	Puttambi
+Tekkali	Andhra Pradesh	28631	
+Duliajan	Assam	28626	Duliagaon,duliyajana
+Duliajan Oil Town	Assam	28626	
+Karaippudur	Tamil Nadu	28602	
+Ambikapuram	Kerala	28592	Hemambikanagar
+Suryampalaiyam	Tamil Nadu	28585	
+Motipur	Bihar	28572	
+Alangulam	Tamil Nadu	28558	Atangulam
+Addanki	Andhra Pradesh	28547	
+Bemetara	Chhattisgarh	28536	
+Milak	Uttar Pradesh	28505	mi la ke,milaka,millag,mirakku,mylak,mylk
+Losal	Rajasthan	28504	losala,luo sa er,lwsal,lwsl
+Alirajpur	Madhya Pradesh	28498	Ali Rajpur,Aliradzhpur,Rajpur,a li la jie pu er,alirajapura,alirajapuram,alirajpura,alliyapuleu,arirajipuru
+Pardi	Gujarat	28495	
+Kinwat	Maharashtra	28454	Kinvat,jin wa te,kin-wateu,kina'oyata,kinavata,kinvata,kinwatto,knwat
+Pasan	Madhya Pradesh	28447	
+Lalgola	West Bengal	28442	Lalgola Ghat
+Utraula	Uttar Pradesh	28437	atrwla,utara'ula,utaraila,utaraula tahasila,wu te lao la
+Baikunthpur	Chhattisgarh	28431	Baikunthapur
+Jowai	Meghalaya	28430	Dzhovai,Dzhovaj,Jawai,gu wa yi,ja'oya'i,java'i,jeavayi,jova'i,jovai,jovay,joya'i
+Ochira	Kerala	28412	Oachira
+Rapar	Gujarat	28407	
+Jammu Cantonment	Jammu and Kashmir	28396	
+Banswada	Telangana	28384	
+Hosadurga	Karnataka	28370	Hosdurga,Khosadurga,hasadurga,hocaturka,hosadouga,hosaduleuga,huo si du er jia
+Ramanayyapeta	Andhra Pradesh	28369	
+Minjur	Tamil Nadu	28337	
+Sonamukhi	West Bengal	28334	
+Kukshi	Madhya Pradesh	28331	
+Kansad	Gujarat	28327	
+Kalavad	Gujarat	28314	
+Jashpur Nagar	Chhattisgarh	28301	Jashpur,Jashpurnagar
+Mavelikara	Kerala	28300	Mavalikara,Mavelikkara
+Dhanaura	Uttar Pradesh	28285	
+Jalgaon Jamod	Maharashtra	28276	Dzhalgaone,Jaigaon,Jalgaon,jalagamo,jalagamva jamoda,jalaganva
+Pallipuram	Kerala	28276	
+Sujanpur	Punjab	28270	
+Annigeri	Karnataka	28267	
+Piravam	Kerala	28254	Piravom
+Ganderbal	Jammu and Kashmir	28233	Gandarbal,ganaderabala,gandarabala,ganderabala,gandrbl,ghandrbl,jandrbl,jia en de er ba er,kantarpal
+Uliyazhathura	Kerala	28230	
+Mandi	Himachal Pradesh	28217	Mandav Nagar,ma en di
+Atholi	Kerala	28213	
+Shiggaon	Karnataka	28207	Shigaon
+Pandua	West Bengal	28205	
+Punch	Jammu and Kashmir	28197	Poonch,bwnsh,bwntsh
+Kottaikadu	Tamil Nadu	28172	Edakalinadu
+Hangal	Karnataka	28159	
+Jhadeshwar	Gujarat	28148	
+Polur	Tamil Nadu	28123	
+Sheohar	Bihar	28116	
+Perumbavoor	Kerala	28110	pei lu mu ba wo ao er,perumbabhura,perumbaraura,perumpavur,pyrwmbawwr
+Gundlupet	Karnataka	28105	Gundalpet
+Sachin	Gujarat	28102	Sachim,Sachir
+Koynanagar	Maharashtra	28091	Kojnanagar,koyananagara,kwynangr
+Gotegaon	Madhya Pradesh	28074	
+Kalwakurti	Telangana	28060	Kalvakurti,Kalwakurthy
+Sheoganj	Rajasthan	28053	
+Devanahalli	Karnataka	28051	Devanhalli,de wa en ha er li,debanahalli,devuanaharri
+Aron	Madhya Pradesh	28010	
+Hadagalli	Karnataka	27967	Hoovina Hadagalli,Huvinabadgalli,Huvvmahadagalli
+Patran	Punjab	27963	
+Tharad	Gujarat	27954	
+Panagar	Madhya Pradesh	27932	Panagar Bazar,Panagara
+Dasna	Uttar Pradesh	27926	
+Kulittalai	Tamil Nadu	27910	
+Sulur	Tamil Nadu	27909	culur,su lu er,sulura
+Rangia	Assam	27889	Ranga Nadi,Rangiya
+Bamor Kalan	Madhya Pradesh	27860	Bamor
+Umargam	Gujarat	27859	Ambargaon,Umbargaon
+Nalbari	Assam	27839	
+Pallikunnu	Kerala	27820	
+Trittala	Kerala	27796	Thrithala,Tritala
+Vadnagar	Gujarat	27790	
+Jaswantnagar	Uttar Pradesh	27777	gu si wan te na jia er,jasavantanagara,jasvantanagara,jie si wen de ne ge er,jswntngr,yasarantanagara
+Afzalgarh	Uttar Pradesh	27753	Afzalgarkh,a fu zha er jia er,aphajalagara,aphazalagarha,aphjalagadha
+Gangapur	Maharashtra	27745	
+Mahna	Punjab	27733	Mehna
+Raipur	Uttarakhand	27702	
+Mathur	Tamil Nadu	27674	
+Tehri	Uttarakhand	27611	N'ju-Tekhri,N'ju-Tikhri,New Tehri,Tehri-Garhwal,Tekhri,hosa tihari,n'yu tehri,na'i tihari,nave tehari,niyu tekri,nyuteheri,te he li,tehari,tihari
+Magadi	Karnataka	27605	
+Puvatuparamba	Kerala	27598	Peruvayal
+Baspalli	Telangana	27563	Bachpalle
+Mahad	Maharashtra	27536	Makhad
+Ezhupunna	Kerala	27528	
+Sankrail	West Bengal	27523	Shankrail
+Waraseoni	Madhya Pradesh	27494	
+Beldanga	West Bengal	27489	
+Jiladiguda	Telangana	27461	Jillalguda
+Sausar	Madhya Pradesh	27459	
+Moothakunnam	Kerala	27458	
+Pathirappally	Kerala	27445	
+Hadgaon	Maharashtra	27433	
+Chandrapura	Jharkhand	27425	
+Rajaldesar	Rajasthan	27419	
+Pachor	Madhya Pradesh	27396	Pachore
+Azhoor	Kerala	27390	
+Miranpur	Uttar Pradesh	27390	
+Sadri	Rajasthan	27390	
+Kullattur	Tamil Nadu	27374	Koilambakkam
+Balussheri	Kerala	27363	Balusseri
+Kalanwali	Haryana	27355	
+Kadodara	Gujarat	27336	
+Chakapara	West Bengal	27320	Chakpara
+Nanminda	Kerala	27316	
+Nokha	Bihar	27302	
+Kattumannarkoil	Tamil Nadu	27294	Kattumannarkojl,Katumanarkoil,ka tu ma na er ke yi er,kattouman'narukoiru,kattumananarkoyil,kattumanarako'ila,kattumannar koyil,kattumannarako'ila,kattumannarakoyila,kattumannarkoyil,katturamannakali,katumannaleukoil
+Andippatti	Tamil Nadu	27287	Andipatti Jakkampatti
+Kalamb	Maharashtra	27287	
+Arumuganeri	Tamil Nadu	27266	
+Elamanchili	Andhra Pradesh	27265	Yellamanchili,Yellamanchilli
+Adichanallur	Kerala	27240	Adichanalloor
+Laitumkhrah	Meghalaya	27219	Pynthormukhrah
+Gulabpura	Rajasthan	27215	
+Pathardi	Maharashtra	27211	
+Kundarkhi	Uttar Pradesh	27197	Kundarki,Kundarkkhi,kun da er ji,kundaraki
+Ukhrul	Manipur	27187	Hungphun,ukharula,ukhrula,ukrul,ukururu,wu ke lu er
+Gadhinglaj	Maharashtra	27185	Gadkhingladzh,gadahinglaja,gadhingalaja,gadhinlaja,gadigeullaji,gadinglaj,gadinguraji,gandinganj,garahinlaja,jia ding ge la jie,katinkalaj
+Bilgram	Uttar Pradesh	27173	
+Ali	Delhi	27169	Aali
+Jafarabad	Gujarat	27167	Jafrabad
+Bhelai	Chhattisgarh	27158	Dipka
+Bidhuna	Uttar Pradesh	27158	
+Ayakudi	Tamil Nadu	27156	Ayakkudi,Palaiya Ayakkudi
+Vettanad	Kerala	27140	Vattappara
+Asandh	Haryana	27125	Assandh
+Perumpavur	Kerala	27105	
+Chanpatia	Bihar	27095	
+Afzalpur	Karnataka	27088	
+Gobindpur	Jharkhand	27066	
+Tikkotti	Kerala	27051	Thikkody,Tikotti
+Gingee	Tamil Nadu	27045	Gingi,cenci,ginji,jing ge ai ai,jingi,jinji,shenji
+Raver	Maharashtra	27039	
+Bagepalli	Karnataka	27011	
+Kotdwara	Uttarakhand	27009	
+Payakaraopeta	Andhra Pradesh	27001	payakaravupeta
+Bhawanipur	Bihar	27000	
+Elamkunnapuzha	Kerala	26997	
+Ettumanoor	Kerala	26993	
+Latehar	Jharkhand	26981	
+Chengam	Tamil Nadu	26980	
+Rajgarh	Rajasthan	26953	
+Kumarapuram	Kerala	26943	
+Margherita	Assam	26914	
+Kulasekarapuram	Kerala	26907	
+Samba	Jammu and Kashmir	26893	
+Pirthipur	Madhya Pradesh	26883	Prithvipur
+Vepagunta	Andhra Pradesh	26881	
+Nocchad	Kerala	26857	Nochad
+Vadipatti	Tamil Nadu	26830	Vadippatti,badipati,baripatti,bhadipatti,vatippatti,vuadipatti,wa di pa di
+Shenkottai	Tamil Nadu	26823	Sumaitheerthapuram,cenkottai
+Edaccheri	Kerala	26819	Edacheri
+Banmankhi	Bihar	26806	Banmanki
+Srinivaspur	Karnataka	26793	
+Chandur	Maharashtra	26755	
+Indapur	Maharashtra	26752	Indapuri
+Varappuzha	Kerala	26750	
+Kemri	Uttar Pradesh	26726	kai mu li,kemari,kymry
+Alattur	Kerala	26720	Alatur
+Bela	Bihar	26707	Behea
+Krishnapuram	Kerala	26705	
+Kartarpur	Punjab	26701	krtar bwr,krtarbwr
+Mamidalapadu	Andhra Pradesh	26694	
+Karhal	Uttar Pradesh	26693	
+Lar	Uttar Pradesh	26688	
+Kudligi	Karnataka	26680	
+Aliganj	Uttar Pradesh	26652	
+Baloda Bazar	Chhattisgarh	26632	
+Manihari	Bihar	26629	
+Kottur	Tamil Nadu	26627	
+Faizpur	Maharashtra	26602	
+Manasa	Madhya Pradesh	26551	
+Sankarapatti	Tamil Nadu	26536	Sankarapuram
+Songadh	Gujarat	26515	Songarh
+Pauri	Uttarakhand	26514	Paury,bao li,bwry,pa'uri,pari,paudi,pauli,pori
+Shahganj	Uttar Pradesh	26510	Jaunpur
+Dhrol	Gujarat	26496	
+Pallippatti	Tamil Nadu	26492	
+Barwah	Madhya Pradesh	26459	Barwaha,Barwaha Kasba
+Mauganj	Madhya Pradesh	26420	
+Bablai	Haryana	26412	Babiyal
+Nadbai	Rajasthan	26411	
+Terdal	Karnataka	26411	
+Kallidaikurichi	Tamil Nadu	26398	Kailidaikorichchi,Kallidaikurichchi
+Taloda	Maharashtra	26363	Talode
+Murugampalaiyam	Tamil Nadu	26349	
+Mon	Nagaland	26328	Mon Town
+Kheri	Uttar Pradesh	26327	Lakhimpur Kheri,khiri
+Bilsi	Uttar Pradesh	26320	bi er xi,bilasi,blsy
+Basi	Punjab	26295	Dera Basi,Dera Bassi
+Ayancheri	Kerala	26293	
+Anjad	Madhya Pradesh	26289	
+Kotturu	Karnataka	26289	Kothur,Kottur
+Chinnalapatti	Tamil Nadu	26285	
+Narasannapeta	Andhra Pradesh	26280	Narsannapet
+Ongallur-II	Kerala	26273	
+Rampur	Uttar Pradesh	26257	
+Aklera	Rajasthan	26240	Akera
+Mirganj	Bihar	26240	
+Kudlu	Kerala	26235	
+Tekkalakote	Karnataka	26224	Takkalakote,Tekkalakota
+Mungaoli	Madhya Pradesh	26192	
+Budhlada	Punjab	26172	
+Anuppanadi	Tamil Nadu	26158	Chinna Anuppanadi
+Reengus	Rajasthan	26139	Ringas,Ringus,lei ai en gu si,rengusa,rinagusa,ringasa,ryngws
+Sutrapara	Gujarat	26132	Sutrapada,Sutrapera
+Kodoli	Maharashtra	26106	
+Phulera	Rajasthan	26091	Phalera
+Renigunta	Andhra Pradesh	26031	lei ni gong ta,renigunta mandala,renikunta
+Basi	Rajasthan	26029	Bassi
+Khoni	Maharashtra	26016	Katai
+Areraj	Bihar	26014	
+Muttanampalaiyam	Tamil Nadu	26014	
+Junnar	Maharashtra	25997	Junara,Shivner,jiu na er,jnar,junnara
+Mehsi	Bihar	25995	
+Edavai	Kerala	25994	
+Mangaldai	Assam	25989	
+Naduvannur	Kerala	25979	
+Krishnarajpet	Karnataka	25946	
+Tirawari	Haryana	25944	Taraori
+Mannachanallur	Tamil Nadu	25931	
+Periyanayakkanpalaiyam	Tamil Nadu	25930	Periyanaicken-palayam,Periyanaikanpalayam
+Kalol	Gujarat	25929	
+Kuttikkattur	Kerala	25929	Kuttikkattoor
+Jaynagar Majilpur	West Bengal	25922	Jaynagar,Jaynagar Mazilpur,Jaynagar Mojilpur,Jaynagar Mozilpur,Joynagar,Joynagar Majilpur,Joynagar Mazilpur,Joynagar Mojilpur,Joynagar Mozilpur,Majilpur,Majilpur Jaynagar,Majilpur Joynagar,Mazilpur,Mazilpur Jaynagar,Mazilpur Joynagar,Mojilpur,Mojilpur Jaynagar,Mojilpur Joynagar,Mozilpur,Mozilpur Jaynagar,Mozilpur Joynagar
+Kailaras	Madhya Pradesh	25920	
+Chipurupalle	Andhra Pradesh	25898	
+Iringal	Kerala	25894	
+Jamjodhpur	Gujarat	25892	
+Chumukedima	Nagaland	25885	
+Thodiyoor	Kerala	25884	
+Jamul	Chhattisgarh	25878	
+Nalhati	West Bengal	25878	
+Kaladi	Kerala	25872	Kalady
+Muhamma	Kerala	25861	
+Ponmundam	Kerala	25855	
+Mulamthuruthy	Kerala	25852	
+Gokarna	Karnataka	25851	Gokarn,kokarnam
+Ganguwa	Haryana	25847	Gangwa
+Koregaon	Maharashtra	25846	Koregaon-Bhima
+Kandla	Gujarat	25845	Kundla
+Erannoli	Kerala	25818	
+Karkala	Karnataka	25800	Karaka,Karkal
+Darwha	Maharashtra	25791	
+Chhota Udepur	Gujarat	25787	Chhota Udaipur,Chota Udaipur
+Avanigadda	Andhra Pradesh	25761	
+Mussoorie	Uttarakhand	25753	Massuri,Masuri,Musoori,Mussooree,Mussoori,Mussuri,mas'suri,masori,mu suo li,mucori,mus'sauri,mus'sori,musauri,mwswry
+Kuttippuram	Kerala	25750	Kutipuram
+Jaleshwar	Odisha	25747	Jaleswar
+Jais	Uttar Pradesh	25726	
+Kallam	Maharashtra	25713	Kalam,Kalamb
+Pawayan	Uttar Pradesh	25708	
+Irugur	Tamil Nadu	25691	
+Jevargi	Karnataka	25686	Dzhevargi,Jalvergi,jebaji,jebaleugi,jebaragi,jevarji,jie wa er ji,jivargi,jywarjy
+Mechcheri	Tamil Nadu	25676	Machcheri,Mecheri
+Silao	Bihar	25674	Vikramasila
+Khajuraho Group of Monuments	Madhya Pradesh	25662	Conjunto de Templos de Khajuraho,Khadzuraho,Khajraho,Khajuraho,Kkhadzhurakho,kajuraho,khajuraha
+Silapathar	Assam	25662	Silapather,cilapathara,silapathara,xi la pa ta er
+Dakor	Gujarat	25658	
+Wadgaon	Maharashtra	25651	Vadgaon,Vadgaon Kasba
+Deori Khas	Madhya Pradesh	25632	Deore,Deori
+Jandiala	Punjab	25631	Jandiali
+Balakrishnapuram	Tamil Nadu	25627	
+Panayattur Vadakkumbhagam	Kerala	25607	Panayam
+Pasighat	Arunachal Pradesh	25581	pacikat
+Kheda	Gujarat	25575	Kaira
+Nagar	Rajasthan	25572	bryj ngar,na jia er,nagaleu,nagara,nagaru
+Viswanatham	Tamil Nadu	25555	
+Kamalapuram	Karnataka	25552	Kamalapura
+Poranki	Andhra Pradesh	25545	
+Parangipettai	Tamil Nadu	25541	
+Andipalayam	Tamil Nadu	25539	
+Adampur	Haryana	25531	
+Kakkanad	Kerala	25531	
+Indapur	Maharashtra	25515	
+Talikkulam	Kerala	25507	
+Colonelganj	Uttar Pradesh	25503	Kolonelgandzh,karnalaganja,karnelaganja,kolonelaganja,kwlwnl gnj,qiao luo nei er gan jie
+Mehndawal	Uttar Pradesh	25495	Mahdawal,Mehdawal
+Koelwar	Bihar	25494	
+Harur	Tamil Nadu	25469	
+Bannur	Karnataka	25455	
+Mul	Maharashtra	25449	
+Kuttampuzha	Kerala	25436	
+Karuva	Kerala	25432	Thrikkaruva
+Doraha	Punjab	25424	
+Koothanallur	Tamil Nadu	25423	Kotkhanalur,Kouthanallur,Kuthanallur,Kuttanallur,kauthanallura,ke wu ta na lu er,ko'uthanallura,kutanallura
+Khategaon	Madhya Pradesh	25413	
+Nileshwar	Kerala	25405	
+Edaicode	Tamil Nadu	25378	
+Kadakkavoor	Kerala	25362	Kadakavor,kadakawwr,katakkavur
+Haludbani	Jharkhand	25360	
+Chandor	Maharashtra	25341	Chandvad,Chandwar
+Sundarnagar	Himachal Pradesh	25338	
+Amarpur	Bihar	25336	
+Karungappalli	Kerala	25336	Karunagapalli,Karunagappally
+Gadkhol	Gujarat	25332	
+Banganapalle	Andhra Pradesh	25325	Banaganapalli,Banganapilly
+Anupshahr	Uttar Pradesh	25306	
+Jalalabad	Uttar Pradesh	25302	
+Chitaguppa	Karnataka	25298	Chitgoppa
+Babra	Gujarat	25270	
+Shamsabad	Uttar Pradesh	25266	
+Kithor	Uttar Pradesh	25262	
+Kallur Vadakummuri	Kerala	25259	
+Machhlishahr	Uttar Pradesh	25247	
+Bagha Purana	Punjab	25206	Baghaparana,Bhagha Purana
+Bhander	Madhya Pradesh	25204	
+Azhikkod	Kerala	25195	Azhikod,Azhikode,Azhikode North,Azhikode South
+Uttiramerur	Tamil Nadu	25194	Uttaramerur
+Dasuya	Punjab	25192	Dasua
+Gursarai	Uttar Pradesh	25191	
+Paonta Sahib	Himachal Pradesh	25183	Paonta
+Tirora	Maharashtra	25181	
+Rajgurunagar	Maharashtra	25146	
+Pottaneri Nallakavundanpatti	Tamil Nadu	25133	P. N. Patti
+Kamaruddinnagar	Delhi	25126	Quammruddin Nagar
+Gauripur	Assam	25124	
+Rania	Haryana	25123	Ranija,Raniya
+Mugalivakkam	Tamil Nadu	25117	mughalibakkama
+Thazhecode	Kerala	25116	
+Saiha	Mizoram	25110	
+Chinna Salem	Tamil Nadu	25106	Chinnasalem
+Vayalar	Kerala	25094	vayalaru
+Ahraura	Uttar Pradesh	25075	
+Rampachodavaram	Andhra Pradesh	25074	
+Mangrol	Rajasthan	25073	Kaiztori,Kazitori
+Shrirangapattana	Karnataka	25061	Srirangapatna
+Kantai	Bihar	25051	Kanti
+Kharkhauda	Haryana	25051	Kharkhoda
+Kanigiri	Andhra Pradesh	25045	
+Chengannur	Kerala	25043	
+Sohagpur	Madhya Pradesh	25040	
+Chandauli	Uttar Pradesh	25035	canda'uli,candauli,cantavuli,chandaulli,chandoouri,chndwly,qian dao li
+Paramathi Velur	Tamil Nadu	25012	
+Velur	Tamil Nadu	25012	
+Naubatpur	Bihar	25011	
+Sandi	Uttar Pradesh	25008	
+Kolasib	Mizoram	25000	ke la si bu,ke la xi bu,kolacip,kolasiba,kollasibeu,korashibu,kwlasyb
+Marayur	Kerala	25000	Maraiyoor,Maraiyur,Marayoor
+Padam	Ladakh	25000	
+Shiraguppi	Maharashtra	25000	
+Abu	Rajasthan	24981	Mount Abu
+Sadulshahar	Rajasthan	24980	
+Borawar	Rajasthan	24975	
+Marutharod	Kerala	24963	
+Gajwel	Telangana	24961	
+Devarshola	Tamil Nadu	24954	
+Kunda	Uttar Pradesh	24948	kun da,kunta
+Sakleshpur	Karnataka	24931	Saklaspur
+Perundurai	Tamil Nadu	24930	Perundural
+Mundargi	Karnataka	24919	mndrgy,mu en da er ji,mundaragi
+Machhiwara	Punjab	24916	
+Nainpur	Madhya Pradesh	24914	
+Tarana	Madhya Pradesh	24908	
+Keirao Bitra	Manipur	24900	Lilong
+Kanth	Uttar Pradesh	24883	Mannagar
+Charkhari	Uttar Pradesh	24881	Maharajnagar
+Kushtagi	Karnataka	24878	
+Churi	Jharkhand	24876	
+Vellalur	Tamil Nadu	24872	Velialur,Vellalore
+Sriperumbudur	Tamil Nadu	24864	Sriperumbubur
+Muthutala	Kerala	24861	
+Mahwa	Rajasthan	24846	Mahwah,Makhva,ma he wa,maha'oya,maharaa,mahava,mahva,mawa
+Kandahar	Maharashtra	24843	
+Avilala	Andhra Pradesh	24839	
+Falna	Rajasthan	24839	
+Ghoti Budrukh	Maharashtra	24838	Ghoti
+Safipur	Uttar Pradesh	24801	
+Brahmana Periya Agraharam	Tamil Nadu	24798	
+Thirunavaya	Kerala	24790	
+Anklesvar INA	Gujarat	24789	
+Kalamnuri	Maharashtra	24784	
+Kabrai	Uttar Pradesh	24771	Kabral
+Ilaiyankudi	Tamil Nadu	24767	Ilayangudi
+Talwara	Punjab	24752	
+Firozpur Jhirka	Haryana	24750	Ferozepur,Ferozepur-Jhirka,Ferozpur Jhirka
+Tijara	Rajasthan	24747	
+Punahana	Haryana	24734	
+Tattankuttai	Tamil Nadu	24708	Thathankuttai
+Koregaon	Maharashtra	24690	
+Phillaur	Punjab	24688	
+Pakala	Andhra Pradesh	24680	Pakal
+Hinjilicut	Odisha	24671	Hinjili,Hinjilikatu,hinjilikata,xin ji li qiu te
+Damua	Madhya Pradesh	24663	
+Ezhudesam	Tamil Nadu	24657	
+Andol	Telangana	24645	
+Shamgarh	Madhya Pradesh	24637	
+Ratanpur	Chhattisgarh	24636	
+Kodarma	Jharkhand	24633	Koderma,ke da er ma,kodaleuma,kodama,kodarama,kodarmam,kotarma,kwdarma
+Keshorai Patan	Rajasthan	24627	
+Navalgund	Karnataka	24613	
+Bholav	Gujarat	24605	
+Williamnagar	Meghalaya	24597	
+Bijbehara	Jammu and Kashmir	24590	Bijbiara,Vejibyor,Vejibyour,Vijeshwara,bi jie bei ha la,bijabehara,bijabihara,pijpehara
+Gorantla	Andhra Pradesh	24586	
+Dataganj	Uttar Pradesh	24562	
+Tiruppuvanam	Tamil Nadu	24554	Thirupuvanam
+Beohari	Madhya Pradesh	24545	
+Pantheeramkavu	Kerala	24537	
+Chharra	Uttar Pradesh	24535	
+Hudkeshwar Buzurg	Maharashtra	24499	Hudkeshwar bk.
+Pindwara	Rajasthan	24487	
+Singapur	Telangana	24457	
+Sahaspur	Uttar Pradesh	24452	Sakhaspur,sa ha si pu er,sahasapura,sahaspwr
+Ugrakheri	Haryana	24440	
+Kant	Uttar Pradesh	24430	
+Bhokardan	Maharashtra	24416	
+Maheshwar	Madhya Pradesh	24411	Makheshvar,ma he si he wa er,mahesbara,maheshuwaru,mahesvar,mahesvara
+Thiruthuraipoondi	Tamil Nadu	24404	Tirutturaippundi,Tiruturaipundi
+Meenambakkam	Tamil Nadu	24334	Tirusulam
+Chiknayakanhalli	Karnataka	24292	
+Maharajgani	Bihar	24282	Maharajganj
+Ayanavelikulangara Vadakku	Kerala	24268	Ayanivelikulangara,Vadakkumthala
+Kaithoon	Rajasthan	24260	
+Denkanikota	Tamil Nadu	24252	Denkanikottai
+Chekkiad	Kerala	24246	
+Mayang Imphal	Manipur	24239	
+Haliyal	Karnataka	24238	Khalijal,ha li ye er,haliyala,halliyail,hariyaru
+Vilankurichi	Tamil Nadu	24235	
+Rajakheri	Madhya Pradesh	24232	
+Sitarganj	Uttarakhand	24225	
+Nandgaon	Maharashtra	24209	
+Siuliban	Jharkhand	24202	
+Dharampur	Gujarat	24178	Dharampore,Dhurrumpur,Dilarampur
+Sikandarpur	Uttar Pradesh	24177	
+Muhammadabad	Uttar Pradesh	24146	
+Srisailain	Andhra Pradesh	24142	Srisailam
+Barki Saria	Jharkhand	24134	
+Loha	Maharashtra	24125	Lawha
+Mhaswad	Maharashtra	24120	Mhasvad,mahasu'oyada,mahasuraada,mahesabara,makasvat,mhasavada,mhasvada,mhswd,mu ha si wa de
+Alot	Madhya Pradesh	24115	a luo te,alat,allos,alota,arotto
+Suryaraopeta	Andhra Pradesh	24112	
+Aluva	Kerala	24108	alubha,alura,alwa
+Hastinapur	Uttar Pradesh	24093	
+Chettipalaiyam	Tamil Nadu	24080	Chettipalayam
+Someshvara	Karnataka	24066	Someshwar
+Pacode	Tamil Nadu	24050	
+Pappakurichchi	Tamil Nadu	24023	Pappankurichi
+Morinda	Punjab	24022	Murinda,mo lin da,morida,mwrynda
+Diu	Dadra and Nagar Haveli and Daman and Diu	23991	Diva,Ntiou,Vostrau Dyu,di wu,di'u,dyu
+Nabinagar	Bihar	23984	
+Dinanagar	Punjab	23976	
+Mayabandar	Andaman and Nicobar	23912	Mayabunder
+Kaikalapettai	Tamil Nadu	23910	Ayyappanthangal,Kattupakkam
+Bazpur	Uttarakhand	23900	
+Karumandi Chellipalaiyam	Tamil Nadu	23868	
+Dalsingh Sarai	Bihar	23862	Dalsingh-Sari
+Makronia	Madhya Pradesh	23861	Makronia Buzurg
+Longowal	Punjab	23851	
+Savantvadi	Maharashtra	23851	Sawantwadi
+Virakeralam	Tamil Nadu	23841	Veerakeralam
+Nasriganj	Bihar	23819	Nasriganji
+Padiyanallur	Tamil Nadu	23819	Padiahallur,Theerthagiriyampattu
+Reoti	Uttar Pradesh	23819	lei ao di,re'oti,revati,rywty
+Fatehganj West	Uttar Pradesh	23810	
+Sadalgi	Karnataka	23790	Sadalga
+Nasrullahganj	Madhya Pradesh	23788	Nasrullaganj
+Sarjamda	Jharkhand	23788	
+Narakal	Kerala	23760	Njarackal
+Lalgudi	Tamil Nadu	23740	ilalkuti,la er gu di,lalagudi,lalaguri
+Ulundurpet	Tamil Nadu	23734	Kiranur,Ulundur,Ulundurpettai
+Lalganj	Uttar Pradesh	23728	
+Malakpur Kohi Rangpur	Delhi	23726	Malik Pur Kohi
+Nivari	Madhya Pradesh	23724	Niwari
+Vypin	Kerala	23717	Azhikkal,Puthuvype,Vypeen
+Muluppilagadu	Kerala	23709	Mulappilangad,Mulappilangal,Muzhappilangad
+Alwaye	Kerala	23703	Aluva
+Tisaiyanvilai	Tamil Nadu	23702	Thisayanvilai
+Srikandamangalam	Kerala	23681	
+Kutiatodu	Kerala	23669	Kuthiathode
+Pipri	Maharashtra	23661	
+Natham	Tamil Nadu	23660	Nattam,Nuttam
+Unnamalaikadai	Tamil Nadu	23656	
+Penugonda	Andhra Pradesh	23654	
+Balod	Chhattisgarh	23648	
+Mariani	Assam	23640	
+Qadian	Punjab	23632	Kadian,ka di ya en,kadi'am,kadiyam,kadiyana,kari'am,katiyan,qadyan,qadyan dar alaman
+Painkulam	Tamil Nadu	23630	
+Prantij	Gujarat	23596	
+Kulgam	Jammu and Kashmir	23584	Kulgam Tehsil,Kulgam-Tekhsil,gu er jia mu,klgam,klgham,kulagam tehsil,kulagama,kulagama tahasila,kulagama tahesila,kulgam tesil,kulgama,kulganva,kulkam tehasil,kwlgam,kwlgham,kwljam
+Chinnur	Telangana	23579	
+Katheru	Andhra Pradesh	23572	
+Mairwa	Bihar	23565	
+Todaraisingh	Rajasthan	23559	Toda Raisingh,Todaraisingkh,Todarasingh,Todarasingkh,todalaijing,todara'isinga,todaraising,todarayasim,todarayasinha,todaraysingh,totaraycin,tuo da lai xin ge
+Pokaran	Rajasthan	23554	Pokhran
+Kumher	Rajasthan	23540	
+Sreekaryam	Kerala	23528	
+Panchla	West Bengal	23526	
+Mudkhed	Maharashtra	23517	
+Shivpur Charcha	Chhattisgarh	23514	
+Jhinjhak	Uttar Pradesh	23499	
+Pethapur	Gujarat	23497	
+Malpe	Karnataka	23496	
+Birur	Karnataka	23493	
+Mandal	Rajasthan	23478	
+Shishgarh	Uttar Pradesh	23471	
+Kuchera	Rajasthan	23468	Kucher,ku qie la,kucera
+Pattiyurgramam	Kerala	23460	Pathiyoor
+Sevilimedu	Tamil Nadu	23454	
+Pawni	Maharashtra	23450	Pauni
+Manesar	Haryana	23448	
+Chhatapur	Bihar	23425	
+Tuneri	Kerala	23421	Thuneri
+Urmar	Punjab	23419	Urmar Tanda
+Lonar	Maharashtra	23416	lang na er,lonaleu,lonara,luo na er,lwnar,ronaru
+Pugalur	Tamil Nadu	23408	Punjai,Punjaipugalur
+Ramtek	Maharashtra	23404	
+Monoharpur	West Bengal	23362	
+Injambakkam	Tamil Nadu	23346	incampakkam,injabakkama,injamabakkama,injambakkama,yi en gu mu ba ka mu
+Mandawa	Rajasthan	23335	
+Maharajpur	Madhya Pradesh	23328	
+Soygaon	Maharashtra	23320	
+Kalanaur	Haryana	23319	
+Chitrakoot Dham	Uttar Pradesh	23316	Chitrakoot,Karwi
+Ron	Karnataka	23311	Rona
+Vengattur	Tamil Nadu	23292	
+Nayanakulam	Tamil Nadu	23284	Nagavakulam
+Bewar	Uttar Pradesh	23280	
+Marampilly	Kerala	23272	
+Od	Gujarat	23250	Ode
+Tapa	Punjab	23248	
+Vaikam	Kerala	23234	Vaikom
+Kerkandi	Tamil Nadu	23229	Kethi
+Bissau	Rajasthan	23227	Bisau
+Colachel	Tamil Nadu	23227	
+Sahibganj	Bihar	23224	Sahebganj
+Karmala	Maharashtra	23199	
+Tharangambadi	Tamil Nadu	23191	Fort Dansborg,Tarangambadi,Tranguebar,Trankebar,Tranquebar,tarankampati,te lan kui ba,tharangamabari
+Hinakallu	Karnataka	23162	Hinkal
+Thiruvankulam	Kerala	23160	
+Tiruverumbur	Tamil Nadu	23156	Thiruverumbur
+Kudachi	Karnataka	23154	Kudchi,ku de qi,kudaci,kudci,kuraci,kutacci
+Seondha	Madhya Pradesh	23140	Seondkha,Seora,ceyonta,sai ao en da,se'onda,sendha,seonda,sevarha,sinyonda,sinyondha
+Kurduvadi	Maharashtra	23131	
+Mattigiri	Tamil Nadu	23129	Mattagiri
+Lalganj	Uttar Pradesh	23124	
+Cooper's Camp	West Bengal	23119	
+Polasara	Odisha	23119	bo la sa la
+Iroopara	Kerala	23113	Ayiroopara
+Nakur	Uttar Pradesh	23084	
+Narasingapuram	Tamil Nadu	23084	
+Palwal Rural	Haryana	23072	
+Pallikonda	Tamil Nadu	23067	Pallikondai
+Asifabad	Telangana	23059	Asafabad,Jangaon
+Pipri	Maharashtra	23047	Peepri
+Indargarh	Madhya Pradesh	23045	
+Sivagiri	Tamil Nadu	23040	
+Vadakkanandal	Tamil Nadu	23034	
+Ancharakandy	Kerala	23030	
+Trikarpur South	Kerala	22991	South Thrikkaripur
+Hukeri	Karnataka	22988	hu kai li,hukkeri,hukkeri taluka
+Todabhim	Rajasthan	22977	Todabkhim,todabhima,todabimu,todahim,totapim,tuo da bi mu
+Dooru Verinag	Jammu and Kashmir	22968	Duru Verinag
+Pehladpur Bangar	Delhi	22968	
+Tiruchanur	Andhra Pradesh	22963	
+Kanhan	Maharashtra	22945	
+Gopavaram	Andhra Pradesh	22936	
+Vattalkundu	Tamil Nadu	22928	Batlagundu
+Dhamanagar	Odisha	22920	
+Saidpur	Uttar Pradesh	22904	
+Tittagudi	Tamil Nadu	22894	Titagudi
+Phulpur	Uttar Pradesh	22886	
+Kunnatnad	Kerala	22881	Kunnathunad
+Jharoda Mazra Burari	Delhi	22878	
+Karanjia	Odisha	22865	
+Sangaria	Rajasthan	22853	
+Balarampur	West Bengal	22847	
+Aramboli	Tamil Nadu	22846	Aralvaimozhi,Aramboly,Perumalpuram
+Ubaidullahganj	Madhya Pradesh	22845	Obedullaganj,Ubaidullaganj
+Chitarpur	Jharkhand	22837	
+Naraingarh	Haryana	22832	Naraingarkh,Narayangarh,na lang ge a er,nalaingaleu,narainagadha,narainga,narainkar'h,narayan ghar,narayanagara,narayanagarha,narayanghar,narayaragara
+Sambhar	Rajasthan	22828	Sambhar Lake,Sambkhara
+Vellur	Kerala	22816	Veiloor
+Fatehnagar	Rajasthan	22812	
+Raghunathpur	West Bengal	22802	
+Pariyapuram	Kerala	22766	
+Kasrawad	Madhya Pradesh	22750	
+Lathi	Gujarat	22745	Lati
+Dugda	Jharkhand	22740	
+Khirkiya	Madhya Pradesh	22737	Khirkian,Khirkiyan,ji er ji ye,khirakiya
+Mudgal	Karnataka	22731	midgala,mu de jia er,mudagal,mudagala,mudogaru
+Curchorem	Goa	22730	Curchurem
+Chorwad	Gujarat	22720	Chorvad,Chorwar
+Madhira	Telangana	22716	Madhra,Madira
+Kadiganpalli	Tamil Nadu	22714	Kattiganapalli
+Akaltara	Chhattisgarh	22712	a ka er ta la,akalatara,akaltra
+Etmadpur	Uttar Pradesh	22697	
+Katghora	Chhattisgarh	22690	Katgkhora,ka te ge la,kantak'hora,kat ghora,kataghora,kateugola,kathagara,katogora
+Lohara	Maharashtra	22664	
+Ponda	Goa	22664	Cassabe de Ponda,bo en da,fonda,phonda,pnda,ponta,pwnda
+Cumbum	Andhra Pradesh	22653	Kambhamu
+Matabhanga	West Bengal	22642	Mathabhanga
+Jaitaran	Rajasthan	22621	
+Taoru	Haryana	22599	
+Lehragaga	Punjab	22588	
+Jamai	Madhya Pradesh	22587	Jumiardev
+Sholavandan	Tamil Nadu	22578	Cholavandan,colavantan,shoryavuandan,si huo la wan dan,solabandana
+Nagod	Madhya Pradesh	22568	
+Khairagarh	Chhattisgarh	22564	Khairagarh Raj
+Kurikuppi	Karnataka	22560	Kurekuppa
+Ariyallur	Kerala	22558	
+Pukhrayan	Uttar Pradesh	22555	
+Raman	Punjab	22553	
+Sirsi	Uttar Pradesh	22549	
+Bankapur	Karnataka	22529	Bankapura
+Godoli	Maharashtra	22517	
+Baswa	Rajasthan	22515	
+Rajmahal	Jharkhand	22514	
+Nambol	Manipur	22512	
+Bikram	Bihar	22486	
+Tulsipur	Uttar Pradesh	22486	
+Belur	Karnataka	22484	
+Sanehwal	Punjab	22484	Sahnewal
+Sisauli	Haryana	22479	Sasauli
+Kanniyakumari	Tamil Nadu	22453	Cap Comorin,Cape Comorin,Comorin,Kan'jakumari,Kanniakumari,Kanniyakumar,Kanyakumari
+Senapparetti	Tamil Nadu	22447	Senapiratti
+Naraura	Uttar Pradesh	22432	
+Kailashahar	Tripura	22405	Kailasahar,kailasahara
+Triparappu	Tamil Nadu	22401	Thirparappu
+Deogarh	Odisha	22390	Debagarh
+Ratu	Jharkhand	22379	
+Puthencruz	Kerala	22378	Puttan kurisu
+Kurandvad	Maharashtra	22372	
+Timurni	Madhya Pradesh	22359	
+Pachgaon	Maharashtra	22353	
+Rahata	Maharashtra	22335	Rahta Pimplas
+Pali	Madhya Pradesh	22324	Birsinghapur
+Bhawanigarh	Punjab	22320	
+Suket	Rajasthan	22319	Suke,Suket-Kotah
+Panniyannur	Kerala	22308	
+Adanattutekkumuri Kizhakku	Kerala	22250	Adinad
+Ankola	Karnataka	22249	an ke la,ankwla
+Mariahu	Uttar Pradesh	22248	
+Kilapavoor	Tamil Nadu	22231	
+Purwa	Uttar Pradesh	22220	
+Attimarappatti	Tamil Nadu	22218	Athimarapatti
+Dasnapur	Telangana	22216	
+Badamibagh	Jammu and Kashmir	22214	
+Sahawar	Uttar Pradesh	22201	
+Bhuban	Odisha	22200	Bkhuban,bhubana,bhuvana,bu ban
+Nilakottai	Tamil Nadu	22197	Nilakkottai,Nilakkottai-Madura
+Sidhauli	Uttar Pradesh	22193	
+Palavansathu	Tamil Nadu	22176	
+Adra	West Bengal	22159	
+Muhammadabad	Uttar Pradesh	22151	
+Sarapaka	Telangana	22149	
+Bhanvad	Gujarat	22142	Bhanwar,Bhauwar
+Someshwar	Karnataka	22137	Somaishwar
+Narayanpur	Chhattisgarh	22106	Narainpur
+Namagiripettai	Tamil Nadu	22098	Namagiripetai
+Nawa	Rajasthan	22088	
+Peravurani	Tamil Nadu	22084	Peravurni
+Kathhara	Jharkhand	22080	Tenu Dam-Cum-Kathhara
+Kathlal	Gujarat	22071	
+Siwana	Rajasthan	22067	
+Deoli	Rajasthan	22065	Devli,Dioli,dai ao li,devali
+Kizhuparamba	Kerala	22062	
+Palai	Kerala	22056	
+Chhanera	Madhya Pradesh	22052	
+Marakkanam	Tamil Nadu	22034	Markanum,Merkanam
+Chhatrapur	Odisha	22027	Chatrapur,Chkhatrapur,cahatrappur,catrapur,cha he te la pu,chatrapura,chatrapwr,chattorapuru,qia te la pu er,syateulapuleu
+Bhinga	Uttar Pradesh	22016	Bkhinga,bainga,bhin'ga,bhinaga,bin ge a,bin jia,binga,pinka
+Lauri	Madhya Pradesh	22002	Laundi,Lavkushnagar
+Nalambur	Tamil Nadu	21973	Nolambur
+Kuppam	Andhra Pradesh	21963	
+Fatehabad	Uttar Pradesh	21957	
+Kil Bhuvanagiri	Tamil Nadu	21956	Bhavanagiri,Bhuvanagiri,Bliuvanagiri
+Sakti	Chhattisgarh	21955	Shakti
+Karuvanthuruthy	Kerala	21952	
+Kollivayal	Tamil Nadu	21943	O' Valley
+Sancoale	Goa	21923	sa en qiao a lai,sanakola,sankavala,sankole
+Polichalur	Tamil Nadu	21906	
+Bhabhar	Gujarat	21894	Bhabar,Bhabbar
+Nowrozabad	Madhya Pradesh	21883	
+Laungowal	Punjab	21880	Lalgarh
+Chachaura	Madhya Pradesh	21860	Chachora
+Ghulewadi	Maharashtra	21860	
+Chandrakona	West Bengal	21855	Chandshona
+Sangod	Rajasthan	21846	
+Kheralu	Gujarat	21843	
+Farakka	West Bengal	21834	Faraka,fa la ka
+Mulavukad	Kerala	21833	
+Mangalvedha	Maharashtra	21824	
+Maniyur	Kerala	21820	
+Kantabanji	Odisha	21819	
+Chalthan	Gujarat	21795	
+Jainagar	Bihar	21782	Jaynagar,gu yi na jia er,jayanagara
+Kopawor	Jammu and Kashmir	21771	Kupwara
+Sakri	Maharashtra	21764	cakri,sa ke li,sakeuli,sakry,sakuri
+Dattapur	Maharashtra	21763	
+Umarsera	Maharashtra	21752	
+Napasar	Rajasthan	21750	
+Shendurjana	Maharashtra	21748	Sendurjana
+Patur	Maharashtra	21747	
+Digboi	Assam	21736	Digbol,Digbor
+Jirapur	Madhya Pradesh	21724	
+Kalleribhagam	Kerala	21723	Kallelibhagom
+Muthupet	Tamil Nadu	21722	Muttapet,Muttupet,Mutupet
+Dum Duma	Assam	21706	Doom-Dooma,Sookerating
+Pampur	Jammu and Kashmir	21680	Pampore,bmbwr,pmpwr
+Munderi	Kerala	21676	
+Surajgarh	Rajasthan	21666	
+Kadayal	Tamil Nadu	21665	
+Kundli	Haryana	21633	
+Balachor	Punjab	21631	Balachaur
+Pushkar	Rajasthan	21626	Pouskar,Puskar,Puskaras,Puszkar,bwshkar,pu si he ka er,pusakara,pushukaru,puskara,puskaranagaram,pwsh kar,pwshkar,pwsqr
+Doda	Jammu and Kashmir	21605	
+Karanpur	Rajasthan	21604	Karanpura,Sri Karanpur
+Samthar	Uttar Pradesh	21582	
+Banat	Uttar Pradesh	21580	banata
+Dhekiajuli	Assam	21579	
+Mandalgarh	Rajasthan	21569	
+Barara	Haryana	21545	
+Tammampatti	Tamil Nadu	21503	Thammampatti
+Chamba	Himachal Pradesh	21502	caba,camba,campa,qia mu ba
+Mahadula	Maharashtra	21481	
+Bansdih	Uttar Pradesh	21457	
+Srisailam Project RFC Township	Andhra Pradesh	21452	
+Bacheli	Chhattisgarh	21435	Bade Bacheli
+Asika	Odisha	21428	Aska
+Guruvayur	Kerala	21416	Gurupavanapuri,Guruvayoor
+Lalru	Punjab	21394	
+Chotila	Gujarat	21364	
+Vasudevanallur	Tamil Nadu	21361	
+Kuju	Jharkhand	21356	
+Padmanabhapuram	Tamil Nadu	21342	patmanapapuram
+Mandawar	Uttar Pradesh	21339	
+Paippad	Kerala	21338	
+Kondasamudram	Tamil Nadu	21335	
+Mahgawan	Madhya Pradesh	21335	Mehgaon
+Bedi	Gujarat	21327	Beda,Bedi Bandar,bedi bandara,bei di
+Tekari	Bihar	21324	Tikari
+Dindori	Madhya Pradesh	21323	
+Channagiri	Karnataka	21313	cannagiri,cannakiri,chan'nagiri,channagili,channajyry,jin ne ji li
+Kuzhithurai	Tamil Nadu	21307	Kuzhittura
+Kodamthuruth	Kerala	21295	
+Ghatanji	Maharashtra	21293	
+Naduvattam	Kerala	21273	Naduvattom
+Chhata	Uttar Pradesh	21260	
+Sanaur	Punjab	21201	sa nao er,sana'ura,sanaura
+Reethapuram	Tamil Nadu	21177	
+Kottappally	Kerala	21169	
+Serchhip	Mizoram	21158	
+Pudupattanam	Tamil Nadu	21151	
+Telhara	Maharashtra	21146	
+Narkher	Maharashtra	21127	
+Ajnala	Punjab	21107	
+Anthiyur	Tamil Nadu	21086	Andiyur
+Bisalgarh	Tripura	21085	
+Dhulagari	West Bengal	21080	
+Talala	Gujarat	21060	
+Bundu	Jharkhand	21054	
+Teliamura	Tripura	21032	
+Devgadh Bariya	Gujarat	21030	Baria,Bariya,Devgad Baria
+Patharia	Madhya Pradesh	21026	pa ta li ya,pathariya
+Kiraoli	Uttar Pradesh	21024	
+Patnagarh	Odisha	21024	
+Bhanpura	Madhya Pradesh	21013	
+Perinjanam	Kerala	21012	
+Anklav	Gujarat	21003	
+Abrama	Gujarat	21000	
+Bagula	West Bengal	20999	
+Gunnaur	Uttar Pradesh	20980	
+Palakkodu	Tamil Nadu	20959	Palakod
+Sindi	Maharashtra	20956	Sindi Turf Hindnagar
+Chelora	Kerala	20952	
+Rajpur	Madhya Pradesh	20947	
+Naravarikuppam	Tamil Nadu	20946	Naravanikuppam
+Marthandam	Tamil Nadu	20938	Killiyoor
+Vinnamala	Andhra Pradesh	20924	
+Sarauli	Uttar Pradesh	20923	Saranli
+Adampur	Punjab	20922	a da mu pu er,adamapura,adampur-doaba,adampwr,adamupuru,atampur
+Badnawar	Madhya Pradesh	20917	
+Banga	Punjab	20906	
+Heli Mandi	Haryana	20906	Hailey Mandi
+Chincholi	Karnataka	20897	
+Hungund	Karnataka	20877	
+Thaikkattussery	Kerala	20874	Thycattusserry,taikkattuseri
+Bangawan	Madhya Pradesh	20873	
+Kapasan	Rajasthan	20869	Kapasin
+Salamedu	Tamil Nadu	20854	
+Barpali	Odisha	20850	
+Gormi	Madhya Pradesh	20841	ge er mi,gorami
+Begun	Rajasthan	20836	
+Lawngtlai	Mizoram	20830	
+Nandri	Rajasthan	20827	
+Dhing	Assam	20826	Dkhing,dhim,dhinga,dhinga sahara,dim,ding ge,dingu
+Vadakarai Kil Pidagai	Tamil Nadu	20821	Vadakarai Keezhpadugai
+Clement Town	Uttarakhand	20806	klementa ta'una
+Sonepur	Odisha	20770	Sonapur,Sonpur,Subarnapur,conippur,sonapura,sonepuleu,sonepuru,subarnapura,suo na pu er,suvarnapura,swbarnapwr  awdysa
+Kaikalur	Andhra Pradesh	20763	
+Akhnur	Jammu and Kashmir	20756	
+Alibag	Maharashtra	20752	Alibagh,a li ba ge,alibaga,aribagu
+Kapren	Rajasthan	20748	Kaprain
+Muthukulam	Kerala	20740	
+Alipur	Delhi	20736	
+Achampet	Telangana	20721	
+Ghorabandha	Jharkhand	20718	
+Koduvayur	Kerala	20703	
+Samalapuram	Tamil Nadu	20691	
+Chakia	Bihar	20686	
+Jining	Arunachal Pradesh	20684	Aalo
+Bhanjanagar	Odisha	20647	Russelkonda,Russellkonda,ban gu na jia er,bhanjanagara
+Vadali	Gujarat	20646	
+koppana Agrahara	Karnataka	20622	
+Madattukkulam	Tamil Nadu	20620	Madathukulam
+Gurmatkal	Karnataka	20614	Gurmatkol
+Dhariwal	Punjab	20604	
+Patuvilayi	Kerala	20598	
+Dayal Pur	Delhi	20589	
+Talwandi Sabo	Punjab	20589	Talwandi
+Jahazpur	Rajasthan	20586	
+Savda	Maharashtra	20584	
+Vadakakarai	Kerala	20571	Vadakkekara
+Viratnagar	Rajasthan	20568	Bairat
+Belsand	Bihar	20566	bei er kan de,bei sang de,belasanda,belasandha,belsandeu,berusando,bylsand,pelcantu
+Sampla	Haryana	20563	
+Vasind	Maharashtra	20561	Vashind
+Kishtwar	Jammu and Kashmir	20553	Kishtvare,Kishtwer
+Achhnera	Uttar Pradesh	20532	Achnera
+Attibele	Karnataka	20532	atibele,attippalli
+Bhikkiwind Uttar	Punjab	20526	Bhikkiwind
+Chillupar	Uttar Pradesh	20518	Barhalganj,ba er ha er gan jie,barahalaganja,barlahalaganja
+Tilpat	Haryana	20514	
+Bijawar	Madhya Pradesh	20513	
+Nellimarla	Andhra Pradesh	20498	
+Maham	Haryana	20484	
+Maniar	Uttar Pradesh	20462	
+Yellapur	Karnataka	20452	
+Keevallur	Kerala	20440	Keezhallur
+Nangli	Punjab	20440	
+Baud	Odisha	20424	Bauda,Baudh,Baudh Raj,Baudh-Ral,Baudhgarh
+Nimaj	Rajasthan	20424	Nimbaj
+Korochi	Maharashtra	20420	
+Tufanganj	West Bengal	20420	
+Pataudi	Haryana	20418	Pataounti,batwdy,pa tao di,patawdy,pattoti
+Dharur	Maharashtra	20417	Fatehabad,Fatheabad
+Pariyaram	Kerala	20405	
+French Rocks	Karnataka	20399	Hirod,Pandavapura
+Ahiwara	Chhattisgarh	20384	
+Bada	Rajasthan	20372	Sarwar
+Sarwar	Rajasthan	20372	saravara
+Edavilangu	Kerala	20363	
+Jhalu	Uttar Pradesh	20356	
+Killannur	Kerala	20339	
+Mundra	Gujarat	20338	
+Byndoor	Karnataka	20323	Baindur,Bainduri
+Chapar	Assam	20322	Ghapar
+Kondalampatti	Tamil Nadu	20318	
+Bawani Khera	Haryana	20289	Bawani
+Basi	Punjab	20288	Bassi Pathana
+Hardi	Bihar	20287	
+Alampalaiyam	Tamil Nadu	20286	
+Umbri	Maharashtra	20262	Umri Pragane Balapur
+Wellington	Tamil Nadu	20254	Vellington,Wellington Town
+Harij	Gujarat	20253	
+Raipur Domana	Jammu and Kashmir	20238	
+Settur	Tamil Nadu	20228	Seithur
+Penukonda	Andhra Pradesh	20220	
+Waluj Buzurg	Maharashtra	20220	Waluj,Waluj Bk.
+Srinagar	Uttarakhand	20216	Shrinagar,Srinagar Garhwal
+Kataiya	Bihar	20193	
+Nirmali	Bihar	20189	
+Surajpur	Chhattisgarh	20189	
+Puliyankannu	Tamil Nadu	20171	Navlock Garden
+Morwa	Gujarat	20168	Morva
+Pattyam	Kerala	20161	Pattiom
+Kaimori	Madhya Pradesh	20154	Kaimur,Kymore,kaimor,kaimora,kayamore,ke yi mo lei,kimora
+Mau	Madhya Pradesh	20147	
+Pudussery West	Kerala	20140	
+Mau Aimma	Uttar Pradesh	20123	Mau Aima,ma'u a'ima,mao ai ma,mau a'ima,myw ayma
+Chinnavadampatti	Tamil Nadu	20122	
+Falakata	West Bengal	20119	
+Suleswaranpatti	Tamil Nadu	20104	
+Dhaurahra	Uttar Pradesh	20098	
+Khairagarh	Uttar Pradesh	20095	Kheragarh
+Maksi	Madhya Pradesh	20094	
+Annur	Tamil Nadu	20079	Anur,annura
+Pulwama	Jammu and Kashmir	20071	Pulawom,blwama,bwlwama,plwama,pwlwama
+Sirumugai	Tamil Nadu	20066	Sirumugal,cirumukai
+Singanuram	Telangana	20061	Singapur
+Dergaon	Assam	20059	de er jia ao en,deragamo,deragamva,deraganva
+Cheppad	Kerala	20052	
+Khowai	Tripura	20046	
+Govardhan	Uttar Pradesh	20044	Gobardhan,Govardkhan
+Saraipali	Chhattisgarh	20043	Saraipaili
+Paravai	Tamil Nadu	20042	
+Khalari	Jharkhand	20010	Khelari
+Raya	Uttar Pradesh	20008	Raja
+Pamuru	Andhra Pradesh	20000	Pamur
+Powai	Maharashtra	20000	pancakutira,pava'i,pavay,pawayy,peye,pway
+Sawar	Rajasthan	20000	savara
+Belonia	Tripura	19996	Beloniya
+Takhatpur	Chhattisgarh	19968	Takkhatpur,ta ka te pu er,takapuleu,takatpur,takattopuru,takhatapura,tkht pwr
+Sullya	Karnataka	19958	Sullia,Sullija,Sulya,culliya,su li ya,suliya,sulliya,sulya taluka,sulyo,suria,swlya
+Bhusawar	Rajasthan	19946	Bhasawar,bhusa'oyara,bhusaraara,bhusavara,bwsawr
+Chunchupally	Telangana	19944	
+Charthawal	Uttar Pradesh	19942	
+Siswa Bazar	Uttar Pradesh	19939	
+Birpur	Bihar	19932	Beerpur
+Kandalloor	Kerala	19925	
+Dhanaula	Punjab	19920	
+L.A.Sagaram	Andhra Pradesh	19904	
+Sarigam INA	Gujarat	19903	Sarigam
+Kanjiramkulam	Kerala	19902	
+Anuppur	Madhya Pradesh	19899	
+Moirang	Manipur	19893	
+Nattappettai	Tamil Nadu	19883	
+Bali	Rajasthan	19880	
+Bokajan	Assam	19877	Bokajan O. Noajan
+Ranikhet	Uttarakhand	19873	Rawikhet
+Sirka	Jharkhand	19871	
+Boriavi	Gujarat	19865	
+Aurad	Karnataka	19849	
+Sankaraperi	Tamil Nadu	19844	
+Kulu	Himachal Pradesh	19831	Kullu,Kuluo,Sultanpur,gu lu,kllw,klw,kulw,kuru,kwlw,qwlw
+Kalinjur	Tamil Nadu	19828	
+Chetput	Tamil Nadu	19827	
+Kolavallur	Kerala	19817	Kolavelloor
+Sonari	Assam	19810	
+Deoranian	Uttar Pradesh	19788	Deorania
+Kolaras	Madhya Pradesh	19781	
+Chinna Andankovil	Tamil Nadu	19779	Andankoil East
+Raval	Gujarat	19777	
+Chandur	Maharashtra	19776	Chandur Railway
+Kannankurichchi	Tamil Nadu	19765	Kannankurichi
+Kattanam	Kerala	19764	
+Ghatkesar	Telangana	19763	
+Borgaon	Maharashtra	19759	
+Sendamangalam	Tamil Nadu	19750	Senthamangalam
+Chhapar	Rajasthan	19744	
+Udangudi	Tamil Nadu	19738	Udankudi
+Tirumeshi	Tamil Nadu	19733	Thirumazhisai
+Kerur	Karnataka	19731	
+Verukulambu	Tamil Nadu	19730	Verkilambi
+Shahpur	Madhya Pradesh	19719	
+Jhinjhana	Uttar Pradesh	19711	
+Kumbhraj	Madhya Pradesh	19707	
+Bareja	Gujarat	19690	
+Vadakku Viravanallur	Tamil Nadu	19689	Viravanallur
+Mokeri	Kerala	19684	
+Samrala	Punjab	19678	
+Junagarh	Chhattisgarh	19656	
+Nalco	Odisha	19644	
+Badi	Madhya Pradesh	19603	
+Charipara	Tripura	19598	
+Resubelpara	Meghalaya	19595	
+Jharoda Kalan	Delhi	19578	
+Kalmeshwar	Maharashtra	19578	
+Lawar Khas	Uttar Pradesh	19556	Lawar
+Sriramnagar	Telangana	19550	Sri Rama Nagar
+Mulakumud	Tamil Nadu	19538	Mulagumudu
+Pattan	Jammu and Kashmir	19538	Patan
+Bagbahra	Chhattisgarh	19529	Bagbahara
+Visavadar	Gujarat	19515	Visavedar
+Pinahat	Uttar Pradesh	19511	
+Pennadam	Tamil Nadu	19494	
+Nainwa	Rajasthan	19485	Naenwa,Nainva,na'ina'oya,na'inaraa,nai en wa,nain-wa,nainava,nynwa
+Rameswaram	Andhra Pradesh	19483	
+Jansath	Uttar Pradesh	19467	
+Santrampur	Gujarat	19465	
+Richha	Uttar Pradesh	19459	richa
+Bhayavadar	Gujarat	19458	Bhaya nadar,Bhayaradar,Bhayawadar
+Aistala	West Bengal	19425	
+Methukummal	Tamil Nadu	19417	
+Gannavaram	Andhra Pradesh	19410	
+Amarpatan	Madhya Pradesh	19409	
+Sojitra	Gujarat	19403	
+Singur	West Bengal	19402	
+Singarayakonda	Andhra Pradesh	19400	Singaraya Konda Pagoda
+Punnayur	Kerala	19387	Punnayurkulam
+Konnur	Karnataka	19386	
+Narwar	Madhya Pradesh	19385	
+Weir	Rajasthan	19385	
+Wazirganj	Uttar Pradesh	19372	
+Kakdwip	West Bengal	19368	
+Tamenglong	Manipur	19363	
+Jalochi	Maharashtra	19346	
+Kaimur	Madhya Pradesh	19343	Kymore
+Maholi	Uttar Pradesh	19343	ma huo li
+Bilhaur	Uttar Pradesh	19333	
+Mangalam	Andhra Pradesh	19318	
+Raja Pur Khurd	Delhi	19312	
+Khanapur	Karnataka	19309	
+Tiruppalai	Tamil Nadu	19305	Thiruppalai
+Burhar	Madhya Pradesh	19289	Burkhar,bu er ha er,bur'hara,burara,burhara
+Nimaparha	Odisha	19289	Nimapara
+Deoli	Maharashtra	19288	
+Devadanapatti	Tamil Nadu	19285	Devadanappatti,de wa da na pa di,debadanapatti,tevatanappatti
+Hamirpur	Himachal Pradesh	19280	
+Laksar	Uttarakhand	19270	
+Vakkam	Kerala	19267	Vakkom
+Ezhome	Kerala	19261	
+Ammainaickanur	Tamil Nadu	19257	
+Kesinga	Odisha	19239	
+Chhaprauli	Uttar Pradesh	19224	
+Sardulgarh	Punjab	19219	
+Maduraivayal	Tamil Nadu	19208	Vanagaram
+Hirekerur	Karnataka	19191	
+Sabalpur	Bihar	19183	
+Kottayam	Kerala	19176	Kotayem
+Shehera	Gujarat	19175	
+Surianwan	Uttar Pradesh	19157	
+Rijokri	Delhi	19148	Harjokri,Rajokri
+Kadikkad	Kerala	19147	
+Biswanath Chariali	Assam	19145	Bishnath
+Siwani	Haryana	19143	Sewani
+Honnavar	Karnataka	19109	Honavar,Honawar,Honore,Onore
+Jalladiampet	Tamil Nadu	19100	
+Torur	Telangana	19100	Thorrur
+Mir Pur Turk	Delhi	19098	
+Bhitarwar	Madhya Pradesh	19096	
+Kallukuttam	Tamil Nadu	19093	
+Chautapal	Telangana	19092	Choutuppal
+Arang	Chhattisgarh	19091	a lang ge,aram,aranga,arng
+Dharmkot	Punjab	19057	
+Kirandul	Chhattisgarh	19053	
+Kothakota	Telangana	19042	Kothkoota
+Katangi	Madhya Pradesh	19040	Nagra Katangi
+Amlagora	West Bengal	19038	
+Karthikappally	Kerala	19021	
+Anshing	Maharashtra	19000	Ansing
+Parichhatgarh	Uttar Pradesh	18990	
+Tiruvattar	Tamil Nadu	18985	Thiruvattar
+Kesariya	Bihar	18984	Kesaria
+Bhor	Maharashtra	18982	
+Kadachira	Kerala	18979	
+Kulpahar	Uttar Pradesh	18976	
+Khariar Road	Odisha	18967	
+Punjai Puliyampatti	Tamil Nadu	18967	
+Kunnimangalam	Puducherry	18965	
+Kharsia	Chhattisgarh	18939	
+Nahorkatiya	Assam	18937	Naharkativa,Naharkatiya
+Khilchipur	Madhya Pradesh	18928	
+Mulgund	Karnataka	18928	
+Kansapur	Haryana	18909	Kansepur
+Somandepalle	Andhra Pradesh	18895	
+Sriramnagar	Andhra Pradesh	18893	
+Gummidipundi	Tamil Nadu	18891	Gumidipoondi,Gummudipundi
+Koath	Bihar	18890	
+Marturu	Kerala	18890	Mattoor
+Manchar	Maharashtra	18876	
+Shahpur	Uttar Pradesh	18874	Shakhpura
+Marahra	Uttar Pradesh	18873	
+Mundgod	Karnataka	18866	meondeugodeu,mu en de ge de,mundagoda,mundagodu,mundagora,mundgoda,mundogoddo,mungoda,muntukot,mwndjwd
+Bhati	Delhi	18864	
+Chicholi	Maharashtra	18864	
+Malvan	Maharashtra	18858	Malwan
+Pahasu	Uttar Pradesh	18854	
+Lateri	Madhya Pradesh	18844	
+Tadikombu	Tamil Nadu	18838	Thadikombu
+Chhipa Barod	Rajasthan	18837	Barod,Chhipa
+Akbarpur	Uttar Pradesh	18835	
+Maithon	Jharkhand	18830	
+Chhiri	Gujarat	18829	
+Mallasamudram	Tamil Nadu	18820	
+Ranipur	Uttar Pradesh	18820	
+Gadhra	Jharkhand	18801	
+Solsumba	Gujarat	18796	
+Chandur Bazar	Maharashtra	18780	
+Sompeta	Andhra Pradesh	18778	
+Gangapur	Rajasthan	18777	
+Chanod	Gujarat	18776	
+Banur	Punjab	18775	
+Paranda	Maharashtra	18758	
+Shadipur Julana	Haryana	18755	Julana,Julana Shadipur
+Rakkiyapalaiyam	Tamil Nadu	18749	Kurudampalayam
+Kammivapettai	Tamil Nadu	18745	Padirikuppam
+Amod	Gujarat	18742	Broach
+Rangapara	Assam	18739	
+Nanauta	Uttar Pradesh	18738	Phuta Shahr,na nao ta,nanata,nanuta,nanwth
+Raybag	Karnataka	18736	Raybagh
+Kundgol	Karnataka	18726	ku en de ge er,kundagola,kundeugol,kundougoru,kuntukol,kwndjwl
+Murbad	Maharashtra	18725	
+Lonand	Maharashtra	18723	
+Tiruvankod	Tamil Nadu	18723	Thiruvithamcode,Tiruvancode,Tiruvidamkodu,Tiruvithancode
+Una	Himachal Pradesh	18722	
+Palda	Madhya Pradesh	18697	
+Haldaur	Uttar Pradesh	18686	
+Srirampur	West Bengal	18682	
+Mandvi	Gujarat	18669	
+Valabhipur	Gujarat	18663	Vala,Vallabhipur
+Kardhan	Haryana	18662	
+Kalayat	Haryana	18660	Kalait
+Kurumathur	Kerala	18641	
+Kim	Gujarat	18638	kima
+Mamsapuram	Tamil Nadu	18635	
+Mangattidam	Kerala	18627	
+Silvani	Madhya Pradesh	18623	Silwani
+Tyagadurgam	Tamil Nadu	18605	Thiagadurgam
+Kharupatia	Assam	18599	Kharupatia Ghat
+Palappallam	Tamil Nadu	18589	
+Palaiyampatti	Tamil Nadu	18576	
+Nadim Tiruvuru	Andhra Pradesh	18567	
+Jadugora	Jharkhand	18563	
+Bhadaur	Punjab	18561	
+Bhoom	Maharashtra	18561	Bhum,Bkhum,bhuma,bu mu,bum,bumu,pum
+Durgapur	Maharashtra	18561	
+Chandili	Odisha	18552	
+Phalauda	Uttar Pradesh	18545	Phalawda,Pkhalauda,bo liu da,pa lao da,phalavada
+Bank	Madhya Pradesh	18534	
+Harpalpur	Madhya Pradesh	18529	
+Rampura	Madhya Pradesh	18495	
+Jogipet	Telangana	18494	Joqipet,andol-jogipeta purapalakasangham,jogipeta
+Alang	Gujarat	18480	
+Barka Kana	Jharkhand	18475	
+Deshnoke	Rajasthan	18470	Deshnok,de si he nuo kai,desanoka,desanoke
+Uttangarai	Tamil Nadu	18470	Uttangaral
+Chicholi	Maharashtra	18469	
+Mukandgarh	Rajasthan	18469	Makundgarh
+Savli	Gujarat	18467	Sauli
+Tondi	Tamil Nadu	18465	Thondi
+Kannapuram	Kerala	18459	
+Pottanur	Tamil Nadu	18455	
+Padampur	Rajasthan	18454	
+Gubbi	Karnataka	18446	gu bu bi,gubabi,gubi,gwby,jwbby,kuppi
+Unchahra	Madhya Pradesh	18442	
+Baroda	Madhya Pradesh	18437	Badoda
+Khali Kachigam	Dadra and Nagar Haveli and Daman and Diu	18434	Calicaxigao,Kachigam
+Namrup	Assam	18432	
+Neral	Maharashtra	18429	
+Sirgitti	Chhattisgarh	18428	
+Mandapam	Tamil Nadu	18427	
+Along	Arunachal Pradesh	18425	
+Kota	Chhattisgarh	18405	ke da,kotta
+Moram	Maharashtra	18371	Murum
+Kadipur	Delhi	18369	Qadi Pur
+Chhoti Sadri	Rajasthan	18360	
+Vazhakulam	Kerala	18358	
+Fort Gloster	West Bengal	18350	
+Seppa	Arunachal Pradesh	18350	
+Majhiaon Kalan	Jharkhand	18349	Majhiaon
+Thakurganj	Bihar	18348	
+Naldurg	Maharashtra	18341	Naldrug
+Thasra	Gujarat	18337	
+Bada Malhera	Madhya Pradesh	18335	
+Kakori	Uttar Pradesh	18332	
+Alangayam	Tamil Nadu	18327	
+Cheranmahadevi	Tamil Nadu	18327	Cheranmadevi,Sermadevi
+Ramjibanpur	West Bengal	18318	
+Hutagalli	Karnataka	18308	
+Howli	Assam	18301	
+Daboh	Madhya Pradesh	18298	
+Talod	Gujarat	18298	
+Palugal	Tamil Nadu	18276	
+Inam Maniyachi	Tamil Nadu	18258	
+Ghogardiha	Bihar	18257	
+Vengikkal	Tamil Nadu	18244	
+Udaipura	Madhya Pradesh	18236	
+Behat	Uttar Pradesh	18223	Bekhat,behata,bei ha te
+Trikarpur North	Kerala	18210	North Thrikkaripur
+Khetri	Rajasthan	18209	kai te li,kherti,khetari
+Kheri Nangal	Haryana	18195	
+Pasthal	Maharashtra	18194	
+Kariapatti	Tamil Nadu	18191	Kariyapatti,Kariyapattinam
+Gairtganj	Madhya Pradesh	18184	Gairatganj,Ghairatganj
+Tezu	Arunachal Pradesh	18184	Teju,Teju Basha
+Jalali	Uttar Pradesh	18177	
+Gaurela	Chhattisgarh	18165	Gaurella
+Singampunari	Tamil Nadu	18143	Singampuneri,cinkampunari,singamapunari,sinhamapuneri,xin ge a mu pu nei li
+Moonak	Punjab	18141	
+Palayad	Kerala	18141	
+Vettaikkaranpudur	Tamil Nadu	18128	Vettagaranpudur,Vettakkaranpudur
+Pichor	Madhya Pradesh	18127	Pichhore
+Bakarwala	Delhi	18122	Bakkar Wala
+Koipadi	Kerala	18121	
+Machai	Karnataka	18073	Machche
+Eruvadi	Tamil Nadu	18067	
+Namminikara	Kerala	18067	Nenmenikkara
+Thara	Gujarat	18060	
+Jhalida	West Bengal	18057	
+Aurangabad Cantonment	Maharashtra	18051	
+Fatehgarh Churian	Punjab	18051	Chaurian Fatehgarh
+Kunnummal	Kerala	18031	
+Kattur	Kerala	18017	
+Vadamadurai	Tamil Nadu	18015	Vada-Madura,badamadura'i,vadamadura,vatamaturai,wa da ma du lai
+Tirumala	Andhra Pradesh	18013	Upper Tirupati
+Bhogpur	Punjab	18008	Bhogpur Sirwal
+Patiriyat	Kerala	18008	Pathiriyad
+Satyamangala	Karnataka	18002	
+Bhattiprolu	Andhra Pradesh	18001	
+Barjala	Tripura	17998	
+Nalloor	Tamil Nadu	17989	
+Mahishadal	West Bengal	17988	
+Sir Muttra	Rajasthan	17988	Sarmathura
+Dumjor	West Bengal	17972	Domjur
+Jadcherla	Telangana	17958	Jedcherla
+Noamundi	Jharkhand	17954	
+Barwala	Gujarat	17951	
+Narauli	Uttar Pradesh	17945	
+Arukutti	Kerala	17944	
+Murudeshwara	Karnataka	17938	Murudeshvara
+Nilokheri	Haryana	17938	Nilokeri,Nilokhera,Nilu Kheri
+Nateputa	Maharashtra	17930	
+Honnali	Karnataka	17928	
+Titabor Town	Assam	17920	
+Samdari	Rajasthan	17915	samadari
+Saiyad-ul-ajaib	Delhi	17914	Saidul Azaib
+Pudunagaram	Kerala	17892	Pudunagram,Puthunagaram
+Bayad	Gujarat	17886	Baad
+Kanjari	Gujarat	17881	
+Vadlapudi	Andhra Pradesh	17881	
+Bhindar	Rajasthan	17878	
+Piranvadi	Karnataka	17874	Peeranwadi
+V.S.K.Valasai (Dindigul-Dist.)	Tamil Nadu	17865	V.S.K.Valasai
+Handia	Uttar Pradesh	17861	
+Avalepalli	Tamil Nadu	17859	
+Narasimhanaickenpalayam	Tamil Nadu	17858	Narasimhanaicken-palayam
+Adiyanuthu	Tamil Nadu	17851	
+Sarai Mir	Uttar Pradesh	17849	Khud Kashta
+Tral	Jammu and Kashmir	17844	
+Akalkuva	Maharashtra	17840	Akkalkuwa,Makranifali
+Bhikhi	Punjab	17825	
+Silappadi	Tamil Nadu	17824	
+Kulattuppalaiyam	Tamil Nadu	17819	Kolathupalayam
+Ramachettipalaiyam	Tamil Nadu	17809	Perur Chettipalayam
+Bilgi	Karnataka	17792	Bilg
+Nagamangala	Karnataka	17776	
+Shahpur	Bihar	17767	
+Damnagar	Gujarat	17766	
+Manalur	Kerala	17757	
+Ambaji	Gujarat	17753	
+Kannod	Madhya Pradesh	17744	
+Jagiroad	Assam	17739	
+Patdi	Gujarat	17725	
+Mahudha	Gujarat	17722	
+Chettinayakkanpatti	Tamil Nadu	17701	Chettinaickenpatti
+Gotan	Rajasthan	17700	Gothan
+Mangalam	Tamil Nadu	17699	
+Peddanayakkanpalaiyam	Tamil Nadu	17678	Pethanaickenpalayam
+Bhuwana	Rajasthan	17665	
+Kothanallur	Tamil Nadu	17662	
+Balugan	Odisha	17645	Balugaon
+Kherli	Rajasthan	17634	
+Rahimatpur	Maharashtra	17633	Rahunatpur,Rakhimatpur,la xi ma te pu er,rahimatapura,rhmt pwr
+Nangavaram	Tamil Nadu	17629	
+Padmapur	Odisha	17625	pa de ma pu er,paddomapuru,padeumapuleu,padmapura,padmapwr,patmapur
+Pipili	Odisha	17623	Pipli,pi pi li,pipali,pipiri
+Koratti	Kerala	17618	
+Vittal	Karnataka	17618	Vitla
+Chaita	Bihar	17613	
+Shirhatti	Karnataka	17610	
+Devgarh	Rajasthan	17604	Deogarh
+Bargi	Madhya Pradesh	17588	
+Jarwal	Uttar Pradesh	17576	
+Nichlaul	Uttar Pradesh	17567	nchlwl,ni qi lao er,nicalaula,niclaula
+Kanke	Jharkhand	17560	
+Vazhapadi	Tamil Nadu	17559	
+Achhibal	Jammu and Kashmir	17556	Acchabal,Achabal,Achhabal,Achhawal,Achhiwal
+Papanasam	Tamil Nadu	17548	Pavanasi,pa pa na sa mu,papanacam
+Kodoli	Maharashtra	17537	
+Raipur	Rajasthan	17537	
+Tajpur	Uttar Pradesh	17529	
+Banki	Odisha	17521	Bankigarh
+Settiyarpatti	Tamil Nadu	17520	Chettiarpatti
+North Guwahati	Assam	17516	North Gauhati
+Madhuban	Bihar	17510	
+Banapur	Odisha	17499	Banpur
+Jatara	Madhya Pradesh	17499	
+Palera	Madhya Pradesh	17493	pa lai la
+Indri	Haryana	17487	Ramgarh,yi en de li
+Bodri	Chhattisgarh	17481	
+Kallur Tekkumuri	Kerala	17480	
+Pennagaram	Tamil Nadu	17480	
+Dharmapuram	Tamil Nadu	17476	
+Depalpur	Madhya Pradesh	17474	
+Mundwa	Rajasthan	17465	
+Auhammadpur Majri	Delhi	17462	Mohammad Pur Majri
+Tadigadapa	Andhra Pradesh	17462	
+Calangute	Goa	17446	Kalangut
+Sarai Akil	Uttar Pradesh	17443	
+Nisang	Haryana	17438	Nissing
+Panoor	Kerala	17438	
+Amet	Rajasthan	17434	a mei te,ameta,ameteu,ametto,amyt,meta
+Bareta	Punjab	17432	
+Kavisuryanagar	Odisha	17430	
+Puthur	Kerala	17430	
+Hat Piplia	Madhya Pradesh	17419	Hatpiplya
+Bhundsi	Haryana	17410	Bhondsi
+Naregal	Karnataka	17403	
+Bermo	Jharkhand	17401	
+Khongapani	Chhattisgarh	17400	
+Bagdogra	West Bengal	17372	Baghdogra,ba ge duo ge la,bagadogara,baggudogura,baghdwghra,bajdwjra
+Indergarh	Uttar Pradesh	17366	
+Lasalgaon	Maharashtra	17360	
+Edakkazhiyur	Kerala	17335	
+Phirangipuram	Andhra Pradesh	17335	
+Narsala	Maharashtra	17330	
+Keezhkulam	Tamil Nadu	17327	
+Jalalpore	Gujarat	17325	Jalalpur,Surat
+Chhala	Gujarat	17323	
+Sivagirippatti	Tamil Nadu	17306	
+Athagarh	Odisha	17304	Athagad,Athgarh
+Lakhnadon	Madhya Pradesh	17302	
+Takhatgarh	Rajasthan	17285	Takkhatgarkh,ta ka te jia er,takhatagara,takhatagarha
+Talwandi Bhai	Punjab	17285	
+Mulki	Karnataka	17274	
+Kattatturai	Tamil Nadu	17271	
+Bhanpuri	Chhattisgarh	17270	
+Kulasegaram	Tamil Nadu	17267	Kulasekharam
+Deori	Chhattisgarh	17265	
+Nilagiri	Odisha	17264	Nilgiri,Raj Nilgiri,ni la ji li,nilakiri,nillagili,niragiri,nylajyry
+Mannarai	Tamil Nadu	17261	
+Ajara	Maharashtra	17257	Ajra
+Bhikshandarkovil	Tamil Nadu	17257	Pichandarkovil
+Jagalur	Karnataka	17257	
+Palangarai	Tamil Nadu	17248	
+Virajpet	Karnataka	17246	Virarajendrapet
+Narnaund	Haryana	17242	
+Pudur	Tamil Nadu	17240	Mettunasuvanpalayam
+Balugaon	Odisha	17238	
+Iriveri	Kerala	17231	
+Alnavar	Karnataka	17228	
+Bilthra	Uttar Pradesh	17228	Belthara,Bilthar
+Anaimalai	Tamil Nadu	17208	Anaimalais,Anamalai,Anamalais,a nai ma lai,anaimali,anaymalay,anemala'i,animala'i
+Guru Har Sahai	Punjab	17192	
+Tangla	Assam	17183	
+Mendarda	Gujarat	17166	
+Taleigao	Goa	17148	
+Jawad	Madhya Pradesh	17129	javada
+Basukinath	Jharkhand	17123	
+Uttarkashi	Uttarakhand	17123	Barahat
+Rajgarh	Madhya Pradesh	17113	
+Ayyalur	Tamil Nadu	17100	
+Kolaccheri	Kerala	17095	Kolacherry
+Naranammalpuram	Tamil Nadu	17094	
+Chalakilakakara	Kerala	17088	Chala
+Shaktinagar	Karnataka	17088	
+Amroli	Gujarat	17082	
+Chalala	Gujarat	17081	
+Samalka	Delhi	17076	Samalkha,Sambhalka
+Meppadam	Kerala	17067	Mannar
+Madambakkam	Tamil Nadu	17058	
+Nongpoh	Meghalaya	17055	Nongpokh,nampo,nangapo,nanpo,nomgapoha,nonapoha,nong bo,nong ge bo,nongapo
+Mahiari	West Bengal	17051	
+Naraina	Rajasthan	17048	
+Kokotamangalam South	Kerala	17047	Kokkothamangalam
+Teonthar	Madhya Pradesh	17039	Teontkhar,tai ao en ta er,te'onathara,te-onssaleu,tentar,teonsaru,tinathara,tinthar,tyonthara
+Jigani	Karnataka	17036	
+Nayagarh	Odisha	17030	
+Kusum Pur	Delhi	17028	
+Eravattur	Kerala	17016	
+Nawabganj	Uttar Pradesh	17015	
+Maghar	Uttar Pradesh	17011	Magkhar,Mankar,magahara,maghara,maqar
+Varam	Kerala	17008	
+Ongallur-I	Kerala	16998	
+Bicholim	Goa	16986	Bicholim Town,Cassabe de Bicholim,Dicholi,bi qiao li mu,bicolim,bicolima,bikollim,bikorimu,bychwlym,dicoli,divacala,piccolim
+Hukumpeta	Andhra Pradesh	16985	
+Valvachatottam	Tamil Nadu	16965	Valvaithankoshtam
+Bijaipur	Madhya Pradesh	16964	Vijaypur
+Garhshankar	Punjab	16955	Garshankar
+Dirba	Punjab	16952	
+Ranpur	Gujarat	16944	Ranpur Kathiawar,Rennur
+Dukli	Tripura	16941	
+Manjhanpur	Uttar Pradesh	16939	Mandzhkhanpur,man zhan pu er,manajahanapura,manajhanapura,manchanpuleu,manhanpur,manj'hanpur,manjanpuru,manjhanapura,manjhanapuram
+Mihona	Madhya Pradesh	16935	Mehona,Mikhona,mi huo na
+Gothara	Rajasthan	16933	Gothra
+Makum	Assam	16923	Makum-Junction
+Kalghatgi	Karnataka	16917	
+Eruvatti	Kerala	16905	
+Merta Road	Rajasthan	16905	
+Tanakpur	Uttarakhand	16905	
+Undera	Gujarat	16902	
+Khed	Maharashtra	16892	
+Kutiyana	Gujarat	16877	Kuntiyana,Kurtiyana
+Sultanpur	Punjab	16877	Sultanpur Lodhi
+Ahor	Rajasthan	16867	Ahore
+Siralkoppa	Karnataka	16864	Siraikoppa
+Sithurajapuram	Tamil Nadu	16860	
+Vandalur	Tamil Nadu	16852	
+Moreh	Manipur	16847	
+Chelamartam	Kerala	16844	Chelamattom
+Challapalle	Andhra Pradesh	16841	Challapalli
+Konarka	Odisha	16834	Kanarak,Konarak,Konark,Swiatynia Surji w Konarak,ke na er ke
+Gandevi	Gujarat	16827	Ganadevi
+Acharipallam Vaniyakudi	Tamil Nadu	16822	Asaripallam
+Peralassery	Kerala	16821	
+Bara Uchana	Haryana	16815	Uchana
+Arkalgud	Karnataka	16810	
+Kamakhyanagar	Odisha	16810	Murhi
+Budhni	Madhya Pradesh	16808	Budni
+Pinarayi	Kerala	16801	
+Pachchal	Tamil Nadu	16789	
+Navalpattu	Tamil Nadu	16788	
+Vathirairuppu	Tamil Nadu	16784	
+Sivagiri	Tamil Nadu	16779	
+Bawal	Haryana	16776	
+Hanumana	Madhya Pradesh	16771	Hanummana
+Porathissery	Kerala	16768	
+Vallam	Tamil Nadu	16758	
+Amta	West Bengal	16753	
+Vada	Maharashtra	16750	
+Kadod	Gujarat	16747	
+Valavanur	Tamil Nadu	16745	balabanura,valavanura,wa la wa nu er
+Khapat	Gujarat	16744	
+Babai	Madhya Pradesh	16741	
+Andada	Gujarat	16730	
+Beri Khas	Haryana	16727	Beri
+Dera Mandi	Delhi	16725	Dera
+Chanaje	Maharashtra	16714	Chanje
+Samburvadakara	Tamil Nadu	16709	Sambavar Vadagarai
+Thorapadi	Tamil Nadu	16700	
+Karingal	Tamil Nadu	16691	
+Nal Khera	Madhya Pradesh	16690	Nalkheda,Nalkhera
+Piriyapatna	Karnataka	16685	
+Nohsa	Bihar	16680	
+Phaphund	Uttar Pradesh	16675	
+Sarangpore	Gujarat	16671	
+Babrala	Uttar Pradesh	16670	
+Virnur	Tamil Nadu	16665	Veerakkalpudur
+Ajaigarh	Madhya Pradesh	16656	
+Baihar	Madhya Pradesh	16650	Baikhar,Bajkhar,ba'ihara,bai ha er,baihaleu,baihara,baiharu,bihar,paihar
+Malihabad	Uttar Pradesh	16649	
+Jhusi	Uttar Pradesh	16642	Pratishthanpur
+Trajpar	Gujarat	16637	
+Pudusseri	Kerala	16629	Pudussery Central
+Pattamadai	Tamil Nadu	16625	
+Cuncolim	Goa	16623	
+Pathalgaon	Chhattisgarh	16613	Pathargaon
+Asind	Rajasthan	16611	
+Baliguda	Odisha	16611	Baligurha,Baljiguda,Balliguda,baligura
+Vaghodia	Gujarat	16604	Waghoria
+Nazareth	Tamil Nadu	16584	Nazerath
+Samurou	Manipur	16582	
+Madhuban	Tripura	16579	
+Lalpettai	Tamil Nadu	16561	Lalpet
+Salumbar	Rajasthan	16557	
+Sonkach	Madhya Pradesh	16545	Sonkatch
+Jambai	Tamil Nadu	16522	
+Kotekara	Karnataka	16505	
+Chandameta	Madhya Pradesh	16497	
+Kiphire	Nagaland	16487	
+Khatra	West Bengal	16484	
+Goraya	Punjab	16462	
+Sundakkampalaiyam	Tamil Nadu	16459	Kanakkampalayam
+Sindkhed Raja	Maharashtra	16434	
+Susner	Madhya Pradesh	16432	cucanner,seoseuneo,su si na er,su si nei er,susanera,susnar,susune,swsnyr
+Bharwari	Uttar Pradesh	16411	
+Chendrappini	Kerala	16404	
+Rani Khera	Delhi	16402	
+Bhainsdehi	Madhya Pradesh	16400	Bkhainsdekhi,Bkhajnsdekhi,bai en si de xi,baijendei,bainsudehi,bhainasadehi,bhainsadehi,payncatehi
+Kankauli	Maharashtra	16398	Kankavali,Kankavli
+Gokavaram	Andhra Pradesh	16389	Gokaram
+Padampur	Odisha	16387	Podampur
+Curti	Goa	16385	karti,kurti,qiu er di
+Nambiyur	Tamil Nadu	16379	
+Lochapada	Odisha	16377	
+Bargur	Tamil Nadu	16366	Barguru
+Dharampuri	Madhya Pradesh	16363	
+Shopian	Jammu and Kashmir	16360	Shupiyan,Shupiyon,shwbyan,sopiyam
+Mullanpur	Punjab	16356	Mullanpur Dakha
+Uttukuli	Tamil Nadu	16354	Zamin Uthukuli
+Kandari	Maharashtra	16353	
+Khada	Uttar Pradesh	16350	
+Jasidih	Jharkhand	16338	gu xi di,jasid'iha,jasidi,jasidiha,jie xi di
+Kargil	Ladakh	16338	ka er ji er,karagila,kargilanagaram,kargl,karkil,krghyl
+Kotaparh	Chhattisgarh	16326	Kotapad,Kotpad
+Chakulia	Jharkhand	16306	Chakuha
+Shahgarh	Madhya Pradesh	16300	
+Kadamakudi	Kerala	16295	Kadamakkudy
+Annamalainagar	Tamil Nadu	16289	Anamalainagar,Annamalai
+Ambasa	Tripura	16285	Ambassa
+Arumanai	Tamil Nadu	16283	
+Anandpur	Punjab	16282	Anandpur Sahib
+Omalur	Tamil Nadu	16279	
+Hatti	Karnataka	16278	Hutti
+Chennimalai	Tamil Nadu	16268	
+Madukkur	Tamil Nadu	16266	
+Bahula	West Bengal	16264	
+Ayyampettai	Tamil Nadu	16263	
+Naroli	Dadra and Nagar Haveli and Daman and Diu	16260	Norali,Noroli
+Nuh	Haryana	16260	
+Thimiri	Tamil Nadu	16246	Timiri
+Ellakkudi	Tamil Nadu	16244	
+Kamalganj	Uttar Pradesh	16222	
+Bhikangaon	Madhya Pradesh	16217	
+Neelagiri	Tamil Nadu	16197	
+Jalakandapuram	Tamil Nadu	16184	Jalakantapuram,gu la kan da pu la mu,jalakandapurama,jlakndpram
+Mullanwala	Punjab	16183	Mallanwala,Mallanwala Khass
+Pandaria	Chhattisgarh	16165	Pandariya
+Thiruvaiyaru	Tamil Nadu	16164	Tiruvadi
+Elandakuttai	Tamil Nadu	16160	Ellandaikuttai
+Sanwer	Madhya Pradesh	16150	Sawer
+Nallavila	Tamil Nadu	16138	Nullivilai
+Kamayakkavundanpatti	Tamil Nadu	16134	Kamayagoundanpatti
+Bijapur	Chhattisgarh	16129	Bajapur,Byapur
+Kuthalam	Tamil Nadu	16125	
+Chengalam	Kerala	16111	Chengalam South
+Cherukunnu	Kerala	16111	
+Kuda	Nagaland	16108	
+Chevvoor	Kerala	16086	
+Vaniyamkulam	Kerala	16085	Vaniyamkulam- II,Variyamkulam
+Tevaram	Tamil Nadu	16079	Tawarum,Thevaram
+Bhiloda	Gujarat	16074	
+Shahi	Uttar Pradesh	16064	
+Kedia	Jharkhand	16054	Kedla
+Simga	Chhattisgarh	16027	cimka,shimuga,sigma,simaga,smga,xi mu jia
+Kandamkunnu	Kerala	16025	
+Kudal	Maharashtra	16015	
+Utnur	Telangana	16005	
+Hindoria	Madhya Pradesh	16001	hinadoriya,hindoriya,xi en duo li ya
+Betma	Madhya Pradesh	15999	
+Kappiyara	Tamil Nadu	15998	
+Vellakkinar	Tamil Nadu	15998	
+Balaungi	Punjab	15982	Balongi
+Hajo	Assam	15977	Nij Hajo
+Maliya	Gujarat	15964	Malia,Mallia
+Kombai	Tamil Nadu	15960	Komebai
+Asara	Uttar Pradesh	15959	
+Koothappar	Tamil Nadu	15943	
+Udalguri	Assam	15935	
+Vaso	Gujarat	15934	
+Chanasma	Gujarat	15932	
+Boothapandi	Tamil Nadu	15931	
+Bharanikavu Tekku	Kerala	15922	Bharanikkavu
+Rura	Uttar Pradesh	15908	
+Bunjwah	Jammu and Kashmir	15899	Bounjwah
+Chandia	Madhya Pradesh	15891	
+Vijayapuri North	Telangana	15887	
+Khaniadhana	Madhya Pradesh	15877	
+Kannampalaiyam	Tamil Nadu	15868	
+Pipraich	Uttar Pradesh	15856	pi pu lai qi,pipara'ica,pypraych
+Abhayapuri	Assam	15847	
+Srivaikuntam	Tamil Nadu	15847	
+Sunel	Rajasthan	15840	sunela
+Sisauli	Uttar Pradesh	15837	sisa'uli,syswly,xi shao li
+Unhel	Madhya Pradesh	15837	
+Marattakara	Kerala	15817	Marathakkara
+Vadakkekkad	Kerala	15811	
+Domchanch	Jharkhand	15809	
+Molakalumuru	Karnataka	15797	
+Jalda	Odisha	15789	
+Jodiya Bandar	Gujarat	15788	Jodiya
+Dera Colliery Township	Odisha	15787	
+Holalkere	Karnataka	15783	Kholalkere,holalakera,holalakere,holalkire,hollalkeoleo,hou la ke li,huo la er kai lei,karimupongu
+Dumra	Bihar	15778	damra,du mu la,dumara,tumra
+Pudukkottai	Tamil Nadu	15769	Nagamalaipudukottai
+Mennanyam	Kerala	15768	Menhaniam
+Binika	Odisha	15765	Binka,bi ni ka
+Sonpet	Maharashtra	15765	Sonepet,Sonepett,Sonpeth
+Bangarda	Madhya Pradesh	15761	Bangarda Bada
+Dharni	Madhya Pradesh	15761	
+Thandla	Madhya Pradesh	15756	
+Khuldabad	Maharashtra	15749	Rauza
+Elumalai	Tamil Nadu	15746	ai lu ma lai,elumala'i
+Khetia	Maharashtra	15744	Kkhetia,kai di ya,khetiya
+Bhudgaon	Maharashtra	15738	Budhgaon
+Khusropur	Bihar	15731	Khusrupur
+Yerkhera	Maharashtra	15727	
+Khatima	Uttarakhand	15714	
+Bari Sadri	Rajasthan	15713	
+Dapoli	Maharashtra	15713	Dapoli Camp,Gimhavane
+Kumarapalaiyam	Tamil Nadu	15706	Ariyappampalayam
+Kabilpor	Gujarat	15699	
+Periyapatti	Tamil Nadu	15690	
+Yamjal	Telangana	15689	Turkayamjal,Yemjal
+Rahon	Punjab	15676	Rabon
+Vadakancheri	Kerala	15674	Vadakancheri-Cochin,Vadakkancheri,Wadakkanchery
+Bagar	Rajasthan	15670	
+Manaveli	Puducherry	15666	
+Manthani	Telangana	15661	
+Vidyavihar	Rajasthan	15644	
+Neb Sarai	Delhi	15640	
+Bina	Bihar	15633	
+Lakhipur	Assam	15633	
+Panangad	Kerala	15630	
+Chokkanathapuram	Tamil Nadu	15625	Melachokkanathapuram
+Kamatgi	Maharashtra	15620	
+Khutar	Uttar Pradesh	15618	
+Satalkheri	Rajasthan	15617	
+Maval	Maharashtra	15612	Kusgaon Budruk
+Kasara	Maharashtra	15611	Kasara Budruk
+Agaram	Tamil Nadu	15610	
+Baben	Gujarat	15610	
+Narayankher	Telangana	15610	Narayankhed
+Salangaippalaiyam	Tamil Nadu	15609	Salangapalayam
+Baberu	Uttar Pradesh	15607	
+Danta	Rajasthan	15594	
+Badshahpur	Haryana	15593	
+Chengala	Kerala	15588	
+Haripad	Kerala	15588	
+Gulgam	Jammu and Kashmir	15587	Trehgam
+Kuchinda	Odisha	15576	Kochinda
+Husainpur	Punjab	15575	
+Kompalli	Telangana	15575	
+Kalher	Maharashtra	15573	
+Tosham	Haryana	15559	Tosbam
+Ponmana	Tamil Nadu	15554	
+Sanjan	Gujarat	15544	
+Bilsanda	Uttar Pradesh	15538	
+Leteri	Madhya Pradesh	15519	
+Vettavalam	Tamil Nadu	15506	
+Mani Majra	Haryana	15489	
+Kurwai	Madhya Pradesh	15487	
+Taranagar	Tripura	15481	
+Kosigi	Andhra Pradesh	15455	Kesigi,Kosgi
+Brahmanan di Bari	Jammu and Kashmir	15453	Bari Brahamana
+Tindal	Tamil Nadu	15440	Thindal
+Kalugumalai	Tamil Nadu	15423	Kalugumali
+Tirthahalli	Karnataka	15422	
+Ajeetgarh	Rajasthan	15414	
+Parvatsar	Rajasthan	15405	Parbatsar
+Kachhwa	Uttar Pradesh	15381	
+Ramachandrapuran	Telangana	15381	Ramachandrapuram BHEL Township
+Rampur	Odisha	15379	Rairakhol,Ranpur,Redhakhol
+Sayla	Gujarat	15376	
+Seoni Chhapara	Madhya Pradesh	15371	Dungaria Chhapara,Seoni
+Purushottampur	Odisha	15366	Purusottampur
+Bah	Uttar Pradesh	15359	Bakh,ba zhen,baha,bhaha,pah
+Kanhirode	Kerala	15353	
+Davorlim	Goa	15350	
+Dornakal	Telangana	15350	
+Morampudi	Andhra Pradesh	15346	
+Penha de Franca	Goa	15342	
+Kanchanpur	Tripura	15341	
+Badgam	Jammu and Kashmir	15338	Badgom,badjam,bdgham
+Palaiyam	Tamil Nadu	15336	
+Pappinivattom	Kerala	15336	
+Mirganj	Uttar Pradesh	15335	
+Darasuram	Tamil Nadu	15326	Dharasuram
+Kushalnagar	Karnataka	15326	Fraserpet
+Sayan	Gujarat	15324	cayan,sa yan,sayana
+Katangi	Madhya Pradesh	15321	
+Bhauri	Rajasthan	15312	Bhavri
+Kathor	Gujarat	15311	
+Villukuri	Tamil Nadu	15304	
+Baonli	Rajasthan	15300	Kasba Bonli
+Bantva	Gujarat	15291	Bantwa
+Chimbel	Goa	15289	
+Dalkola	West Bengal	15285	
+Srivardhan	Maharashtra	15279	Savardhan,Shriwardham
+Vilattikulam	Tamil Nadu	15277	Vilatikulam
+Koratagere	Karnataka	15265	Kotagere,ke la ta gai lei,kolatajieo,koratagea,koratagera,koratageri,korattakere,kwratagrh,kwratajyry
+Thekkumkara	Kerala	15258	
+Bommasandra Industrial Area	Karnataka	15254	Bommasandra
+Kudali	Kerala	15236	Koodali
+Yadagirigutta	Telangana	15232	
+Mulanur	Tamil Nadu	15223	
+Ichhawar	Madhya Pradesh	15221	
+Saram	Jharkhand	15212	
+Jugial	Punjab	15210	
+Goniana Mandi	Punjab	15208	Goniana
+Gangolli	Karnataka	15200	Ganguli
+R.S. Pora	Jammu and Kashmir	15197	
+Niz-Hajo	Assam	15188	
+Kilattingal	Kerala	15185	Keezhattingal
+Kangeyanallur	Tamil Nadu	15177	
+Buguda	Odisha	15176	
+Khapa	Maharashtra	15175	
+Petlawad	Madhya Pradesh	15174	
+Mahabalipuram	Tamil Nadu	15172	Mahabalipur,Mahaballipuram,Mahapalipuram,Makhabalipuram,Mamallapuram,Seven Pagodas
+Ghantapada	Odisha	15169	
+Sultan Pur	Delhi	15160	
+Lormi	Chhattisgarh	15156	
+Ottakkadai	Tamil Nadu	15152	Othakadai
+Korwai	Madhya Pradesh	15136	
+Kenda	West Bengal	15131	
+Ayikudi	Tamil Nadu	15129	Aygudi
+Karamuck	Kerala	15129	
+Pupri	Bihar	15129	Janakpur Road
+Saligram	Karnataka	15123	
+Shrivardhan	Maharashtra	15123	
+Garot	Madhya Pradesh	15122	Garoth
+Phek	Manipur	15118	Pkhek,fekku,pa ke,pheka,pheka jila,pihek
+Sorada	Odisha	15117	Surada
+Kizhariyur	Kerala	15116	Keezhariyur
+Kharhial	Odisha	15087	Khariar
+Tirunageswaram	Tamil Nadu	15082	Thirunageswaram
+Naraini	Madhya Pradesh	15077	
+Lalpur	Gujarat	15076	
+Amingarh	Karnataka	15073	Aminagad,Amingad
+Panth Piplia	Madhya Pradesh	15070	Piplya Mandi
+Usehat	Uttar Pradesh	15068	
+Alur	Tamil Nadu	15063	
+Pachperwa	Uttar Pradesh	15056	
+Sumbal	Jammu and Kashmir	15041	
+Misrikh	Uttar Pradesh	15007	
+Ūn	Uttar Pradesh	15007	
+Kaveripatnam	Tamil Nadu	15006	Kaveripattinam,Kaverippattanam
+Ahwa	Gujarat	15004	

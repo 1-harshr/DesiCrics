@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.profile
+import com.harsh.desicrics.ui.components.CityField
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 
 import androidx.compose.animation.AnimatedVisibility
@@ -192,13 +193,12 @@ internal fun AboutSection(state: ProfileFormState, onUpdate: ((ProfileFormState)
                 color = DesiTheme.colors.muted,
             )
         }
-        DesiTextField(
+        CityField(
             value = state.city,
             onValueChange = { value -> onUpdate { it.copy(city = value) } },
             label = stringResource(Res.string.profile_city_label),
             leadingIcon = DesiIcons.Location,
             error = invalid?.takeIf { it == ProfileError.CITY_TOO_LONG }?.let { stringResource(it.label) },
-            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
         )
     }
 }

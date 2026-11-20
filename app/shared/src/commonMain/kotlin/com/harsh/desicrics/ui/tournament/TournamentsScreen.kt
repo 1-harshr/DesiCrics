@@ -1,4 +1,6 @@
 package com.harsh.desicrics.ui.tournament
+import androidx.compose.foundation.layout.imePadding
+import com.harsh.desicrics.ui.components.CityField
 import com.harsh.desicrics.designsystem.component.LocalNavBarClearance
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.component.ErrorState
@@ -102,7 +104,7 @@ fun TournamentsContent(
     val space = DesiTheme.space
     DesiScaffold(title = stringResource(Res.string.tournaments_title), onBack = onBack) { padding ->
         LazyColumn(
-            Modifier.fillMaxSize().padding(padding),
+            Modifier.fillMaxSize().padding(padding).imePadding(),
             contentPadding = PaddingValues(start = space.screen, top = space.s4, end = space.screen, bottom = space.s4 + LocalNavBarClearance.current),
             verticalArrangement = Arrangement.spacedBy(space.s3),
         ) {
@@ -123,13 +125,12 @@ fun TournamentsContent(
             if (!state.loadFailed) {
                 item { SectionHeader(stringResource(Res.string.tournaments_open), icon = DesiIcons.PersonAdd, modifier = Modifier.padding(top = space.s2)) }
                 item {
-                    DesiTextField(
+                    CityField(
                         value = state.city,
                         onValueChange = onCity,
                         label = stringResource(Res.string.community_city),
                         leadingIcon = DesiIcons.Location,
                         supportingText = stringResource(Res.string.tournaments_open_anywhere).takeIf { state.city.isBlank() },
-                        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                     )
                 }
                 // The user's own tournaments are listed above already.
@@ -221,12 +222,7 @@ private fun CreateTournamentSheet(saving: Boolean, failed: Boolean, onCreate: (C
             label = stringResource(Res.string.tournament_name),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
         )
-        DesiTextField(
-            value = city,
-            onValueChange = { city = it.take(100) },
-            label = stringResource(Res.string.tournament_city),
-            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
-        )
+        CityField(value = city, onValueChange = { city = it }, label = stringResource(Res.string.tournament_city))
         SectionHeader(stringResource(Res.string.tournament_format), icon = DesiIcons.Trophy)
         ChoiceChips(TournamentFormat.entries, selected = format, label = { stringResource(it.label) }, onSelect = {
             format = it

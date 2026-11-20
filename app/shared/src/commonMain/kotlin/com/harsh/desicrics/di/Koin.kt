@@ -1,6 +1,7 @@
 package com.harsh.desicrics.di
 
 import com.harsh.desicrics.data.AuctionRepository
+import com.harsh.desicrics.data.CityRepository
 import com.harsh.desicrics.data.AuthRepository
 import com.harsh.desicrics.data.CommunityRepository
 import com.harsh.desicrics.data.MatchRepository
@@ -80,6 +81,7 @@ val dataModule = module {
     singleOf(::StatsRepository)
     singleOf(::CommunityRepository)
     singleOf(::AuctionRepository)
+    singleOf(::CityRepository)
     single { ThemePreference(Settings()) }
     single { ModePreference(Settings()) }
 }
