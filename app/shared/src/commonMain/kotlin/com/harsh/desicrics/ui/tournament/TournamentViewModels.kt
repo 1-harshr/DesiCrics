@@ -9,12 +9,14 @@ import com.harsh.desicrics.data.TeamRepository
 import com.harsh.desicrics.data.TournamentRepository
 import com.harsh.desicrics.model.AuctionDetails
 import com.harsh.desicrics.model.EntryPolicy
+import com.harsh.desicrics.model.EntryStatus
 import com.harsh.desicrics.model.PlayerSummary
 import com.harsh.desicrics.model.SavedTeam
 import com.harsh.desicrics.model.TeamRole
 import com.harsh.desicrics.model.TeamSummary
 import com.harsh.desicrics.model.TournamentDetails
 import com.harsh.desicrics.model.TournamentPlayer
+import com.harsh.desicrics.model.TournamentTeam
 import com.harsh.desicrics.model.TournamentSummary
 import com.harsh.desicrics.ui.teams.attempt
 import kotlinx.coroutines.Job
@@ -102,6 +104,9 @@ data class TournamentUiState(
 
     fun runs(teamId: String): Boolean = myTeams.any { it.id == teamId && it.myRole == TeamRole.ADMIN }
 
+    /** Teams the caller runs that an organiser invited, waiting for them to accept. */
+    val myInvites: List<TournamentTeam> get() = details?.tournament?.teams.orEmpty().filter { it.status == EntryStatus.INVITED && runs(it.teamId) }
+
     /**
      * Teams that aren't in yet. Organisers can enter any team, so they also get what they searched for;
      * anyone else can only register a team they run.
@@ -174,7 +179,22 @@ class TournamentViewModel(
         }
     }
 
-    fun enterTeam(teamId: String) = act { repository.enterTeam(tournamentId, teamId) }
+    fun enterTeam(teamId: String, invite: Boolean = false) = act { repository.enterTeam(tournamentId, teamId, invite) }
+
+    fun acceptTeamInvite(teamId: String) = act { repository.acceptTeamInvite(tournamentId, teamId) }
+
+    fun withdrawTeam(teamId: String) = act { repository.withdrawTeam(tournamentId, teamId) }
+
+    fun acceptInvite() {
+        val me = _state.value.myId ?: return
+        act { repository.acceptPlayerInvite(tournamentId, me) }
+    }
+
+    /** The caller leaves the tournament as a player, or turns down an invite. */
+    fun leave() {
+        val me = _state.value.myId ?: return
+        act { repository.removePlayer(tournamentId, me) }
+    }
 
     fun review(teamId: String, confirm: Boolean) = act { repository.review(tournamentId, teamId, confirm) }
 
@@ -189,7 +209,7 @@ class TournamentViewModel(
     fun joinAsPlayer() = act { repository.addPlayer(tournamentId) }
 
     /** An organiser adds anyone (to the pool, or a squad); a team's admin adds its members to its squad. */
-    fun addPlayer(profileId: String, teamId: String? = null) = act { repository.addPlayer(tournamentId, profileId, teamId) }
+    fun addPlayer(profileId: String, teamId: String? = null, invite: Boolean = false) = act { repository.addPlayer(tournamentId, profileId, teamId, invite) }
 
     fun placePlayer(profileId: String, teamId: String?) = act { repository.placePlayer(tournamentId, profileId, teamId) }
 

@@ -28,7 +28,13 @@ fun Route.tournamentRoutes(tournaments: TournamentService) {
         post { call.respond(HttpStatusCode.Created, tournaments.create(call.user, call.receive<CreateTournamentRequest>())) }
         route("/{id}") {
             get { call.respond(tournaments.details(call.parameters["id"].orEmpty())) }
-            post("/teams") { call.respond(tournaments.enterTeam(call.user, call.parameters["id"].orEmpty(), call.receive<EnterTeamRequest>().teamId)) }
+            post("/teams") {
+                val request = call.receive<EnterTeamRequest>()
+                call.respond(tournaments.enterTeam(call.user, call.parameters["id"].orEmpty(), request.teamId, request.invite))
+            }
+            post("/teams/{teamId}/accept") {
+                call.respond(tournaments.acceptTeam(call.user, call.parameters["id"].orEmpty(), call.parameters["teamId"].orEmpty()))
+            }
             put("/teams/{teamId}") {
                 val review = call.receive<ReviewEntryRequest>()
                 call.respond(tournaments.review(call.user, call.parameters["id"].orEmpty(), call.parameters["teamId"].orEmpty(), review.confirm))
@@ -42,6 +48,9 @@ fun Route.tournamentRoutes(tournaments: TournamentService) {
                 put("/{profileId}") {
                     val request = call.receive<PlacePlayerRequest>()
                     call.respond(tournaments.placePlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty(), request))
+                }
+                post("/{profileId}/accept") {
+                    call.respond(tournaments.acceptPlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty()))
                 }
                 delete("/{profileId}") {
                     call.respond(tournaments.removePlayer(call.user, call.parameters["id"].orEmpty(), call.parameters["profileId"].orEmpty()))

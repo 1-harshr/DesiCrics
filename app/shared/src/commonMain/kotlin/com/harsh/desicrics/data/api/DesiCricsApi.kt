@@ -272,8 +272,15 @@ class DesiCricsApi(
 
     suspend fun tournament(id: String): TournamentDetails = call { get("$baseUrl/tournaments/$id", it) }.body()
 
-    suspend fun enterTeam(id: String, teamId: String): TournamentDetails =
-        call { post("$baseUrl/tournaments/$id/teams") { it(); json(EnterTeamRequest(teamId)) } }.body()
+    suspend fun enterTeam(id: String, teamId: String, invite: Boolean = false): TournamentDetails =
+        call { post("$baseUrl/tournaments/$id/teams") { it(); json(EnterTeamRequest(teamId, invite)) } }.body()
+
+    suspend fun acceptTeamInvite(id: String, teamId: String): TournamentDetails = call { post("$baseUrl/tournaments/$id/teams/$teamId/accept", it) }.body()
+
+    suspend fun withdrawTeam(id: String, teamId: String): TournamentDetails = call { delete("$baseUrl/tournaments/$id/teams/$teamId", it) }.body()
+
+    suspend fun acceptPlayerInvite(id: String, profileId: String): TournamentDetails =
+        call { post("$baseUrl/tournaments/$id/players/$profileId/accept", it) }.body()
 
     suspend fun reviewEntry(id: String, teamId: String, confirm: Boolean): TournamentDetails =
         call { put("$baseUrl/tournaments/$id/teams/$teamId") { it(); json(ReviewEntryRequest(confirm)) } }.body()

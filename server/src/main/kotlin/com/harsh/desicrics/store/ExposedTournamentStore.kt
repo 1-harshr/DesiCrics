@@ -23,6 +23,7 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.isNull
+import org.jetbrains.exposed.v1.core.neq
 import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
@@ -255,9 +256,9 @@ class ExposedTournamentStore(private val db: Database) : TournamentStore {
                 it[seed] = team.seed
             }
         }
-        // Entries nobody confirmed don't play.
-        TournamentTeamsTable.deleteWhere { (TournamentTeamsTable.tournamentId eq tournamentId) and (status eq EntryStatus.PENDING) }
-        TournamentPlayersTable.deleteWhere { (TournamentPlayersTable.tournamentId eq tournamentId) and (status eq EntryStatus.PENDING) }
+        // Entries nobody confirmed, or invites nobody accepted, don't play.
+        TournamentTeamsTable.deleteWhere { (TournamentTeamsTable.tournamentId eq tournamentId) and (status neq EntryStatus.CONFIRMED) }
+        TournamentPlayersTable.deleteWhere { (TournamentPlayersTable.tournamentId eq tournamentId) and (status neq EntryStatus.CONFIRMED) }
         true
     }
 }

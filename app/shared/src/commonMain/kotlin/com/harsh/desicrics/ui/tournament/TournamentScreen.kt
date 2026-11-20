@@ -176,14 +176,22 @@ fun TournamentScreen(
         onRetry = viewModel::refresh,
         onAuction = { state.auction?.let { onOpenAuction(it.auction.id) } ?: viewModel.createAuction(onOpenAuction) },
         onAskAuction = viewModel::requestAuction,
-        onJoin = viewModel::joinAsPlayer,
-        onConfirmPlayer = { viewModel.placePlayer(it, null) },
-        onRemovePlayer = viewModel::removePlayer,
+        entry = EntryActions(
+            join = viewModel::joinAsPlayer,
+            acceptInvite = viewModel::acceptInvite,
+            leave = viewModel::leave,
+            acceptTeam = viewModel::acceptTeamInvite,
+            withdrawTeam = viewModel::withdrawTeam,
+            confirmPlayer = { viewModel.placePlayer(it, null) },
+            removePlayer = viewModel::removePlayer,
+        ),
     )
     when (val current = sheet) {
         null -> Unit
         TournamentSheet.EnterTeam -> DesiSheet(stringResource(Res.string.tournament_add_team), close, fullHeight = state.isOrganiser) {
+            var invite by remember { mutableStateOf(false) }
             if (state.isOrganiser) {
+                InviteChoice(invite, onSelect = { invite = it })
                 val focus = remember { FocusRequester() }
                 LaunchedEffect(Unit) { focus.requestFocus() }
                 DesiTextField(
@@ -196,7 +204,7 @@ fun TournamentScreen(
                 )
             }
             if (state.registrable.isEmpty() && !state.isOrganiser) EmptyState(DesiIcons.Shield, stringResource(Res.string.new_match_no_teams))
-            state.registrable.forEach { team -> TeamRow(team, onClick = { viewModel.enterTeam(team.id); close() }) }
+            state.registrable.forEach { team -> TeamRow(team, onClick = { viewModel.enterTeam(team.id, invite); close() }) }
         }
         TournamentSheet.AddOrganiser -> DesiSheet(stringResource(Res.string.tournament_add_organiser), close, fullHeight = true) {
             val focus = remember { FocusRequester() }
@@ -223,7 +231,7 @@ fun TournamentScreen(
                 state,
                 current.teamId,
                 onSearch = viewModel::searchPeople,
-                onAdd = { viewModel.addPlayer(it, current.teamId); close() },
+                onAdd = { profileId, invite -> viewModel.addPlayer(profileId, current.teamId, invite); close() },
                 onDismiss = close,
             )
         }
@@ -274,9 +282,7 @@ internal fun TournamentContent(
     onRetry: () -> Unit = {},
     onAuction: () -> Unit = {},
     onAskAuction: (requested: Boolean) -> Unit = {},
-    onJoin: () -> Unit = {},
-    onConfirmPlayer: (profileId: String) -> Unit = {},
-    onRemovePlayer: (profileId: String) -> Unit = {},
+    entry: EntryActions = EntryActions(),
 ) {
     val details = state.details
     val space = DesiTheme.space
@@ -334,7 +340,7 @@ internal fun TournamentContent(
             }
         }
         if (state.actionFailed) ErrorBanner(stringResource(Res.string.tournament_action_failed))
-        EntryCard(state, onEnterTeam = { onSheet(TournamentSheet.EnterTeam) }, onJoin = onJoin)
+        EntryCard(state, entry, onEnterTeam = { onSheet(TournamentSheet.EnterTeam) })
         if (state.auction != null || (state.isOrganiser && !t.started)) AuctionCard(state.auction, state.myId, state.isOrganiser, state.auctionSaving, onAuction, onAskAuction)
         val tabs = TournamentTab.entries.filter {
             when (it) {
@@ -361,8 +367,8 @@ internal fun TournamentContent(
                 TournamentTab.TABLE -> details.tables.forEachIndexed { group, table ->
                     PointsTable(table, if (details.tables.size > 1) group else null, t.advance) { fixtureTeam = it; tab = TournamentTab.FIXTURES }
                 }
-                TournamentTab.TEAMS -> Teams(state, onSheet, onStart, onReview, onOpenTeam)
-                TournamentTab.PLAYERS -> Players(state, onSheet, onConfirmPlayer, onRemovePlayer, onOpenPlayer)
+                TournamentTab.TEAMS -> Teams(state, onSheet, onStart, onReview, onOpenTeam, entry.withdrawTeam)
+                TournamentTab.PLAYERS -> Players(state, onSheet, entry, onOpenPlayer)
                 TournamentTab.STATS -> {
                     details.playerOfTournament?.let { best -> PlayerOfTournament(best, onOpenPlayer) }
                     Stats(details.keyStats, onOpenPlayer)
@@ -511,6 +517,7 @@ private fun ColumnScope.Teams(
     onStart: () -> Unit,
     onReview: (String, Boolean) -> Unit,
     onOpenTeam: (String) -> Unit,
+    onWithdraw: (String) -> Unit,
 ) {
     val t = state.details?.tournament ?: return
     if (state.isOrganiser && !t.started) {
@@ -531,7 +538,18 @@ private fun ColumnScope.Teams(
     }
     if (t.teams.isEmpty()) EmptyState(DesiIcons.Shield, stringResource(Res.string.tournament_not_started))
     else ListCard {
-        t.teams.forEachIndexed { index, team -> EntryRow(team, state.isOrganiser && !t.started, onReview, divider = index > 0, onClick = { onOpenTeam(team.teamId) }) }
+        t.teams.forEachIndexed { index, team ->
+            // A team's admins can take it out before the start; invites they answer from the card at the top.
+            val canWithdraw = !state.isOrganiser && !t.started && team.status != EntryStatus.INVITED && state.runs(team.teamId)
+            EntryRow(
+                team,
+                state.isOrganiser && !t.started,
+                onReview,
+                divider = index > 0,
+                onClick = { onOpenTeam(team.teamId) },
+                onWithdraw = if (canWithdraw) ({ onWithdraw(team.teamId) }) else null,
+            )
+        }
     }
     if (state.isOrganiser) {
         GhostButton(stringResource(Res.string.tournament_add_organiser), onClick = { onSheet(TournamentSheet.AddOrganiser) }, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Whistle)
@@ -555,15 +573,33 @@ private fun ColumnScope.Teams(
 }
 
 @Composable
-private fun EntryRow(team: TournamentTeam, canReview: Boolean, onReview: (String, Boolean) -> Unit, divider: Boolean, onClick: () -> Unit) {
+private fun EntryRow(
+    team: TournamentTeam,
+    canReview: Boolean,
+    onReview: (String, Boolean) -> Unit,
+    divider: Boolean,
+    onClick: () -> Unit,
+    onWithdraw: (() -> Unit)? = null,
+) {
     val pending = team.status == EntryStatus.PENDING
+    val invited = team.status == EntryStatus.INVITED
     ListRow(
         title = team.name,
         subtitle = team.group?.let { stringResource(Res.string.tournament_group, groupName(it)) },
         leading = { Avatar(team.name, size = 40) },
         // Nothing to show on the right leaves room for the chevron that says the row opens the team.
-        trailing = if (!canReview && !pending) null else ({
-            if (canReview && pending) {
+        trailing = if (!canReview && !pending && !invited && onWithdraw == null) null else ({
+            if (canReview && invited) {
+                TextButton(onClick = { onReview(team.teamId, false) }) {
+                    Text(stringResource(Res.string.entry_cancel_invite), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
+                }
+            } else if (invited) {
+                Tag(stringResource(Res.string.entry_invited_tag), tone = TagTone.BRAND, icon = DesiIcons.Mail)
+            } else if (onWithdraw != null) {
+                TextButton(onClick = onWithdraw) {
+                    Text(stringResource(Res.string.entry_withdraw), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
+                }
+            } else if (canReview && pending) {
                 TextButton(onClick = { onReview(team.teamId, false) }) {
                     Text(stringResource(Res.string.tournament_decline), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
                 }

@@ -509,4 +509,18 @@ class ScreenshotTest {
             {}, {}, {}, {}, {}, {}, { _, _ -> },
         )
     }
+
+    @Test
+    fun tournamentInviteForATeamAdmin() = shoot("tournament_entry_invited") {
+        val t = entryTournament()
+        TournamentContent(
+            TournamentUiState(
+                myId = "me",
+                loading = false,
+                details = TournamentDetails(t.copy(teams = t.teams + TournamentTeam("t9", "Juhu Kings", 4, status = EntryStatus.INVITED))),
+                myTeams = listOf(TeamSummary("t9", "Juhu Kings", "Mumbai", 11, myRole = TeamRole.ADMIN)),
+            ),
+            {}, {}, {}, {}, {}, {}, { _, _ -> },
+        )
+    }
 }

@@ -101,15 +101,27 @@ internal fun EntrySettingsSheet(tournament: Tournament, onSave: (EntryPolicy, En
 internal fun entrySummary(t: Tournament): String =
     stringResource(Res.string.entry_summary, stringResource(t.teamEntry.label), stringResource(t.playerEntry.label))
 
+/** What people do about their entries; the screen wires each to the view model. */
+internal class EntryActions(
+    val join: () -> Unit = {},
+    val acceptInvite: () -> Unit = {},
+    val leave: () -> Unit = {},
+    val acceptTeam: (teamId: String) -> Unit = {},
+    val withdrawTeam: (teamId: String) -> Unit = {},
+    val confirmPlayer: (profileId: String) -> Unit = {},
+    val removePlayer: (profileId: String) -> Unit = {},
+)
+
 /**
- * Near the top of the tournament for anyone who isn't organising it: a way in while entries are open, and
- * afterwards where the caller stands as a player.
+ * Near the top of the tournament for anyone who isn't organising it: invites to answer, a way in while
+ * entries are open, and afterwards where the caller stands as a player.
  */
 @Composable
-internal fun EntryCard(state: TournamentUiState, onEnterTeam: () -> Unit, onJoin: () -> Unit) {
+internal fun EntryCard(state: TournamentUiState, actions: EntryActions, onEnterTeam: () -> Unit) {
     val t = state.details?.tournament ?: return
     val me = state.myEntry
-    if (state.isOrganiser || (me == null && !state.canEnterTeam && !state.canJoinAsPlayer)) return
+    val invites = state.myInvites
+    if (state.isOrganiser || (me == null && invites.isEmpty() && !state.canEnterTeam && !state.canJoinAsPlayer)) return
     val colors = DesiTheme.colors
     DesiCard(Modifier.fillMaxWidth(), padding = DesiTheme.space.s4) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
@@ -117,6 +129,8 @@ internal fun EntryCard(state: TournamentUiState, onEnterTeam: () -> Unit, onJoin
             Column(Modifier.weight(1f)) {
                 val team = me?.teamId?.let { id -> t.teams.firstOrNull { it.teamId == id }?.name }
                 val (title, line) = when {
+                    me?.status == EntryStatus.INVITED -> Res.string.entry_card_invited to stringResource(Res.string.entry_card_invited_hint)
+                    invites.isNotEmpty() -> Res.string.entry_card_team_invited to stringResource(Res.string.entry_card_team_invited_hint, invites.joinToString { it.name })
                     me == null -> Res.string.entry_card_open to stringResource(
                         when {
                             state.canEnterTeam && state.canJoinAsPlayer -> Res.string.entry_card_open_both
@@ -132,12 +146,37 @@ internal fun EntryCard(state: TournamentUiState, onEnterTeam: () -> Unit, onJoin
                 Text(line, style = DesiTheme.type.caption, color = colors.muted)
             }
         }
+        if (me?.status == EntryStatus.INVITED) {
+            AcceptOrDecline(state.saving, onAccept = actions.acceptInvite, onDecline = actions.leave)
+        }
+        invites.forEach { invite ->
+            if (invites.size > 1) Text(invite.name, style = DesiTheme.type.bodyStrong, color = colors.ink)
+            AcceptOrDecline(state.saving, onAccept = { actions.acceptTeam(invite.teamId) }, onDecline = { actions.withdrawTeam(invite.teamId) })
+        }
         if (state.canEnterTeam) {
             TonalButton(stringResource(Res.string.tournament_register_team), onClick = onEnterTeam, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Shield)
         }
         if (state.canJoinAsPlayer) {
-            PrimaryButton(stringResource(Res.string.entry_join_player), onClick = onJoin, loading = state.saving, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.PersonAdd)
+            // An invite's Accept is the main action when there is one.
+            if (invites.isEmpty()) {
+                PrimaryButton(stringResource(Res.string.entry_join_player), onClick = actions.join, loading = state.saving, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.PersonAdd)
+            } else {
+                TonalButton(stringResource(Res.string.entry_join_player), onClick = actions.join, enabled = !state.saving, modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.PersonAdd)
+            }
         }
+        if (me != null && me.status != EntryStatus.INVITED && !t.started) {
+            TextButton(onClick = actions.leave, enabled = !state.saving) {
+                Text(stringResource(Res.string.entry_leave), style = DesiTheme.type.button, color = colors.muted)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AcceptOrDecline(saving: Boolean, onAccept: () -> Unit, onDecline: () -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(DesiTheme.space.s3)) {
+        TonalButton(stringResource(Res.string.tournament_decline), onClick = onDecline, enabled = !saving, modifier = Modifier.weight(1f))
+        PrimaryButton(stringResource(Res.string.entry_accept), onClick = onAccept, loading = saving, modifier = Modifier.weight(1f))
     }
 }
 
@@ -149,10 +188,11 @@ internal fun EntryCard(state: TournamentUiState, onEnterTeam: () -> Unit, onJoin
 internal fun ColumnScope.Players(
     state: TournamentUiState,
     onSheet: (TournamentSheet) -> Unit,
-    onConfirm: (profileId: String) -> Unit,
-    onRemove: (profileId: String) -> Unit,
+    actions: EntryActions,
     onOpenPlayer: (String) -> Unit,
 ) {
+    val onConfirm = actions.confirmPlayer
+    val onRemove = actions.removePlayer
     val t = state.details?.tournament ?: return
     val organiser = state.isOrganiser
     if (organiser) {
@@ -161,21 +201,27 @@ internal fun ColumnScope.Players(
     if (t.players.isEmpty()) {
         EmptyState(DesiIcons.Teams, stringResource(if (t.takesPlayers) Res.string.entry_no_players_open else Res.string.entry_no_players))
     }
-    val waiting = t.players.filter { it.status == EntryStatus.PENDING }
+    val waiting = t.players.filter { it.status != EntryStatus.CONFIRMED }
     if (waiting.isNotEmpty()) {
         SectionHeader(stringResource(Res.string.entry_waiting, waiting.size), icon = DesiIcons.Clock)
         ListCard {
             waiting.forEachIndexed { i, entry ->
                 PlayerEntryRow(entry, i > 0, onOpenPlayer) {
-                    if (organiser) {
-                        TextButton(onClick = { onRemove(entry.player.profileId) }) {
-                            Text(stringResource(Res.string.tournament_decline), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
+                    val invited = entry.status == EntryStatus.INVITED
+                    when {
+                        organiser && invited -> TextButton(onClick = { onRemove(entry.player.profileId) }) {
+                            Text(stringResource(Res.string.entry_cancel_invite), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
                         }
-                        TextButton(onClick = { onConfirm(entry.player.profileId) }) {
-                            Text(stringResource(Res.string.tournament_confirm), style = DesiTheme.type.button, color = DesiTheme.colors.brand)
+                        organiser -> {
+                            TextButton(onClick = { onRemove(entry.player.profileId) }) {
+                                Text(stringResource(Res.string.tournament_decline), style = DesiTheme.type.button, color = DesiTheme.colors.muted)
+                            }
+                            TextButton(onClick = { onConfirm(entry.player.profileId) }) {
+                                Text(stringResource(Res.string.tournament_confirm), style = DesiTheme.type.button, color = DesiTheme.colors.brand)
+                            }
                         }
-                    } else {
-                        Tag(stringResource(Res.string.tournament_pending_short), tone = TagTone.WARN, icon = DesiIcons.Clock)
+                        invited -> Tag(stringResource(Res.string.entry_invited_tag), tone = TagTone.BRAND, icon = DesiIcons.Mail)
+                        else -> Tag(stringResource(Res.string.tournament_pending_short), tone = TagTone.WARN, icon = DesiIcons.Clock)
                     }
                 }
             }
@@ -276,17 +322,20 @@ internal fun AddPlayerSheet(
     state: TournamentUiState,
     teamId: String?,
     onSearch: (String) -> Unit,
-    onAdd: (profileId: String) -> Unit,
+    onAdd: (profileId: String, invite: Boolean) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    var invite by remember { mutableStateOf(false) }
     val t = state.details?.tournament ?: return
     val team = teamId?.let { id -> t.teams.firstOrNull { it.teamId == id } }
     val entered = t.players.map { it.player.profileId }.toSet()
     DesiSheet(team?.let { stringResource(Res.string.entry_add_to_squad, it.name) } ?: stringResource(Res.string.entry_add_player), onDismiss, fullHeight = state.isOrganiser) {
+        // Organisers adding to the pool can ask instead; people on the app then accept from the tournament.
+        if (state.isOrganiser && teamId == null) InviteChoice(invite, onSelect = { invite = it })
         val members = state.squadSource?.takeIf { it.id == teamId }?.members.orEmpty().map { it.player }.filter { it.profileId !in entered }
         if (members.isNotEmpty()) {
             SectionHeader(stringResource(Res.string.entry_from_team), icon = DesiIcons.Shield)
-            members.forEach { player -> PlayerLine(player, onClick = { onAdd(player.profileId) }) }
+            members.forEach { player -> PlayerLine(player, onClick = { onAdd(player.profileId, false) }) }
         } else if (!state.isOrganiser) {
             EmptyState(DesiIcons.Teams, stringResource(Res.string.entry_all_members_in))
         }
@@ -298,8 +347,22 @@ internal fun AddPlayerSheet(
                 leadingIcon = DesiIcons.Search,
                 keyboardOptions = KeyboardOptions.Default,
             )
-            state.peopleResults.filter { it.profileId !in entered }.forEach { player -> PlayerLine(player, onClick = { onAdd(player.profileId) }) }
+            state.peopleResults.filter { it.profileId !in entered && !(invite && it.isPlaceholder) }
+                .forEach { player -> PlayerLine(player, onClick = { onAdd(player.profileId, invite) }) }
         }
     }
 }
 
+/** Add straight in, or send an invite to accept. */
+@Composable
+internal fun InviteChoice(invite: Boolean, onSelect: (Boolean) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(DesiTheme.space.s2)) {
+        SegmentedControl(
+            listOf(false, true),
+            selected = invite,
+            label = { stringResource(if (it) Res.string.entry_mode_invite else Res.string.entry_mode_add) },
+            onSelect = onSelect,
+        )
+        Text(stringResource(if (invite) Res.string.entry_mode_invite_hint else Res.string.entry_mode_add_hint), style = DesiTheme.type.caption, color = DesiTheme.colors.muted)
+    }
+}

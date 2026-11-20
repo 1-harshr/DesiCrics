@@ -162,6 +162,8 @@ class Notifier(
             NotificationKind.ENTRY_CONFIRMED -> if (team) "$name is in $tournamentName" else "You're in $tournamentName"
             NotificationKind.ENTRY_REJECTED -> if (team) "$tournamentName didn't take $name this time" else "$tournamentName didn't take your entry this time"
             NotificationKind.SQUAD_PLACED -> "You're in $name's squad for $tournamentName"
+            NotificationKind.ENTRY_INVITED -> if (team) "$name is invited to $tournamentName" else "You're invited to play in $tournamentName"
+            NotificationKind.ENTRY_WITHDRAWN -> "$name left $tournamentName"
             else -> tournamentName
         }
         runCatching { push.send(tokens, "DesiCrics", message, mapOf("tournamentId" to tournamentId)) }

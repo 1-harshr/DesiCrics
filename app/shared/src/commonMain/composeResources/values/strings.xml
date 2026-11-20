@@ -794,6 +794,19 @@
     <string name="entry_invite_players">Invite players</string>
     <string name="entry_invite_players_hint">A link for players to join on their own</string>
     <string name="entry_invite_players_text">Join %1$s as a player on DesiCrics: %2$s</string>
+    <string name="entry_card_invited">You're invited</string>
+    <string name="entry_card_invited_hint">The organisers want you to play. Accept to join as a player.</string>
+    <string name="entry_card_team_invited">Your team is invited</string>
+    <string name="entry_card_team_invited_hint">The organisers invited %1$s. Accept to enter.</string>
+    <string name="entry_accept">Accept</string>
+    <string name="entry_leave">Leave the tournament</string>
+    <string name="entry_withdraw">Withdraw</string>
+    <string name="entry_cancel_invite">Cancel invite</string>
+    <string name="entry_invited_tag">Invited</string>
+    <string name="entry_mode_add">Add now</string>
+    <string name="entry_mode_invite">Send an invite</string>
+    <string name="entry_mode_add_hint">They're in straight away.</string>
+    <string name="entry_mode_invite_hint">They're in once they accept. Only people on the app can accept.</string>
     <string name="tournament_create_action">Create tournament</string>
     <string name="tournament_create_failed">Couldn't create the tournament. Check the details and your connection.</string>
     <string name="tournament_tab_fixtures">Fixtures</string>
@@ -1242,6 +1255,9 @@
     <string name="notification_entry_rejected_team">%1$s didn't take %2$s this time</string>
     <string name="notification_entry_rejected_player">%1$s didn't take your entry this time</string>
     <string name="notification_squad_placed">You're in %1$s's squad for %2$s</string>
+    <string name="notification_entry_invited_team">%1$s is invited to %2$s</string>
+    <string name="notification_entry_invited_player">You're invited to play in %1$s</string>
+    <string name="notification_entry_withdrawn">%1$s left %2$s</string>
 
     <!-- Phase 7 · wagon wheel -->
     <string name="scoring_field_description">Where the next shot went. Tap a part of the field, then the runs.</string>

@@ -22,7 +22,15 @@ class TournamentRepository(private val api: DesiCricsApi, private val config: Ap
 
     suspend fun details(id: String): TournamentDetails = api.tournament(id)
 
-    suspend fun enterTeam(id: String, teamId: String): TournamentDetails = api.enterTeam(id, teamId)
+    /** Organisers can [invite] the team instead, for its admins to accept. */
+    suspend fun enterTeam(id: String, teamId: String, invite: Boolean = false): TournamentDetails = api.enterTeam(id, teamId, invite)
+
+    suspend fun acceptTeamInvite(id: String, teamId: String): TournamentDetails = api.acceptTeamInvite(id, teamId)
+
+    /** A team's admin takes it out, or turns down an invite. */
+    suspend fun withdrawTeam(id: String, teamId: String): TournamentDetails = api.withdrawTeam(id, teamId)
+
+    suspend fun acceptPlayerInvite(id: String, profileId: String): TournamentDetails = api.acceptPlayerInvite(id, profileId)
 
     suspend fun review(id: String, teamId: String, confirm: Boolean): TournamentDetails = api.reviewEntry(id, teamId, confirm)
 
@@ -30,8 +38,8 @@ class TournamentRepository(private val api: DesiCricsApi, private val config: Ap
         api.setEntry(id, EntrySettingsRequest(teamEntry, playerEntry))
 
     /** With no [profileId], the caller joins as a player; otherwise an organiser or team admin adds someone. */
-    suspend fun addPlayer(id: String, profileId: String? = null, teamId: String? = null): TournamentDetails =
-        api.addTournamentPlayer(id, AddTournamentPlayerRequest(profileId, teamId))
+    suspend fun addPlayer(id: String, profileId: String? = null, teamId: String? = null, invite: Boolean = false): TournamentDetails =
+        api.addTournamentPlayer(id, AddTournamentPlayerRequest(profileId, teamId, invite))
 
     /** Confirms a waiting player, and puts them in [teamId]'s squad or the pool. */
     suspend fun placePlayer(id: String, profileId: String, teamId: String?): TournamentDetails = api.placeTournamentPlayer(id, profileId, teamId)

@@ -42,7 +42,13 @@ enum class OrganiserRole { ORGANISER, CO_ORGANISER }
 data class Organiser(val uid: String, val name: String, val role: OrganiserRole)
 
 @Serializable
-enum class EntryStatus { CONFIRMED, PENDING }
+enum class EntryStatus {
+    CONFIRMED,
+    /** Asked to enter; waiting for an organiser. */
+    PENDING,
+    /** An organiser asked them; waiting for the team's admin or the player to accept. */
+    INVITED,
+}
 
 /** Who can enter a tournament, set separately for teams and for players. */
 @Serializable

@@ -373,4 +373,45 @@ class TournamentsTest {
         val started = client.post("/matches/${fixture.id}/start") { bearerAuth("test-asha"); jsonBody(start(listOf(SquadPlayer("Dev", "dev"), SquadPlayer("Guest 2")))) }
         assertEquals(HttpStatusCode.OK, started.status)
     }
+
+    @Test
+    fun organisersInviteAndEntrantsAcceptOrWithdraw() = apiTest { client ->
+        client.setUpProfile("asha")
+        client.setUpProfile("dev", name = "Dev")
+        client.setUpProfile("kabir", name = "Kabir")
+        val devs = client.team("dev", "Dev XI")
+        val others = (1..2).map { client.team("asha", "Team $it") }
+        val cup = client.tournament("asha", CreateTournamentRequest("Cup", format = TournamentFormat.KNOCKOUT, oversPerInnings = 5)).tournament
+        suspend fun invite(teamId: String) = client.post("/tournaments/${cup.id}/teams") { bearerAuth("test-asha"); jsonBody(EnterTeamRequest(teamId, invite = true)) }
+
+        // Asha invites Dev XI; only its admin can accept, and then it's in with its squad.
+        assertEquals(EntryStatus.INVITED, invite(devs.id).body<TournamentDetails>().tournament.teams.single().status)
+        assertEquals(listOf(NotificationKind.ENTRY_INVITED), client.inbox("dev").map { it.kind })
+        assertEquals(HttpStatusCode.Forbidden, client.post("/tournaments/${cup.id}/teams/${devs.id}/accept") { bearerAuth("test-kabir") }.status)
+        val accepted = client.post("/tournaments/${cup.id}/teams/${devs.id}/accept") { bearerAuth("test-dev") }.body<TournamentDetails>().tournament
+        assertEquals(EntryStatus.CONFIRMED, accepted.teams.single().status)
+        assertEquals(listOf("dev"), accepted.squad(devs.id).map { it.player.profileId })
+        assertEquals(listOf(NotificationKind.ENTRY_JOINED), client.inbox("asha").map { it.kind })
+
+        // Only organisers invite; Kabir accepts his own invite, then leaves.
+        assertEquals(HttpStatusCode.Forbidden, client.addPlayer("dev", cup.id, AddTournamentPlayerRequest("kabir", invite = true)).status)
+        client.addPlayer("asha", cup.id, AddTournamentPlayerRequest("kabir", invite = true))
+        assertEquals(listOf(NotificationKind.ENTRY_INVITED), client.inbox("kabir").map { it.kind })
+        assertEquals(HttpStatusCode.Forbidden, client.post("/tournaments/${cup.id}/players/kabir/accept") { bearerAuth("test-dev") }.status)
+        val kabir = client.post("/tournaments/${cup.id}/players/kabir/accept") { bearerAuth("test-kabir") }.body<TournamentDetails>().tournament.entryOf("kabir")
+        assertEquals(EntryStatus.CONFIRMED, kabir?.status)
+        client.delete("/tournaments/${cup.id}/players/kabir") { bearerAuth("test-kabir") }
+
+        // Dev withdraws his team; Asha hears both.
+        assertEquals(HttpStatusCode.Forbidden, client.delete("/tournaments/${cup.id}/teams/${devs.id}") { bearerAuth("test-kabir") }.status)
+        val withdrawn = client.delete("/tournaments/${cup.id}/teams/${devs.id}") { bearerAuth("test-dev") }.body<TournamentDetails>().tournament
+        assertTrue(withdrawn.teams.isEmpty())
+        assertEquals(listOf(NotificationKind.ENTRY_WITHDRAWN, NotificationKind.ENTRY_WITHDRAWN), client.inbox("asha").take(2).map { it.kind })
+
+        // An invite nobody accepts doesn't play.
+        invite(devs.id)
+        others.forEach { client.enter("asha", cup.id, it.id) }
+        val started = client.post("/tournaments/${cup.id}/start") { bearerAuth("test-asha") }.body<TournamentDetails>().tournament
+        assertEquals(listOf("Team 1", "Team 2"), started.teams.map { it.name })
+    }
 }

@@ -36,6 +36,10 @@ enum class NotificationKind {
     ENTRY_CONFIRMED,
     /** An organiser turned the entry down. */
     ENTRY_REJECTED,
+    /** An organiser invited the team (to its admins) or the player; they accept from the tournament. */
+    ENTRY_INVITED,
+    /** A team or player left the tournament before it started; sent to its organisers. */
+    ENTRY_WITHDRAWN,
     /** The user was placed in [Notification.playerName]'s squad for the tournament. */
     SQUAD_PLACED,
 }

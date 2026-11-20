@@ -215,7 +215,8 @@ private fun NotificationRow(notification: Notification, onClick: () -> Unit) {
             NotificationKind.TEAM_JOIN_ACCEPTED -> DesiIcons.Teams to colors.brand
             NotificationKind.ENTRY_REQUEST, NotificationKind.ENTRY_JOINED -> DesiIcons.PersonAdd to colors.brand
             NotificationKind.ENTRY_CONFIRMED, NotificationKind.SQUAD_PLACED -> DesiIcons.Trophy to colors.brand
-            NotificationKind.ENTRY_REJECTED -> DesiIcons.Trophy to colors.muted
+            NotificationKind.ENTRY_REJECTED, NotificationKind.ENTRY_WITHDRAWN -> DesiIcons.Trophy to colors.muted
+            NotificationKind.ENTRY_INVITED -> DesiIcons.Mail to colors.brand
         }
         IconTile(icon, tint = tint, container = tint.copy(alpha = 0.12f))
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -247,6 +248,10 @@ fun notificationText(n: Notification): String = when (n.kind) {
         if (n.detail == "team") stringResource(Res.string.notification_entry_rejected_team, n.matchTitle, n.playerName.orEmpty())
         else stringResource(Res.string.notification_entry_rejected_player, n.matchTitle)
     NotificationKind.SQUAD_PLACED -> stringResource(Res.string.notification_squad_placed, n.playerName.orEmpty(), n.matchTitle)
+    NotificationKind.ENTRY_INVITED ->
+        if (n.detail == "team") stringResource(Res.string.notification_entry_invited_team, n.playerName.orEmpty(), n.matchTitle)
+        else stringResource(Res.string.notification_entry_invited_player, n.matchTitle)
+    NotificationKind.ENTRY_WITHDRAWN -> stringResource(Res.string.notification_entry_withdrawn, n.playerName.orEmpty(), n.matchTitle)
 }
 
 @Composable

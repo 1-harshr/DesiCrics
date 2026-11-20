@@ -19,10 +19,12 @@ import kotlinx.serialization.Serializable
 //   PUT    /tournaments/{id}/entry                 EntrySettingsRequest → TournamentDetails (organisers, before it starts)
 //   POST   /tournaments/{id}/teams                 EnterTeamRequest → TournamentDetails (organisers, or a team admin as teamEntry allows)
 //   PUT    /tournaments/{id}/teams/{teamId}        ReviewEntryRequest → TournamentDetails (organisers)
-//   DELETE /tournaments/{id}/teams/{teamId}        → TournamentDetails (organisers, before it starts)
+//   POST   /tournaments/{id}/teams/{teamId}/accept → TournamentDetails (the team's admins, for an invite)
+//   DELETE /tournaments/{id}/teams/{teamId}        → TournamentDetails (organisers; the team's admins withdraw; before it starts)
 //   POST   /tournaments/{id}/players               AddTournamentPlayerRequest → TournamentDetails (yourself as playerEntry allows;
 //                                                  organisers anyone; team admins their team's members, into its squad)
 //   PUT    /tournaments/{id}/players/{profileId}   PlacePlayerRequest → TournamentDetails (organisers)
+//   POST   /tournaments/{id}/players/{profileId}/accept → TournamentDetails (the player, for an invite)
 //   DELETE /tournaments/{id}/players/{profileId}   → TournamentDetails (organisers; the player; their team's admins before it starts)
 //   POST   /tournaments/{id}/organisers            AddOrganiserRequest → TournamentDetails (organisers)
 //   POST   /tournaments/{id}/start                 → TournamentDetails with the first fixtures (organisers)
@@ -67,16 +69,20 @@ data class CreateTournamentRequest(
 @Serializable
 data class EntrySettingsRequest(val teamEntry: EntryPolicy, val playerEntry: EntryPolicy)
 
-/** Enters a saved team. Organisers' entries are confirmed; a team admin's waits for review unless entry is open. */
+/**
+ * Enters a saved team. Organisers' entries are confirmed, or with [invite] wait for the team's admins to
+ * accept; a team admin's waits for review unless entry is open.
+ */
 @Serializable
-data class EnterTeamRequest(val teamId: String)
+data class EnterTeamRequest(val teamId: String, val invite: Boolean = false)
 
 /**
  * Adds a player to a tournament: with no [profileId], the caller joins the pool themselves. Organisers add
- * anyone, to the pool or straight into [teamId]'s squad; a team's admins add its members to its squad.
+ * anyone, to the pool or straight into [teamId]'s squad, or with [invite] ask them to accept; a team's
+ * admins add its members to its squad.
  */
 @Serializable
-data class AddTournamentPlayerRequest(val profileId: String? = null, val teamId: String? = null)
+data class AddTournamentPlayerRequest(val profileId: String? = null, val teamId: String? = null, val invite: Boolean = false)
 
 /** Confirms a waiting player, and puts them in [teamId]'s squad, or back in the pool when it's null. */
 @Serializable
