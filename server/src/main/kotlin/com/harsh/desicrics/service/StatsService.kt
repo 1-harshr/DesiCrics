@@ -1,5 +1,6 @@
 package com.harsh.desicrics.service
 
+import com.harsh.desicrics.cities.Cities
 import com.harsh.desicrics.api.MatchDetails
 import com.harsh.desicrics.auth.FirebasePrincipal
 import com.harsh.desicrics.live.MatchListener
@@ -70,7 +71,7 @@ class StatsService(
             LeaderboardScope.CITY -> {
                 val city = id?.takeIf { it.isNotBlank() } ?: users.get(user.uid)?.city.orEmpty()
                 if (city.isBlank()) return emptyList()
-                stats.forProfiles(stats.profilesInCity(city))
+                stats.forProfiles(stats.profilesInCity(Cities.India.canonical(city)))
             }
             LeaderboardScope.TOURNAMENT -> stats.forTournament(id ?: throw ApiException(HttpStatusCode.BadRequest, "Which tournament?"))
             LeaderboardScope.FRIENDS -> stats.forProfiles(friendsOf(user.uid))

@@ -236,19 +236,6 @@ internal fun WicketSheet(
     }
 }
 
-internal val DismissalKind.label: StringResource
-    get() = when (this) {
-        DismissalKind.BOWLED -> Res.string.scoring_dismissal_bowled
-        DismissalKind.CAUGHT -> Res.string.scoring_dismissal_caught
-        DismissalKind.LBW -> Res.string.scoring_dismissal_lbw
-        DismissalKind.RUN_OUT -> Res.string.scoring_dismissal_run_out
-        DismissalKind.STUMPED -> Res.string.scoring_dismissal_stumped
-        DismissalKind.HIT_WICKET -> Res.string.scoring_dismissal_hit_wicket
-        DismissalKind.OBSTRUCTING_FIELD -> Res.string.scoring_dismissal_obstructing
-        DismissalKind.HIT_BALL_TWICE -> Res.string.scoring_dismissal_hit_twice
-        DismissalKind.OTHER -> Res.string.scoring_dismissal_other
-    }
-
 /** A ball that breaks rules the match set to warn: what it breaks, then record it anyway or think again. */
 @Composable
 internal fun RuleWarningSheet(pending: PendingBall, onRecord: () -> Unit, onCancel: () -> Unit) {

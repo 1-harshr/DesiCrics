@@ -17,4 +17,6 @@ iOS is out of scope for now.
 | [phase-7.md](phase-7.md) | Phase 7 spec: wagon wheel first, share studio and overlays, posters, player auction |
 | [phase-8.md](phase-8.md) | Phase 8 spec: cricket-inspired themes and the theme system |
 | [tournament-entry.md](tournament-entry.md) | Teams and players joining a tournament: entry settings, player pool, squads, invites, notifications |
+| [cities.md](cities.md) | Cities: suggestions as you type and one spelling per city, from GeoNames |
+| [simple-mode.md](simple-mode.md) | Simple mode: a minimal front end for scoring, with its own screens over the same logic |
 | [decisions/](decisions/) | Architecture decision records, including [0004](decisions/0004-phases-1-to-5-design-log.md), the design log for Phases 1–5 |

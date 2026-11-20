@@ -42,6 +42,7 @@ import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.authenticate
 import io.ktor.server.plugins.cors.routing.CORS
+import com.harsh.desicrics.cities.standardiseCities
 import io.ktor.server.auth.bearer
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -111,6 +112,11 @@ fun Application.module(
     val playerService = PlayerService(players, users)
     val account = AccountService(players, teamStore, ExposedSupportStore(database))
     launch { matches.backfillInningsScores() }
+    launch {
+        runCatching { standardiseCities(database) }
+            .onSuccess { if (it > 0) environment.log.info("Standardised $it city names") }
+            .onFailure { environment.log.warn("Standardising cities failed", it) }
+    }
     launch { auctions.resumeClocks() }
     launch {
         while (isActive) {
@@ -167,6 +173,8 @@ fun Application.module(
             imageUploadRoutes(images)
             communityRoutes(community)
             statsRoutes(stats)
+            cityRoutes()
+            statsRoutes(StatsService(statsStore, players, users, teamStore, socialStore))
             auctionRoutes(auctions, liveAuctions)
         }
     }

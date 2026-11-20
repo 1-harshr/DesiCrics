@@ -1,4 +1,6 @@
 package com.harsh.desicrics.service
+
+import com.harsh.desicrics.cities.Cities
 import com.harsh.desicrics.api.EndBeforeStartRequest
 
 import com.harsh.desicrics.api.AddOrganiserRequest
@@ -83,7 +85,7 @@ class TournamentService(
     suspend fun mine(user: FirebasePrincipal): List<TournamentSummary> = tournaments.forUser(user.uid)
 
     /** Tournaments anyone can ask to enter now, in [city] or anywhere. */
-    suspend fun open(city: String): List<TournamentSummary> = tournaments.open(city.take(100), clock(), OPEN_PAGE)
+    suspend fun open(city: String): List<TournamentSummary> = tournaments.open(Cities.India.canonical(city.take(100)), clock(), OPEN_PAGE)
 
     /** Every tournament in [city] unless it's blank, newest first, for the web app. */
     suspend fun browse(city: String): List<TournamentSummary> = tournaments.browse(city.take(100), BROWSE_PAGE)
@@ -98,7 +100,7 @@ class TournamentService(
         val tournament = Tournament(
             id = UUID.randomUUID().toString(),
             name = request.name.trim(),
-            city = request.city.trim(),
+            city = Cities.India.canonical(request.city),
             format = request.format,
             oversPerInnings = request.oversPerInnings,
             rules = request.rules,

@@ -1,4 +1,5 @@
 package com.harsh.desicrics.ui.teams
+import com.harsh.desicrics.ui.components.CityField
 import com.harsh.desicrics.designsystem.component.ErrorBanner
 import com.harsh.desicrics.designsystem.component.ErrorState
 
@@ -237,12 +238,7 @@ internal fun TeamDetailsSheet(
             label = stringResource(Res.string.teams_name),
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Next),
         )
-        DesiTextField(
-            value = city,
-            onValueChange = { city = it.take(100) },
-            label = stringResource(Res.string.teams_city),
-            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done),
-        )
+        CityField(value = city, onValueChange = { city = it }, label = stringResource(Res.string.teams_city))
         if (failed) ErrorBanner(error ?: stringResource(Res.string.teams_action_failed))
         PrimaryButton(action, onClick = { onSave(name, city) }, enabled = name.isNotBlank(), loading = saving, modifier = Modifier.fillMaxWidth())
     }
