@@ -177,8 +177,8 @@ fun NotificationsContent(
                 contentPadding = PaddingValues(horizontal = space.screen, vertical = space.s4),
                 verticalArrangement = Arrangement.spacedBy(space.s2),
             ) {
-                if (state.loadFailed) {
-                    item { ErrorState(stringResource(Res.string.error_notifications_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
+                if (state.loadError != null) {
+                    item { ErrorState(stringResource(Res.string.error_notifications_title), state.loadError, onRetry = onRetry, compact = true) }
                 } else if (state.notifications.isEmpty()) {
                     item { EmptyState(DesiIcons.Notifications, stringResource(Res.string.notifications_empty_title), body = stringResource(Res.string.notifications_empty)) }
                 }
@@ -294,7 +294,7 @@ fun PlayerContent(
             if (state.loading) FullScreenLoading(Modifier.padding(padding))
             else ErrorState(
                 stringResource(Res.string.error_player_title),
-                stringResource(Res.string.error_connection_body),
+                state.loadError ?: stringResource(Res.string.error_connection_body),
                 Modifier.padding(padding),
                 onRetry = onRetry,
             )

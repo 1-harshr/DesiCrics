@@ -34,7 +34,7 @@ data class TournamentsUiState(
     val city: String = "",
     /** Tournaments taking entries in [city], leaving out the user's own. */
     val open: List<TournamentSummary> = emptyList(),
-    val loadFailed: Boolean = false,
+    val loadError: String? = null,
     val saving: Boolean = false,
     val createFailed: Boolean = false,
 )
@@ -50,11 +50,11 @@ class TournamentsViewModel(city: String, private val repository: TournamentRepos
 
     /** Loads the list, first time and after a failure. */
     fun retry() {
-        _state.update { it.copy(loading = true, loadFailed = false) }
+        _state.update { it.copy(loading = true, loadError = null) }
         viewModelScope.launch {
             attempt { repository.mine() }.fold(
                 onSuccess = { list -> _state.update { it.copy(loading = false, tournaments = list) } },
-                onFailure = { _state.update { it.copy(loading = false, loadFailed = true) } },
+                onFailure = { e -> _state.update { it.copy(loading = false, loadError = e.message ?: e::class.simpleName ?: "error") } },
             )
         }
         loadOpen()
@@ -95,7 +95,7 @@ data class TournamentUiState(
     val myId: String? = null,
     val loading: Boolean = true,
     val details: TournamentDetails? = null,
-    val loadFailed: Boolean = false,
+    val loadError: String? = null,
     val saving: Boolean = false,
     val actionFailed: Boolean = false,
     /** The caller's saved teams, to enter one. */
@@ -175,8 +175,8 @@ class TournamentViewModel(
     fun refresh() {
         viewModelScope.launch {
             attempt { repository.details(tournamentId) }.fold(
-                onSuccess = { details -> _state.update { it.copy(loading = false, details = details, loadFailed = false) } },
-                onFailure = { _state.update { it.copy(loading = false, loadFailed = it.details == null) } },
+                onSuccess = { details -> _state.update { it.copy(loading = false, details = details, loadError = null) } },
+                onFailure = { e -> _state.update { it.copy(loading = false, loadError = if (it.details == null) e.message ?: e::class.simpleName ?: "error" else null) } },
             )
         }
         viewModelScope.launch {

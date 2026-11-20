@@ -31,7 +31,7 @@ data class AuctionUiState(
     val myId: String? = null,
     val loading: Boolean = true,
     val details: AuctionDetails? = null,
-    val loadFailed: Boolean = false,
+    val loadError: String? = null,
     /** The latest update failed; the last good room stays on screen. */
     val offline: Boolean = false,
     /** An action is on its way to the server. */
@@ -93,7 +93,7 @@ class AuctionViewModel(
             reloads.flatMapLatest { repository.observe(auctionId) }.collect { result ->
                 result.fold(
                     onSuccess = ::receive,
-                    onFailure = { _state.update { if (it.details == null) it.copy(loading = false, loadFailed = true) else it.copy(offline = true) } },
+                    onFailure = { e -> _state.update { if (it.details == null) it.copy(loading = false, loadError = e.message ?: e::class.simpleName ?: "error") else it.copy(offline = true) } },
                 )
             }
         }
@@ -101,7 +101,7 @@ class AuctionViewModel(
 
     /** Starts watching again after the first load failed. */
     fun retry() {
-        _state.update { it.copy(loading = true, loadFailed = false) }
+        _state.update { it.copy(loading = true, loadError = null) }
         reloads.update { it + 1 }
     }
 
@@ -116,7 +116,7 @@ class AuctionViewModel(
         val newSale = previous != null && latest is AuctionEvent.Sold && latest.seq > previous.state.lastSeq
         current.copy(
             loading = false,
-            loadFailed = false,
+            loadError = null,
             offline = false,
             details = details,
             clockSkew = if (details.serverTime > 0) details.serverTime - nowMillis() else 0,

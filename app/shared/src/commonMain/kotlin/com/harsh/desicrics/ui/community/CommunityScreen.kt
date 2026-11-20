@@ -120,7 +120,7 @@ fun CommunityScreen(
                     onAction = viewModel::clearError,
                 )
             }
-            if (state.failed) ErrorState(stringResource(Res.string.error_community_title), stringResource(Res.string.error_connection_body), onRetry = viewModel::retry, compact = true)
+            if (state.loadError != null) ErrorState(stringResource(Res.string.error_community_title), state.loadError, onRetry = viewModel::retry, compact = true)
             when (state.tab) {
                 CommunityTab.LOOKING_FOR -> {
                     PrimaryButton(stringResource(Res.string.looking_for_post), onClick = { show(CommunitySheet.Post) }, enabled = state.city.isNotBlank(), modifier = Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Add)

@@ -44,7 +44,7 @@ internal class FeedModel(private val repo: SocialRepository) : ViewModel() {
     var filter by mutableStateOf<String?>(null)
         private set
     var loading by mutableStateOf(false)
-    var failed by mutableStateOf(false)
+    var loadError by mutableStateOf<String?>(null)
     var more by mutableStateOf(true)
     var scope by mutableStateOf<String?>(null)
         private set
@@ -60,7 +60,7 @@ internal class FeedModel(private val repo: SocialRepository) : ViewModel() {
         scope = audience
         filter = status
         loading = !background
-        failed = false
+        loadError = null
         job = viewModelScope.launch {
             try {
                 val next = repo.feedPage(status, if (append) rows.lastOrNull() else null, audience)
@@ -74,7 +74,7 @@ internal class FeedModel(private val repo: SocialRepository) : ViewModel() {
                 rows = if (append) (rows + next).distinctBy { it.id } else next
                 more = next.size == 30
             } catch (e: CancellationException) { throw e }
-            catch (e: Exception) { failed = true }
+            catch (e: Exception) { loadError = e.message ?: e::class.simpleName ?: "error" }
             finally { if (kotlin.coroutines.coroutineContext[Job]?.isActive == true) loading = false }
         }
     }
@@ -133,8 +133,8 @@ internal fun FeedScreen(onOpen: (String) -> Unit, community: () -> Unit, ranking
                 if (model.incoming.isNotEmpty()) item {
                     TonalButton(stringResource(Res.string.feed_new), { model.load(model.filter) }, Modifier.fillMaxWidth(), leadingIcon = DesiIcons.Refresh)
                 }
-                if (model.failed && model.rows.isNotEmpty()) item {
-                    ErrorBanner(stringResource(Res.string.feed_stale), icon = DesiIcons.CloudOff, warning = true, action = stringResource(Res.string.feed_retry), onAction = { model.load(model.filter) })
+                if (model.loadError != null && model.rows.isNotEmpty()) item {
+                    ErrorBanner(model.loadError!!, icon = DesiIcons.CloudOff, warning = true, action = stringResource(Res.string.feed_retry), onAction = { model.load(model.filter) })
                 }
                 items(model.rows, key = { it.id }) { HomeMatchCard(it, false) { onOpen(it.id) } }
                 item {
@@ -142,8 +142,8 @@ internal fun FeedScreen(onOpen: (String) -> Unit, community: () -> Unit, ranking
                         when {
                             model.loading && model.rows.isEmpty() -> BallSpinner()
                             model.loading -> Unit
-                            model.failed && model.rows.isEmpty() -> ErrorState(stringResource(Res.string.error_feed_title), stringResource(Res.string.error_connection_body), onRetry = { model.load(model.filter) }, compact = true)
-                            model.failed -> Unit
+                            model.loadError != null && model.rows.isEmpty() -> ErrorState(stringResource(Res.string.error_feed_title), model.loadError!!, onRetry = { model.load(model.filter) }, compact = true)
+                            model.loadError != null -> Unit
                             model.rows.isEmpty() -> EmptyState(DesiIcons.Cricket, stringResource(Res.string.feed_empty), body = stringResource(Res.string.feed_empty_body))
                             model.more -> GhostButton(stringResource(Res.string.feed_more), { model.load(model.filter, true) }, Modifier.fillMaxWidth())
                         }

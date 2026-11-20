@@ -149,10 +149,10 @@ fun TeamsContent(
                     keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Search),
                 )
             }
-            if (state.loadFailed) {
-                item { ErrorState(stringResource(Res.string.error_teams_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
+            if (state.loadError != null) {
+                item { ErrorState(stringResource(Res.string.error_teams_title), state.loadError, onRetry = onRetry, compact = true) }
             }
-            if (!searching && !state.loading && state.teams.isEmpty() && !state.loadFailed) {
+            if (!searching && !state.loading && state.teams.isEmpty() && state.loadError == null) {
                 item { EmptyState(DesiIcons.Shield, stringResource(Res.string.teams_empty_title), body = stringResource(Res.string.teams_empty)) }
             }
             if (mine.isNotEmpty()) {
@@ -164,14 +164,14 @@ fun TeamsContent(
                 item { TeamList(others, onOpenTeam) }
             }
             // Asks for the next page when the list scrolls down to here.
-            if (!state.browsedAll && !state.browseFailed && state.browsed.isNotEmpty()) {
+            if (!state.browsedAll && state.browseError == null && state.browsed.isNotEmpty()) {
                 item(key = "more") {
                     LaunchedEffect(state.browsed.size, state.query) { onLoadMore() }
                 }
             }
             when {
-                state.browseFailed -> item {
-                    ErrorState(stringResource(Res.string.error_teams_title), stringResource(Res.string.error_connection_body), onRetry = onRetryBrowse, compact = true)
+                state.browseError != null -> item {
+                    ErrorState(stringResource(Res.string.error_teams_title), state.browseError, onRetry = onRetryBrowse, compact = true)
                 }
                 state.browsing -> item {
                     Box(Modifier.fillMaxWidth().padding(vertical = space.s4), contentAlignment = Alignment.Center) { BallSpinner(size = 28.dp) }

@@ -28,7 +28,7 @@ data class CommunityUiState(
     val city: String = "",
     val tab: CommunityTab = CommunityTab.LOOKING_FOR,
     val loading: Boolean = false,
-    val failed: Boolean = false,
+    val loadError: String? = null,
     val actionFailed: Boolean = false,
     val saving: Boolean = false,
     val posts: List<LookingForPost> = emptyList(),
@@ -109,8 +109,8 @@ class CommunityViewModel(
     private suspend fun loadNow() {
         val ui = _state.value
         if (ui.city.isBlank()) return
-        _state.update { it.copy(loading = true, failed = false) }
-        val ok = attempt {
+        _state.update { it.copy(loading = true, loadError = null) }
+        val result = attempt {
             when (ui.tab) {
                 CommunityTab.LOOKING_FOR -> {
                     val posts = repository.lookingFor(ui.city, null)
@@ -122,8 +122,8 @@ class CommunityViewModel(
                     else repository.teamRankings(ui.city).let { r -> _state.update { it.copy(teamRankings = r) } }
                 CommunityTab.DIRECTORY -> repository.directory(ui.city, ui.directoryKind).let { d -> _state.update { it.copy(directory = d) } }
             }
-        }.isSuccess
-        _state.update { it.copy(loading = false, failed = !ok) }
+        }
+        _state.update { it.copy(loading = false, loadError = result.exceptionOrNull()?.let { e -> e.message ?: e::class.simpleName ?: "error" }) }
     }
 
     private fun act(onDone: () -> Unit, call: suspend () -> Any) {

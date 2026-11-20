@@ -21,7 +21,7 @@ enum class SettingsResult { CLAIMED, CLAIM_FAILED, SUPPORT_SENT, SUPPORT_FAILED,
 data class ProfileUiState(
     val matches: List<Match>? = null,
     val teams: List<TeamSummary>? = null,
-    val loadFailed: Boolean = false,
+    val loadError: String? = null,
     /** Placeholders a team made with this user's verified number, waiting to be claimed. */
     val claimable: List<PlayerSummary> = emptyList(),
     val saving: Boolean = false,
@@ -47,7 +47,7 @@ class ProfileViewModel(
                 it.copy(
                     matches = matches.getOrNull() ?: it.matches,
                     teams = myTeams.getOrNull() ?: it.teams,
-                    loadFailed = matches.isFailure || myTeams.isFailure,
+                    loadError = (matches.exceptionOrNull() ?: myTeams.exceptionOrNull())?.let { it.message ?: it::class.simpleName ?: "error" },
                     claimable = claimable,
                 )
             }

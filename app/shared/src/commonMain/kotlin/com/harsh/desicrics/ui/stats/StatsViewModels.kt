@@ -25,7 +25,7 @@ data class CareerUiState(
     val filter: StatsFilter = StatsFilter(),
     val stats: CareerStats? = null,
     val loading: Boolean = true,
-    val failed: Boolean = false,
+    val loadError: String? = null,
 )
 
 class CareerViewModel(private val profileId: String, private val repository: StatsRepository) : ViewModel() {
@@ -49,10 +49,10 @@ class CareerViewModel(private val profileId: String, private val repository: Sta
         job?.cancel()
         val filter = _state.value.filter
         job = viewModelScope.launch {
-            _state.update { it.copy(loading = true, failed = false) }
+            _state.update { it.copy(loading = true, loadError = null) }
             attempt { repository.career(profileId, filter.season, filter.format) }.fold(
                 onSuccess = { stats -> _state.update { it.copy(stats = stats, loading = false) } },
-                onFailure = { _state.update { it.copy(loading = false, failed = true) } },
+                onFailure = { e -> _state.update { it.copy(loading = false, loadError = e.message ?: e::class.simpleName ?: "error") } },
             )
         }
     }
@@ -64,7 +64,7 @@ data class CompareUiState(
     val results: List<PlayerSummary> = emptyList(),
     val filter: StatsFilter = StatsFilter(),
     val stats: Pair<CareerStats, CareerStats>? = null,
-    val failed: Boolean = false,
+    val loadError: String? = null,
 )
 
 /** [profileId] against someone the user searches for. */
@@ -109,8 +109,8 @@ class CompareViewModel(
         val filter = _state.value.filter
         viewModelScope.launch {
             attempt { stats.compare(profileId, other.profileId, filter.season, filter.format) }.fold(
-                onSuccess = { pair -> _state.update { it.copy(stats = pair, failed = false) } },
-                onFailure = { _state.update { it.copy(failed = true) } },
+                onSuccess = { pair -> _state.update { it.copy(stats = pair, loadError = null) } },
+                onFailure = { e -> _state.update { it.copy(loadError = e.message ?: e::class.simpleName ?: "error") } },
             )
         }
     }
@@ -122,7 +122,7 @@ data class LeaderboardUiState(
     val season: Int? = null,
     val rows: List<LeaderboardRow> = emptyList(),
     val loading: Boolean = true,
-    val failed: Boolean = false,
+    val loadError: String? = null,
 )
 
 /** [tournamentId], when set, fixes the scope to that tournament. */
@@ -147,12 +147,12 @@ class LeaderboardViewModel(private val tournamentId: String?, private val reposi
         job?.cancel()
         val ui = _state.value
         job = viewModelScope.launch {
-            _state.update { it.copy(loading = true, failed = false) }
+            _state.update { it.copy(loading = true, loadError = null) }
             // City uses the user's own city; the server fills it in.
             val id = if (ui.scope == LeaderboardScope.TOURNAMENT) tournamentId else null
             attempt { repository.leaderboard(ui.scope, id, ui.metric, ui.season) }.fold(
                 onSuccess = { rows -> _state.update { it.copy(rows = rows, loading = false) } },
-                onFailure = { _state.update { it.copy(loading = false, failed = true) } },
+                onFailure = { e -> _state.update { it.copy(loading = false, loadError = e.message ?: e::class.simpleName ?: "error") } },
             )
         }
     }

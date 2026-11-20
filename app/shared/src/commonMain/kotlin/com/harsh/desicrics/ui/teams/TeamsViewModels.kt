@@ -43,7 +43,7 @@ internal fun Throwable.refusal(): String? = (this as? ApiException)?.takeIf { it
 data class TeamsUiState(
     val loading: Boolean = true,
     val teams: List<TeamSummary> = emptyList(),
-    val loadFailed: Boolean = false,
+    val loadError: String? = null,
     /** A create or join is in flight. */
     val saving: Boolean = false,
     val joinFailed: Boolean = false,
@@ -55,7 +55,7 @@ data class TeamsUiState(
     val browsing: Boolean = true,
     /** The server has no more pages. */
     val browsedAll: Boolean = false,
-    val browseFailed: Boolean = false,
+    val browseError: String? = null,
 ) {
     /** The caller's teams that match the search. */
     val mine: List<TeamSummary>
@@ -79,8 +79,8 @@ class TeamsViewModel(private val repository: TeamRepository) : ViewModel() {
     fun refresh() {
         viewModelScope.launch {
             attempt { repository.myTeams() }.fold(
-                onSuccess = { teams -> _state.update { it.copy(loading = false, teams = teams, loadFailed = false) } },
-                onFailure = { _state.update { it.copy(loading = false, loadFailed = true) } },
+                onSuccess = { teams -> _state.update { it.copy(loading = false, teams = teams, loadError = null) } },
+                onFailure = { e -> _state.update { it.copy(loading = false, loadError = e.message ?: e::class.simpleName ?: "error") } },
             )
         }
         browse(reset = true)
@@ -95,7 +95,7 @@ class TeamsViewModel(private val repository: TeamRepository) : ViewModel() {
     /** The next page, when the list scrolls to its end. */
     fun loadMore() {
         val s = _state.value
-        if (s.browsing || s.browsedAll || s.browseFailed) return
+        if (s.browsing || s.browsedAll || s.browseError != null) return
         browse(reset = false)
     }
 
@@ -103,7 +103,7 @@ class TeamsViewModel(private val repository: TeamRepository) : ViewModel() {
 
     private fun browse(reset: Boolean, wait: Boolean = false) {
         if (reset) browseJob?.cancel()
-        _state.update { it.copy(browsing = true, browseFailed = false) }
+        _state.update { it.copy(browsing = true, browseError = null) }
         browseJob = viewModelScope.launch {
             if (wait) delay(300)
             val offset = if (reset) 0 else _state.value.browsed.size
@@ -113,7 +113,7 @@ class TeamsViewModel(private val repository: TeamRepository) : ViewModel() {
                         it.copy(browsed = if (reset) page else it.browsed + page, browsing = false, browsedAll = page.isEmpty())
                     }
                 },
-                onFailure = { _state.update { it.copy(browsing = false, browseFailed = true) } },
+                onFailure = { e -> _state.update { it.copy(browsing = false, browseError = e.message ?: e::class.simpleName ?: "error") } },
             )
         }
     }
@@ -162,7 +162,7 @@ data class TeamUiState(
     val myId: String? = null,
     val loading: Boolean = true,
     val team: SavedTeam? = null,
-    val loadFailed: Boolean = false,
+    val loadError: String? = null,
     val saving: Boolean = false,
     val actionFailed: Boolean = false,
     /** The server's reason the last action failed, if it gave one; see [refusal]. */
@@ -215,11 +215,11 @@ class TeamViewModel(
     fun retry() = load()
 
     private fun load() {
-        _state.update { it.copy(loading = true, loadFailed = false) }
+        _state.update { it.copy(loading = true, loadError = null) }
         viewModelScope.launch {
             attempt { repository.team(teamId) }.fold(
                 onSuccess = { team -> show(team) },
-                onFailure = { _state.update { it.copy(loading = false, loadFailed = true) } },
+                onFailure = { e -> _state.update { it.copy(loading = false, loadError = e.message ?: e::class.simpleName ?: "error") } },
             )
             if (_state.value.isAdmin) {
                 attempt { repository.insights(teamId) }.getOrNull()?.let { insights -> _state.update { it.copy(insights = insights) } }
@@ -331,6 +331,6 @@ class TeamViewModel(
     }
 
     private fun show(team: SavedTeam) = _state.update {
-        it.copy(loading = false, team = team, saving = false, loadFailed = false, searchQuery = "", searchResults = emptyList())
+        it.copy(loading = false, team = team, saving = false, loadError = null, searchQuery = "", searchResults = emptyList())
     }
 }

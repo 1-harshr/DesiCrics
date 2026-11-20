@@ -107,8 +107,8 @@ fun TournamentsContent(
             verticalArrangement = Arrangement.spacedBy(space.s3),
         ) {
             item { CreateTournamentCard(onCreate) }
-            if (state.loadFailed) {
-                item { ErrorState(stringResource(Res.string.error_tournaments_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
+            if (state.loadError != null) {
+                item { ErrorState(stringResource(Res.string.error_tournaments_title), state.loadError, onRetry = onRetry, compact = true) }
             } else if (!state.loading && state.tournaments.isEmpty()) {
                 item { EmptyState(DesiIcons.Trophy, stringResource(Res.string.tournaments_empty_title), body = stringResource(Res.string.tournaments_empty)) }
             }
@@ -120,7 +120,7 @@ fun TournamentsContent(
                     }
                 }
             }
-            if (!state.loadFailed) {
+            if (state.loadError == null) {
                 item { SectionHeader(stringResource(Res.string.tournaments_open), icon = DesiIcons.PersonAdd, modifier = Modifier.padding(top = space.s2)) }
                 item {
                     DesiTextField(

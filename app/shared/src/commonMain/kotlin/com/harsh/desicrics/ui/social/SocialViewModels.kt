@@ -39,7 +39,7 @@ class SearchViewModel(private val repository: SocialRepository) : ViewModel() {
     }
 }
 
-data class NotificationsUiState(val loading: Boolean = true, val notifications: List<Notification> = emptyList(), val loadFailed: Boolean = false)
+data class NotificationsUiState(val loading: Boolean = true, val notifications: List<Notification> = emptyList(), val loadError: String? = null)
 
 /** The inbox. Opening it marks everything read. */
 class NotificationsViewModel(private val repository: SocialRepository) : ViewModel() {
@@ -52,18 +52,18 @@ class NotificationsViewModel(private val repository: SocialRepository) : ViewMod
 
     /** Loads the inbox, first time and after a failure. */
     fun retry() {
-        _state.update { it.copy(loading = true, loadFailed = false) }
+        _state.update { it.copy(loading = true, loadError = null) }
         viewModelScope.launch {
             attempt { repository.notifications() }.fold(
                 onSuccess = { list -> _state.update { NotificationsUiState(loading = false, notifications = list) } },
-                onFailure = { _state.update { it.copy(loading = false, loadFailed = true) } },
+                onFailure = { e -> _state.update { it.copy(loading = false, loadError = e.message ?: e::class.simpleName ?: "error") } },
             )
             attempt { repository.markNotificationsRead() }
         }
     }
 }
 
-data class PlayerUiState(val loading: Boolean = true, val page: PlayerPage? = null, val loadFailed: Boolean = false, val isMe: Boolean = false)
+data class PlayerUiState(val loading: Boolean = true, val page: PlayerPage? = null, val loadError: String? = null, val isMe: Boolean = false)
 
 class PlayerViewModel(
     private val profileId: String,
@@ -79,11 +79,11 @@ class PlayerViewModel(
 
     /** Loads the page, first time and after a failure. */
     fun retry() {
-        _state.update { it.copy(loading = true, loadFailed = false) }
+        _state.update { it.copy(loading = true, loadError = null) }
         viewModelScope.launch {
             attempt { repository.playerPage(profileId) }.fold(
                 onSuccess = { page -> _state.update { it.copy(loading = false, page = page) } },
-                onFailure = { _state.update { it.copy(loading = false, loadFailed = true) } },
+                onFailure = { e -> _state.update { it.copy(loading = false, loadError = e.message ?: e::class.simpleName ?: "error") } },
             )
         }
     }

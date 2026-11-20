@@ -180,8 +180,8 @@ fun HomeContent(
     ) {
         item { Greeting(playerName, playerPhoto, feed.unreadNotifications, onProfile, onSearch, onNotifications) }
         item { StartMatchCard(onNewMatch) }
-        if (state.loadFailed) {
-            item { ErrorBanner(stringResource(Res.string.home_error_body), title = stringResource(Res.string.home_error_title), icon = DesiIcons.CloudOff, warning = true) }
+        if (state.loadError != null) {
+            item { ErrorBanner(state.loadError, title = stringResource(Res.string.home_error_title), icon = DesiIcons.CloudOff, warning = true) }
         }
         when {
             state.loading -> item {
@@ -189,7 +189,7 @@ fun HomeContent(
                     BallSpinner()
                 }
             }
-            feed.mine.isEmpty() && !state.loadFailed -> item { EmptyMatches() }
+            feed.mine.isEmpty() && state.loadError == null -> item { EmptyMatches() }
         }
         feedSection(Res.string.home_section_mine, feed.mine, currentUid, onOpenMatch, first = true)
         item {
@@ -388,5 +388,5 @@ private fun HomeEmptyPreview() = DesiTheme(darkTheme = false) {
 @Preview
 @Composable
 private fun HomeOfflinePreview() = DesiTheme(darkTheme = false) {
-    HomeContent(HomeUiState(loading = false, feed = TodayFeed(recent = listOf(PreviewDone)), loadFailed = true), "Rohan Iyer", "me", {}, {}, {})
+    HomeContent(HomeUiState(loading = false, feed = TodayFeed(recent = listOf(PreviewDone)), loadError = "timeout"), "Rohan Iyer", "me", {}, {}, {})
 }

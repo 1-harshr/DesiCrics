@@ -141,7 +141,7 @@ internal fun AuctionContent(
             if (state.loading) FullScreenLoading(Modifier.padding(padding))
             else ErrorState(
                 stringResource(Res.string.auction_load_failed_title),
-                stringResource(Res.string.error_connection_body),
+                state.loadError ?: stringResource(Res.string.error_connection_body),
                 Modifier.padding(padding),
                 onRetry = actions::retry,
             )

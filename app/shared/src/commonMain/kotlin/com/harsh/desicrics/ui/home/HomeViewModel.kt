@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 data class HomeUiState(
     val loading: Boolean = true,
     val feed: TodayFeed = TodayFeed(),
-    /** The latest refresh failed; the last feed we got stays on screen. */
-    val loadFailed: Boolean = false,
+    /** Non-null when the latest refresh failed; the last feed we got stays on screen. */
+    val loadError: String? = null,
 ) {
     val isEmpty: Boolean get() = feed.mine.isEmpty() && feed.live.isEmpty() && feed.upcoming.isEmpty() && feed.recent.isEmpty()
 }
@@ -61,7 +61,7 @@ class HomeViewModel(
         .scan(HomeUiState()) { previous, result ->
             result.fold(
                 onSuccess = { HomeUiState(loading = false, feed = it) },
-                onFailure = { previous.copy(loading = false, loadFailed = true) },
+                onFailure = { e -> previous.copy(loading = false, loadError = e.message ?: e::class.simpleName ?: "error") },
             )
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())

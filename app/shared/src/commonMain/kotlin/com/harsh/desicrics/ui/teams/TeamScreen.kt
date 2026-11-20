@@ -289,7 +289,7 @@ fun TeamContent(
             if (state.loading) FullScreenLoading(Modifier.padding(padding))
             else ErrorState(
                 stringResource(Res.string.error_team_title),
-                stringResource(Res.string.error_connection_body),
+                state.loadError ?: stringResource(Res.string.error_connection_body),
                 Modifier.padding(padding),
                 onRetry = onRetry,
             )

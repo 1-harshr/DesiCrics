@@ -162,7 +162,7 @@ fun CareerSection(
         StatsFilters(state.filter, viewModel::setFilter)
         val stats = state.stats
         when {
-            stats == null && state.failed -> ErrorState(stringResource(Res.string.error_stats_title), stringResource(Res.string.error_connection_body), onRetry = viewModel::retry, compact = true)
+            stats == null && state.loadError != null -> ErrorState(stringResource(Res.string.error_stats_title), state.loadError, onRetry = viewModel::retry, compact = true)
             stats == null -> Unit
             stats.matches == 0 -> EmptyState(DesiIcons.Leaderboard, stringResource(Res.string.stats_none_title), body = stringResource(if (isMe) Res.string.stats_none else Res.string.stats_none_other))
             else -> CareerCards(stats, onOpenMatch)
@@ -354,7 +354,7 @@ fun CompareScreen(profileId: String, name: String, onBack: () -> Unit, viewModel
             if (other != null) {
                 item { StatsFilters(state.filter, viewModel::setFilter) }
             }
-            if (state.failed) item { ErrorBanner(stringResource(Res.string.stats_load_failed)) }
+            if (state.loadError != null) item { ErrorBanner(state.loadError) }
             if (pair != null && other != null) {
                 item { CompareTable(name, other.name, pair.first, pair.second) }
             }
@@ -471,7 +471,7 @@ fun LeaderboardContent(
             }
             val value: (LeaderboardRow) -> String = { if (state.metric == LeaderboardMetric.MVP) mvpText(it.value) else "${it.value}" }
             when {
-                state.failed -> item { ErrorState(stringResource(Res.string.error_stats_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true) }
+                state.loadError != null -> item { ErrorState(stringResource(Res.string.error_stats_title), state.loadError, onRetry = onRetry, compact = true) }
                 state.loading && state.rows.isEmpty() -> item {
                     Box(Modifier.fillMaxWidth().padding(space.s8), contentAlignment = Alignment.Center) { BallSpinner() }
                 }

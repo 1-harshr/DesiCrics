@@ -189,12 +189,12 @@ private fun ProfileContent(
                 onSettings(it)
             })
             ProfileTab.STATS -> stats()
-            ProfileTab.MATCHES -> ListTab(state.matches, Res.string.profile_no_matches, state.loadFailed, DesiIcons.History, onRetry) { matches ->
+            ProfileTab.MATCHES -> ListTab(state.matches, Res.string.profile_no_matches, state.loadError, DesiIcons.History, onRetry) { matches ->
                 Column(verticalArrangement = Arrangement.spacedBy(space.s3)) {
                     matches.forEach { HomeMatchCard(it, isMine = it.scorerUid == profile.uid, onClick = { onOpenMatch(it.id) }) }
                 }
             }
-            ProfileTab.TEAMS -> ListTab(state.teams, Res.string.teams_empty, state.loadFailed, DesiIcons.Shield, onRetry) { teams ->
+            ProfileTab.TEAMS -> ListTab(state.teams, Res.string.teams_empty, state.loadError, DesiIcons.Shield, onRetry) { teams ->
                 TeamList(teams, onOpenTeam)
             }
         }
@@ -249,9 +249,9 @@ private fun AboutTab(profile: UserProfile, onEdit: () -> Unit, onSignOut: () -> 
 
 /** A list that's still loading (null), empty, or ready. */
 @Composable
-private fun <T> ColumnScope.ListTab(items: List<T>?, empty: StringResource, failed: Boolean, icon: DrawableResource, onRetry: () -> Unit, content: @Composable ColumnScope.(List<T>) -> Unit) {
+private fun <T> ColumnScope.ListTab(items: List<T>?, empty: StringResource, loadError: String?, icon: DrawableResource, onRetry: () -> Unit, content: @Composable ColumnScope.(List<T>) -> Unit) {
     when {
-        items == null && failed -> ErrorState(stringResource(Res.string.error_list_title), stringResource(Res.string.error_connection_body), onRetry = onRetry, compact = true)
+        items == null && loadError != null -> ErrorState(stringResource(Res.string.error_list_title), loadError, onRetry = onRetry, compact = true)
         items == null -> Unit
         items.isEmpty() -> EmptyState(icon, stringResource(empty))
         else -> content(items)
