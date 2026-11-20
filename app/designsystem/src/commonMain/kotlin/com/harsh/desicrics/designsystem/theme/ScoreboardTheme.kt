@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.harsh.desicrics.designsystem.resources.Res
-import com.harsh.desicrics.designsystem.resources.antonio_variable
+import com.harsh.desicrics.designsystem.resources.bebas_neue_regular
 import com.harsh.desicrics.designsystem.resources.ds_theme_scoreboard
 import org.jetbrains.compose.resources.Font
 
@@ -72,7 +72,7 @@ val ScoreboardTheme: DesiThemeSpec = DesiThemeSpec(
         ),
         isDark = true,
     ),
-    typography = { desiTypography(antonioFamily(), figtreeFamily(), jetBrainsMonoFamily()) },
+    typography = { desiTypography(bebasNeueFamily(), figtreeFamily(), jetBrainsMonoFamily()) },
     shapes = DesiShapes(
         small = Square,
         medium = Square,
@@ -91,11 +91,14 @@ val ScoreboardTheme: DesiThemeSpec = DesiThemeSpec(
     surface = { area, colors -> drawBoardPanels(area, colors) },
 )
 
-/** Antonio: Scoreboard's display face, tall condensed numerals like painted tins, tabular as drawn. */
+/**
+ * Bebas Neue: Scoreboard's display face, condensed capitals like the stencilled names and tins on a
+ * manual board. Its digits are tabular as drawn. One weight, standing in for both.
+ */
 @Composable
-fun antonioFamily(): FontFamily = FontFamily(
-    Font(Res.font.antonio_variable, FontWeight.SemiBold),
-    Font(Res.font.antonio_variable, FontWeight.Bold),
+fun bebasNeueFamily(): FontFamily = FontFamily(
+    Font(Res.font.bebas_neue_regular, FontWeight.SemiBold),
+    Font(Res.font.bebas_neue_regular, FontWeight.Bold),
 )
 
 /**
