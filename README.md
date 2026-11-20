@@ -1,93 +1,82 @@
-DesiCrics is an Android app and Ktor server for scoring and following amateur cricket. Product, design and
-roadmap docs are in [/docs](./docs).
+# DesiCrics
 
-* [/app/androidApp](./app/androidApp) is the Android entry point.
-* [/app/shared](./app/shared/src) holds the app's screens, ViewModels and data layer (Compose Multiplatform,
-  Android target only).
-* [/core](./core/src) is shared between the app and the server: API types and the scoring rules.
-* [/server](./server/src/main/kotlin) is the Ktor server.
-* [/web](./web) is the React web app for people without the Android app ([docs/web.md](docs/web.md)).
+**Score, follow and run amateur cricket, from gully games to weekend leagues.**
 
-iOS is not built for now. [/app/iosApp](./app/iosApp) is kept in the repo but no Gradle module targets iOS;
-the iOS sources removed from `app/shared` can be restored from git history.
+Local cricket in India runs on WhatsApp groups and paper scorebooks. Scores get lost, stats never add up
+across seasons, and nobody outside the ground can follow the game. DesiCrics puts it all in one place:
+score every ball with one thumb, let anyone follow live, and watch career stats build up on their own.
 
-### Architecture
+<p align="center">
+  <img src="docs/images/scoring.png" width="220" alt="Scoring a match ball by ball">
+  <img src="docs/images/live-match.png" width="220" alt="Following a live match">
+  <img src="docs/images/feed.png" width="220" alt="The feed of live, upcoming and finished matches">
+</p>
 
-- **Auth:** Firebase Authentication (phone OTP and Google).
-- **Backend:** the Ktor server in [/server](./server). The app calls its REST API with the user's Firebase ID
-  token, which the server verifies against Google's public keys. The routes are listed in
-  [core/.../api/Api.kt](./core/src/commonMain/kotlin/com/harsh/desicrics/api/Api.kt).
-- **Database:** Postgres, accessed through Exposed with a HikariCP connection pool. Routes and services only
-  use the `UserStore` / `MatchStore` interfaces. Tests run on in-memory H2 in PostgreSQL mode.
-- **Scoring:** `ScoringEngine` and the ball rules in `:core`. The server uses them to validate every ball and
-  compute the score; the app uses them to draw the scorecard.
+## Score a match
 
-#### Database setup
+- **Set up in a minute.** Pick the teams and squads, choose the rules, do the toss. T20 with a tennis ball is
+  the default; overs, ball and pitch type, power plays and venue are all yours to change.
+- **Play by your rules.** Last man stands, retired batters coming back, back-to-back overs, free hits:
+  start from a Gully, Club or Standard preset and switch each rule off, to a warning, or enforced.
+- **One-thumb scoring.** A run pad within reach of your thumb, a wicket sheet that asks only what matters,
+  undo, substitutes, revised targets and a wagon wheel. Made to read in bright sunlight.
+- **Just want to score?** Simple mode hides everything else and leaves the scoring and your teams.
 
-Start the local Postgres (needs Docker Desktop or another Docker runtime running):
+## Follow the game
 
-```
-docker compose up -d
-```
+- **Live for everyone.** Share a link and family, teammates or rivals watch the score move, ball by ball,
+  with the full scorecard, overs and commentary. No app needed: it opens in any browser.
+- **A feed of your cricket.** Your own match first, then the teams and players you follow, then what's on in
+  your city.
+- **Notifications** when a match starts, a followed player hits a milestone, or a result comes in.
 
-The server's defaults point at it, so `./gradlew :server:run` needs no extra settings. Anywhere else, set
-`DATABASE_URL` (e.g. `jdbc:postgresql://<host>:5432/desicrics`), `DATABASE_USER`, `DATABASE_PASSWORD` and
-optionally `DATABASE_POOL_SIZE` (default 10).
+## Run a tournament
 
-#### Schema changes
+<p align="center">
+  <img src="docs/images/tournament.png" width="220" alt="A tournament's points table">
+  <img src="docs/images/player.png" width="220" alt="A player's profile and stats">
+  <img src="docs/images/result-poster.png" width="220" alt="A match result poster">
+</p>
 
-Flyway owns the schema. On startup the server applies any pending migrations from
-[server/src/main/resources/db/migration](./server/src/main/resources/db/migration). To change the schema:
+- **Leagues and cups.** Knockouts, round robins, box leagues, groups and finals, with fixtures, a points table
+  with net run rate, and top performers.
+- **Entries and squads.** Teams register, players join the pool, and organisers approve squad changes.
+- **Player auction.** Give each team a purse and sell players one at a time, in a hall on one big screen or
+  online with every owner bidding from their own phone.
 
-1. Add a new file `V<next number>__<description>.sql`. Never edit a migration that has already run.
-2. Update the matching Exposed table in [db/Database.kt](./server/src/main/kotlin/com/harsh/desicrics/db/Database.kt).
-3. Keep the SQL valid on both Postgres and H2, since the tests use H2.
+<p align="center">
+  <img src="docs/images/auction.png" width="680" alt="A player auction in the hall">
+</p>
 
-To wipe local data: `docker compose down -v`.
+## Stats that build themselves
 
-To fill it with a demo season of Pune club cricket (teams, players, a finished league, a knockout cup with a
-live semi-final, friendlies, fixtures to come, "looking for" posts and a directory):
-`./gradlew :server:seedDemo --args="--for <your uid>"`. The `--for` part is optional; it puts your signed-in
-account in Kothrud Kings and has you follow a few teams and players. Every ball goes through `MatchService`,
-so stats, tables and rankings are real. It runs once per database.
+- **Career stats** from every ball scored: batting, bowling and fielding, by season and format, with a form
+  chart and head-to-head player comparison.
+- **MVP points** rank everyone in a match with [one published formula](docs/features.md#mvp-points), and
+  pick the player of the match and of the tournament.
+- **Leaderboards and rankings** for your city, your tournament and your friends, with team ratings weighted
+  by the strength of the opposition.
 
-### Firebase setup
+## Share it
 
-Firebase config files are gitignored (this is a public repo), so each developer adds their own.
+Scorecards, milestones, fixtures, brackets, points tables, squads and results become posters and
+Instagram-style overlays, sized for WhatsApp status and stories. Pick a template, pick a theme, share.
 
-1. In the [Firebase console](https://console.firebase.google.com), enable the Phone and Google
-   sign-in providers. For phone sign-in, also allow your countries under Authentication → Settings →
-   SMS region policy, and add test numbers. Real SMS needs the Blaze plan.
-2. **Android:** register package `com.harsh.desicrics`, add your debug SHA-1 and SHA-256
-   (`./gradlew :app:androidApp:signingReport`), and put `google-services.json` in `app/androidApp/`.
-   Debug builds are signed with a project-only key, so their fingerprints don't clash with Google
-   sign-in set up elsewhere for the shared Android debug key. Create it once (it stays out of git):
-   ```bash
-   keytool -genkeypair -keystore app/androidApp/debug.keystore -storepass android -keypass android \
-     -alias desicrics-debug -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=DesiCrics Debug"
-   ```
-3. If your Firebase project isn't `desicrics-45117`, run the server with `FIREBASE_PROJECT_ID=<your-project>`.
+## Find your people
 
-### Running the apps
+Post what you're looking for (an opponent, a player, a ground, an umpire or a scorer) and let others reply.
+Browse a directory of local grounds and officials, and join teams through an invite link or a QR code.
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
+## Make it yours
 
-- Android app: `./gradlew :app:androidApp:assembleLocalDebug`. The `server` flavor picks the backend, for
-  debug and release alike: `local` calls the server on this computer, `remote` the deployed one through the proxy
-  (`assembleRemoteDebug`, `assembleRemoteRelease`; see [docs/deploy.md](docs/deploy.md)).
-- Server: `docker compose up -d`, then `./gradlew :server:run` (start this first; the app expects it on port 8080). The app calls
-  `http://localhost:8080`; forward that to your computer once per device connection with
-  `adb reverse tcp:8080 tcp:8080` (emulators and USB devices). Android 17 blocks apps from LAN addresses like
-  `10.0.2.2` without the local network permission, so the forward is needed even on the emulator.
+Pick a cricket-inspired theme (Red Ball, Floodlights, Gully, Scoreboard or Classic) in light or dark.
 
-### Running tests
+## Where it runs
 
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
-
-- Android tests: `./gradlew :app:shared:testAndroidHostTest`
-- Server tests: `./gradlew :server:test`
-- Core tests: `./gradlew :core:jvmTest`
+- **Android app** for scoring, organising and everything else.
+- **Web app** for following matches, tournaments, teams and players from any browser, including iPhones.
 
 ---
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…# DesiCrics
+Building DesiCrics or running it locally? See [docs/development.md](docs/development.md) for setup, and
+[/docs](docs) for the product, design and architecture docs.
