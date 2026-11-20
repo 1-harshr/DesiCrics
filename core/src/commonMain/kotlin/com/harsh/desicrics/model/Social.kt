@@ -88,8 +88,6 @@ data class SearchResults(
     val teams: List<TeamSummary> = emptyList(),
     val players: List<PlayerSummary> = emptyList(),
     val matches: List<Match> = emptyList(),
-    /** Filled in by the web app's public search only. */
-    val tournaments: List<TournamentSummary> = emptyList(),
 )
 
 /** Another player's page: who they are, their teams and matches, and whether the caller follows them. */

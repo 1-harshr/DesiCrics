@@ -6,7 +6,6 @@ roadmap docs are in [/docs](./docs).
   Android target only).
 * [/core](./core/src) is shared between the app and the server: API types and the scoring rules.
 * [/server](./server/src/main/kotlin) is the Ktor server.
-* [/web](./web) is the React web app for people without the Android app ([docs/web.md](docs/web.md)).
 
 iOS is not built for now. [/app/iosApp](./app/iosApp) is kept in the repo but no Gradle module targets iOS;
 the iOS sources removed from `app/shared` can be restored from git history.

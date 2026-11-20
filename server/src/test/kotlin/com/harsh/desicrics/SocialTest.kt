@@ -125,28 +125,6 @@ class SocialTest {
     }
 
     @Test
-    fun anyoneWithALinkGetsEveryBallLiveWithoutSigningIn() = apiTest { client ->
-        client.setUpProfile("asha")
-        val match = client.createMatch("asha").match
-        val (a1, a2) = match.teamA.players
-        val b1 = match.teamB.players.first()
-
-        val details = client.get("/public/matches/${match.id}").body<MatchDetails>()
-        assertEquals(match.teamA.name, details.match.teamA.name)
-        assertEquals("", details.match.createdBy)
-        assertEquals("", details.match.scorerUid)
-        assertEquals(HttpStatusCode.NotFound, client.get("/public/matches/nope").status)
-
-        client.webSocket("/public/matches/${match.id}/live") {
-            assertTrue(receiveDeserialized<MatchDetails>().deliveries.isEmpty())
-            client.record("asha", match.id, Delivery(0, 1, a1.id, a2.id, b1.id, runsOffBat = 4))
-            val update = receiveDeserialized<MatchDetails>()
-            assertEquals("Strikers 4/0 (0.1)", update.match.scoreSummary)
-            assertEquals("", update.match.scorerUid)
-        }
-    }
-
-    @Test
     fun anyoneCanOpenAMatchLink() = apiTest { client ->
         client.setUpProfile("asha")
         val match = client.createMatch("asha", teamA = squad("Strikers <script>", "Asha", "Bilal")).match

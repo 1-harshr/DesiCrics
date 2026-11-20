@@ -48,46 +48,11 @@ class SocialService(
     }
 
     suspend fun page(uid: String, scope: String?, status: String?, before: String?, id: String?): List<Match> {
-        val filter = statusFilter(status)
-        val time = cursor(before, id)
-        if (scope != null && scope !in listOf("following", "city")) throw ApiException(HttpStatusCode.BadRequest, "Invalid feed scope")
-        return matches.feedPage(filter, time, id.orEmpty(), uid, scope)
-    }
-
-    /** For the web app, which nobody signs in to: live, upcoming and recent matches, in [city] unless it's blank. */
-    suspend fun publicFeed(city: String): TodayFeed {
-        val place = city.trim().take(100)
-        suspend fun of(status: MatchStatus) = matches.feedPage(status, null, "", uid = "", scope = null, city = place)
-        return TodayFeed(
-            live = of(MatchStatus.IN_PROGRESS),
-            upcoming = of(MatchStatus.SCHEDULED).sortedBy { it.scheduledAt ?: Long.MAX_VALUE },
-            recent = of(MatchStatus.COMPLETED).take(RECENT_SIZE),
-        )
-    }
-
-    /** The web app's "more matches": a page of everyone's, in [city] unless it's blank. */
-    suspend fun publicPage(status: String?, before: String?, id: String?, city: String): List<Match> =
-        matches.feedPage(statusFilter(status), cursor(before, id), id.orEmpty(), uid = "", scope = null, city = city.trim().take(100))
-
-    /** A player as anyone sees them on the web: no follow state. */
-    suspend fun publicPlayerPage(profileId: String): PlayerPage {
-        val player = players.summaries(listOf(profileId))[profileId] ?: throw ApiException(HttpStatusCode.NotFound, "Player not found")
-        return PlayerPage(
-            player = player,
-            teams = teams.forPlayer(profileId).map { it.copy(myRole = null) },
-            matches = matches.forPlayer(profileId, limit = 20),
-            followers = social.followerCount(FollowType.PLAYER, profileId),
-        )
-    }
-
-    private fun statusFilter(status: String?): MatchStatus? =
-        status?.let { MatchStatus.entries.find { s -> s.name == it } ?: throw ApiException(HttpStatusCode.BadRequest, "Invalid match status") }
-
-    /** The time half of a page cursor; it comes with the last match's ID or not at all. */
-    private fun cursor(before: String?, id: String?): Long? {
+        val filter = status?.let { MatchStatus.entries.find { s -> s.name == it } ?: throw ApiException(HttpStatusCode.BadRequest, "Invalid match status") }
         val time = before?.toLongOrNull()
         if ((before != null && time == null) || (time == null) != (id == null)) throw ApiException(HttpStatusCode.BadRequest, "Invalid cursor")
-        return time
+        if (scope != null && scope !in listOf("following", "city")) throw ApiException(HttpStatusCode.BadRequest, "Invalid feed scope")
+        return matches.feedPage(filter, time, id.orEmpty(), uid, scope)
     }
 
     suspend fun search(query: String): SearchResults {
