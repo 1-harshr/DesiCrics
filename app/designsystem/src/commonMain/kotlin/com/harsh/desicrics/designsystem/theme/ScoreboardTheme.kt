@@ -158,7 +158,11 @@ private fun DrawScope.drawScoreboardBall(colors: DesiColors) {
     )
     val r = side * 0.3f
     drawCircle(colors.onBrandStrong, r, center)
-    drawLine(colors.brandStrong, Offset(center.x, center.y - r), Offset(center.x, center.y + r), r * 0.14f, StrokeCap.Butt)
+    // A double seam, stopping short of the edge like the stitching on a ball.
+    for (dx in floatArrayOf(-0.09f, 0.09f)) {
+        val x = center.x + dx * r
+        drawLine(colors.brandStrong, Offset(x, center.y - r * 0.82f), Offset(x, center.y + r * 0.82f), r * 0.07f, StrokeCap.Butt)
+    }
 }
 
 /** Two flat bails with square spigots, in the brand colour. */
